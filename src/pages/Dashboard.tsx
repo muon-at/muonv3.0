@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ref, get } from 'firebase/database';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/Dashboard.css';
 
@@ -9,6 +9,11 @@ interface Employee {
   email?: string;
   department?: string;
   role?: string;
+  project?: string;
+  slackName?: string;
+  externalName?: string;
+  tmgName?: string;
+  employment_type?: string;
 }
 
 export default function Dashboard() {
@@ -19,22 +24,27 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const employeesRef = ref(db, 'employees');
-        const snapshot = await get(employeesRef);
+        const employeesRef = collection(db, 'employees');
+        const snapshot = await getDocs(employeesRef);
         
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const employeeList = Object.entries(data).map(([id, emp]: [string, any]) => ({
-            id,
-            name: emp.name || 'N/A',
-            email: emp.email,
-            department: emp.department,
-            role: emp.role,
-          }));
-          setEmployees(employeeList);
-        } else {
-          setError('Ingen ansatte funnet');
-        }
+        const employeeList: Employee[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          employeeList.push({
+            id: doc.id,
+            name: data.name || 'N/A',
+            email: data.email,
+            department: data.department,
+            role: data.role,
+            project: data.project,
+            slackName: data.slackName,
+            externalName: data.externalName,
+            tmgName: data.tmgName,
+            employment_type: data.employment_type,
+          });
+        });
+        
+        setEmployees(employeeList.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err) {
         setError(`Feil ved henting av data: ${err}`);
         console.error(err);
@@ -52,14 +62,20 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <h1>📊 Muon Dashboard</h1>
+      <p className="employee-count">{employees.length} ansatte</p>
       <div className="employees-grid">
         {employees.length > 0 ? (
           employees.map((emp) => (
             <div key={emp.id} className="employee-card">
               <h3>{emp.name}</h3>
-              {emp.department && <p><strong>Avdeling:</strong> {emp.department}</p>}
-              {emp.role && <p><strong>Rolle:</strong> {emp.role}</p>}
-              {emp.email && <p><strong>Email:</strong> {emp.email}</p>}
+              {emp.role && <p className="role"><strong>🎯 Rolle:</strong> {emp.role}</p>}
+              {emp.department && <p><strong>🏢 Avdeling:</strong> {emp.department}</p>}
+              {emp.project && <p><strong>📋 Prosjekt:</strong> {emp.project}</p>}
+              {emp.employment_type && <p><strong>📌 Type:</strong> {emp.employment_type}</p>}
+              {emp.email && <p><strong>📧 Email:</strong> {emp.email}</p>}
+              {emp.slackName && <p className="slack"><strong>💬 Slack:</strong> {emp.slackName}</p>}
+              {emp.externalName && <p><strong>👤 Navn (Ekstern):</strong> {emp.externalName}</p>}
+              {emp.tmgName && <p><strong>🎧 TMG Navn:</strong> {emp.tmgName}</p>}
             </div>
           ))
         ) : (

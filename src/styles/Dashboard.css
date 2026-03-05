@@ -1,14 +1,23 @@
 .dashboard {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f7fa;
+  min-height: 100vh;
 }
 
 .dashboard h1 {
-  color: #333;
-  margin-bottom: 2rem;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
   font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.employee-count {
+  color: #718096;
+  margin-bottom: 2rem;
+  font-size: 1rem;
 }
 
 .dashboard.error {
@@ -16,40 +25,63 @@
   padding: 2rem;
   background: #ffebee;
   border-radius: 8px;
+  border-left: 4px solid #d32f2f;
 }
 
 .employees-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
+  margin-top: 2rem;
 }
 
 .employee-card {
   background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .employee-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  border-color: #3182ce;
 }
 
 .employee-card h3 {
   margin: 0 0 1rem 0;
-  color: #1976d2;
-  font-size: 1.25rem;
+  color: #2d3748;
+  font-size: 1.35rem;
+  font-weight: 600;
+  border-bottom: 2px solid #edf2f7;
+  padding-bottom: 0.75rem;
 }
 
 .employee-card p {
-  margin: 0.5rem 0;
-  color: #666;
+  margin: 0.75rem 0;
+  color: #4a5568;
   font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.employee-card p.role {
+  background: #ebf8ff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  color: #2c5282;
+  margin: 0.5rem 0;
+}
+
+.employee-card p.slack {
+  background: #f0f4f8;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin: 0.5rem 0;
 }
 
 .employee-card strong {
-  color: #333;
+  color: #2d3748;
+  font-weight: 600;
 }
