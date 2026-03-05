@@ -67,6 +67,8 @@ export default function AdminDashboard() {
   const [loadingSalg, setLoadingSalg] = useState(false);
   const [angringerData, setAngringerData] = useState<any[]>([]);
   const [loadingAngringer, setLoadingAngringer] = useState(false);
+  const [produkterData, setProdukterData] = useState<any[]>([]);
+  const [loadingProdukter, setLoadingProdukter] = useState(false);
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
     selger: '',
     avdeling: '',
@@ -90,6 +92,52 @@ export default function AdminDashboard() {
       fetchEmployees();
     }
   }, [activeMainTab]);
+
+  // Fetch produkter data when PRODUKT tab is opened
+  useEffect(() => {
+    if (activeMainTab === 'allente' && activeAllenteTab === 'produkt') {
+      setLoadingProdukter(true);
+      const loadProdukterData = async () => {
+        try {
+          // Get unique products from contracts
+          const contractsRef = collection(db, 'allente_kontraktsarkiv');
+          const contractsSnapshot = await getDocs(contractsRef);
+          const uniqueProdukter = new Set<string>();
+          
+          contractsSnapshot.forEach((doc) => {
+            const produkt = doc.data().produkt || '';
+            if (produkt.trim()) {
+              uniqueProdukter.add(produkt);
+            }
+          });
+
+          // Get CPO/Provisjon data from Firestore
+          const produkterRef = collection(db, 'allente_produkter');
+          const produkterSnapshot = await getDocs(produkterRef);
+          const produkterMap = new Map<string, any>();
+          
+          produkterSnapshot.forEach((doc) => {
+            produkterMap.set(doc.id, doc.data());
+          });
+
+          // Build products list with CPO/Provisjon
+          const products = Array.from(uniqueProdukter).map((navn) => ({
+            navn,
+            cpo: produkterMap.get(navn)?.cpo || '',
+            provisjon: produkterMap.get(navn)?.provisjon || '',
+          })).sort((a, b) => a.navn.localeCompare(b.navn));
+          
+          setProdukterData(products);
+        } catch (err) {
+          console.error('Error fetching produkter:', err);
+        } finally {
+          setLoadingProdukter(false);
+        }
+      };
+      
+      loadProdukterData();
+    }
+  }, [activeMainTab, activeAllenteTab]);
 
   // Fetch angringer data when ANGRING tab is opened
   useEffect(() => {
@@ -210,6 +258,44 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Error saving employee:', err);
       alert('Feil ved lagring av ansatt');
+    }
+  };
+
+  const handleSaveProdukter = async () => {
+    try {
+      const produkterRef = collection(db, 'allente_produkter');
+      const snapshot = await getDocs(produkterRef);
+      const existingIds = new Set<string>();
+      
+      snapshot.forEach((d) => {
+        existingIds.add(d.id);
+      });
+
+      for (const produkt of produkterData) {
+        if (produkt.navn.trim()) {
+          if (existingIds.has(produkt.navn)) {
+            // Update existing
+            await updateDoc(doc(db, 'allente_produkter', produkt.navn), {
+              cpo: produkt.cpo || '',
+              provisjon: produkt.provisjon || '',
+              updatedAt: new Date().toISOString(),
+            });
+          } else {
+            // Create new - use product name as document ID
+            await addDoc(produkterRef, {
+              navn: produkt.navn,
+              cpo: produkt.cpo || '',
+              provisjon: produkt.provisjon || '',
+              createdAt: new Date().toISOString(),
+            });
+          }
+        }
+      }
+
+      alert('✅ Produkter lagret!');
+    } catch (err) {
+      console.error('Error saving produkter:', err);
+      alert('❌ Feil ved lagring');
     }
   };
 
@@ -767,8 +853,99 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* PRODUKT Tab */}
+            {activeAllenteTab === 'produkt' && (
+              <div className="tab-content">
+                <div className="content-title">
+                  <h3>Produkter</h3>
+                  <p className="content-subtitle">Administrer CPO og Provisjon per produkt</p>
+                </div>
+
+                {loadingProdukter ? (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Laster produkter...
+                  </p>
+                ) : produkterData.length > 0 ? (
+                  <>
+                    <div className="produkter-table">
+                      <div className="table-header">
+                        <div className="col-produktnavn">Produkt</div>
+                        <div className="col-cpo">CPO</div>
+                        <div className="col-provisjon">Provisjon</div>
+                      </div>
+                      {produkterData.map((produkt, idx) => (
+                        <div key={idx} className="table-row">
+                          <div className="col-produktnavn">{produkt.navn}</div>
+                          <div className="col-cpo">
+                            <input
+                              type="text"
+                              value={produkt.cpo || ''}
+                              onChange={(e) => {
+                                const updated = [...produkterData];
+                                updated[idx].cpo = e.target.value;
+                                setProdukterData(updated);
+                              }}
+                              placeholder="f.eks 500 eller 5%"
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                              }}
+                            />
+                          </div>
+                          <div className="col-provisjon">
+                            <input
+                              type="text"
+                              value={produkt.provisjon || ''}
+                              onChange={(e) => {
+                                const updated = [...produkterData];
+                                updated[idx].provisjon = e.target.value;
+                                setProdukterData(updated);
+                              }}
+                              placeholder="f.eks 10% eller 1500"
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={handleSaveProdukter}
+                      style={{
+                        marginTop: '1.5rem',
+                        padding: '0.75rem 1.5rem',
+                        background: '#667eea',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      💾 Lagre alle produkter
+                    </button>
+
+                    <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
+                      Total: {produkterData.length} produkter (fra {salgData.length} kontrakter)
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Ingen produkter funnet. Hent kontrakter først under SALG-tabell.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Other tabs placeholder */}
-            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && (
+            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && activeAllenteTab !== 'produkt' && (
               <div className="tab-content">
                 <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
                   {allenteTabs.find(t => t.id === activeAllenteTab)?.label} tab content coming soon...
