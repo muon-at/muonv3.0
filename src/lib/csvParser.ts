@@ -25,12 +25,11 @@ export function parseCSV(csvText: string): ParsedSalgRecord[] {
   const headers = parseCSVLine(headerLine);
   
   console.log('📋 CSV Headers:', headers);
-  alert('📋 CSV Headers:\n' + headers.map((h, i) => `${i}: ${h}`).join('\n'));
   
   // Map column names to indices
   const columnMap: { [key: string]: number } = {};
   headers.forEach((header, idx) => {
-    const normalized = header.toLowerCase().trim();
+    const normalized = header.toLowerCase().trim().replace(/\s+/g, '');
     columnMap[normalized] = idx;
   });
   
@@ -46,9 +45,12 @@ export function parseCSV(csvText: string): ParsedSalgRecord[] {
     const values = parseCSVLine(line);
     
     // Get kundenummer - if empty, this is a timestamp row, skip it
-    const kundenummerIdx = Object.entries(columnMap).find(
-      ([key]) => key.includes('kundenummer') || key.includes('kundnr') || key.includes('id')
-    )?.[1];
+    // Search in order: exact "kundenummer" first, then alternatives
+    const kundenummerIdx = 
+      Object.entries(columnMap).find(([key]) => key === 'kundenummer')?.[1] ||
+      Object.entries(columnMap).find(([key]) => key.includes('kundenummer'))?.[1] ||
+      Object.entries(columnMap).find(([key]) => key.includes('kundnr'))?.[1] ||
+      undefined;
     
     if (kundenummerIdx === undefined) {
       console.warn('⚠️ Could not find kundenummer column');
@@ -64,9 +66,11 @@ export function parseCSV(csvText: string): ParsedSalgRecord[] {
     }
     
     // Extract date from ordredato (remove time if present)
-    const ordredatoIdx = Object.entries(columnMap).find(
-      ([key]) => key.includes('ordredato') || key.includes('date')
-    )?.[1];
+    const ordredatoIdx = 
+      Object.entries(columnMap).find(([key]) => key === 'ordredato')?.[1] ||
+      Object.entries(columnMap).find(([key]) => key.includes('ordredato'))?.[1] ||
+      Object.entries(columnMap).find(([key]) => key.includes('date'))?.[1] ||
+      undefined;
     
     const ordredatoFull = ordredatoIdx !== undefined ? values[ordredatoIdx]?.trim() : '';
     const ordredato = ordredatoFull?.split(' ')[0] || ''; // Get date part only
@@ -76,11 +80,11 @@ export function parseCSV(csvText: string): ParsedSalgRecord[] {
       kundenummer,
       kunde: getColumnValue(values, columnMap, 'kunde', 'customer'),
       ordredato,
-      produkt: getColumnValue(values, columnMap, 'produkt', 'product'),
-      ordertype: getColumnValue(values, columnMap, 'ordertype', 'type'),
+      produkt: getColumnValue(values, columnMap, 'produkter', 'produkt', 'product'),
+      ordertype: getColumnValue(values, columnMap, 'ordretype', 'ordertype', 'type'),
       forhandler: getColumnValue(values, columnMap, 'forhandler', 'reseller'),
       selger: getColumnValue(values, columnMap, 'selger', 'seller'),
-      platform: getColumnValue(values, columnMap, 'platform', 'valgt platform'),
+      platform: getColumnValue(values, columnMap, 'chosen platform', 'valgt platform', 'platform'),
       status: getColumnValue(values, columnMap, 'status'),
     };
     
@@ -126,7 +130,16 @@ function getColumnValue(
   ...possibleNames: string[]
 ): string {
   for (const name of possibleNames) {
-    const key = Object.keys(columnMap).find(k => k.includes(name.toLowerCase()));
+    const normalized = name.toLowerCase().replace(/\s+/g, '');
+    
+    // Try exact match first
+    if (columnMap[normalized] !== undefined) {
+      const idx = columnMap[normalized];
+      return values[idx]?.trim() || '';
+    }
+    
+    // Then try substring match
+    const key = Object.keys(columnMap).find(k => k.includes(normalized));
     if (key) {
       const idx = columnMap[key];
       return values[idx]?.trim() || '';
