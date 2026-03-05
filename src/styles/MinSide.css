@@ -1,0 +1,371 @@
+.minside-container {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Profile Banner */
+.profile-banner {
+  background: linear-gradient(135deg, #d4a5d4 0%, #e8c8e8 100%);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+}
+
+.banner-left {
+  flex-shrink: 0;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.banner-center {
+  flex: 1;
+  text-align: center;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #a78ba7;
+  letter-spacing: -0.5px;
+}
+
+.user-subtitle {
+  margin: 0.25rem 0 1rem 0;
+  font-size: 0.95rem;
+  color: #999;
+  text-transform: lowercase;
+}
+
+.badges-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.badge-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nav-button-minside {
+  background: white;
+  color: #a78ba7;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.nav-button-minside:hover {
+  background: #f5f0f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Main Content Area */
+.minside-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Stats Section */
+.stats-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.trophy-left,
+.trophy-right {
+  font-size: 4rem;
+  flex-shrink: 0;
+}
+
+.stats-circles {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.stat-circle-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-label {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+/* Goals Sidebar */
+.goals-sidebar {
+  width: 350px;
+  background: #fffef5;
+  border-radius: 12px;
+  padding: 2rem;
+  border: 2px solid #f5e6d3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.goals-sidebar h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.goals-subtitle {
+  margin: 0 0 1.5rem 0;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.goal-item {
+  text-align: center;
+}
+
+.goal-item label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.goal-value {
+  margin: 0 0 0.3rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e67e22;
+}
+
+.goal-unit {
+  display: block;
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.endre-mal-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #e67e22;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.endre-mal-btn:hover {
+  background: #d36c0f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+
+/* Progress Section */
+.progress-section {
+  padding: 0 2rem 2rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.progress-item {
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progress-header label {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.progress-percent {
+  font-weight: 600;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+.progress-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.progress-fraction {
+  color: #666;
+  font-weight: 500;
+}
+
+.progress-status {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .minside-content {
+    flex-direction: column;
+  }
+
+  .goals-sidebar {
+    width: 100%;
+  }
+
+  .stats-circles {
+    gap: 1rem;
+  }
+
+  .stat-circle {
+    width: 70px;
+    height: 70px;
+    font-size: 1.4rem;
+  }
+
+  .trophy-left,
+  .trophy-right {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .banner-center {
+    order: 2;
+  }
+
+  .banner-left {
+    order: 1;
+  }
+
+  .user-name {
+    font-size: 2rem;
+  }
+
+  .badges-row {
+    justify-content: center;
+  }
+
+  .nav-button-minside {
+    width: 100%;
+  }
+
+  .minside-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .stats-section {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+
+  .stats-circles {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .goals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-section {
+    padding: 0 1rem 1rem 1rem;
+  }
+}
