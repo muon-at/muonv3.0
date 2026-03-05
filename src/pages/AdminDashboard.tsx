@@ -831,7 +831,7 @@ export default function AdminDashboard() {
             {activeAllenteTab === 'angring' && (
               <div className="tab-content">
                 <div className="content-title">
-                  <h3>Angringer</h3>
+                  <h3>Angringer {angringerData.length > 0 && <span style={{ color: '#667eea', fontSize: '0.8em' }}>({getFilteredAngringerData().length} av {angringerData.length})</span>}</h3>
                   <p className="content-subtitle">Oversikt over alle angringer</p>
                 </div>
 
