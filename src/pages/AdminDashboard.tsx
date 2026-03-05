@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import FileUploadModal from '../components/FileUploadModal';
 import '../styles/AdminDashboard.css';
@@ -52,6 +52,16 @@ export default function AdminDashboard() {
   const [deleting, setDeleting] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    name: '',
+    role: 'employee',
+    project: '',
+    department: 'OSL',
+    slackName: '',
+    externalName: '',
+    tmgName: '',
+  });
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
   const [salgData, setSalgData] = useState<SalgRecord[]>([]);
   const [loadingSalg, setLoadingSalg] = useState(false);
@@ -169,6 +179,44 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Error saving employee:', err);
       alert('Feil ved lagring av ansatt');
+    }
+  };
+
+  const handleSaveAdd = async () => {
+    if (!newEmployee.name.trim()) {
+      alert('Navn er påkrevd');
+      return;
+    }
+
+    try {
+      const empCollection = collection(db, 'employees');
+      const docRef = await addDoc(empCollection, {
+        name: newEmployee.name,
+        role: newEmployee.role,
+        project: newEmployee.project || '',
+        department: newEmployee.department,
+        slackName: newEmployee.slackName || '',
+        externalName: newEmployee.externalName || '',
+        tmgName: newEmployee.tmgName || '',
+        createdAt: new Date().toISOString(),
+      });
+
+      // Add to local state
+      setEmployees([...employees, { id: docRef.id, ...newEmployee }]);
+
+      setShowAddModal(false);
+      setNewEmployee({
+        name: '',
+        role: 'employee',
+        project: '',
+        department: 'OSL',
+        slackName: '',
+        externalName: '',
+        tmgName: '',
+      });
+    } catch (err) {
+      console.error('Error adding employee:', err);
+      alert('Feil ved opprettelse av ansatt');
     }
   };
 
@@ -654,9 +702,7 @@ export default function AdminDashboard() {
               <>
                 <button 
                   className="add-employee-btn"
-                  onClick={() => {
-                    // TODO: Implement add employee
-                  }}
+                  onClick={() => setShowAddModal(true)}
                   style={{
                     marginBottom: '1.5rem',
                     padding: '0.75rem 1.5rem',
@@ -841,6 +887,109 @@ export default function AdminDashboard() {
                 onClick={handleSaveEdit}
               >
                 Lagre
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Employee Modal */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="edit-modal">
+            <h2>Legg til ansatt</h2>
+            <div className="edit-form">
+              <div className="form-group">
+                <label>Navn *</label>
+                <input 
+                  type="text"
+                  value={newEmployee.name || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, name: e.target.value })}
+                  placeholder="Fullt navn"
+                />
+              </div>
+              <div className="form-group">
+                <label>Rolle</label>
+                <select 
+                  value={newEmployee.role || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
+                >
+                  <option value="">Velg rolle</option>
+                  <option value="owner">Owner</option>
+                  <option value="teamlead">Teamlead</option>
+                  <option value="employee">Employee</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Prosjekt</label>
+                <input 
+                  type="text"
+                  value={newEmployee.project || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, project: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Avdeling</label>
+                <select 
+                  value={newEmployee.department || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, department: e.target.value })}
+                >
+                  <option value="">Velg avdeling</option>
+                  <option value="OSL">OSL</option>
+                  <option value="KRS">KRS</option>
+                  <option value="Skien">Skien</option>
+                  <option value="MUON">MUON</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Slack Navn</label>
+                <input 
+                  type="text"
+                  value={newEmployee.slackName || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, slackName: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Ekstern Navn *</label>
+                <input 
+                  type="text"
+                  placeholder='f.eks "Mats / selger"'
+                  value={newEmployee.externalName || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, externalName: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>TMG Navn</label>
+                <input 
+                  type="text"
+                  value={newEmployee.tmgName || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, tmgName: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button 
+                className="modal-btn cancel-btn"
+                onClick={() => {
+                  setShowAddModal(false);
+                  setNewEmployee({
+                    name: '',
+                    role: 'employee',
+                    project: '',
+                    department: 'OSL',
+                    slackName: '',
+                    externalName: '',
+                    tmgName: '',
+                  });
+                }}
+              >
+                Avbryt
+              </button>
+              <button 
+                className="modal-btn save-btn"
+                onClick={handleSaveAdd}
+              >
+                Legg til
               </button>
             </div>
           </div>
