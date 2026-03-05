@@ -87,6 +87,11 @@ export default function AdminDashboard() {
     }
   }, [activeMainTab, activeAllenteTab]);
 
+  const normalizeWhitespace = (text: string): string => {
+    // Normalize whitespace around "/" - "Mats / selger" and "Mats /selger" become "Mats / selger"
+    return text.replace(/\s*\/\s*/g, ' / ').trim();
+  };
+
   const fetchEmployeeMap = async () => {
     try {
       const empRef = collection(db, 'employees');
@@ -96,14 +101,15 @@ export default function AdminDashboard() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.externalName && data.department) {
-          // Eksakt matching - CSV må matche nøyaktig
-          map[data.externalName] = data.department;
+          // Normalize whitespace for consistent matching
+          const normalized = normalizeWhitespace(data.externalName);
+          map[normalized] = data.department;
         }
       });
       
       console.log('📋 Employee Map loaded:', Object.keys(map).length, 'entries');
       Object.entries(map).slice(0, 3).forEach(([name, dept]) => {
-        console.log(`  ${name} → ${dept}`);
+        console.log(`  "${name}" → ${dept}`);
       });
       setEmployeeMap(map);
     } catch (err) {
@@ -125,11 +131,13 @@ export default function AdminDashboard() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         const selger = data.selger || '';
-        const avdeling = employeeMap[selger] || 'Ukjent';
+        // Normalize whitespace for matching
+        const normalizedSelger = normalizeWhitespace(selger);
+        const avdeling = employeeMap[normalizedSelger] || 'Ukjent';
         
         // Debug: Log first few records to see what's happening
         if (salgList.length < 5) {
-          console.log('🔍 DEBUG - Selger:', selger, '→ Avdeling:', avdeling, '| Map has:', Object.keys(employeeMap).length, 'entries');
+          console.log('🔍 DEBUG - Selger orig:', selger, '| Normalized:', normalizedSelger, '→ Avdeling:', avdeling);
         }
         
         // Try different column name variations for kundenummer
