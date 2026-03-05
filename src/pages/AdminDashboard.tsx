@@ -87,7 +87,6 @@ export default function AdminDashboard() {
         const empSnapshot = await getDocs(empRef);
         const map: { [key: string]: string } = {};
         
-        console.log('📋 EMPLOYEES: Found', empSnapshot.size, 'records');
         empSnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.externalName && data.department) {
@@ -95,23 +94,17 @@ export default function AdminDashboard() {
             map[normalized] = data.department;
           }
         });
-        console.log('✅ EMPLOYEE MAP: Ready with', Object.keys(map).length, 'entries');
         
         // Then fetch and match salg data
         const salgRef = collection(db, 'allente_kontraktsarkiv');
         const salgSnapshot = await getDocs(salgRef);
         const salgList: SalgRecord[] = [];
         
-        console.log('📊 SALG: Found', salgSnapshot.size, 'records');
         salgSnapshot.forEach((doc) => {
           const data = doc.data();
           const selger = data.selger || '';
           const normalizedSelger = normalizeWhitespace(selger);
           const avdeling = map[normalizedSelger] || 'Ukjent';
-          
-          if (salgList.length < 2) {
-            console.log(`  Rec: "${selger}" → "${normalizedSelger}" → "${avdeling}"`);
-          }
           
           salgList.push({
             id: doc.id,
@@ -127,7 +120,6 @@ export default function AdminDashboard() {
             ...data,
           });
         });
-        
         setSalgData(salgList.sort((a, b) => (b.dato || '').localeCompare(a.dato || '')));
         setLoadingSalg(false);
       };
