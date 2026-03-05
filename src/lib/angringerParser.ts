@@ -83,6 +83,16 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
     const salesDate = parseDate(salesdateStr);
     const regretDate = parseDate(regretdateStr);
     const period = calculateDays(salesDate, regretDate);
+    
+    if (i === 1) {
+      console.log('📅 Date calculation sample:', {
+        original_sales: salesdateStr,
+        parsed_sales: salesDate,
+        original_regret: regretdateStr,
+        parsed_regret: regretDate,
+        period_days: period
+      });
+    }
 
     records.push({
       kundenummer,
@@ -128,14 +138,19 @@ function calculateDays(salesDateStr: string, regretDateStr: string): number {
   if (!salesDateStr || !regretDateStr) return 0;
 
   try {
-    const salesDate = new Date(salesDateStr);
-    const regretDate = new Date(regretDateStr);
+    // Parse ISO dates more explicitly
+    const [salesYear, salesMonth, salesDay] = salesDateStr.split('-').map(Number);
+    const [regretYear, regretMonth, regretDay] = regretDateStr.split('-').map(Number);
+    
+    const salesDate = new Date(salesYear, salesMonth - 1, salesDay);
+    const regretDate = new Date(regretYear, regretMonth - 1, regretDay);
     
     const diffMs = regretDate.getTime() - salesDate.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
     
-    return diffDays;
+    return Math.max(0, diffDays); // Return 0 if negative
   } catch (err) {
+    console.error('Error calculating days:', salesDateStr, regretDateStr, err);
     return 0;
   }
 }
