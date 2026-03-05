@@ -47,37 +47,38 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
       if (fileType === 'salg') {
         // Parse CSV
         const records = parseCSV(fileText);
-        console.log('📊 Parsed records:', records.length);
+        console.log('📊 Parsed kontrakter:', records.length);
 
         if (records.length === 0) {
-          setError('Ingen gyldige records funnet i filen');
+          setError('Ingen gyldige kontrakter funnet i filen');
           setUploading(false);
           return;
         }
 
-        // Fetch existing kundenummer from Firestore
+        // Fetch existing Ids from Firestore
         const salgRef = collection(db, 'allente_salg');
         const snapshot = await getDocs(salgRef);
-        const existingKundenummer = new Set<string>();
+        const existingIds = new Set<string>();
         
         snapshot.forEach((doc) => {
           const data = doc.data();
-          if (data.kundenummer) {
-            existingKundenummer.add(data.kundenummer);
+          if (data.id) {
+            existingIds.add(data.id);
           }
         });
 
-        console.log('📋 Existing kundenummer:', existingKundenummer.size);
+        console.log('📋 Existing Ids:', existingIds.size);
 
-        // Filter new records (deduplicate)
+        // Filter new records (deduplicate by Id)
         const newRecords = records.filter(
-          (record) => !existingKundenummer.has(record.kundenummer)
+          (record) => !existingIds.has(record.id)
         );
 
         console.log('✨ New records to insert:', newRecords.length);
+        console.log('🔄 Duplicates (already exist):', records.length - newRecords.length);
 
         if (newRecords.length === 0) {
-          setError(`Alle ${records.length} records eksisterer allerede`);
+          setError(`Alle ${records.length} kontrakter eksisterer allerede`);
           setUploading(false);
           return;
         }
@@ -101,7 +102,7 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
             });
             insertedCount++;
           } catch (err) {
-            console.error('❌ Error inserting record:', record.kundenummer, err);
+            console.error('❌ Error inserting record:', record.id, err);
           }
         }
 
@@ -109,7 +110,8 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
         setSuccess(true);
         
         // Show success message with counts
-        const message = `✅ Lastet opp ${insertedCount} nye salg\n(${records.length - insertedCount} eksisterte allerede)`;
+        const duplicates = records.length - newRecords.length;
+        const message = `✅ Lastet opp ${insertedCount} nye kontrakter\n(${duplicates} eksisterte allerede)`;
         alert(message);
         
         // Call parent callback
