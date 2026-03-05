@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import EditEmployeeModal from '../components/EditEmployeeModal';
@@ -28,7 +29,8 @@ const getRoleBadgeColor = (role: string) => {
   return roleColors[role?.toLowerCase()] || '#6b7280';
 };
 
-export default function Dashboard() {
+export default function Admin() {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,12 +123,20 @@ export default function Dashboard() {
     <div className="dashboard">
       <div className="dashboard-header">
         <div>
-          <h1>Muon Dashboard</h1>
-          <p className="subtitle">Oversikt over ansatte</p>
+          <h1>🔐 Admin - Ansatt Oversikt</h1>
+          <p className="subtitle">Administrering av alle ansatte</p>
         </div>
-        <button className="btn btn-add" onClick={handleAddClick}>
-          ➕ Legg til ansatt
-        </button>
+        <div className="header-buttons">
+          <button className="btn btn-add" onClick={handleAddClick}>
+            ➕ Legg til ansatt
+          </button>
+          <button 
+            className="btn btn-back"
+            onClick={() => navigate('/teamleder')}
+          >
+            ← Tilbake
+          </button>
+        </div>
       </div>
 
       <div className="table-container">
