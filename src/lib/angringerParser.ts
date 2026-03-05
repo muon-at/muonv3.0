@@ -111,7 +111,7 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
 function parseDate(dateStr: string): string {
   if (!dateStr) return '';
   
-  // Handle various formats: DD/MM/YYYY, MM/DD/YYYY, DD.MM.YYYY, YYYY-MM-DD
+  // Handle various formats: DD/MM/YYYY, MM/DD/YYYY, YYYY/MM/DD, DD.MM.YYYY, YYYY-MM-DD
   let parts: string[] = [];
   
   if (dateStr.includes('/')) {
@@ -119,30 +119,41 @@ function parseDate(dateStr: string): string {
   } else if (dateStr.includes('.')) {
     parts = dateStr.split('.');
   } else if (dateStr.includes('-')) {
-    // Already ISO format or similar
-    return dateStr;
+    // Could be YYYY-MM-DD (ISO) or DD-MM-YYYY
+    parts = dateStr.split('-');
   }
 
   if (parts.length === 3) {
     const part1 = parseInt(parts[0], 10);
     const part2 = parseInt(parts[1], 10);
-    const year = parts[2];
+    const part3 = parseInt(parts[2], 10);
     
-    let day: string, month: string;
+    let year: string, month: string, day: string;
     
-    // Detect format: if first part > 12, it's DD/MM/YYYY; otherwise check second part
-    if (part1 > 12) {
-      // DD/MM/YYYY or DD.MM.YYYY
-      day = String(part1).padStart(2, '0');
+    // Detect YYYY format (first part > 1900)
+    if (part1 > 1900) {
+      // YYYY/MM/DD or YYYY-MM-DD
+      year = String(part1);
       month = String(part2).padStart(2, '0');
-    } else if (part2 > 12) {
-      // MM/DD/YYYY (American format)
-      month = String(part1).padStart(2, '0');
-      day = String(part2).padStart(2, '0');
+      day = String(part3).padStart(2, '0');
     } else {
-      // Ambiguous - assume DD/MM/YYYY (European)
-      day = String(part1).padStart(2, '0');
-      month = String(part2).padStart(2, '0');
+      // Last part is year
+      year = String(part3);
+      
+      // Detect format: if first part > 12, it's DD/MM/YYYY; otherwise check second part
+      if (part1 > 12) {
+        // DD/MM/YYYY
+        day = String(part1).padStart(2, '0');
+        month = String(part2).padStart(2, '0');
+      } else if (part2 > 12) {
+        // MM/DD/YYYY (American)
+        month = String(part1).padStart(2, '0');
+        day = String(part2).padStart(2, '0');
+      } else {
+        // Ambiguous - assume DD/MM/YYYY (European)
+        day = String(part1).padStart(2, '0');
+        month = String(part2).padStart(2, '0');
+      }
     }
     
     return `${year}-${month}-${day}`;
