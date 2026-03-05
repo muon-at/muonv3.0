@@ -25,6 +25,7 @@ export function parseCSV(csvText: string): ParsedSalgRecord[] {
   const headers = parseCSVLine(headerLine);
   
   console.log('📋 CSV Headers:', headers);
+  alert('📋 CSV Headers:\n' + headers.map((h, i) => `${i}: ${h}`).join('\n'));
   
   // Map column names to indices
   const columnMap: { [key: string]: number } = {};
