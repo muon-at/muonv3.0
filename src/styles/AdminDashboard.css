@@ -296,7 +296,7 @@
 .table-header {
   background: #fffbf0;
   display: grid;
-  grid-template-columns: 110px 140px 130px 200px 140px 150px;
+  grid-template-columns: 110px 120px 130px 180px 120px 110px 120px;
   gap: 1rem;
   padding: 1rem;
   font-weight: 600;
@@ -307,7 +307,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 110px 140px 130px 200px 140px 150px;
+  grid-template-columns: 110px 120px 130px 180px 120px 110px 120px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -576,6 +576,62 @@
   cursor: not-allowed;
 }
 
+/* Filter Panel */
+.filter-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.filter-input,
+.filter-select {
+  padding: 0.625rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-reset {
+  padding: 0.625rem 1rem;
+  background: #e2e8f0;
+  color: #334155;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-end;
+}
+
+.filter-reset:hover {
+  background: #cbd5e1;
+}
+
 /* SALG Tab / Kontraktsarkiv Styles */
 .col-dato {
   color: #666;
@@ -604,6 +660,12 @@
 
 .col-selger {
   color: #666;
+  font-size: 0.9rem;
+}
+
+.col-avdeling {
+  color: #667eea;
+  font-weight: 500;
   font-size: 0.9rem;
 }
 

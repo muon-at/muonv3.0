@@ -32,6 +32,15 @@ interface SalgRecord {
   [key: string]: any;
 }
 
+interface KontraktsarkivFilters {
+  selger: string;
+  avdeling: string;
+  produkt: string;
+  platform: string;
+  datoFrom: string;
+  datoTo: string;
+}
+
 export default function AdminDashboard() {
   console.log('✅ AdminDashboard component mounted!');
   const navigate = useNavigate();
@@ -45,6 +54,14 @@ export default function AdminDashboard() {
   const [salgData, setSalgData] = useState<SalgRecord[]>([]);
   const [loadingSalg, setLoadingSalg] = useState(false);
   const [employeeMap, setEmployeeMap] = useState<{ [key: string]: string }>({});
+  const [filters, setFilters] = useState<KontraktsarkivFilters>({
+    selger: '',
+    avdeling: '',
+    produkt: '',
+    platform: '',
+    datoFrom: '',
+    datoTo: '',
+  });
 
   // Fetch employees when Organisasjon tab is opened
   useEffect(() => {
@@ -115,6 +132,7 @@ export default function AdminDashboard() {
           avdeling: avdeling,
           ...data,
         });
+        console.log('📌 Record with avdeling:', kundeNr, '→', avdeling);
       });
       
       console.log('✅ Total salg records processed:', salgList.length);
@@ -258,6 +276,42 @@ export default function AdminDashboard() {
     }
   };
 
+  const getFilteredSalgData = () => {
+    return salgData.filter((record) => {
+      // Selger filter
+      if (filters.selger && !record.selger?.toLowerCase().includes(filters.selger.toLowerCase())) {
+        return false;
+      }
+
+      // Avdeling filter
+      if (filters.avdeling && record.avdeling !== filters.avdeling) {
+        return false;
+      }
+
+      // Produkt filter
+      if (filters.produkt && !record.produkt?.toLowerCase().includes(filters.produkt.toLowerCase())) {
+        return false;
+      }
+
+      // Plattform filter
+      if (filters.platform && !record.platform?.toLowerCase().includes(filters.platform.toLowerCase())) {
+        return false;
+      }
+
+      // Dato from filter
+      if (filters.datoFrom && record.dato && record.dato < filters.datoFrom) {
+        return false;
+      }
+
+      // Dato to filter
+      if (filters.datoTo && record.dato && record.dato > filters.datoTo) {
+        return false;
+      }
+
+      return true;
+    });
+  };
+
   return (
     <div className="admin-dashboard-container">
       {/* Header */}
@@ -386,7 +440,7 @@ export default function AdminDashboard() {
             {activeAllenteTab === 'salg' && (
               <div className="tab-content">
                 <div className="content-title">
-                  <h3>Kontraktsarkiv {salgData.length > 0 && <span style={{ color: '#667eea', fontSize: '0.8em' }}>({salgData.length} ordre)</span>}</h3>
+                  <h3>Kontraktsarkiv {salgData.length > 0 && <span style={{ color: '#667eea', fontSize: '0.8em' }}>({getFilteredSalgData().length} av {salgData.length})</span>}</h3>
                   <p className="content-subtitle">Fullstendig oversikt over alle kontrakter</p>
                 </div>
 
@@ -396,6 +450,91 @@ export default function AdminDashboard() {
                   </p>
                 ) : salgData.length > 0 ? (
                   <>
+                    {/* Filter Panel */}
+                    <div className="filter-panel">
+                      <div className="filter-group">
+                        <label>Selger:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk selger..."
+                          value={filters.selger}
+                          onChange={(e) => setFilters({ ...filters, selger: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>Avdeling:</label>
+                        <select
+                          value={filters.avdeling}
+                          onChange={(e) => setFilters({ ...filters, avdeling: e.target.value })}
+                          className="filter-select"
+                        >
+                          <option value="">Alle avdelinger</option>
+                          {[...new Set(salgData.map(r => r.avdeling).filter(Boolean))].sort().map((avd) => (
+                            <option key={avd} value={avd}>{avd}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="filter-group">
+                        <label>Produkt:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk produkt..."
+                          value={filters.produkt}
+                          onChange={(e) => setFilters({ ...filters, produkt: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>Plattform:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk plattform..."
+                          value={filters.platform}
+                          onChange={(e) => setFilters({ ...filters, platform: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>Dato fra:</label>
+                        <input
+                          type="date"
+                          value={filters.datoFrom}
+                          onChange={(e) => setFilters({ ...filters, datoFrom: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <div className="filter-group">
+                        <label>Dato til:</label>
+                        <input
+                          type="date"
+                          value={filters.datoTo}
+                          onChange={(e) => setFilters({ ...filters, datoTo: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+
+                      <button
+                        className="filter-reset"
+                        onClick={() => setFilters({
+                          selger: '',
+                          avdeling: '',
+                          produkt: '',
+                          platform: '',
+                          datoFrom: '',
+                          datoTo: '',
+                        })}
+                      >
+                        🔄 Nullstill filter
+                      </button>
+                    </div>
+
+                    {/* Data Table */}
                     <div className="sales-table">
                       <div className="table-header">
                         <div className="col-dato">Ordredato</div>
@@ -403,15 +542,17 @@ export default function AdminDashboard() {
                         <div className="col-kunde">Kundenummer</div>
                         <div className="col-produkt">Produkter</div>
                         <div className="col-selger">Selger</div>
-                        <div className="col-platform">Choosen Platform</div>
+                        <div className="col-avdeling">Avdeling</div>
+                        <div className="col-platform">Plattform</div>
                       </div>
-                      {salgData.map((row) => (
+                      {getFilteredSalgData().map((row) => (
                         <div key={row.id} className="table-row">
                           <div className="col-dato">{row.dato || '-'}</div>
                           <div className="col-id">{row.csvId || '-'}</div>
                           <div className="col-kunde">{row.kundeNr}</div>
                           <div className="col-produkt">{row.produkt || '-'}</div>
                           <div className="col-selger">{row.selger || '-'}</div>
+                          <div className="col-avdeling">{row.avdeling || 'Ukjent'}</div>
                           <div className="col-platform">{row.platform || '-'}</div>
                         </div>
                       ))}
