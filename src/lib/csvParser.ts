@@ -1,8 +1,13 @@
 /**
- * Parse CSV file and extract salg records
- * Handles multi-line format where:
- * - Line 1: Order data (Kundenummer, Kunde, Selger, etc.)
- * - Line 2: Timestamp (skip this)
+ * Parse CSV file and extract kontrakt records
+ * New format:
+ * - Row 1: Headers
+ * - Row 2+: Kontraktdata (Status required)
+ * - Rows without Status in column A are skipped (timestamp rows)
+ * 
+ * Column mapping (by index):
+ * A=Status, B=Ordredato, C=Id, D=Kundenummer, E=Kunde, F=Produkter, 
+ * G=Ordretype, H=Forhandler, I=Selger, J=Plattform
  */
 
 export interface ParsedSalgRecord {
@@ -21,81 +26,80 @@ export interface ParsedSalgRecord {
 export function parseCSV(csvText: string): ParsedSalgRecord[] {
   const lines = csvText.split('\n').filter(line => line.trim());
   
-  // Find header row
-  const headerLine = lines[0];
-  const headers = parseCSVLine(headerLine);
-  
-  console.log('📋 CSV Headers:', headers);
-  
-  // Map column names to indices
-  const columnMap: { [key: string]: number } = {};
-  headers.forEach((header, idx) => {
-    const normalized = header.toLowerCase().trim().replace(/\s+/g, '');
-    columnMap[normalized] = idx;
-  });
-  
-  console.log('🗺️ Column map:', columnMap);
+  if (lines.length < 2) {
+    console.warn('⚠️ CSV file is empty or has only header');
+    return [];
+  }
   
   const records: ParsedSalgRecord[] = [];
   
-  // Process data rows (skip header and timestamp rows)
+  // Process data rows (skip header at index 0)
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
     
     const values = parseCSVLine(line);
     
-    // Get kundenummer - if empty, this is a timestamp row, skip it
-    // Search in order: exact "kundenummer" first, then alternatives
-    const kundenummerIdx = 
-      Object.entries(columnMap).find(([key]) => key === 'kundenummer')?.[1] ||
-      Object.entries(columnMap).find(([key]) => key.includes('kundenummer'))?.[1] ||
-      Object.entries(columnMap).find(([key]) => key.includes('kundnr'))?.[1] ||
-      undefined;
-    
-    if (kundenummerIdx === undefined) {
-      console.warn('⚠️ Could not find kundenummer column');
+    // Column A = Status - if empty, skip (it's a timestamp row)
+    const status = values[0]?.trim();
+    if (!status) {
+      console.log('⏭️ Skipping row without Status:', line.substring(0, 50));
       continue;
     }
     
-    const kundenummer = values[kundenummerIdx]?.trim();
+    // Extract values by column index
+    const ordredato = values[1]?.trim() || ''; // B - Ordredato
+    const idRaw = values[2]?.trim() || ''; // C - Id (might be in scientific notation)
+    const kundenummerRaw = values[3]?.trim() || ''; // D - Kundenummer
+    const kunde = values[4]?.trim() || ''; // E - Kunde
+    const produkt = values[5]?.trim() || ''; // F - Produkter
+    const ordertype = values[6]?.trim() || ''; // G - Ordretype
+    const forhandler = values[7]?.trim() || ''; // H - Forhandler
+    const selger = values[8]?.trim() || ''; // I - Selger
+    const platform = values[9]?.trim() || ''; // J - Plattform
     
-    // Skip if no kundenummer (this is a timestamp line)
+    // Convert scientific notation to regular number
+    const id = convertScientificNotation(idRaw);
+    const kundenummer = convertScientificNotation(kundenummerRaw);
+    
     if (!kundenummer) {
-      console.log('⏭️ Skipping timestamp line:', line.substring(0, 50));
+      console.warn('⚠️ Skipping row with empty kundenummer');
       continue;
     }
-    
-    // Extract date from ordredato (remove time if present)
-    const ordredatoIdx = 
-      Object.entries(columnMap).find(([key]) => key === 'ordredato')?.[1] ||
-      Object.entries(columnMap).find(([key]) => key.includes('ordredato'))?.[1] ||
-      Object.entries(columnMap).find(([key]) => key.includes('date'))?.[1] ||
-      undefined;
-    
-    const ordredatoFull = ordredatoIdx !== undefined ? values[ordredatoIdx]?.trim() : '';
-    const ordredato = ordredatoFull?.split(' ')[0] || ''; // Get date part only
     
     // Build record
     const record: ParsedSalgRecord = {
-      id: getColumnValue(values, columnMap, 'id'),
+      id,
       kundenummer,
-      kunde: getColumnValue(values, columnMap, 'kunde', 'customer'),
+      kunde,
       ordredato,
-      produkt: getColumnValue(values, columnMap, 'produkter', 'produkt', 'product'),
-      ordertype: getColumnValue(values, columnMap, 'ordretype', 'ordertype', 'type'),
-      forhandler: getColumnValue(values, columnMap, 'forhandler', 'reseller'),
-      selger: getColumnValue(values, columnMap, 'selger', 'seller'),
-      platform: getColumnValue(values, columnMap, 'chosen platform', 'valgt platform', 'platform'),
-      status: getColumnValue(values, columnMap, 'status'),
+      produkt,
+      ordertype,
+      forhandler,
+      selger,
+      platform,
+      status,
     };
     
-    console.log('✅ Parsed record:', record.kundenummer, record.kunde);
+    console.log('✅ Parsed kontrakt:', record.kundenummer, '|', record.id);
     records.push(record);
   }
   
-  console.log('🎉 Total records parsed:', records.length);
+  console.log('🎉 Total kontrakter parsed:', records.length);
   return records;
+}
+
+function convertScientificNotation(value: string): string {
+  if (!value) return '';
+  
+  // Check if it's scientific notation (e.g., "1.6E+09")
+  const scientificMatch = value.match(/^([0-9.]+)E([+-]?\d+)$/i);
+  if (scientificMatch) {
+    const num = parseFloat(value);
+    return Math.floor(num).toString();
+  }
+  
+  return value;
 }
 
 function parseCSVLine(line: string): string[] {
@@ -126,26 +130,4 @@ function parseCSVLine(line: string): string[] {
   return result;
 }
 
-function getColumnValue(
-  values: string[],
-  columnMap: { [key: string]: number },
-  ...possibleNames: string[]
-): string {
-  for (const name of possibleNames) {
-    const normalized = name.toLowerCase().replace(/\s+/g, '');
-    
-    // Try exact match first
-    if (columnMap[normalized] !== undefined) {
-      const idx = columnMap[normalized];
-      return values[idx]?.trim() || '';
-    }
-    
-    // Then try substring match
-    const key = Object.keys(columnMap).find(k => k.includes(normalized));
-    if (key) {
-      const idx = columnMap[key];
-      return values[idx]?.trim() || '';
-    }
-  }
-  return '';
-}
+
