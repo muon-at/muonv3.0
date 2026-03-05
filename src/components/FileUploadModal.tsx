@@ -56,7 +56,7 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
         }
 
         // Fetch existing Ids from Firestore
-        const salgRef = collection(db, 'allente_salg');
+        const salgRef = collection(db, 'allente_kontraktsarkiv');
         const snapshot = await getDocs(salgRef);
         const existingIds = new Set<string>();
         
@@ -67,7 +67,7 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
           }
         });
 
-        console.log('📋 Existing Ids:', existingIds.size);
+        console.log('📋 Existing Ids in allente_kontraktsarkiv:', existingIds.size);
 
         // Filter new records (deduplicate by Id)
         const newRecords = records.filter(

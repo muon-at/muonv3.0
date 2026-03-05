@@ -85,10 +85,10 @@ export default function AdminDashboard() {
   const fetchSalgData = async () => {
     setLoadingSalg(true);
     try {
-      const salgRef = collection(db, 'allente_salg');
+      const salgRef = collection(db, 'allente_kontraktsarkiv');
       const snapshot = await getDocs(salgRef);
       
-      console.log('📊 Fetching from allente_salg collection...');
+      console.log('📊 Fetching from allente_kontraktsarkiv collection...');
       console.log('📦 Total documents found:', snapshot.size);
       
       const salgList: SalgRecord[] = [];
