@@ -1,0 +1,167 @@
+import { useState } from 'react';
+import '../styles/AdminDashboard.css';
+
+export default function AdminDashboard() {
+  const [activeMainTab, setActiveMainTab] = useState('allente');
+  const [activeAllenteTab, setActiveAllenteTab] = useState('i-dag');
+
+  // Mock data
+  const salesData = [
+    { ansatt: 'Fayez Fadie', salg: 0, slack: 'Fayez' },
+    { ansatt: 'Steffen Støylen', salg: 0, slack: 'Steffen' },
+    { ansatt: 'Benjamin Johannessen', salg: 0, slack: 'Benjamin' },
+  ];
+
+  const mainTabs = [
+    { id: 'dashboard', label: '📊 Dashboard' },
+    { id: 'organisasjon', label: '👥 Organisasjon' },
+    { id: 'allente', label: '🟠 Allente' },
+  ];
+
+  const allenteTabs = [
+    { id: 'i-dag', label: 'I DAG' },
+    { id: 'salg', label: 'SALG' },
+    { id: 'stats', label: 'STATS' },
+    { id: 'angring', label: 'ANGRING' },
+    { id: 'mal', label: 'MÅL' },
+    { id: 'dashboard', label: 'DASHBOARD' },
+    { id: 'produkt', label: 'PRODUKT' },
+    { id: 'badges', label: 'BADGES' },
+  ];
+
+  const uploadButtons = [
+    { label: 'Last opp Salg', icon: '📤', color: '#C86D4D' },
+    { label: 'Last opp Stats', icon: '📈', color: '#667eea' },
+    { label: 'Last opp Angring', icon: '↩️', color: '#10b981' },
+  ];
+
+  return (
+    <div className="admin-dashboard-container">
+      {/* Header */}
+      <div className="admin-header">
+        <div className="header-left">
+          <span className="muon-logo">muon</span>
+          <div>
+            <h1>Admin Dashboard</h1>
+            <p className="subtitle">Sentralisert oversikt over kontrakter og brukerstatistikk</p>
+          </div>
+        </div>
+        <button className="logout-btn">LOGG UT</button>
+      </div>
+
+      {/* Main Tab Navigation */}
+      <div className="main-tabs">
+        {mainTabs.map((tab) => (
+          <button
+            key={tab.id}
+            className={`main-tab ${activeMainTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveMainTab(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content Area */}
+      <div className="admin-content">
+        {activeMainTab === 'allente' && (
+          <>
+            {/* Allente Header */}
+            <div className="section-header">
+              <div className="section-title">
+                <div className="section-icon">🟠</div>
+                <h2>Allente</h2>
+              </div>
+              <div className="upload-buttons">
+                {uploadButtons.map((btn, idx) => (
+                  <button 
+                    key={idx} 
+                    className="upload-btn"
+                    style={{ borderColor: btn.color, color: btn.color }}
+                  >
+                    {btn.icon} {btn.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Allente Sub-tabs */}
+            <div className="allente-tabs">
+              {allenteTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`allente-tab ${activeAllenteTab === tab.id ? 'active' : ''}`}
+                  onClick={() => setActiveAllenteTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* I DAG Content */}
+            {activeAllenteTab === 'i-dag' && (
+              <div className="tab-content">
+                <div className="content-title">
+                  <h3>Salg i dag – Allente</h3>
+                  <p className="content-subtitle">Henter live data fra aliente Slack-kanal (🔔 + 📱 = 1 salg)</p>
+                </div>
+
+                <div className="info-box">
+                  <span className="info-icon">💡</span>
+                  <p>
+                    <strong>Hvordan det fungerer:</strong> Post salg i #allente med emojis (🔔 eller 📱 = 1 salg hver). Tabellen oppdateres live.
+                  </p>
+                </div>
+
+                <button className="update-btn">↻ Oppdater nå</button>
+
+                {/* Sales Table */}
+                <div className="sales-table">
+                  <div className="table-header">
+                    <div className="col-ansatt">Ansatt</div>
+                    <div className="col-salg">Salg i dag</div>
+                    <div className="col-slack">Slack-navn</div>
+                  </div>
+                  {salesData.map((row, idx) => (
+                    <div key={idx} className="table-row">
+                      <div className="col-ansatt">{row.ansatt}</div>
+                      <div className="col-salg">
+                        <span className="salg-badge">{row.salg}</span>
+                      </div>
+                      <div className="col-slack">{row.slack}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Other tabs placeholder */}
+            {activeAllenteTab !== 'i-dag' && (
+              <div className="tab-content">
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                  {allenteTabs.find(t => t.id === activeAllenteTab)?.label} tab content coming soon...
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {activeMainTab === 'dashboard' && (
+          <div className="tab-content">
+            <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+              Dashboard content coming soon...
+            </p>
+          </div>
+        )}
+
+        {activeMainTab === 'organisasjon' && (
+          <div className="tab-content">
+            <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+              Organisasjon content coming soon...
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

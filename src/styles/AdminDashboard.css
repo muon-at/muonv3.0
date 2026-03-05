@@ -1,0 +1,393 @@
+.admin-dashboard-container {
+  width: 100%;
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.admin-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.muon-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  min-width: 60px;
+}
+
+.admin-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.admin-header .subtitle {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.logout-btn {
+  background: #dc2626;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-2px);
+}
+
+/* Main Tab Navigation */
+.main-tabs {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  width: 100%;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.main-tab {
+  padding: 1rem 2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+
+.main-tab:hover {
+  color: #333;
+  background: #f8fafc;
+}
+
+.main-tab.active {
+  color: #C86D4D;
+  border-bottom-color: #C86D4D;
+}
+
+/* Content Area */
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* Section Header */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.section-icon {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.upload-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid;
+  background: white;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.upload-btn:hover {
+  background: #f8fafc;
+  transform: translateY(-2px);
+}
+
+/* Allente Sub-tabs */
+.allente-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.allente-tab {
+  padding: 1rem 1.5rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.allente-tab:hover {
+  color: #666;
+}
+
+.allente-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+/* Tab Content */
+.tab-content {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.content-title {
+  margin-bottom: 1.5rem;
+}
+
+.content-title h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.content-subtitle {
+  margin: 0.5rem 0 0 0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Info Box */
+.info-box {
+  background: #fffbf0;
+  border-left: 4px solid #f97316;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.info-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.info-box p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.info-box strong {
+  color: #333;
+}
+
+/* Update Button */
+.update-btn {
+  background: white;
+  border: 2px solid #C86D4D;
+  color: #C86D4D;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.update-btn:hover {
+  background: #fffbf0;
+  transform: translateY(-2px);
+}
+
+/* Sales Table */
+.sales-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-header {
+  background: #fffbf0;
+  display: grid;
+  grid-template-columns: 1fr 150px 150px;
+  gap: 1rem;
+  padding: 1rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1fr 150px 150px;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  align-items: center;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:nth-child(even) {
+  background: #fffbf0;
+}
+
+.col-ansatt {
+  font-weight: 500;
+  color: #333;
+}
+
+.col-salg {
+  display: flex;
+  justify-content: center;
+}
+
+.salg-badge {
+  background: #C86D4D;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-block;
+}
+
+.col-slack {
+  color: #666;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .upload-buttons {
+    justify-content: flex-start;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .col-salg,
+  .col-slack {
+    text-align: left;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .header-left {
+    flex-direction: column;
+  }
+
+  .muon-logo {
+    font-size: 1.2rem;
+  }
+
+  .logout-btn {
+    width: 100%;
+  }
+
+  .main-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .admin-content {
+    padding: 1rem;
+  }
+
+  .section-title h2 {
+    font-size: 1.2rem;
+  }
+
+  .upload-buttons {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .upload-btn {
+    width: 100%;
+  }
+
+  .allente-tab {
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+  }
+}

@@ -63,7 +63,7 @@ export default function Teamleder() {
           </button>
           <button 
             className="nav-button admin-btn-header"
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate('/admin-dashboard')}
           >
             Admin →
           </button>
