@@ -27,7 +27,9 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
   
   const getColumnIndex = (columnName: string): number => {
     const lowerName = columnName.toLowerCase();
-    return headers.findIndex(h => h.toLowerCase().includes(lowerName));
+    const index = headers.findIndex(h => h.toLowerCase().includes(lowerName));
+    console.log(`  📌 Column "${columnName}" found at index ${index}`);
+    return index;
   };
 
   // Find all needed column indices
