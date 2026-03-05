@@ -17,7 +17,13 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
 
   // Parse header to find column indices
   const headerLine = lines[0];
-  const headers = headerLine.split('\t').map(h => h.trim());
+  // Try both tab and comma as separators
+  let headers = headerLine.split('\t').map(h => h.trim());
+  if (headers.length < 3) {
+    headers = headerLine.split(',').map(h => h.trim());
+  }
+  
+  console.log('📋 CSV Headers found:', headers);
   
   const getColumnIndex = (columnName: string): number => {
     const lowerName = columnName.toLowerCase();
@@ -51,7 +57,16 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
     const line = lines[i].trim();
     if (!line) continue;
 
-    const values = line.split('\t').map(v => v.trim());
+    // Use same separator as headers
+    let values = line.split('\t').map(v => v.trim());
+    if (values.length < 3) {
+      values = line.split(',').map(v => v.trim());
+    }
+    
+    if (i === 1) {
+      console.log('📊 Sample row 1 values:', values);
+      console.log('  Mapping: TempID=[' + values[tempIdIndex] + '], Product=[' + values[productIndex] + '], Person=[' + values[salespersonIndex] + ']');
+    }
 
     // Get values from correct columns
     const kundenummer = values[tempIdIndex] || '';

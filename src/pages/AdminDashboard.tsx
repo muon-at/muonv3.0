@@ -67,6 +67,15 @@ export default function AdminDashboard() {
   const [loadingSalg, setLoadingSalg] = useState(false);
   const [angringerData, setAngringerData] = useState<any[]>([]);
   const [loadingAngringer, setLoadingAngringer] = useState(false);
+  const [angringerFilters, setAngringerFilters] = useState({
+    filnavn: '',
+    kundenummer: '',
+    produkt: '',
+    selger: '',
+    periode: '',
+    plattform: '',
+  });
+  const [activeAngringerFilters, setActiveAngringerFilters] = useState(angringerFilters);
   const [produkterData, setProdukterData] = useState<any[]>([]);
   const [loadingProdukter, setLoadingProdukter] = useState(false);
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
@@ -473,6 +482,30 @@ export default function AdminDashboard() {
     return dateStr;
   };
 
+  const getFilteredAngringerData = () => {
+    return angringerData.filter((record) => {
+      if (activeAngringerFilters.filnavn && !record.filename?.toLowerCase().includes(activeAngringerFilters.filnavn.toLowerCase())) {
+        return false;
+      }
+      if (activeAngringerFilters.kundenummer && !record.kundenummer?.toLowerCase().includes(activeAngringerFilters.kundenummer.toLowerCase())) {
+        return false;
+      }
+      if (activeAngringerFilters.produkt && !record.produkt?.toLowerCase().includes(activeAngringerFilters.produkt.toLowerCase())) {
+        return false;
+      }
+      if (activeAngringerFilters.selger && !record.selger?.toLowerCase().includes(activeAngringerFilters.selger.toLowerCase())) {
+        return false;
+      }
+      if (activeAngringerFilters.periode && record.period?.toString() !== activeAngringerFilters.periode) {
+        return false;
+      }
+      if (activeAngringerFilters.plattform && !record.plattform?.toLowerCase().includes(activeAngringerFilters.plattform.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  };
+
   const getFilteredSalgData = () => {
     return salgData.filter((record) => {
       // Selger filter
@@ -816,6 +849,105 @@ export default function AdminDashboard() {
                       📤 Last opp Angringer
                     </button>
 
+                    {/* Filter Panel */}
+                    <div className="filter-panel">
+                      <div className="filter-group">
+                        <label>Filnavn:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={angringerFilters.filnavn}
+                          onChange={(e) => setAngringerFilters({ ...angringerFilters, filnavn: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+                      <div className="filter-group">
+                        <label>Kundenummer:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={angringerFilters.kundenummer}
+                          onChange={(e) => setAngringerFilters({ ...angringerFilters, kundenummer: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+                      <div className="filter-group">
+                        <label>Produkt:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={angringerFilters.produkt}
+                          onChange={(e) => setAngringerFilters({ ...angringerFilters, produkt: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+                      <div className="filter-group">
+                        <label>Selger:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={angringerFilters.selger}
+                          onChange={(e) => setAngringerFilters({ ...angringerFilters, selger: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+                      <div className="filter-group">
+                        <label>Plattform:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={angringerFilters.plattform}
+                          onChange={(e) => setAngringerFilters({ ...angringerFilters, plattform: e.target.value })}
+                          className="filter-input"
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          setActiveAngringerFilters(angringerFilters);
+                        }}
+                        style={{
+                          padding: '0.75rem 1.5rem',
+                          background: '#667eea',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        🔍 Søk
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAngringerFilters({
+                            filnavn: '',
+                            kundenummer: '',
+                            produkt: '',
+                            selger: '',
+                            periode: '',
+                            plattform: '',
+                          });
+                          setActiveAngringerFilters({
+                            filnavn: '',
+                            kundenummer: '',
+                            produkt: '',
+                            selger: '',
+                            periode: '',
+                            plattform: '',
+                          });
+                        }}
+                        style={{
+                          padding: '0.75rem 1.5rem',
+                          background: '#999',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        🔄 Nullstill
+                      </button>
+                    </div>
+
                     <div className="angringer-table">
                       <div className="table-header">
                         <div className="col-filename">Filnavn</div>
@@ -827,7 +959,7 @@ export default function AdminDashboard() {
                         <div className="col-period">Periode (dager)</div>
                         <div className="col-category">Plattform</div>
                       </div>
-                      {angringerData.map((record, idx) => (
+                      {getFilteredAngringerData().map((record, idx) => (
                         <div key={idx} className="table-row">
                           <div className="col-filename">{record.filename || '-'}</div>
                           <div className="col-kundenr">{record.kundenummer || '-'}</div>
@@ -842,7 +974,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
-                      Total: {angringerData.length} angringer
+                      Total: {getFilteredAngringerData().length} av {angringerData.length} angringer
                     </p>
                   </>
                 ) : (
