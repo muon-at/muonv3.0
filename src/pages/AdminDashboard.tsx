@@ -95,13 +95,16 @@ export default function AdminDashboard() {
         const selger = data.selger || '';
         const avdeling = employeeMap[selger] || 'Ukjent';
         
-        console.log('📌 Document:', doc.id, 'Selger:', selger, 'Avdeling:', avdeling);
+        // Try different column name variations for kundenummer
+        const kundeNr = data.kundenummer || data.kundeNr || data.kundenr || 'N/A';
+        
+        console.log('📌 Document:', doc.id, 'Kundenummer:', kundeNr, 'Selger:', selger);
         
         salgList.push({
           id: doc.id,
-          kundeNr: data.kundeNr || data.kundenr || 'N/A',
-          kundeNavn: data.kundeNavn || data.kundenavn,
-          beløp: data.beløp || data.beløp,
+          kundeNr: kundeNr,
+          kundeNavn: data.kunde || data.kundeNavn || data.kundenavn || '-',
+          beløp: data.beløp || '-',
           dato: data.dato,
           produkt: data.produkt,
           selger: selger,
