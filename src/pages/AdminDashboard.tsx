@@ -133,6 +133,10 @@ export default function AdminDashboard() {
     return text.replace(/\s*\/\s*/g, ' / ').trim();
   };
 
+  const handleDeleteClick = (employeeId: string, employeeName: string) => {
+    setDeleteConfirm({ show: true, employeeId, employeeName });
+  };
+
 
 
   const fetchEmployees = async () => {
@@ -613,6 +617,25 @@ export default function AdminDashboard() {
               </p>
             ) : (
               <>
+                <button 
+                  className="add-employee-btn"
+                  onClick={() => {
+                    // TODO: Implement add employee
+                  }}
+                  style={{
+                    marginBottom: '1.5rem',
+                    padding: '0.75rem 1.5rem',
+                    background: '#667eea',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }}
+                >
+                  ➕ Legg til ansatt
+                </button>
+
                 <div className="employees-table">
                   <div className="table-header">
                     <div className="col-name">Navn</div>
@@ -622,6 +645,7 @@ export default function AdminDashboard() {
                     <div className="col-slack">Slack Navn</div>
                     <div className="col-external">Ekstern Navn</div>
                     <div className="col-tmg">TMG Navn</div>
+                    <div className="col-actions">Handlinger</div>
                   </div>
                   {employees.map((emp) => (
                     <div key={emp.id} className="table-row">
@@ -632,6 +656,24 @@ export default function AdminDashboard() {
                       <div className="col-slack">{emp.slackName || '-'}</div>
                       <div className="col-external">{emp.externalName || '-'}</div>
                       <div className="col-tmg">{emp.tmgName || '-'}</div>
+                      <div className="col-actions">
+                        <button 
+                          className="action-btn edit-btn"
+                          onClick={() => {
+                            // TODO: Implement edit
+                          }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          className="action-btn delete-btn"
+                          onClick={() => handleDeleteClick(emp.id, emp.name)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -375,7 +375,7 @@
 .employees-table .table-header {
   background: #fffbf0;
   display: grid;
-  grid-template-columns: 180px 120px 140px 120px 150px 220px 180px;
+  grid-template-columns: 180px 120px 140px 120px 150px 220px 180px 100px;
   gap: 1rem;
   padding: 1rem;
   font-weight: 600;
@@ -388,7 +388,7 @@
 
 .employees-table .table-row {
   display: grid;
-  grid-template-columns: 180px 120px 140px 120px 150px 220px 180px;
+  grid-template-columns: 180px 120px 140px 120px 150px 220px 180px 100px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
