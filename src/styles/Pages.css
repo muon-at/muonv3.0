@@ -9,7 +9,7 @@
   color: white;
   padding: 3rem 2rem;
   text-align: center;
-  margin-bottom: 3rem;
+  width: 100%;
 }
 
 .page-header h1 {
@@ -26,9 +26,8 @@
 }
 
 .page-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem 2rem;
+  width: 100%;
+  padding: 3rem 2rem 2rem;
 }
 
 /* Stats Section */
@@ -155,7 +154,7 @@
 /* Section Grid for Teamleder */
 .section-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-bottom: 3rem;
 }
