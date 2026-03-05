@@ -96,25 +96,15 @@ export default function AdminDashboard() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         if (data.externalName && data.department) {
-          // Add both full name and potentially shortened versions
+          // Eksakt matching - CSV må matche nøyaktig
           map[data.externalName] = data.department;
-          
-          // Also add shortened version (e.g., "Brandon Kanyange / selger" → "Brandon / selger")
-          const parts = data.externalName.split(' / ');
-          if (parts.length === 2) {
-            const nameParts = parts[0].split(' ');
-            const role = parts[1]; // e.g., "selger"
-            if (nameParts.length > 1) {
-              // Try first name + role
-              const shortVersion = `${nameParts[0]} / ${role}`;
-              map[shortVersion] = data.department;
-              console.log('🔗 Added mapping:', shortVersion, '→', data.department);
-            }
-          }
         }
       });
       
       console.log('📋 Employee Map loaded:', Object.keys(map).length, 'entries');
+      Object.entries(map).slice(0, 3).forEach(([name, dept]) => {
+        console.log(`  ${name} → ${dept}`);
+      });
       setEmployeeMap(map);
     } catch (err) {
       console.error('❌ Error fetching employee map:', err);
