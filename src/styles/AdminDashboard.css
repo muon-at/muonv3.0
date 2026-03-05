@@ -296,7 +296,7 @@
 .table-header {
   background: #fffbf0;
   display: grid;
-  grid-template-columns: 120px 150px 120px 100px 120px 120px;
+  grid-template-columns: 120px 150px 120px 100px 120px 120px 100px;
   gap: 1rem;
   padding: 1rem;
   font-weight: 600;
@@ -307,7 +307,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 120px 150px 120px 100px 120px 120px;
+  grid-template-columns: 120px 150px 120px 100px 120px 120px 100px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -603,6 +603,11 @@
 
 .col-selger {
   color: #666;
+}
+
+.col-avdeling {
+  color: #667eea;
+  font-weight: 500;
 }
 
 /* Responsive */

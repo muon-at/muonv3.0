@@ -26,6 +26,7 @@ interface SalgRecord {
   dato?: string;
   produkt?: string;
   selger?: string;
+  avdeling?: string;
   [key: string]: any;
 }
 
@@ -40,6 +41,7 @@ export default function AdminDashboard() {
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
   const [salgData, setSalgData] = useState<SalgRecord[]>([]);
   const [loadingSalg, setLoadingSalg] = useState(false);
+  const [employeeMap, setEmployeeMap] = useState<{ [key: string]: string }>({});
 
   // Fetch employees when Organisasjon tab is opened
   useEffect(() => {
@@ -51,9 +53,28 @@ export default function AdminDashboard() {
   // Fetch salg data when SALG tab is opened
   useEffect(() => {
     if (activeMainTab === 'allente' && activeAllenteTab === 'salg') {
-      fetchSalgData();
+      fetchEmployeeMap().then(() => fetchSalgData());
     }
   }, [activeMainTab, activeAllenteTab]);
+
+  const fetchEmployeeMap = async () => {
+    try {
+      const empRef = collection(db, 'employees');
+      const snapshot = await getDocs(empRef);
+      
+      const map: { [key: string]: string } = {};
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.externalName && data.department) {
+          map[data.externalName] = data.department;
+        }
+      });
+      
+      setEmployeeMap(map);
+    } catch (err) {
+      console.error('Error fetching employee map:', err);
+    }
+  };
 
   const fetchSalgData = async () => {
     setLoadingSalg(true);
@@ -64,6 +85,9 @@ export default function AdminDashboard() {
       const salgList: SalgRecord[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
+        const selger = data.selger || '';
+        const avdeling = employeeMap[selger] || 'Ukjent';
+        
         salgList.push({
           id: doc.id,
           kundeNr: data.kundeNr || data.kundenr || 'N/A',
@@ -71,7 +95,8 @@ export default function AdminDashboard() {
           beløp: data.beløp || data.beløp,
           dato: data.dato,
           produkt: data.produkt,
-          selger: data.selger,
+          selger: selger,
+          avdeling: avdeling,
           ...data,
         });
       });
@@ -364,6 +389,7 @@ export default function AdminDashboard() {
                         <div className="col-dato">Dato</div>
                         <div className="col-produkt">Produkt</div>
                         <div className="col-selger">Selger</div>
+                        <div className="col-avdeling">Avdeling</div>
                       </div>
                       {salgData.map((row) => (
                         <div key={row.id} className="table-row">
@@ -373,6 +399,7 @@ export default function AdminDashboard() {
                           <div className="col-dato">{row.dato || '-'}</div>
                           <div className="col-produkt">{row.produkt || '-'}</div>
                           <div className="col-selger">{row.selger || '-'}</div>
+                          <div className="col-avdeling">{row.avdeling || 'Ukjent'}</div>
                         </div>
                       ))}
                     </div>
