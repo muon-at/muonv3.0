@@ -16,6 +16,17 @@ interface Employee {
   employment_type?: string;
 }
 
+const getRoleBadgeColor = (role: string) => {
+  const roleColors: { [key: string]: string } = {
+    owner: '#4f46e5',
+    teamleder: '#6366f1',
+    selger: '#10b981',
+    tekniker: '#f59e0b',
+    ansatt: '#6b7280',
+  };
+  return roleColors[role?.toLowerCase()] || '#6b7280';
+};
+
 export default function Dashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,31 +67,69 @@ export default function Dashboard() {
     fetchEmployees();
   }, []);
 
-  if (loading) return <div className="dashboard">Laster ansattliste...</div>;
+  if (loading) return <div className="dashboard"><div className="loading">Laster ansattliste...</div></div>;
   if (error) return <div className="dashboard error">{error}</div>;
 
   return (
     <div className="dashboard">
-      <h1>📊 Muon Dashboard</h1>
-      <p className="employee-count">{employees.length} ansatte</p>
-      <div className="employees-grid">
-        {employees.length > 0 ? (
-          employees.map((emp) => (
-            <div key={emp.id} className="employee-card">
-              <h3>{emp.name}</h3>
-              {emp.role && <p className="role"><strong>🎯 Rolle:</strong> {emp.role}</p>}
-              {emp.department && <p><strong>🏢 Avdeling:</strong> {emp.department}</p>}
-              {emp.project && <p><strong>📋 Prosjekt:</strong> {emp.project}</p>}
-              {emp.employment_type && <p><strong>📌 Type:</strong> {emp.employment_type}</p>}
-              {emp.email && <p><strong>📧 Email:</strong> {emp.email}</p>}
-              {emp.slackName && <p className="slack"><strong>💬 Slack:</strong> {emp.slackName}</p>}
-              {emp.externalName && <p><strong>👤 Navn (Ekstern):</strong> {emp.externalName}</p>}
-              {emp.tmgName && <p><strong>🎧 TMG Navn:</strong> {emp.tmgName}</p>}
-            </div>
-          ))
-        ) : (
-          <p>Ingen ansatte å vise</p>
-        )}
+      <div className="dashboard-header">
+        <div>
+          <h1>Muon Dashboard</h1>
+          <p className="subtitle">Oversikt over ansatte</p>
+        </div>
+      </div>
+
+      <div className="table-container">
+        <table className="employees-table">
+          <thead>
+            <tr>
+              <th>Navn</th>
+              <th>Email</th>
+              <th>Rolle</th>
+              <th>Prosjekt</th>
+              <th>Avdeling</th>
+              <th>Slack Navn</th>
+              <th>Type</th>
+              <th>Ekstern Navn</th>
+              <th>Handlinger</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.length > 0 ? (
+              employees.map((emp) => (
+                <tr key={emp.id} className="employee-row">
+                  <td className="name-cell">
+                    <strong>{emp.name}</strong>
+                  </td>
+                  <td className="email-cell">{emp.email || '-'}</td>
+                  <td className="role-cell">
+                    {emp.role && (
+                      <span 
+                        className="role-badge"
+                        style={{ backgroundColor: getRoleBadgeColor(emp.role) }}
+                      >
+                        {emp.role}
+                      </span>
+                    )}
+                  </td>
+                  <td>{emp.project || '-'}</td>
+                  <td className="department-cell">{emp.department || '-'}</td>
+                  <td>{emp.slackName || '-'}</td>
+                  <td>{emp.employment_type || '-'}</td>
+                  <td>{emp.externalName || '-'}</td>
+                  <td className="actions-cell">
+                    <button className="btn btn-edit">Redigør</button>
+                    <button className="btn btn-delete">Slett</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="no-data">Ingen ansatte å vise</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

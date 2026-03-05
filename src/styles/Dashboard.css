@@ -1,23 +1,148 @@
 .dashboard {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f5f7fa;
   min-height: 100vh;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.dashboard h1 {
-  color: #1a202c;
-  margin-bottom: 0.5rem;
-  font-size: 2.5rem;
-  font-weight: 700;
+.loading {
+  padding: 3rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #64748b;
 }
 
-.employee-count {
-  color: #718096;
+.dashboard-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2.5rem;
   margin-bottom: 2rem;
-  font-size: 1rem;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-header .subtitle {
+  margin: 0;
+  opacity: 0.95;
+  font-size: 0.95rem;
+}
+
+.table-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 1.5rem 2rem;
+  overflow-x: auto;
+}
+
+.employees-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.employees-table thead {
+  background: #f1f5f9;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.employees-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.employees-table tbody tr {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.15s ease;
+}
+
+.employees-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.employees-table td {
+  padding: 1.25rem;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
+.name-cell {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.email-cell {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.department-cell {
+  font-weight: 500;
+  color: #475569;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #2563eb;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.btn-delete {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem !important;
+  color: #94a3b8;
 }
 
 .dashboard.error {
@@ -28,60 +153,20 @@
   border-left: 4px solid #d32f2f;
 }
 
-.employees-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
+/* Responsiv på små skjermer */
+@media (max-width: 768px) {
+  .table-container {
+    padding: 0 1rem 2rem;
+  }
 
-.employee-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
+  .employees-table th,
+  .employees-table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
 
-.employee-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-  border-color: #3182ce;
-}
-
-.employee-card h3 {
-  margin: 0 0 1rem 0;
-  color: #2d3748;
-  font-size: 1.35rem;
-  font-weight: 600;
-  border-bottom: 2px solid #edf2f7;
-  padding-bottom: 0.75rem;
-}
-
-.employee-card p {
-  margin: 0.75rem 0;
-  color: #4a5568;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.employee-card p.role {
-  background: #ebf8ff;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  color: #2c5282;
-  margin: 0.5rem 0;
-}
-
-.employee-card p.slack {
-  background: #f0f4f8;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  margin: 0.5rem 0;
-}
-
-.employee-card strong {
-  color: #2d3748;
-  font-weight: 600;
+  .btn {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
 }
