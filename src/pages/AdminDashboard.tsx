@@ -18,6 +18,17 @@ interface Employee {
   employment_type?: string;
 }
 
+interface SalgRecord {
+  id: string;
+  kundeNr: string;
+  kundeNavn?: string;
+  beløp?: number;
+  dato?: string;
+  produkt?: string;
+  selger?: string;
+  [key: string]: any;
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeMainTab, setActiveMainTab] = useState('allente');
@@ -27,6 +38,8 @@ export default function AdminDashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
   const [deleting, setDeleting] = useState(false);
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
+  const [salgData, setSalgData] = useState<SalgRecord[]>([]);
+  const [loadingSalg, setLoadingSalg] = useState(false);
 
   // Fetch employees when Organisasjon tab is opened
   useEffect(() => {
@@ -34,6 +47,42 @@ export default function AdminDashboard() {
       fetchEmployees();
     }
   }, [activeMainTab]);
+
+  // Fetch salg data when SALG tab is opened
+  useEffect(() => {
+    if (activeMainTab === 'allente' && activeAllenteTab === 'salg') {
+      fetchSalgData();
+    }
+  }, [activeMainTab, activeAllenteTab]);
+
+  const fetchSalgData = async () => {
+    setLoadingSalg(true);
+    try {
+      const salgRef = collection(db, 'allente_salg');
+      const snapshot = await getDocs(salgRef);
+      
+      const salgList: SalgRecord[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        salgList.push({
+          id: doc.id,
+          kundeNr: data.kundeNr || data.kundenr || 'N/A',
+          kundeNavn: data.kundeNavn || data.kundenavn,
+          beløp: data.beløp || data.beløp,
+          dato: data.dato,
+          produkt: data.produkt,
+          selger: data.selger,
+          ...data,
+        });
+      });
+      
+      setSalgData(salgList.sort((a, b) => (b.dato || '').localeCompare(a.dato || '')));
+    } catch (err) {
+      console.error('Error fetching salg data:', err);
+    } finally {
+      setLoadingSalg(false);
+    }
+  };
 
   const fetchEmployees = async () => {
     setLoadingEmployees(true);
@@ -293,7 +342,54 @@ export default function AdminDashboard() {
             )}
 
             {/* Other tabs placeholder */}
-            {activeAllenteTab !== 'i-dag' && (
+            {/* SALG Tab */}
+            {activeAllenteTab === 'salg' && (
+              <div className="tab-content">
+                <div className="content-title">
+                  <h3>Salg – Allente</h3>
+                  <p className="content-subtitle">Oversikt over alle opploadede salg fra CSV/Excel filer</p>
+                </div>
+
+                {loadingSalg ? (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Laster salg data...
+                  </p>
+                ) : salgData.length > 0 ? (
+                  <>
+                    <div className="sales-table">
+                      <div className="table-header">
+                        <div className="col-kunde">Kunde-Nr</div>
+                        <div className="col-navn">Kunde Navn</div>
+                        <div className="col-beløp">Beløp</div>
+                        <div className="col-dato">Dato</div>
+                        <div className="col-produkt">Produkt</div>
+                        <div className="col-selger">Selger</div>
+                      </div>
+                      {salgData.map((row) => (
+                        <div key={row.id} className="table-row">
+                          <div className="col-kunde">{row.kundeNr}</div>
+                          <div className="col-navn">{row.kundeNavn || '-'}</div>
+                          <div className="col-beløp">{row.beløp ? `${row.beløp} kr` : '-'}</div>
+                          <div className="col-dato">{row.dato || '-'}</div>
+                          <div className="col-produkt">{row.produkt || '-'}</div>
+                          <div className="col-selger">{row.selger || '-'}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
+                      Total: {salgData.length} salg
+                    </p>
+                  </>
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Ingen salg data funnet. Last opp en CSV/Excel fil for å komme i gang.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Other tabs placeholder */}
+            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && (
               <div className="tab-content">
                 <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
                   {allenteTabs.find(t => t.id === activeAllenteTab)?.label} tab content coming soon...

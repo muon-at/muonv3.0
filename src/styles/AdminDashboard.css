@@ -296,7 +296,7 @@
 .table-header {
   background: #fffbf0;
   display: grid;
-  grid-template-columns: 1fr 150px 150px;
+  grid-template-columns: 120px 150px 120px 100px 120px 120px;
   gap: 1rem;
   padding: 1rem;
   font-weight: 600;
@@ -307,7 +307,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 150px 150px;
+  grid-template-columns: 120px 150px 120px 100px 120px 120px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -574,6 +574,35 @@
 .modal-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* SALG Tab Styles */
+.col-kunde {
+  font-weight: 500;
+  color: #333;
+}
+
+.col-navn {
+  font-weight: 500;
+  color: #333;
+}
+
+.col-beløp {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.col-dato {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.col-produkt {
+  color: #666;
+}
+
+.col-selger {
+  color: #666;
 }
 
 /* Responsive */
