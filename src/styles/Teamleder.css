@@ -1,0 +1,269 @@
+.teamleder-container {
+  min-height: 100vh;
+  background: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Header */
+.teamleder-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.teamleder-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.teamleder-header .subtitle {
+  margin: 0.25rem 0 0 0;
+  opacity: 0.95;
+  font-size: 0.95rem;
+}
+
+.header-nav-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  white-space: nowrap;
+}
+
+.nav-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-btn-header {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.back-btn-header:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.admin-btn-header {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+}
+
+.admin-btn-header:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Content */
+.teamleder-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* KPI Section */
+.kpi-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: white;
+  border: 2px solid #e8d4c4;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.kpi-label {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #C86D4D;
+}
+
+.kpi-value {
+  margin: 0 0 0.5rem 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.kpi-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+/* Department Section */
+.department-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.department-card {
+  background: white;
+  border: 2px solid #e8d4c4;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.department-name {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Top 5 Sellers */
+.top-sellers-card {
+  background: white;
+  border: 2px solid #e8d4c4;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.top-sellers-header {
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e8d4c4;
+  padding-bottom: 1rem;
+}
+
+.top-sellers-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #C86D4D;
+}
+
+.sellers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.seller-row {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #fffef5;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 1.5rem;
+}
+
+.seller-row:last-child {
+  border-bottom: none;
+}
+
+.seller-rank {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #C86D4D;
+  min-width: 40px;
+  text-align: center;
+}
+
+.seller-name {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.seller-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .teamleder-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .teamleder-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .header-nav-buttons {
+    width: 100%;
+  }
+
+  .header-nav-buttons button {
+    width: 100%;
+  }
+
+  .teamleder-content {
+    padding: 1rem;
+  }
+
+  .kpi-section,
+  .department-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .kpi-card,
+  .department-card,
+  .top-sellers-card {
+    padding: 1.25rem;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+  }
+
+  .seller-row {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .seller-name {
+    font-size: 0.85rem;
+  }
+}
