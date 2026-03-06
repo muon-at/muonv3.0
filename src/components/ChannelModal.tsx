@@ -23,7 +23,8 @@ export default function ChannelModal({ isOpen, onClose, onChannelCreated, allUse
     '🎓', '📚', '🎨', '🎭', '🎪', '🎬', '🎤', '🎧', '🎸', '🎹',
     '⚽', '🏀', '🎾', '🏐', '🏈', '⛳', '🎯', '🎳', '🎮', '🎰',
     '🍕', '🍔', '🍟', '🍗', '🌮', '🍜', '🍱', '🍣', '🍤', '🍰',
-    '☕', '🍵', '🍶', '🍷', '🍾', '🍻', '🥂', '🥃', '🍪', '🎂'
+    '☕', '🍵', '🍶', '🍷', '🍾', '🍻', '🥂', '🥃', '🍪', '🎂',
+    '🏝️', '🏖️', '🌴', '🌊', '⛱️', '🏄', '🤿', '🚤'
   ];
 
   const handleCustomEmojiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
