@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
 import '../styles/Teamleder.css';
 
 export default function Teamleder() {
@@ -19,6 +19,11 @@ export default function Teamleder() {
   const [departmentData, setDepartmentData] = useState<any>({});
   const [targetData, setTargetData] = useState<any>({});
   const [topSellers, setTopSellers] = useState<any>([]);
+  const [goals, setGoals] = useState<any>({
+    KRS: { dag: '', uke: '', måned: '' },
+    OSL: { dag: '', uke: '', måned: '' },
+    Skien: { dag: '', uke: '', måned: '' },
+  });
 
   // Load sales and target data
   useEffect(() => {
@@ -114,6 +119,57 @@ export default function Teamleder() {
 
     loadData();
   }, []);
+
+  // Load goals when MÅL tab opens
+  useEffect(() => {
+    if (activeTab === 'mal') {
+      loadGoals();
+    }
+  }, [activeTab]);
+
+  const loadGoals = async () => {
+    try {
+      const targetsRef = collection(db, 'allente_targets');
+      const targetsSnap = await getDocs(targetsRef);
+      const loadedGoals: any = {
+        KRS: { dag: '', uke: '', måned: '' },
+        OSL: { dag: '', uke: '', måned: '' },
+        Skien: { dag: '', uke: '', måned: '' },
+      };
+
+      targetsSnap.forEach((doc) => {
+        const dept = doc.id;
+        const data = doc.data();
+        if (loadedGoals[dept]) {
+          loadedGoals[dept] = {
+            dag: data.dag || '',
+            uke: data.uke || '',
+            måned: data.måned || '',
+          };
+        }
+      });
+
+      setGoals(loadedGoals);
+    } catch (err) {
+      console.error('Error loading goals:', err);
+    }
+  };
+
+  const saveGoals = async () => {
+    try {
+      for (const dept of ['KRS', 'OSL', 'Skien']) {
+        await setDoc(doc(db, 'allente_targets', dept), {
+          dag: goals[dept].dag || 0,
+          uke: goals[dept].uke || 0,
+          måned: goals[dept].måned || 0,
+        });
+      }
+      alert('✅ Mål lagret!');
+    } catch (err) {
+      console.error('Error saving goals:', err);
+      alert('❌ Feil ved lagring');
+    }
+  };
 
   // Mock KPI data structure
   const kpis = [
@@ -272,9 +328,103 @@ export default function Teamleder() {
       {/* MÅL Tab */}
       {activeTab === 'mal' && (
       <div className="teamleder-content">
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>
-          <h2>🎯 MÅL - Kom snart!</h2>
-          <p>Her kan du sette mål for hver avdeling (Dag/Uke/Måned)</p>
+        <div style={{ paddingTop: '2rem' }}>
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{ marginBottom: '0.5rem' }}>🎯 Sett Mål for Avdelingene</h2>
+            <p style={{ color: '#999' }}>Dagsmål, Ukesmål, Månedsmål per avdeling</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+            {['KRS', 'OSL', 'Skien'].map((dept) => (
+              <div key={dept} style={{
+                padding: '1.5rem',
+                background: '#fffbf0',
+                border: '2px solid #667eea',
+                borderRadius: '8px',
+              }}>
+                <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem' }}>{dept}</h3>
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Dagsmål</label>
+                  <input
+                    type="number"
+                    value={goals[dept]?.dag || ''}
+                    onChange={(e) => setGoals({
+                      ...goals,
+                      [dept]: { ...goals[dept], dag: e.target.value }
+                    })}
+                    placeholder="f.eks 10"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      fontSize: '1rem',
+                      color: '#333',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Ukesmål</label>
+                  <input
+                    type="number"
+                    value={goals[dept]?.uke || ''}
+                    onChange={(e) => setGoals({
+                      ...goals,
+                      [dept]: { ...goals[dept], uke: e.target.value }
+                    })}
+                    placeholder="f.eks 50"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      fontSize: '1rem',
+                      color: '#333',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Månedsmål</label>
+                  <input
+                    type="number"
+                    value={goals[dept]?.måned || ''}
+                    onChange={(e) => setGoals({
+                      ...goals,
+                      [dept]: { ...goals[dept], måned: e.target.value }
+                    })}
+                    placeholder="f.eks 200"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '4px',
+                      fontSize: '1rem',
+                      color: '#333',
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={saveGoals}
+            style={{
+              padding: '0.75rem 2rem',
+              background: '#C86D4D',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+          >
+            💾 Lagre Mål
+          </button>
         </div>
       </div>
       )}
