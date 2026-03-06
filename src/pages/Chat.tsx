@@ -54,6 +54,8 @@ export default function Chat() {
   const [gifSearch, setGifSearch] = useState('');
   const [gifs, setGifs] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [dmSearchQuery, setDmSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -62,9 +64,36 @@ export default function Chat() {
     const load = async () => {
       await loadChannels();
       await loadDMs();
+      await loadAllUsers();
     };
     load();
   }, [user]);
+
+  const loadAllUsers = async () => {
+    try {
+      const employeesRef = collection(db, 'employees');
+      const snapshot = await getDocs(employeesRef);
+      const users: any[] = [];
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // Only add users that are not the current user
+        if (data.name !== user?.name) {
+          users.push({
+            id: doc.id,
+            name: data.name,
+            email: data.email,
+            department: data.department,
+            role: data.role,
+          });
+        }
+      });
+      
+      setAllUsers(users.sort((a, b) => a.name.localeCompare(b.name)));
+    } catch (err) {
+      console.error('Error loading users:', err);
+    }
+  };
 
   // Load messages when channel/DM changes
   useEffect(() => {
@@ -122,9 +151,52 @@ export default function Chat() {
         }
       });
       
+      // Sort by most recent first
+      userDMs.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
       setDMs(userDMs);
     } catch (err) {
       console.error('Error loading DMs:', err);
+    }
+  };
+
+  const startOrOpenDM = async (otherUser: any) => {
+    try {
+      const participants = [user?.name || 'Unknown', otherUser.name].sort();
+      
+      // Check if DM already exists
+      const dmsRef = collection(db, 'chat_dms');
+      const snapshot = await getDocs(dmsRef);
+      
+      let existingDMId: string | null = null;
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const dmParticipants = data.participants.sort();
+        if (JSON.stringify(dmParticipants) === JSON.stringify(participants)) {
+          existingDMId = doc.id;
+        }
+      });
+      
+      if (existingDMId) {
+        // Open existing DM
+        setSelectedDM(existingDMId);
+        setSelectedChannel(null);
+      } else {
+        // Create new DM
+        const newDMRef = await addDoc(dmsRef, {
+          participants,
+          lastMessage: '',
+          lastMessageTime: Date.now(),
+          createdAt: new Date(),
+        });
+        setSelectedDM(newDMRef.id);
+        setSelectedChannel(null);
+        // Reload DMs to show the new one
+        await loadDMs();
+      }
+      
+      setDmSearchQuery('');
+    } catch (err) {
+      console.error('Error starting DM:', err);
     }
   };
 
@@ -228,6 +300,14 @@ export default function Chat() {
           };
         }
         await addDoc(messagesRef, msgData);
+        
+        // Update DM thread with last message
+        const dmRef = doc(db, 'chat_dms', selectedDM);
+        await updateDoc(dmRef, {
+          lastMessage: messageContent,
+          lastMessageTime: Date.now(),
+        });
+        
         console.log('✅ Message sent successfully!');
       }
       
@@ -406,33 +486,87 @@ export default function Chat() {
           )}
 
           {activeTab === 'dms' && (
-            <div className="chat-list">
-              {dms.length === 0 ? (
-                <p style={{ padding: '1rem', color: '#999', fontSize: '0.85rem' }}>
-                  Ingen DMs ennå
-                </p>
-              ) : (
-                dms.map(dm => {
-                  const otherParticipant = dm.participants.find(p => p !== user?.name) || 'Unknown';
-                  return (
-                    <div
-                      key={dm.id}
-                      className={`chat-item ${selectedDM === dm.id ? 'active' : ''}`}
-                      onClick={() => {
-                        setSelectedDM(dm.id);
-                        setSelectedChannel(null);
-                      }}
-                    >
-                      <span className={`chat-name ${dm.unread > 0 ? 'unread' : ''}`}>
-                        💬 {otherParticipant}
-                      </span>
-                      {dm.unread > 0 && (
-                        <span className="chat-unread">{dm.unread}</span>
-                      )}
-                    </div>
-                  );
-                })
-              )}
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+              {/* Search field */}
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={dmSearchQuery}
+                onChange={(e) => setDmSearchQuery(e.target.value)}
+                style={{
+                  padding: '0.75rem',
+                  margin: '0.5rem',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontFamily: 'inherit',
+                  fontSize: '0.9rem',
+                  color: '#fff',
+                  background: '#2d3748',
+                }}
+              />
+              
+              {/* Search results or DM list */}
+              <div className="chat-list" style={{ flex: 1, overflow: 'auto' }}>
+                {dmSearchQuery.trim() ? (
+                  /* Show search results */
+                  <>
+                    {allUsers
+                      .filter(u => u.name.toLowerCase().includes(dmSearchQuery.toLowerCase()))
+                      .map(user => (
+                        <div
+                          key={user.id}
+                          className="chat-item"
+                          onClick={() => startOrOpenDM(user)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <span className="chat-name">👤 {user.name}</span>
+                          <span style={{ fontSize: '0.75rem', color: '#999' }}>
+                            {user.department}
+                          </span>
+                        </div>
+                      ))}
+                    {allUsers.filter(u => u.name.toLowerCase().includes(dmSearchQuery.toLowerCase())).length === 0 && (
+                      <p style={{ padding: '1rem', color: '#999', fontSize: '0.85rem' }}>
+                        No users found
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  /* Show active DMs */
+                  <>
+                    {dms.length === 0 ? (
+                      <p style={{ padding: '1rem', color: '#999', fontSize: '0.85rem' }}>
+                        No DMs yet. Search for a user to start chatting!
+                      </p>
+                    ) : (
+                      dms.map(dm => {
+                        const otherParticipant = dm.participants.find(p => p !== user?.name) || 'Unknown';
+                        return (
+                          <div
+                            key={dm.id}
+                            className={`chat-item ${selectedDM === dm.id ? 'active' : ''}`}
+                            onClick={() => {
+                              setSelectedDM(dm.id);
+                              setSelectedChannel(null);
+                            }}
+                            style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+                          >
+                            <span className={`chat-name ${dm.unread > 0 ? 'unread' : ''}`}>
+                              💬 {otherParticipant}
+                            </span>
+                            <span style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.25rem' }}>
+                              {dm.lastMessage ? dm.lastMessage.substring(0, 50) + (dm.lastMessage.length > 50 ? '...' : '') : 'No messages'}
+                            </span>
+                            {dm.unread > 0 && (
+                              <span className="chat-unread">{dm.unread}</span>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>
