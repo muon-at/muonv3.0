@@ -46,6 +46,9 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeMainTab, setActiveMainTab] = useState('allente');
   const [activeAllenteTab, setActiveAllenteTab] = useState('i-dag');
+  const [dashboardFromDate, setDashboardFromDate] = useState('');
+  const [dashboardToDate, setDashboardToDate] = useState('');
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
@@ -145,6 +148,73 @@ export default function AdminDashboard() {
       fetchEmployees();
     }
   }, [activeMainTab]);
+
+  // Load dashboard data when dates change or tab opens
+  useEffect(() => {
+    if (activeMainTab === 'allente' && activeAllenteTab === 'dashboard' && dashboardFromDate && dashboardToDate) {
+      loadDashboardData();
+    }
+  }, [dashboardFromDate, dashboardToDate]);
+
+  const loadDashboardData = async () => {
+    try {
+      // Fetch all contracts
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      const contractsSnap = await getDocs(contractsRef);
+      const contracts = contractsSnap.docs.map(doc => doc.data());
+
+      // Fetch all produkter to get CPO values
+      const produkterRef = collection(db, 'allente_produkter');
+      const produkterSnap = await getDocs(produkterRef);
+      const cpoMap: any = {};
+      produkterSnap.forEach(doc => {
+        const data = doc.data();
+        cpoMap[data.navn] = parseFloat(data.cpo) || 0;
+      });
+
+      // Filter contracts by date
+      const fromDate = new Date(dashboardFromDate);
+      const toDate = new Date(dashboardToDate);
+
+      const filtered = contracts.filter(c => {
+        if (!c.dato) return false;
+        const cDate = new Date(c.dato);
+        return cDate >= fromDate && cDate <= toDate;
+      });
+
+      // Calculate per department
+      const deptStats: any = {
+        KRS: { salg: 0, omsetning: 0 },
+        OSL: { salg: 0, omsetning: 0 },
+        Skien: { salg: 0, omsetning: 0 },
+      };
+
+      let totalSalg = 0;
+      let totalOmsetning = 0;
+
+      filtered.forEach(c => {
+        const avdeling = c.avdeling || 'Ukjent';
+        const cpo = cpoMap[c.produkt] || 0;
+
+        if (deptStats[avdeling]) {
+          deptStats[avdeling].salg += 1;
+          deptStats[avdeling].omsetning += cpo;
+        }
+
+        totalSalg += 1;
+        totalOmsetning += cpo;
+      });
+
+      setDashboardData({
+        totalSalg,
+        totalOmsetning,
+        avgPerSalg: totalSalg > 0 ? Math.round(totalOmsetning / totalSalg) : 0,
+        departments: deptStats,
+      });
+    } catch (err) {
+      console.error('Error loading dashboard data:', err);
+    }
+  };
 
   // Fetch progresjon data when PROGRESJON tab is opened
   useEffect(() => {
@@ -1800,8 +1870,112 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* DASHBOARD Tab */}
+            {activeAllenteTab === 'dashboard' && (
+              <div className="tab-content">
+                <div className="content-title">
+                  <h3>Salg & Omsetning Oversikt</h3>
+                  <p className="content-subtitle">Analyse av salg og omsetning per avdeling (CPO-basert)</p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Fra dato:</label>
+                    <input 
+                      type="date" 
+                      value={dashboardFromDate}
+                      onChange={(e) => setDashboardFromDate(e.target.value)}
+                      style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '4px', width: '150px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Til dato:</label>
+                    <input 
+                      type="date" 
+                      value={dashboardToDate}
+                      onChange={(e) => setDashboardToDate(e.target.value)}
+                      style={{ padding: '0.5rem', border: '1px solid #e2e8f0', borderRadius: '4px', width: '150px' }}
+                    />
+                  </div>
+                </div>
+
+                {dashboardData && (
+                  <>
+                    {/* KPI Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                      <div style={{ padding: '1.5rem', background: '#f0f0f0', borderRadius: '8px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>SALG</p>
+                        <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#667eea' }}>{dashboardData.totalSalg}</p>
+                        <p style={{ fontSize: '0.85rem', color: '#999' }}>i periode</p>
+                      </div>
+                      <div style={{ padding: '1.5rem', background: '#f0f0f0', borderRadius: '8px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>OMSETNING</p>
+                        <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#C86D4D' }}>kr {dashboardData.totalOmsetning.toLocaleString('no-NO')}</p>
+                        <p style={{ fontSize: '0.85rem', color: '#999' }}>CPO-basert</p>
+                      </div>
+                      <div style={{ padding: '1.5rem', background: '#f0f0f0', borderRadius: '8px', textAlign: 'center' }}>
+                        <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '0.5rem' }}>GJ.SNITT</p>
+                        <p style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#667eea' }}>kr {dashboardData.avgPerSalg.toLocaleString('no-NO')}</p>
+                        <p style={{ fontSize: '0.85rem', color: '#999' }}>per salg</p>
+                      </div>
+                    </div>
+
+                    {/* Department Cards */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                      {['KRS', 'OSL', 'Skien'].map((dept) => {
+                        const data = dashboardData.departments[dept];
+                        const pct = dashboardData.totalSalg > 0 ? ((data.salg / dashboardData.totalSalg) * 100).toFixed(1) : '0';
+                        return (
+                          <div key={dept} style={{ padding: '1.5rem', background: '#fffbf0', border: '2px solid #667eea', borderRadius: '8px' }}>
+                            <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '1rem' }}>{dept}</p>
+                            <p style={{ marginBottom: '0.5rem' }}>📊 Salg: <strong>{data.salg}</strong></p>
+                            <p style={{ marginBottom: '0.5rem' }}>💰 Omsetning: <strong>kr {data.omsetning.toLocaleString('no-NO')}</strong></p>
+                            <p style={{ color: '#999', fontSize: '0.85rem' }}>% av total: <strong>{pct}%</strong></p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Tabell */}
+                    <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '200px 100px 200px 100px', gap: '1rem', padding: '1rem', background: '#fffbf0', fontWeight: '600', borderBottom: '2px solid #e2e8f0' }}>
+                        <div>Avdeling</div>
+                        <div>Salg</div>
+                        <div>Omsetning</div>
+                        <div>% av total</div>
+                      </div>
+                      {['KRS', 'OSL', 'Skien'].map((dept) => {
+                        const data = dashboardData.departments[dept];
+                        const pct = dashboardData.totalSalg > 0 ? ((data.salg / dashboardData.totalSalg) * 100).toFixed(1) : '0';
+                        return (
+                          <div key={dept} style={{ display: 'grid', gridTemplateColumns: '200px 100px 200px 100px', gap: '1rem', padding: '1rem', borderBottom: '1px solid #e2e8f0' }}>
+                            <div>{dept}</div>
+                            <div>{data.salg}</div>
+                            <div>kr {data.omsetning.toLocaleString('no-NO')}</div>
+                            <div>{pct}%</div>
+                          </div>
+                        );
+                      })}
+                      <div style={{ display: 'grid', gridTemplateColumns: '200px 100px 200px 100px', gap: '1rem', padding: '1rem', background: '#f9f9f9', fontWeight: '600', borderTop: '2px solid #667eea' }}>
+                        <div>TOTALT</div>
+                        <div>{dashboardData.totalSalg}</div>
+                        <div>kr {dashboardData.totalOmsetning.toLocaleString('no-NO')}</div>
+                        <div>100%</div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {!dashboardData && (
+                  <p style={{ color: '#999', textAlign: 'center', padding: '2rem' }}>
+                    Velg fra og til dato for å se omsetningsdata
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Other tabs placeholder */}
-            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && activeAllenteTab !== 'produkt' && activeAllenteTab !== 'badges' && activeAllenteTab !== 'progresjon' && (
+            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && activeAllenteTab !== 'produkt' && activeAllenteTab !== 'badges' && activeAllenteTab !== 'progresjon' && activeAllenteTab !== 'dashboard' && activeAllenteTab !== 'mal' && activeAllenteTab !== 'stats' && activeAllenteTab !== 'stats' && (
               <div className="tab-content">
                 <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
                   {allenteTabs.find(t => t.id === activeAllenteTab)?.label} tab content coming soon...
