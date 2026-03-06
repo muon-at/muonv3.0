@@ -126,6 +126,8 @@ export default function Teamleder() {
           };
         });
         setDepartmentData(deptMap);
+        console.log('Department Data:', deptMap);
+        console.log('Target Data:', targets);
 
         // All sellers - THIS MONTH ONLY
         const monthContracts = contracts.filter(c => {
@@ -309,6 +311,31 @@ export default function Teamleder() {
       {/* Content */}
       {activeTab === 'status' && (
       <div className="teamleder-content">
+        <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ margin: '0 0 0.25rem 0', color: '#333' }}>📊 Status Denne Måneden</h2>
+            <p style={{ margin: 0, color: '#666', fontSize: '0.9rem' }}>Live data fra kontrakter</p>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '0.95rem',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.background = '#764ba2')}
+            onMouseOut={(e) => (e.currentTarget.style.background = '#667eea')}
+          >
+            🔄 Oppdater
+          </button>
+        </div>
+
         {/* KPI Cards */}
         <div className="kpi-section">
           {kpis.map((kpi: any, idx: number) => (
