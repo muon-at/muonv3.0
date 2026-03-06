@@ -245,18 +245,21 @@ export default function Chat() {
     }
     
     try {
-      // Using Giphy API with working key
+      console.log('🔍 Searching GIFs for:', query);
       const response = await fetch(
         `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=8&api_key=MkcEdmOnWYPUmJCPVlUvqJZIgkZv58YZ`
       );
       const data = await response.json();
-      if (data.data) {
+      console.log('📦 GIF API Response:', data);
+      if (data.data && data.data.length > 0) {
+        console.log('✅ Found', data.data.length, 'GIFs');
         setGifs(data.data);
       } else {
+        console.log('❌ No GIFs found');
         setGifs([]);
       }
     } catch (err) {
-      console.error('Error searching GIFs:', err);
+      console.error('❌ Error searching GIFs:', err);
       setGifs([]);
     }
   };
