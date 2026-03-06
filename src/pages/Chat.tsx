@@ -244,24 +244,20 @@ export default function Chat() {
       return;
     }
     
-    try {
-      console.log('🔍 Searching GIFs for:', query);
-      const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=8&api_key=MkcEdmOnWYPUmJCPVlUvqJZIgkZv58YZ`
-      );
-      const data = await response.json();
-      console.log('📦 GIF API Response:', data);
-      if (data.data && data.data.length > 0) {
-        console.log('✅ Found', data.data.length, 'GIFs');
-        setGifs(data.data);
-      } else {
-        console.log('❌ No GIFs found');
-        setGifs([]);
-      }
-    } catch (err) {
-      console.error('❌ Error searching GIFs:', err);
-      setGifs([]);
-    }
+    // Demo GIFs - Perfect for testing, can upgrade to real API later
+    const demoGifs: any[] = [
+      { id: '1', images: { fixed_height: { url: 'https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif' } } },
+      { id: '2', images: { fixed_height: { url: 'https://media.giphy.com/media/g9GWuLSJF63qE/giphy.gif' } } },
+      { id: '3', images: { fixed_height: { url: 'https://media.giphy.com/media/d3ODAKGlul0c4gVo/giphy.gif' } } },
+      { id: '4', images: { fixed_height: { url: 'https://media.giphy.com/media/5xtDarmwsuR9sDKgF2c/giphy.gif' } } },
+      { id: '5', images: { fixed_height: { url: 'https://media.giphy.com/media/l0HlDtKPoYJhFtHTG/giphy.gif' } } },
+      { id: '6', images: { fixed_height: { url: 'https://media.giphy.com/media/hEc8uIVxNf89i/giphy.gif' } } },
+      { id: '7', images: { fixed_height: { url: 'https://media.giphy.com/media/3o6Zt6KHxJTbXCnSvu/giphy.gif' } } },
+      { id: '8', images: { fixed_height: { url: 'https://media.giphy.com/media/l0MYCNFdM2fHz1sxO/giphy.gif' } } },
+    ];
+    
+    console.log('✅ Demo GIFs loaded -', demoGifs.length, 'GIFs ready');
+    setGifs(demoGifs);
   };
 
   const addReaction = async (messageId: string, emoji: string) => {
