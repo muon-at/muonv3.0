@@ -82,6 +82,8 @@ export default function AdminDashboard() {
   const [loadingBadges, setLoadingBadges] = useState(false);
 
   const defaultBadges = ['👑', '🎓', '🏆', '⭐', '💎', '🔥', '🚀', '👑', '🎯', '💪', '☀️', '⚡', '🎭', '🏅', '🎖️'];
+  const [progresjonData, setProgresjonData] = useState<any[]>([]);
+  const [loadingProgresjon, setLoadingProgresjon] = useState(false);
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
     selger: '',
     avdeling: '',
@@ -105,6 +107,100 @@ export default function AdminDashboard() {
       fetchEmployees();
     }
   }, [activeMainTab]);
+
+  // Fetch progresjon data when PROGRESJON tab is opened
+  useEffect(() => {
+    if (activeMainTab === 'allente' && activeAllenteTab === 'progresjon') {
+      setLoadingProgresjon(true);
+      const loadProgresjonData = async () => {
+        try {
+          const salgRef = collection(db, 'allente_kontraktsarkiv');
+          const snapshot = await getDocs(salgRef);
+          
+          // Calculate date ranges
+          const today = new Date();
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          
+          // Parse contracts and group by seller
+          const sellerStats: { [key: string]: { month: number; week: number; total: number } } = {};
+          const sellerWeeksByYear: { [key: string]: { [key: string]: number } } = {};
+          const sellerMonthsByYear: { [key: string]: { [key: string]: number } } = {};
+          
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            const selger = data.selger || 'Ukjent';
+            const orderedateStr = data.orderdato || '';
+            
+            // Initialize seller if not exists
+            if (!sellerStats[selger]) {
+              sellerStats[selger] = { month: 0, week: 0, total: 0 };
+              sellerWeeksByYear[selger] = {};
+              sellerMonthsByYear[selger] = {};
+            }
+            
+            sellerStats[selger].total++;
+            
+            // Parse date (DD/MM/YYYY format)
+            if (orderedateStr) {
+              const parts = orderedateStr.split('/');
+              if (parts.length === 3) {
+                const orderDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+                
+                // Count this month
+                if (orderDate >= startOfMonth && orderDate <= today) {
+                  sellerStats[selger].month++;
+                }
+                
+                // Count this week
+                if (orderDate >= startOfWeek && orderDate <= today) {
+                  sellerStats[selger].week++;
+                }
+                
+                // Track weeks for best week calculation
+                const weekNum = Math.floor((orderDate.getTime() - new Date(orderDate.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000));
+                const weekKey = `${orderDate.getFullYear()}-W${weekNum}`;
+                sellerWeeksByYear[selger][weekKey] = (sellerWeeksByYear[selger][weekKey] || 0) + 1;
+                
+                // Track months for best month calculation
+                const monthKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+                sellerMonthsByYear[selger][monthKey] = (sellerMonthsByYear[selger][monthKey] || 0) + 1;
+              }
+            }
+          });
+          
+          // Find best week and month for each seller
+          const progresjonArray = Object.entries(sellerStats).map(([selger, stats]) => {
+            const bestWeekEntry = Object.entries(sellerWeeksByYear[selger] || {})
+              .sort((a, b) => b[1] - a[1])[0];
+            const bestWeek = bestWeekEntry ? bestWeekEntry[1] : 0;
+            
+            const bestMonthEntry = Object.entries(sellerMonthsByYear[selger] || {})
+              .sort((a, b) => b[1] - a[1])[0];
+            const bestMonth = bestMonthEntry ? bestMonthEntry[1] : 0;
+            
+            return {
+              selger,
+              month: stats.month,
+              week: stats.week,
+              total: stats.total,
+              bestWeek,
+              bestMonth,
+            };
+          });
+          
+          setProgresjonData(progresjonArray.sort((a, b) => b.total - a.total));
+        } catch (err) {
+          console.error('Error fetching progresjon data:', err);
+        } finally {
+          setLoadingProgresjon(false);
+        }
+      };
+      
+      loadProgresjonData();
+    }
+  }, [activeMainTab, activeAllenteTab]);
 
   // Fetch badges data when BADGES tab is opened
   useEffect(() => {
@@ -484,6 +580,7 @@ export default function AdminDashboard() {
     { id: 'angring', label: 'ANGRING' },
     { id: 'mal', label: 'MÅL' },
     { id: 'dashboard', label: 'DASHBOARD' },
+    { id: 'progresjon', label: 'PROGRESJON' },
     { id: 'produkt', label: 'PRODUKT' },
     { id: 'badges', label: 'BADGES' },
   ];
@@ -1075,6 +1172,57 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {/* PROGRESJON Tab */}
+            {activeAllenteTab === 'progresjon' && (
+              <div className="tab-content">
+                <div className="content-title">
+                  <h3>Progresjon</h3>
+                  <p className="content-subtitle">Salgs oversikt per selger</p>
+                </div>
+
+                {loadingProgresjon ? (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Laster progresjon data...
+                  </p>
+                ) : progresjonData.length > 0 ? (
+                  <div className="progresjon-table">
+                    <div className="table-header">
+                      <div className="col-selger">Ekstern Navn</div>
+                      <div className="col-week">Uke</div>
+                      <div className="col-month">Måned</div>
+                      <div className="col-total">Totalt</div>
+                      <div className="col-best-week">Best Uke</div>
+                      <div className="col-best-month">Best Måned</div>
+                    </div>
+                    {progresjonData.map((row, idx) => (
+                      <div key={idx} className="table-row">
+                        <div className="col-selger">{row.selger}</div>
+                        <div className="col-week" style={{ textAlign: 'center', fontWeight: '600', color: '#667eea' }}>
+                          {row.week}
+                        </div>
+                        <div className="col-month" style={{ textAlign: 'center', fontWeight: '600', color: '#667eea' }}>
+                          {row.month}
+                        </div>
+                        <div className="col-total" style={{ textAlign: 'center', fontWeight: '600', color: '#764ba2' }}>
+                          {row.total}
+                        </div>
+                        <div className="col-best-week" style={{ textAlign: 'center', fontWeight: '600', color: '#10b981' }}>
+                          {row.bestWeek}
+                        </div>
+                        <div className="col-best-month" style={{ textAlign: 'center', fontWeight: '600', color: '#10b981' }}>
+                          {row.bestMonth}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Ingen data tilgjengelig.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* BADGES Tab */}
             {activeAllenteTab === 'badges' && (
               <div className="tab-content">
@@ -1260,7 +1408,7 @@ export default function AdminDashboard() {
             )}
 
             {/* Other tabs placeholder */}
-            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && activeAllenteTab !== 'produkt' && activeAllenteTab !== 'badges' && (
+            {activeAllenteTab !== 'i-dag' && activeAllenteTab !== 'salg' && activeAllenteTab !== 'angring' && activeAllenteTab !== 'produkt' && activeAllenteTab !== 'badges' && activeAllenteTab !== 'progresjon' && (
               <div className="tab-content">
                 <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
                   {allenteTabs.find(t => t.id === activeAllenteTab)?.label} tab content coming soon...
