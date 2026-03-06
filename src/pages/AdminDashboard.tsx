@@ -107,6 +107,7 @@ export default function AdminDashboard() {
 
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [loadingProgresjon, setLoadingProgresjon] = useState(false);
+  const [emojiCounts, setEmojiCounts] = useState<any>({}); // {selger: {🔔: count, 💎: count}}
   const [badgeWinner, setBadgeWinner] = useState<string | null>(null);
   const [mvpMånedWinners, setMvpMånedWinners] = useState<Set<string>>(new Set());
   const [mvpDagWinners, setMvpDagWinners] = useState<Set<string>>(new Set());
@@ -618,6 +619,19 @@ export default function AdminDashboard() {
           } catch (err) {
             console.error('Error calculating threshold badges:', err);
           }
+
+          // Load emoji counts from chat
+          try {
+            const emojiCountsRef = doc(db, 'emoji_counts', 'chat_reactions');
+            const emojiSnap = await getDoc(emojiCountsRef);
+            if (emojiSnap.exists()) {
+              setEmojiCounts(emojiSnap.data());
+              console.log('📊 Emoji counts loaded:', emojiSnap.data());
+            }
+          } catch (err) {
+            console.error('Error loading emoji counts:', err);
+          }
+
         } catch (err) {
           console.error('Error fetching progresjon data:', err);
         } finally {
@@ -1680,7 +1694,7 @@ export default function AdminDashboard() {
                         <div className="col-best-month" style={{ textAlign: 'center', fontWeight: '600', color: '#10b981' }}>
                           {row.bestMonth}
                         </div>
-                        <div className="col-badges" style={{ textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.25rem' }}>
+                        <div className="col-badges" style={{ textAlign: 'center', fontSize: '1.2rem', letterSpacing: '0.2rem', display: 'flex', flexWrap: 'wrap', gap: '0.3rem', justifyContent: 'center', alignItems: 'center' }}>
                           {badgeWinner === row.selger ? '🏆' : ''}
                           {mvpMånedWinners.has(row.selger) ? '👑' : ''}
                           {mvpDagWinners.has(row.selger) ? '⭐' : ''}
@@ -1689,6 +1703,18 @@ export default function AdminDashboard() {
                           {thresholdBadges.SALG_10.has(row.selger) ? '🎯' : ''}
                           {thresholdBadges.SALG_15.has(row.selger) ? '🔥' : ''}
                           {thresholdBadges.SALG_20.has(row.selger) ? '💎' : ''}
+                          
+                          {/* Chat emoji counts */}
+                          {emojiCounts[row.selger]?.['🔔'] && (
+                            <span title={`🔔 talt ${emojiCounts[row.selger]['🔔']} ganger`}>
+                              🔔{emojiCounts[row.selger]['🔔']}
+                            </span>
+                          )}
+                          {emojiCounts[row.selger]?.['💎'] && (
+                            <span title={`💎 talt ${emojiCounts[row.selger]['💎']} ganger`}>
+                              💎{emojiCounts[row.selger]['💎']}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))}
