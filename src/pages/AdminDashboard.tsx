@@ -1743,7 +1743,8 @@ export default function AdminDashboard() {
                                 padding: '0.5rem',
                                 border: '1px solid #e2e8f0',
                                 borderRadius: '4px',
-                                color: '#333',
+                                color: '#fff',
+                                backgroundColor: '#2d3748',
                               }}
                             />
                           </div>
@@ -1762,7 +1763,8 @@ export default function AdminDashboard() {
                                 padding: '0.5rem',
                                 border: '1px solid #e2e8f0',
                                 borderRadius: '4px',
-                                color: '#333',
+                                color: '#fff',
+                                backgroundColor: '#2d3748',
                               }}
                             />
                           </div>
