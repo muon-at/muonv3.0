@@ -90,15 +90,15 @@ export default function AdminDashboard() {
   const [thresholdBadges, setThresholdBadges] = useState<{ [key: string]: Set<string> }>({
     FØRSTE_SALGET: new Set(),
     SALG_5: new Set(),
+    SALG_10: new Set(),
     SALG_15: new Set(),
-    SALG_20: new Set(),
   });
 
   const thresholdBadgesList = [
     { badge: 'FØRSTE_SALGET', emoji: '🎓', type: 'total', threshold: 1, label: 'Første salget' },
     { badge: 'SALG_5', emoji: '🚀', type: 'day', threshold: 5, label: '5 Salg på en dag' },
-    { badge: 'SALG_15', emoji: '🔥', type: 'day', threshold: 15, label: '15 Salg på en dag' },
-    { badge: 'SALG_20', emoji: '💎', type: 'day', threshold: 20, label: '20 Salg på en dag' },
+    { badge: 'SALG_10', emoji: '🔥', type: 'day', threshold: 10, label: '10 Salg på en dag' },
+    { badge: 'SALG_15', emoji: '💎', type: 'day', threshold: 15, label: '15 Salg på en dag' },
   ];
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
     selger: '',
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
           try {
             // Build best day per seller
             const dailyStats: { [key: string]: { [key: string]: number } } = {};
-            const bestDayPerSeller: { [key: string]: number } = {};
+            const bestDayPerSeller: { [key: string]: { sales: number; date: string } } = {};
             
             contracts.forEach((data) => {
               const selger = data.selger || 'Ukjent';
@@ -398,9 +398,19 @@ export default function AdminDashboard() {
             for (const dayKey in dailyStats) {
               for (const selger in dailyStats[dayKey]) {
                 const daySales = dailyStats[dayKey][selger];
-                bestDayPerSeller[selger] = Math.max(bestDayPerSeller[selger] || 0, daySales);
+                if (!bestDayPerSeller[selger]) {
+                  bestDayPerSeller[selger] = { sales: daySales, date: dayKey };
+                } else if (daySales > bestDayPerSeller[selger].sales) {
+                  bestDayPerSeller[selger] = { sales: daySales, date: dayKey };
+                }
               }
             }
+            
+            // Debug: Log best day for each seller
+            console.log('📊 BEST DAY PER SELLER:');
+            Object.entries(bestDayPerSeller).forEach(([selger, data]: [string, any]) => {
+              console.log(`  ${selger}: ${data.sales} salg på ${data.date}`);
+            });
             
             const mvpRef = collection(db, 'allente_badge_earners');
             const allBadges = await getDocs(mvpRef);
@@ -408,8 +418,8 @@ export default function AdminDashboard() {
             const thresholdEarners: { [key: string]: Set<string> } = {
               FØRSTE_SALGET: new Set(),
               SALG_5: new Set(),
+              SALG_10: new Set(),
               SALG_15: new Set(),
-              SALG_20: new Set(),
             };
             
             // Load existing threshold badge winners
@@ -424,7 +434,7 @@ export default function AdminDashboard() {
             for (const row of progresjonArray) {
               const selger = row.selger;
               const totalSales = row.total;
-              const bestDay = bestDayPerSeller[selger] || 0;
+              const bestDay = bestDayPerSeller[selger]?.sales || 0;
               
               // Check each threshold
               for (const badgeConfig of thresholdBadgesList) {
@@ -445,6 +455,7 @@ export default function AdminDashboard() {
                     threshold: badgeConfig.threshold,
                     type: badgeConfig.type,
                     value: badgeConfig.type === 'total' ? totalSales : bestDay,
+                    bestDate: badgeConfig.type === 'day' ? bestDayPerSeller[selger]?.date : null,
                     awardedAt: new Date().toISOString(),
                   });
                   thresholdEarners[badgeConfig.badge].add(selger);
@@ -1487,8 +1498,8 @@ export default function AdminDashboard() {
                           {mvpDagWinners.has(row.selger) ? '⭐' : ''}
                           {thresholdBadges.FØRSTE_SALGET.has(row.selger) ? '🎓' : ''}
                           {thresholdBadges.SALG_5.has(row.selger) ? '🚀' : ''}
-                          {thresholdBadges.SALG_15.has(row.selger) ? '🔥' : ''}
-                          {thresholdBadges.SALG_20.has(row.selger) ? '💎' : ''}
+                          {thresholdBadges.SALG_10.has(row.selger) ? '🔥' : ''}
+                          {thresholdBadges.SALG_15.has(row.selger) ? '💎' : ''}
                         </div>
                       </div>
                     ))}
