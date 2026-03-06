@@ -1604,6 +1604,7 @@ export default function AdminDashboard() {
                                   border: '1px solid #e2e8f0',
                                   borderRadius: '4px',
                                   background: idx < 8 ? '#fff' : '#f9f9f9',
+                                  color: '#333',
                                 }}
                                 disabled={idx >= 8}
                               />
@@ -1624,6 +1625,7 @@ export default function AdminDashboard() {
                                   border: '1px solid #e2e8f0',
                                   borderRadius: '4px',
                                   background: idx < 8 ? '#fff' : '#f9f9f9',
+                                  color: '#333',
                                 }}
                                 disabled={idx >= 8}
                               />
@@ -1644,6 +1646,7 @@ export default function AdminDashboard() {
                                   border: '1px solid #e2e8f0',
                                   borderRadius: '4px',
                                   background: idx < 8 ? '#fff' : '#f9f9f9',
+                                  color: '#333',
                                 }}
                                 disabled={idx >= 8}
                               />
