@@ -62,6 +62,9 @@ export default function MinSide() {
         </div>
 
         <div className="header-buttons">
+          <button className="nav-button-minside" onClick={() => navigate('/chat')}>
+            💬 Chat
+          </button>
           {canAccessTeamleder && (
             <button className="nav-button-minside" onClick={() => navigate('/teamleder')}>
               👥 Teamleder →

@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Login from './pages/Login';
 import MinSide from './pages/MinSide';
 import MinSideTest from './pages/MinSideTest';
+import Chat from './pages/Chat';
 import Teamleder from './pages/Teamleder';
 import Admin from './pages/Admin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -52,6 +53,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="owner">
                 <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/chat" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <Chat />
               </ProtectedRoute>
             } 
           />
