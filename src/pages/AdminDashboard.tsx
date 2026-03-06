@@ -566,14 +566,14 @@ export default function AdminDashboard() {
           contracts.forEach((doc) => {
             const data = doc.data();
             const produkt = data.produkt || '';
-            // Plattform field exists and is named "plattform"
-            const plattform = data.plattform || 'Ukjent';
-            const key = `${produkt}|${plattform}`;
+            // Hent "Choosen Platform" fra arkivet som separat felt
+            const chosenPlattform = data['Choosen Platform'] || 'Ukjent';
+            const key = `${produkt}|${chosenPlattform}`;
             
             if (produkt.trim() && !produkterMap.has(key)) {
               produkterMap.set(key, {
                 navn: produkt,
-                plattform: plattform,
+                plattform: chosenPlattform,
                 cpo: '',
                 provisjon: '',
               });
