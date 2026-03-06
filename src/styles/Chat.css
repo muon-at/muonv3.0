@@ -47,15 +47,15 @@
   background: transparent;
   cursor: pointer;
   font-weight: 600;
-  color: #999;
+  color: white;
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
 }
 
 .chat-tab.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
-  background: #f9f9f9;
+  color: white;
+  border-bottom-color: white;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .chat-list {
