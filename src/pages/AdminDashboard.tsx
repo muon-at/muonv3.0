@@ -175,15 +175,28 @@ export default function AdminDashboard() {
       // Filter contracts by date
       const fromDate = new Date(dashboardFromDate);
       const toDate = new Date(dashboardToDate);
+      
+      // Add end-of-day to toDate
+      toDate.setHours(23, 59, 59, 999);
+
+      console.log('📊 DASHBOARD DEBUG:');
+      console.log('  Input fra dato:', dashboardFromDate, '→ Parsed:', fromDate);
+      console.log('  Input til dato:', dashboardToDate, '→ Parsed:', toDate);
+      console.log('  Total kontrakter:', contracts.length);
+
+      // Log some sample contracts to see date formats
+      console.log('  Sample kontrakter (første 3):');
+      contracts.slice(0, 3).forEach((c, i) => {
+        console.log(`    [${i}] dato="${c.dato}" → parsed=${new Date(c.dato)}`);
+      });
 
       const filtered = contracts.filter(c => {
         if (!c.dato) return false;
         const cDate = new Date(c.dato);
-        return cDate >= fromDate && cDate <= toDate;
+        const match = cDate >= fromDate && cDate <= toDate;
+        return match;
       });
 
-      console.log('📊 DASHBOARD DEBUG:');
-      console.log('  Total kontrakter:', contracts.length);
       console.log('  Filtrerte kontrakter (etter dato):', filtered.length);
 
       // Calculate per department
