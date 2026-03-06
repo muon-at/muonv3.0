@@ -139,7 +139,7 @@ export default function AdminDashboard() {
           
           contracts.forEach((data, idx) => {
             const selger = data.selger || 'Ukjent';
-            const orderedateStr = data.orderdato || '';
+            const orderedateStr = data.dato || data.orderdato || '';
             
             // Debug first 2 contracts
             if (idx < 2) {
