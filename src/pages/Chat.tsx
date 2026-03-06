@@ -266,6 +266,10 @@ export default function Chat() {
     console.log('📤 Send clicked! Message:', messageContent, 'Channel:', selectedChannel);
     if (!messageContent.trim()) return;
     
+    // Calculate deleteAt timestamp (90 days from now)
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    const deleteAtDate = new Date(Date.now() + ninetyDaysMs);
+    
     try {
       if (selectedChannel) {
         console.log('📝 Sending to channel:', selectedChannel);
@@ -274,6 +278,7 @@ export default function Chat() {
           sender: user?.name || 'Unknown',
           content: messageContent,
           timestamp: Date.now(),
+          deleteAt: deleteAtDate, // Auto-delete after 90 days
         };
         if (replyingTo) {
           msgData.replyTo = {
@@ -283,7 +288,7 @@ export default function Chat() {
           };
         }
         await addDoc(messagesRef, msgData);
-        console.log('✅ Message sent successfully!');
+        console.log('✅ Message sent successfully! Will auto-delete on:', deleteAtDate.toLocaleDateString());
       } else if (selectedDM) {
         console.log('📝 Sending to DM:', selectedDM);
         const messagesRef = collection(db, 'chat_dms', selectedDM, 'messages');
@@ -291,6 +296,7 @@ export default function Chat() {
           sender: user?.name || 'Unknown',
           content: messageContent,
           timestamp: Date.now(),
+          deleteAt: deleteAtDate, // Auto-delete after 90 days
         };
         if (replyingTo) {
           msgData.replyTo = {
@@ -308,7 +314,7 @@ export default function Chat() {
           lastMessageTime: Date.now(),
         });
         
-        console.log('✅ Message sent successfully!');
+        console.log('✅ Message sent successfully! Will auto-delete on:', deleteAtDate.toLocaleDateString());
       }
       
       setNewMessage('');
@@ -381,6 +387,10 @@ export default function Chat() {
   };
 
   const insertGifAsAttachment = async (gifUrl: string) => {
+    // Calculate deleteAt timestamp (90 days from now)
+    const ninetyDaysMs = 90 * 24 * 60 * 60 * 1000;
+    const deleteAtDate = new Date(Date.now() + ninetyDaysMs);
+    
     try {
       if (selectedChannel) {
         const messagesRef = collection(db, 'chat_channels', selectedChannel, 'messages');
@@ -388,6 +398,7 @@ export default function Chat() {
           sender: user?.name || 'Unknown',
           content: '🎬 Shared a GIF',
           timestamp: Date.now(),
+          deleteAt: deleteAtDate, // Auto-delete after 90 days
           attachments: [
             {
               type: 'gif',
@@ -401,6 +412,7 @@ export default function Chat() {
           sender: user?.name || 'Unknown',
           content: '🎬 Shared a GIF',
           timestamp: Date.now(),
+          deleteAt: deleteAtDate, // Auto-delete after 90 days
           attachments: [
             {
               type: 'gif',
