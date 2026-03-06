@@ -443,9 +443,7 @@ export default function AdminDashboard() {
     setUploadModal({ isOpen: true, fileType });
   };
 
-  const handleFileUpload = async (file: File, fileType: string) => {
-    console.log(`📤 Upload completed for ${fileType} file:`, file.name);
-    
+  const handleFileUpload = async () => {
     // Note: SALG data will auto-refresh when useEffect triggers on tab change
     // No need to manually fetch here
   };
@@ -640,7 +638,6 @@ export default function AdminDashboard() {
                   key={tab.id}
                   className={`allente-tab ${activeAllenteTab === tab.id ? 'active' : ''}`}
                   onClick={() => {
-                    console.log('🔘 Clicked tab:', tab.id);
                     setActiveAllenteTab(tab.id);
                   }}
                 >

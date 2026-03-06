@@ -43,12 +43,10 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
     try {
       // Read file as text
       const fileText = await selectedFile.text();
-      console.log('📄 File text length:', fileText.length);
 
       if (fileType === 'salg') {
         // Parse CSV
         const records = parseCSV(fileText);
-        console.log('📊 Parsed kontrakter:', records.length);
 
         if (records.length === 0) {
           setError('Ingen gyldige kontrakter funnet i filen');
@@ -68,15 +66,10 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
           }
         });
 
-        console.log('📋 Existing Ids in allente_kontraktsarkiv:', existingIds.size);
-
         // Filter new records (deduplicate by Id)
         const newRecords = records.filter(
           (record) => !existingIds.has(record.id)
         );
-
-        console.log('✨ New records to insert:', newRecords.length);
-        console.log('🔄 Duplicates (already exist):', records.length - newRecords.length);
 
         if (newRecords.length === 0) {
           setError(`Alle ${records.length} kontrakter eksisterer allerede`);
@@ -107,7 +100,6 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
           }
         }
 
-        console.log('🎉 Inserted records:', insertedCount);
         setSuccess(true);
         
         // Show success message with counts
@@ -125,7 +117,6 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
       } else if (fileType === 'angring') {
         // Parse Angringer CSV
         const records = parseAngringerCSV(fileText);
-        console.log('↩️ Parsed angringer:', records.length);
 
         if (records.length === 0) {
           setError('Ingen gyldige angringer funnet i filen');
@@ -145,15 +136,10 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
           }
         });
 
-        console.log('📋 Existing kundenummers in allente_angringer:', existingKundenummers.size);
-
         // Filter new records (deduplicate by kundenummer)
         const newRecords = records.filter(
           (record) => !existingKundenummers.has(record.kundenummer)
         );
-
-        console.log('✨ New angringer to insert:', newRecords.length);
-        console.log('🔄 Duplicates (already exist):', records.length - newRecords.length);
 
         if (newRecords.length === 0) {
           setError(`Alle ${records.length} angringer eksisterer allerede`);
@@ -182,7 +168,6 @@ export default function FileUploadModal({ isOpen, title, fileType, onClose, onUp
           }
         }
 
-        console.log('🎉 Inserted angringer:', insertedCount);
         setSuccess(true);
         
         // Show success message with counts

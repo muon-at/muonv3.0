@@ -23,13 +23,9 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
     headers = headerLine.split(',').map(h => h.trim());
   }
   
-  console.log('📋 CSV Headers found:', headers);
-  
   const getColumnIndex = (columnName: string): number => {
     const lowerName = columnName.toLowerCase();
-    const index = headers.findIndex(h => h.toLowerCase().includes(lowerName));
-    console.log(`  📌 Column "${columnName}" found at index ${index}`);
-    return index;
+    return headers.findIndex(h => h.toLowerCase().includes(lowerName));
   };
 
   // Find all needed column indices
@@ -64,11 +60,6 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
     if (values.length < 3) {
       values = line.split(',').map(v => v.trim());
     }
-    
-    if (i === 1) {
-      console.log('📊 Sample row 1 values:', values);
-      console.log('  Mapping: TempID=[' + values[tempIdIndex] + '], Product=[' + values[productIndex] + '], Person=[' + values[salespersonIndex] + ']');
-    }
 
     // Get values from correct columns
     const kundenummer = values[tempIdIndex] || '';
@@ -85,16 +76,6 @@ export function parseAngringerCSV(csvContent: string): AngringerRecord[] {
     const salesDate = parseDate(salesdateStr);
     const regretDate = parseDate(regretdateStr);
     const period = calculateDays(salesDate, regretDate);
-    
-    if (i === 1) {
-      console.log('📅 Date calculation sample:', {
-        original_sales: salesdateStr,
-        parsed_sales: salesDate,
-        original_regret: regretdateStr,
-        parsed_regret: regretDate,
-        period_days: period
-      });
-    }
 
     records.push({
       kundenummer,
@@ -185,7 +166,6 @@ function calculateDays(salesDateStr: string, regretDateStr: string): number {
   
   // Validate dates before calculating
   if (!isValidDate(salesDateStr) || !isValidDate(regretDateStr)) {
-    console.warn('⚠️ Invalid date format:', salesDateStr, regretDateStr);
     return 0;
   }
 
@@ -206,7 +186,6 @@ function calculateDays(salesDateStr: string, regretDateStr: string): number {
     
     return diffDays;
   } catch (err) {
-    console.error('Error calculating days:', salesDateStr, regretDateStr, err);
     return 0;
   }
 }
