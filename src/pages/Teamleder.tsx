@@ -75,16 +75,30 @@ export default function Teamleder() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Get all employees (for department lookup)
+        const employeesRef = collection(db, 'employees');
+        const employeesSnap = await getDocs(employeesRef);
+        const employeeMap: any = {};
+        employeesSnap.forEach(doc => {
+          const emp = doc.data();
+          if (emp.externalName) {
+            employeeMap[emp.externalName] = emp.department || 'Ukjent';
+          }
+        });
+        console.log('👥 Employee department map:', employeeMap);
+
         // Get all contracts
         const contractsRef = collection(db, 'allente_kontraktsarkiv');
         const contractsSnap = await getDocs(contractsRef);
-        const contracts = contractsSnap.docs.map(doc => doc.data());
+        let contracts = contractsSnap.docs.map(doc => doc.data());
         
-        // DEBUG: Log first contract to see structure
-        if (contracts.length > 0) {
-          console.log('🔍 First contract structure:', contracts[0]);
-          console.log('🔍 Sample avdeling values:', contracts.slice(0, 5).map(c => c.avdeling));
-        }
+        // Enrich contracts with department info from employees
+        contracts = contracts.map(c => ({
+          ...c,
+          avdeling: employeeMap[c.selger] || c.avdeling || 'Annet'
+        }));
+        
+        console.log('📋 Enriched contracts with departments (first 3):', contracts.slice(0, 3));
 
         // Get targets
         const targetsRef = collection(db, 'allente_targets');
@@ -136,17 +150,17 @@ export default function Teamleder() {
           totalContracts: contracts.length
         });
 
-        // Debug: count contracts with each avdeling value
+        // Count contracts per department
         const avdelingCounts: any = {};
         contracts.forEach(c => {
           const av = c.avdeling || 'MISSING';
           avdelingCounts[av] = (avdelingCounts[av] || 0) + 1;
         });
-        console.log('📋 Avdeling distribution:', avdelingCounts);
+        console.log('📋 Avdeling distribution after enrichment:', avdelingCounts);
 
         ['KRS', 'OSL', 'Skien'].forEach(dept => {
           const deptContracts = contracts.filter(c => c.avdeling === dept);
-          console.log(`📊 ${dept} total contracts:`, deptContracts.length, 'looking for:', dept);
+          console.log(`📊 ${dept} total contracts:`, deptContracts.length);
           
           const deptToday = deptContracts.filter(c => {
             const cDate = parseDate(c.dato);
@@ -188,12 +202,13 @@ export default function Teamleder() {
         const sellerMap: any = {};
         monthContracts.forEach(c => {
           const sellerKey = c.selger || 'Unknown';
-          const dept = c.avdeling || 'Ukjent';
+          const dept = employeeMap[c.selger] || c.avdeling || 'Annet';
           if (!sellerMap[sellerKey]) {
             sellerMap[sellerKey] = { count: 0, department: dept };
           }
           sellerMap[sellerKey].count += 1;
         });
+        console.log('📈 Sellers this month:', sellerMap);
 
         const sellers = Object.entries(sellerMap)
           .map(([name, data]: any) => ({ name, count: data.count, department: data.department }))
