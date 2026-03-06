@@ -182,18 +182,29 @@ export default function AdminDashboard() {
         return cDate >= fromDate && cDate <= toDate;
       });
 
+      console.log('📊 DASHBOARD DEBUG:');
+      console.log('  Total kontrakter:', contracts.length);
+      console.log('  Filtrerte kontrakter (etter dato):', filtered.length);
+
       // Calculate per department
       const deptStats: any = {
         KRS: { salg: 0, omsetning: 0 },
         OSL: { salg: 0, omsetning: 0 },
         Skien: { salg: 0, omsetning: 0 },
+        Annet: { salg: 0, omsetning: 0 },
       };
 
       let totalSalg = 0;
       let totalOmsetning = 0;
 
       filtered.forEach(c => {
-        const avdeling = c.avdeling || 'Ukjent';
+        let avdeling = c.avdeling || 'Annet';
+        
+        // Map unknown departments to "Annet"
+        if (!['KRS', 'OSL', 'Skien'].includes(avdeling)) {
+          avdeling = 'Annet';
+        }
+        
         const cpo = cpoMap[c.produkt] || 0;
 
         if (deptStats[avdeling]) {
@@ -204,6 +215,9 @@ export default function AdminDashboard() {
         totalSalg += 1;
         totalOmsetning += cpo;
       });
+
+      console.log('  Salg per avdeling:', deptStats);
+      console.log('  Totalt salg fra loop:', totalSalg);
 
       setDashboardData({
         totalSalg,
@@ -1921,8 +1935,8 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* Department Cards */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-                      {['KRS', 'OSL', 'Skien'].map((dept) => {
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+                      {['KRS', 'OSL', 'Skien', 'Annet'].map((dept) => {
                         const data = dashboardData.departments[dept];
                         const pct = dashboardData.totalSalg > 0 ? ((data.salg / dashboardData.totalSalg) * 100).toFixed(1) : '0';
                         return (
@@ -1944,7 +1958,7 @@ export default function AdminDashboard() {
                         <div>Omsetning</div>
                         <div>% av total</div>
                       </div>
-                      {['KRS', 'OSL', 'Skien'].map((dept) => {
+                      {['KRS', 'OSL', 'Skien', 'Annet'].map((dept) => {
                         const data = dashboardData.departments[dept];
                         const pct = dashboardData.totalSalg > 0 ? ((data.salg / dashboardData.totalSalg) * 100).toFixed(1) : '0';
                         return (
