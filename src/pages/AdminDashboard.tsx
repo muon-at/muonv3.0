@@ -557,14 +557,16 @@ export default function AdminDashboard() {
       setLoadingProdukter(true);
       const loadProdukterData = async () => {
         try {
-          // Get unique Produkt + Plattform combinations from contracts
+          // Get unique Produkt + Choosen Platform combinations from contracts
           const contractsRef = collection(db, 'allente_kontraktsarkiv');
           const contractsSnapshot = await getDocs(contractsRef);
           const produkterMap = new Map<string, any>();
           
           contractsSnapshot.forEach((doc) => {
-            const produkt = doc.data().produkt || '';
-            const plattform = doc.data().plattform || 'Ukjent';
+            const data = doc.data();
+            const produkt = data.produkt || '';
+            // Try both field name variations
+            const plattform = data['Choosen Platform'] || data.chosenPlatform || data.plattform || 'Ukjent';
             const key = `${produkt}|${plattform}`;
             
             if (produkt.trim() && !produkterMap.has(key)) {
