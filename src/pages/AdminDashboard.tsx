@@ -136,6 +136,11 @@ export default function AdminDashboard() {
             const selger = data.selger || 'Ukjent';
             const orderedateStr = data.orderdato || '';
             
+            // Debug first 2 contracts
+            if (idx < 2) {
+              console.log(`📋 Contract ${idx}:`, { selger, orderedato: orderedateStr, keys: Object.keys(data).slice(0, 5) });
+            }
+            
             // Initialize seller if not exists
             if (!sellerStats[selger]) {
               sellerStats[selger] = { month: 0, week: 0, total: 0, weeks: {}, months: {} };
@@ -152,12 +157,14 @@ export default function AdminDashboard() {
                 const year = parseInt(parts[2]);
                 const orderDate = new Date(year, month - 1, day);
                 
-                // Debug first contract
+                // Debug first contract parsing
                 if (idx === 0) {
-                  console.log('🗓️ First contract date parsing:', {
+                  console.log('🗓️ First contract parsed:', {
                     raw: orderedateStr,
                     parts: parts,
-                    parsed: { day, month, year },
+                    day,
+                    month,
+                    year,
                     orderDate: orderDate.toISOString().split('T')[0],
                   });
                 }
