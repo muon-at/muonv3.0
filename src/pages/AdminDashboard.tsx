@@ -565,7 +565,7 @@ export default function AdminDashboard() {
           const contracts = contractsSnapshot.docs;
           contracts.forEach((doc) => {
             const data = doc.data();
-            const produkt = data.produkter || data.Produkter || '';
+            const produkt = data.produkt || '';
             // Fetch from "Choosen Platform" field (with space, as imported from CSV)
             const plattform = data['Choosen Platform'] || 'Ukjent';
             const key = `${produkt}|${plattform}`;
