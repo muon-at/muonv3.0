@@ -175,7 +175,7 @@ export default function AdminDashboard() {
           });
           
           // Create array with all stats
-          const progresjonArray = Object.entries(sellerStats).map(([selger, stats]) => {
+          const progresjonArray = Object.entries(sellerStats).map(([selger, stats], index) => {
             // Find best week
             const weeks = Object.values(stats.weeks);
             const bestWeek = weeks.length > 0 ? Math.max(...weeks) : 0;
@@ -184,14 +184,13 @@ export default function AdminDashboard() {
             const months = Object.values(stats.months);
             const bestMonth = months.length > 0 ? Math.max(...months) : 0;
             
-            // Debug log
-            if (selger.includes('Ajay')) {
-              console.log('🔍 Debug Ajay:', {
-                weeksObj: stats.weeks,
-                weeksArray: weeks,
+            // Debug: Log first 3 sellers
+            if (index < 3) {
+              console.log(`📊 ${selger}:`, {
+                total: stats.total,
+                weeks: Object.keys(stats.weeks).length > 0 ? Object.keys(stats.weeks)[0] + '=' + Object.values(stats.weeks)[0] : 'empty',
+                months: Object.keys(stats.months).length > 0 ? Object.keys(stats.months)[0] + '=' + Object.values(stats.months)[0] : 'empty',
                 bestWeek,
-                monthsObj: stats.months,
-                monthsArray: months,
                 bestMonth,
               });
             }
