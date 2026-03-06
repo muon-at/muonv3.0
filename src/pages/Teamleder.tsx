@@ -16,28 +16,45 @@ export default function Teamleder() {
   const parseDate = (dateStr: string): Date => {
     if (!dateStr) return new Date(0);
     
-    // Try DD/MM/YYYY format
-    const ddmmyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    const trimmed = dateStr.trim();
+    
+    // Try DD/MM/YYYY format (19/02/2026)
+    const ddmmyyyyMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (ddmmyyyyMatch) {
       const [, day, month, year] = ddmmyyyyMatch;
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return result;
     }
     
-    // Try DD.MM.YYYY format
-    const ddmmyyyy2Match = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    // Try DD.MM.YYYY format (19.02.2026)
+    const ddmmyyyy2Match = trimmed.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if (ddmmyyyy2Match) {
       const [, day, month, year] = ddmmyyyy2Match;
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return result;
     }
     
-    // Try ISO format (YYYY-MM-DD)
-    const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    // Try ISO format (YYYY-MM-DD or 2026-02-19)
+    const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (isoMatch) {
       const [, year, month, day] = isoMatch;
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      return result;
+    }
+
+    // Try MM/DD/YYYY format (American, 02/19/2026)
+    const mmddyyyyMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (mmddyyyyMatch) {
+      const [, month, day, year] = mmddyyyyMatch;
+      // Check if this looks like MM/DD/YYYY (month > 12 would be invalid)
+      if (parseInt(month) <= 12 && parseInt(day) <= 31) {
+        const result = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return result;
+      }
     }
     
     // Fallback to default Date parsing
+    console.warn('Could not parse date:', dateStr);
     return new Date(dateStr);
   };
   
@@ -100,23 +117,39 @@ export default function Teamleder() {
 
         // Calculate per department
         const deptMap: any = {};
+        const today_end = new Date(today);
+        today_end.setHours(23, 59, 59, 999);
+        
+        console.log('🔍 Debug Info:', {
+          today: today.toDateString(),
+          weekStart: weekStart.toDateString(),
+          monthStart: monthStart.toDateString(),
+          totalContracts: contracts.length
+        });
+
         ['KRS', 'OSL', 'Skien'].forEach(dept => {
           const deptContracts = contracts.filter(c => c.avdeling === dept);
+          console.log(`📊 ${dept} total contracts:`, deptContracts.length);
           
           const deptToday = deptContracts.filter(c => {
             const cDate = parseDate(c.dato);
-            return cDate.toDateString() === today.toDateString();
+            const match = cDate.toDateString() === today.toDateString();
+            return match;
           }).length;
 
           const deptWeek = deptContracts.filter(c => {
             const cDate = parseDate(c.dato);
-            return cDate >= weekStart && cDate <= today;
+            const match = cDate >= weekStart && cDate <= today_end;
+            return match;
           }).length;
 
           const deptMonth = deptContracts.filter(c => {
             const cDate = parseDate(c.dato);
-            return cDate >= monthStart && cDate <= today;
+            const match = cDate >= monthStart && cDate <= today_end;
+            return match;
           }).length;
+
+          console.log(`📈 ${dept} this week:`, deptWeek, `this month:`, deptMonth);
 
           deptMap[dept] = {
             today: deptToday,
@@ -126,8 +159,8 @@ export default function Teamleder() {
           };
         });
         setDepartmentData(deptMap);
-        console.log('Department Data:', deptMap);
-        console.log('Target Data:', targets);
+        console.log('✅ Final Department Data:', deptMap);
+        console.log('✅ Target Data:', targets);
 
         // All sellers - THIS MONTH ONLY
         const monthContracts = contracts.filter(c => {
