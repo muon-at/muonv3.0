@@ -75,6 +75,7 @@ export default function AdminDashboard() {
   const [loadingSalg, setLoadingSalg] = useState(false);
   const [angringerData, setAngringerData] = useState<any[]>([]);
   const [loadingAngringer, setLoadingAngringer] = useState(false);
+  const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
   const [angringerFilters, setAngringerFilters] = useState({
     filnavn: '',
     kundenummer: '',
@@ -2121,6 +2122,45 @@ export default function AdminDashboard() {
               </p>
             ) : (
               <>
+                {/* Statistics Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                  <div style={{ background: 'white', border: '2px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666', fontWeight: '600' }}>Total Ansatte</p>
+                    <p style={{ margin: 0, fontSize: '2rem', fontWeight: '700', color: '#667eea' }}>{employees.length}</p>
+                  </div>
+                  <div style={{ background: 'white', border: '2px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666', fontWeight: '600' }}>KRS</p>
+                    <p style={{ margin: 0, fontSize: '2rem', fontWeight: '700', color: '#667eea' }}>{employees.filter(e => e.department === 'KRS').length}</p>
+                  </div>
+                  <div style={{ background: 'white', border: '2px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666', fontWeight: '600' }}>OSL</p>
+                    <p style={{ margin: 0, fontSize: '2rem', fontWeight: '700', color: '#667eea' }}>{employees.filter(e => e.department === 'OSL').length}</p>
+                  </div>
+                  <div style={{ background: 'white', border: '2px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', color: '#666', fontWeight: '600' }}>Skien</p>
+                    <p style={{ margin: 0, fontSize: '2rem', fontWeight: '700', color: '#667eea' }}>{employees.filter(e => e.department === 'Skien').length}</p>
+                  </div>
+                </div>
+
+                {/* Search Field */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="🔍 Søk etter ansatt navn..."
+                    value={employeeSearchQuery}
+                    onChange={(e) => setEmployeeSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem 1rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '0.95rem',
+                      color: '#333',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
                 <button 
                   className="add-employee-btn"
                   onClick={() => setShowAddModal(true)}
@@ -2152,7 +2192,9 @@ export default function AdminDashboard() {
                     <div className="col-tmg">TMG Navn</div>
                     <div className="col-actions">Handlinger</div>
                   </div>
-                  {employees.map((emp) => (
+                  {employees
+                    .filter(emp => emp.name?.toLowerCase().includes(employeeSearchQuery.toLowerCase()))
+                    .map((emp) => (
                     <div key={emp.id} className="table-row" style={{ minWidth: '2000px' }}>
                       <div className="col-name">{emp.name}</div>
                       <div className="col-email" style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{emp.email || '-'}</div>
