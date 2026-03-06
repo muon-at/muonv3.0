@@ -95,10 +95,10 @@ export default function AdminDashboard() {
   });
 
   const thresholdBadgesList = [
-    { badge: 'FØRSTE_SALGET', emoji: '🎓', threshold: 1, label: 'Første salget' },
-    { badge: 'SALG_5', emoji: '🚀', threshold: 5, label: '5 Salg' },
-    { badge: 'SALG_15', emoji: '🔥', threshold: 15, label: '15 Salg' },
-    { badge: 'SALG_20', emoji: '💎', threshold: 20, label: '20 Salg' },
+    { badge: 'FØRSTE_SALGET', emoji: '🎓', type: 'total', threshold: 1, label: 'Første salget' },
+    { badge: 'SALG_5', emoji: '🚀', type: 'day', threshold: 5, label: '5 Salg på en dag' },
+    { badge: 'SALG_15', emoji: '🔥', type: 'day', threshold: 15, label: '15 Salg på en dag' },
+    { badge: 'SALG_20', emoji: '💎', type: 'day', threshold: 20, label: '20 Salg på en dag' },
   ];
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
     selger: '',
@@ -370,6 +370,38 @@ export default function AdminDashboard() {
           
           // Calculate threshold badges
           try {
+            // Build best day per seller
+            const dailyStats: { [key: string]: { [key: string]: number } } = {};
+            const bestDayPerSeller: { [key: string]: number } = {};
+            
+            contracts.forEach((data) => {
+              const selger = data.selger || 'Ukjent';
+              const dateStr = data.dato || data.orderdato || '';
+              
+              if (dateStr) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                  const day = parseInt(parts[0]);
+                  const month = parseInt(parts[1]);
+                  const year = parseInt(parts[2]);
+                  const dayKey = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  
+                  if (!dailyStats[dayKey]) {
+                    dailyStats[dayKey] = {};
+                  }
+                  dailyStats[dayKey][selger] = (dailyStats[dayKey][selger] || 0) + 1;
+                }
+              }
+            });
+            
+            // Calculate best day for each seller
+            for (const dayKey in dailyStats) {
+              for (const selger in dailyStats[dayKey]) {
+                const daySales = dailyStats[dayKey][selger];
+                bestDayPerSeller[selger] = Math.max(bestDayPerSeller[selger] || 0, daySales);
+              }
+            }
+            
             const mvpRef = collection(db, 'allente_badge_earners');
             const allBadges = await getDocs(mvpRef);
             
@@ -388,21 +420,31 @@ export default function AdminDashboard() {
               }
             });
             
-            // Award threshold badges based on total sales
+            // Award threshold badges
             for (const row of progresjonArray) {
               const selger = row.selger;
               const totalSales = row.total;
+              const bestDay = bestDayPerSeller[selger] || 0;
               
               // Check each threshold
               for (const badgeConfig of thresholdBadgesList) {
-                if (totalSales >= badgeConfig.threshold && !thresholdEarners[badgeConfig.badge].has(selger)) {
+                let qualifies = false;
+                
+                if (badgeConfig.type === 'total') {
+                  qualifies = totalSales >= badgeConfig.threshold;
+                } else if (badgeConfig.type === 'day') {
+                  qualifies = bestDay >= badgeConfig.threshold;
+                }
+                
+                if (qualifies && !thresholdEarners[badgeConfig.badge].has(selger)) {
                   // Award badge
                   await addDoc(mvpRef, {
                     badge: badgeConfig.badge,
                     emoji: badgeConfig.emoji,
                     selger: selger,
                     threshold: badgeConfig.threshold,
-                    totalSales: totalSales,
+                    type: badgeConfig.type,
+                    value: badgeConfig.type === 'total' ? totalSales : bestDay,
                     awardedAt: new Date().toISOString(),
                   });
                   thresholdEarners[badgeConfig.badge].add(selger);
