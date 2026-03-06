@@ -725,21 +725,22 @@ export default function Chat() {
               {channels.map(channel => (
                 <div
                   key={channel.id}
-                  className={`chat-item ${selectedChannel === channel.id ? 'active' : ''}`}
+                  className={`chat-item-compact ${selectedChannel === channel.id ? 'active' : ''}`}
                   onClick={() => {
                     setSelectedChannel(channel.id);
                     setSelectedDM(null);
                   }}
+                  style={{ position: 'relative' }}
                 >
-                  <span className={`chat-name ${channel.unread > 0 ? 'unread' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', minWidth: '1.5rem' }}>
-                      {renderChannelEmoji(channel.emoji)}
-                    </span>
-                    {channel.name}
-                  </span>
-                  {channel.unread > 0 && (
-                    <span className="chat-unread">{channel.unread}</span>
-                  )}
+                  <div 
+                    className={`emoji-circle ${channel.unread > 0 ? 'unread' : ''}`}
+                    title={channel.name}
+                    style={{
+                      background: selectedChannel === channel.id ? '#764ba2' : '#667eea',
+                    }}
+                  >
+                    {renderChannelEmoji(channel.emoji)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -804,22 +805,23 @@ export default function Chat() {
                         return (
                           <div
                             key={dm.id}
-                            className={`chat-item ${selectedDM === dm.id ? 'active' : ''}`}
+                            className={`chat-item-compact ${selectedDM === dm.id ? 'active' : ''}`}
                             onClick={() => {
                               setSelectedDM(dm.id);
                               setSelectedChannel(null);
                             }}
-                            style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+                            style={{ position: 'relative' }}
                           >
-                            <span className={`chat-name ${dm.unread > 0 ? 'unread' : ''}`}>
-                              💬 {otherParticipant}
-                            </span>
-                            <span style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.25rem' }}>
-                              {dm.lastMessage ? dm.lastMessage.substring(0, 50) + (dm.lastMessage.length > 50 ? '...' : '') : 'No messages'}
-                            </span>
-                            {dm.unread > 0 && (
-                              <span className="chat-unread">{dm.unread}</span>
-                            )}
+                            <div 
+                              className={`emoji-circle ${dm.unread > 0 ? 'unread' : ''}`}
+                              title={otherParticipant}
+                              style={{
+                                background: selectedDM === dm.id ? '#764ba2' : '#667eea',
+                                fontSize: '1.2rem',
+                              }}
+                            >
+                              👤
+                            </div>
                           </div>
                         );
                       })
