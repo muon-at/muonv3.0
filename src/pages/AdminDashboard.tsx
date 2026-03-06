@@ -87,6 +87,19 @@ export default function AdminDashboard() {
   const [badgeWinner, setBadgeWinner] = useState<string | null>(null);
   const [mvpMånedWinners, setMvpMånedWinners] = useState<Set<string>>(new Set());
   const [mvpDagWinners, setMvpDagWinners] = useState<Set<string>>(new Set());
+  const [thresholdBadges, setThresholdBadges] = useState<{ [key: string]: Set<string> }>({
+    FØRSTE_SALGET: new Set(),
+    SALG_5: new Set(),
+    SALG_15: new Set(),
+    SALG_20: new Set(),
+  });
+
+  const thresholdBadgesList = [
+    { badge: 'FØRSTE_SALGET', emoji: '🎓', threshold: 1, label: 'Første salget' },
+    { badge: 'SALG_5', emoji: '🚀', threshold: 5, label: '5 Salg' },
+    { badge: 'SALG_15', emoji: '🔥', threshold: 15, label: '15 Salg' },
+    { badge: 'SALG_20', emoji: '💎', threshold: 20, label: '20 Salg' },
+  ];
   const [filters, setFilters] = useState<KontraktsarkivFilters>({
     selger: '',
     avdeling: '',
@@ -353,6 +366,53 @@ export default function AdminDashboard() {
             setMvpDagWinners(mvpDagEarners);
           } catch (err) {
             console.error('Error calculating MVP badges:', err);
+          }
+          
+          // Calculate threshold badges
+          try {
+            const mvpRef = collection(db, 'allente_badge_earners');
+            const allBadges = await getDocs(mvpRef);
+            
+            const thresholdEarners: { [key: string]: Set<string> } = {
+              FØRSTE_SALGET: new Set(),
+              SALG_5: new Set(),
+              SALG_15: new Set(),
+              SALG_20: new Set(),
+            };
+            
+            // Load existing threshold badge winners
+            allBadges.forEach((doc) => {
+              const data = doc.data();
+              if (thresholdEarners[data.badge]) {
+                thresholdEarners[data.badge].add(data.selger);
+              }
+            });
+            
+            // Award threshold badges based on total sales
+            for (const row of progresjonArray) {
+              const selger = row.selger;
+              const totalSales = row.total;
+              
+              // Check each threshold
+              for (const badgeConfig of thresholdBadgesList) {
+                if (totalSales >= badgeConfig.threshold && !thresholdEarners[badgeConfig.badge].has(selger)) {
+                  // Award badge
+                  await addDoc(mvpRef, {
+                    badge: badgeConfig.badge,
+                    emoji: badgeConfig.emoji,
+                    selger: selger,
+                    threshold: badgeConfig.threshold,
+                    totalSales: totalSales,
+                    awardedAt: new Date().toISOString(),
+                  });
+                  thresholdEarners[badgeConfig.badge].add(selger);
+                }
+              }
+            }
+            
+            setThresholdBadges(thresholdEarners);
+          } catch (err) {
+            console.error('Error calculating threshold badges:', err);
           }
         } catch (err) {
           console.error('Error fetching progresjon data:', err);
@@ -1383,6 +1443,10 @@ export default function AdminDashboard() {
                           {badgeWinner === row.selger ? '🏆' : ''}
                           {mvpMånedWinners.has(row.selger) ? '👑' : ''}
                           {mvpDagWinners.has(row.selger) ? '⭐' : ''}
+                          {thresholdBadges.FØRSTE_SALGET.has(row.selger) ? '🎓' : ''}
+                          {thresholdBadges.SALG_5.has(row.selger) ? '🚀' : ''}
+                          {thresholdBadges.SALG_15.has(row.selger) ? '🔥' : ''}
+                          {thresholdBadges.SALG_20.has(row.selger) ? '💎' : ''}
                         </div>
                       </div>
                     ))}
