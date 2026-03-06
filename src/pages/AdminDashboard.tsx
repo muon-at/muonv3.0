@@ -17,7 +17,7 @@ interface Employee {
   slackName?: string;
   externalName?: string;
   tmgName?: string;
-  employment_type?: string;
+  stilling?: string;
 }
 
 interface SalgRecord {
@@ -64,11 +64,12 @@ export default function AdminDashboard() {
     username: '',
     password: '',
     role: 'employee',
-    project: '',
+    project: 'Allente',
     department: 'OSL',
     slackName: '',
     externalName: '',
     tmgName: '',
+    stilling: 'Fulltid',
   });
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
   const [salgData, setSalgData] = useState<SalgRecord[]>([]);
@@ -857,6 +858,7 @@ export default function AdminDashboard() {
         slackName: editingEmployee.slackName || '',
         externalName: editingEmployee.externalName || '',
         tmgName: editingEmployee.tmgName || '',
+        stilling: editingEmployee.stilling || '',
       });
 
       // Update local state
@@ -982,6 +984,7 @@ export default function AdminDashboard() {
         slackName: newEmployee.slackName || '',
         externalName: newEmployee.externalName || '',
         tmgName: newEmployee.tmgName || '',
+        stilling: newEmployee.stilling || 'Fulltid',
         createdAt: new Date().toISOString(),
       });
 
@@ -995,11 +998,12 @@ export default function AdminDashboard() {
         username: '',
         password: '',
         role: 'employee',
-        project: '',
+        project: 'Allente',
         department: 'OSL',
         slackName: '',
         externalName: '',
         tmgName: '',
+        stilling: 'Fulltid',
       });
       alert('✅ Ansatt opprettet!');
     } catch (err) {
@@ -1026,13 +1030,15 @@ export default function AdminDashboard() {
           id: doc.id,
           name: data.name || 'N/A',
           email: data.email,
+          username: data.username,
+          password: data.password,
           department: data.department,
           role: data.role,
           project: data.project,
           slackName: data.slackName,
           externalName: data.externalName,
           tmgName: data.tmgName,
-          employment_type: data.employment_type,
+          stilling: data.stilling,
         });
       });
       
@@ -2193,56 +2199,66 @@ export default function AdminDashboard() {
                   </div>
                   {employees
                     .filter(emp => emp.name?.toLowerCase().includes(employeeSearchQuery.toLowerCase()) || emp.email?.toLowerCase().includes(employeeSearchQuery.toLowerCase()))
-                    .map((emp) => (
+                    .map((emp) => {
+                      const getRoleColor = (role?: string) => {
+                        switch(role) {
+                          case 'owner': return '#a78bfa'; // purple
+                          case 'teamlead': return '#60a5fa'; // blue
+                          default: return '#34d399'; // green
+                        }
+                      };
+                      const getRoleLabel = (role?: string) => {
+                        switch(role) {
+                          case 'owner': return 'eier';
+                          case 'teamlead': return 'teamleder';
+                          default: return 'selger';
+                        }
+                      };
+                      return (
                     <div key={emp.id} className="table-row">
                       <div className="col-name">{emp.name}</div>
                       <div className="col-email" style={{ fontSize: '0.9rem' }}>{emp.email || '-'}</div>
-                      <div className="col-role"><span style={{ background: '#f0f0f0', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '500' }}>{emp.role || '-'}</span></div>
+                      <div className="col-role"><span style={{ background: getRoleColor(emp.role), color: 'white', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '500' }}>{getRoleLabel(emp.role)}</span></div>
                       <div className="col-project">{emp.project || '-'}</div>
                       <div className="col-dept">{emp.department || '-'}</div>
                       <div className="col-tmg">{emp.tmgName || '-'}</div>
-                      <div className="col-slack">{emp.slackName || '-'}</div>
+                      <div className="col-slack">{emp.stilling || '-'}</div>
                       <div className="col-external">{emp.externalName || '-'}</div>
                       <div className="col-actions" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                         <button 
                           onClick={() => handleEditClick(emp)}
                           style={{ 
-                            background: '#f0f0f0', 
+                            background: 'none', 
                             border: 'none', 
-                            cursor: 'pointer', 
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
+                            cursor: 'pointer',
                             fontSize: '0.85rem',
                             fontWeight: '500',
                             color: '#667eea',
-                            transition: 'all 0.2s'
+                            textDecoration: 'underline',
+                            padding: '0'
                           }}
-                          onMouseOver={(e) => (e.currentTarget.style.background = '#667eea', e.currentTarget.style.color = 'white')}
-                          onMouseOut={(e) => (e.currentTarget.style.background = '#f0f0f0', e.currentTarget.style.color = '#667eea')}
                         >
                           Rediger
                         </button>
                         <button 
                           onClick={() => handleDeleteClick(emp.id, emp.name)}
                           style={{ 
-                            background: '#f0f0f0', 
+                            background: 'none', 
                             border: 'none', 
-                            cursor: 'pointer', 
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
+                            cursor: 'pointer',
                             fontSize: '0.85rem',
                             fontWeight: '500',
                             color: '#dc2626',
-                            transition: 'all 0.2s'
+                            textDecoration: 'underline',
+                            padding: '0'
                           }}
-                          onMouseOver={(e) => (e.currentTarget.style.background = '#dc2626', e.currentTarget.style.color = 'white')}
-                          onMouseOut={(e) => (e.currentTarget.style.background = '#f0f0f0', e.currentTarget.style.color = '#dc2626')}
                         >
                           Slett
                         </button>
                       </div>
                     </div>
-                  ))}
+                  );
+                    })}
                 </div>
 
                 <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
@@ -2340,11 +2356,26 @@ export default function AdminDashboard() {
               </div>
               <div className="form-group">
                 <label>Prosjekt</label>
-                <input 
-                  type="text"
+                <select 
                   value={editingEmployee.project || ''}
                   onChange={(e) => setEditingEmployee({ ...editingEmployee, project: e.target.value })}
-                />
+                >
+                  <option value="">Velg prosjekt</option>
+                  <option value="Allente">Allente</option>
+                  <option value="AT Ventilasjon">AT Ventilasjon</option>
+                  <option value="Muon">Muon</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Stilling</label>
+                <select 
+                  value={editingEmployee.stilling || ''}
+                  onChange={(e) => setEditingEmployee({ ...editingEmployee, stilling: e.target.value })}
+                >
+                  <option value="">Velg stilling</option>
+                  <option value="Fulltid">Fulltid</option>
+                  <option value="Deltid">Deltid</option>
+                </select>
               </div>
               <div className="form-group">
                 <label>Avdeling</label>
@@ -2462,11 +2493,26 @@ export default function AdminDashboard() {
               </div>
               <div className="form-group">
                 <label>Prosjekt</label>
-                <input 
-                  type="text"
+                <select 
                   value={newEmployee.project || ''}
                   onChange={(e) => setNewEmployee({ ...newEmployee, project: e.target.value })}
-                />
+                >
+                  <option value="">Velg prosjekt</option>
+                  <option value="Allente">Allente</option>
+                  <option value="AT Ventilasjon">AT Ventilasjon</option>
+                  <option value="Muon">Muon</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Stilling</label>
+                <select 
+                  value={newEmployee.stilling || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, stilling: e.target.value })}
+                >
+                  <option value="">Velg stilling</option>
+                  <option value="Fulltid">Fulltid</option>
+                  <option value="Deltid">Deltid</option>
+                </select>
               </div>
               <div className="form-group">
                 <label>Avdeling</label>
@@ -2518,11 +2564,12 @@ export default function AdminDashboard() {
                     username: '',
                     password: '',
                     role: 'employee',
-                    project: '',
+                    project: 'Allente',
                     department: 'OSL',
                     slackName: '',
                     externalName: '',
                     tmgName: '',
+                    stilling: 'Fulltid',
                   });
                 }}
               >
