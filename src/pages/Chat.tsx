@@ -198,30 +198,36 @@ export default function Chat() {
       if (selectedChannel) {
         console.log('📝 Sending to channel:', selectedChannel);
         const messagesRef = collection(db, 'chat_channels', selectedChannel, 'messages');
-        await addDoc(messagesRef, {
+        const msgData: any = {
           sender: user?.name || 'Unknown',
           content: messageContent,
           timestamp: Date.now(),
-          replyTo: replyingTo ? {
+        };
+        if (replyingTo) {
+          msgData.replyTo = {
             id: replyingTo.id,
             sender: replyingTo.sender,
             content: replyingTo.content,
-          } : undefined,
-        });
+          };
+        }
+        await addDoc(messagesRef, msgData);
         console.log('✅ Message sent successfully!');
       } else if (selectedDM) {
         console.log('📝 Sending to DM:', selectedDM);
         const messagesRef = collection(db, 'chat_dms', selectedDM, 'messages');
-        await addDoc(messagesRef, {
+        const msgData: any = {
           sender: user?.name || 'Unknown',
           content: messageContent,
           timestamp: Date.now(),
-          replyTo: replyingTo ? {
+        };
+        if (replyingTo) {
+          msgData.replyTo = {
             id: replyingTo.id,
             sender: replyingTo.sender,
             content: replyingTo.content,
-          } : undefined,
-        });
+          };
+        }
+        await addDoc(messagesRef, msgData);
         console.log('✅ Message sent successfully!');
       }
       
