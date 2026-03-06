@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import '../styles/Login.css';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'owner' | 'teamlead' | 'employee'>('employee');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,27 +20,43 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!email || !password) {
-      setError('Vennligst fyll inn både e-post og passord');
+    if (!username || !password) {
+      setError('Vennligst fyll inn både brukernavn og passord');
       return;
     }
 
     setLoading(true);
     
-    // Mock login - in real app, this would validate against backend
-    setTimeout(() => {
-      if (email && password) {
-        login(email, password, selectedRole);
+    try {
+      // Lookup employee by username in Firestore
+      const employeesRef = collection(db, 'employees');
+      const snapshot = await getDocs(employeesRef);
+      
+      let foundEmployee: any = null;
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.username === username && data.password === password && !data.archived) {
+          foundEmployee = { id: doc.id, ...data };
+        }
+      });
+
+      if (foundEmployee) {
+        // Successful login - store employee data
+        login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
         navigate('/min-side');
       } else {
-        setError('Feil e-post eller passord');
+        setError('Feil brukernavn eller passord');
       }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Feil ved innlogging. Prøv igjen.');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -56,13 +73,13 @@ export default function Login() {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="email">E-post</label>
+            <label htmlFor="username">Brukernavn</label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="din.epost@muon.no"
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="f.eks sebastian.moen"
               disabled={loading}
               autoFocus
             />
@@ -80,45 +97,17 @@ export default function Login() {
             />
           </div>
 
-          <div className="form-group">
-            <label>Rolle (for demo)</label>
-            <div className="role-selector">
-              <label className="role-option">
-                <input
-                  type="radio"
-                  value="owner"
-                  checked={selectedRole === 'owner'}
-                  onChange={(e) => setSelectedRole(e.target.value as 'owner' | 'teamlead' | 'employee')}
-                  disabled={loading}
-                />
-                <span className="role-label">👑 Owner</span>
-              </label>
-              <label className="role-option">
-                <input
-                  type="radio"
-                  value="teamlead"
-                  checked={selectedRole === 'teamlead'}
-                  onChange={(e) => setSelectedRole(e.target.value as 'owner' | 'teamlead' | 'employee')}
-                  disabled={loading}
-                />
-                <span className="role-label">👔 Teamlead</span>
-              </label>
-              <label className="role-option">
-                <input
-                  type="radio"
-                  value="employee"
-                  checked={selectedRole === 'employee'}
-                  onChange={(e) => setSelectedRole(e.target.value as 'owner' | 'teamlead' | 'employee')}
-                  disabled={loading}
-                />
-                <span className="role-label">👤 Employee</span>
-              </label>
-            </div>
-          </div>
+          {/* Removed role selector - comes from Firestore */}
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? 'Logger inn...' : 'Logg inn'}
+          <button
+            type="submit"
+            className="login-button"
+            disabled={loading}
+          >
+            {loading ? '🔄 Logger inn...' : '✅ Logg inn'}
           </button>
+
+          {/* Rolle og prosjekt hentes fra Firestore */}
         </form>
 
         {/* Footer */}

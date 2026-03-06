@@ -1,15 +1,23 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   name: string;
-  email: string;
-  role: 'owner' | 'teamlead' | 'employee';
+  email?: string;
+  username?: string;
+  password?: string;
+  role?: 'owner' | 'teamlead' | 'employee';
+  department?: string;
+  project?: string;
+  stilling?: string;
+  externalName?: string;
+  tmgName?: string;
+  slackName?: string;
 }
 
 interface AuthContextType {
   user: AuthUser | null;
-  login: (email: string, password: string, role: AuthUser['role']) => void;
+  login: (name: string, id: string, role: string, fullEmployee?: any) => void;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -20,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    // Load user from localStorage on mount, or auto-login as demo Owner
+    // Load user from localStorage on mount
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
@@ -28,29 +36,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (err) {
         localStorage.removeItem('user');
       }
-    } else {
-      // Auto-login as demo Owner (temporary - remove for production)
-      const demoUser: AuthUser = {
-        id: 'demo-owner-001',
-        name: 'Stian Abrahamsen',
-        email: 'stian@muonas.no',
-        role: 'owner',
-      };
-      setUser(demoUser);
-      localStorage.setItem('user', JSON.stringify(demoUser));
     }
+    // No auto-login - must authenticate with real credentials
   }, []);
 
-  const login = (email: string, _password: string, role: AuthUser['role']) => {
+  const login = (name: string, id: string, role: string, fullEmployee?: any) => {
     const newUser: AuthUser = {
-      id: Math.random().toString(36).substr(2, 9),
-      name: email.split('@')[0],
-      email,
-      role,
+      id,
+      name,
+      role: (role as 'owner' | 'teamlead' | 'employee') || 'employee',
+      ...(fullEmployee && {
+        email: fullEmployee.email,
+        username: fullEmployee.username,
+        department: fullEmployee.department,
+        project: fullEmployee.project,
+        stilling: fullEmployee.stilling,
+        externalName: fullEmployee.externalName,
+        tmgName: fullEmployee.tmgName,
+        slackName: fullEmployee.slackName,
+      }),
     };
     setUser(newUser);
     localStorage.setItem('user', JSON.stringify(newUser));
-    localStorage.setItem('auth', 'true');
   };
 
   const logout = () => {
@@ -84,5 +91,6 @@ export function useHasAccess(requiredRole: 'owner' | 'teamlead' | 'employee') {
     employee: 1,
   };
 
-  return roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+  const userRoleLevel = user.role ? roleHierarchy[user.role] : 0;
+  return userRoleLevel >= roleHierarchy[requiredRole];
 }

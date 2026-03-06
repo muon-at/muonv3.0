@@ -1,62 +1,134 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import '../styles/MinSide.css';
+
+interface SalesRecord {
+  dato?: string;
+  selger?: string;
+  id?: string;
+}
 
 export default function MinSide() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any[]>([]);
+  const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
 
   const canAccessTeamleder = user?.role === 'owner' || user?.role === 'teamlead';
 
-  // Mock data - will be replaced with Firestore later
-  const userData = {
-    name: 'Stian Abrahamsen',
-    role: 'owner',
-    project: 'Muon',
-    profileImage: '📷',
+  useEffect(() => {
+    if (!user) {
+      navigate('/');
+      return;
+    }
+    loadEmployeeData();
+  }, [user, navigate]);
+
+  const parseDate = (dateStr?: string): Date | null => {
+    if (!dateStr) return null;
+    const dateString = String(dateStr).trim();
+    const ddmmRegex = /^(\d{1,2})[./](\d{1,2})[./](\d{4})$/;
+    const match = dateString.match(ddmmRegex);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10);
+      const year = parseInt(match[3], 10);
+      return new Date(year, month - 1, day);
+    }
+    const isoDate = new Date(dateString);
+    if (!isNaN(isoDate.getTime())) return isoDate;
+    return null;
   };
 
-  // Badge order: In-use (8) + Future (6)
-  const badges = [
-    // In-use badges
-    '🏆', '👑', '⭐', '🎓', '🚀', '🎯', '🔥', '💎',
-    // Future badges (no duplicates)
-    '💪', '☀️', '⚡', '🎭', '🏅', '🎖️'
-  ];
+  const loadEmployeeData = async () => {
+    try {
+      const salesRef = collection(db, 'allente_kontraktsarkiv');
+      const snapshot = await getDocs(salesRef);
+      
+      const contracts: SalesRecord[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        contracts.push({ id: doc.id, ...data });
+      });
 
-  const stats = [
-    { value: 57, label: 'Dag', color: '#E8956E' },
-    { value: 476, label: 'Uke', color: '#E8956E' },
-    { value: 57, label: 'Måned', color: '#E8956E' },
-    { value: 328, label: 'År', color: '#5B7FFF' },
-    { value: 678, label: 'Altid', color: '#A855C9' },
-  ];
+      // Filter for this employee
+      const employeeContracts = contracts.filter(c => c.selger === user?.externalName);
 
-  const goals = {
-    weekly: { current: 19, unit: 'order/uke' },
-    monthly: { current: 120, unit: 'order/måned' },
+      // Calculate stats
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      const salesToday = employeeContracts.filter(c => {
+        const date = parseDate(c.dato);
+        return date && date.getTime() === today.getTime();
+      }).length;
+
+      const salesThisWeek = employeeContracts.filter(c => {
+        const date = parseDate(c.dato);
+        return date && date >= weekStart && date <= today;
+      }).length;
+
+      const salesThisMonth = employeeContracts.filter(c => {
+        const date = parseDate(c.dato);
+        return date && date >= monthStart && date <= today;
+      }).length;
+
+      setStats([
+        { value: salesToday, label: 'Dag', color: '#E8956E' },
+        { value: salesThisWeek, label: 'Uke', color: '#E8956E' },
+        { value: salesThisMonth, label: 'Måned', color: '#E8956E' },
+        { value: Math.round(employeeContracts.length / 12), label: 'År', color: '#5B7FFF' },
+        { value: employeeContracts.length, label: 'Altid', color: '#A855C9' },
+      ]);
+
+      // Badges: simplified - show if they have sales
+      const badges: string[] = [];
+      if (employeeContracts.length > 0) badges.push('🎓'); // First sale
+      if (salesToday >= 5) badges.push('🚀');
+      if (salesToday >= 10) badges.push('🎯');
+      if (salesToday >= 15) badges.push('🔥');
+      if (salesToday >= 20) badges.push('💎');
+      setEarnedBadges(badges.length > 0 ? badges : ['🏆']); // Show at least one badge
+    } catch (err) {
+      console.error('Error loading employee data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const progressData = [
-    { label: 'Dagens Mål', current: 7, target: 33, color: '#3B82F6', status: '✓ Mål nådd!' },
-    { label: 'Ukes Mål', current: 29, target: 25, color: '#10B981', status: '✓ Mål nådd!' },
-    { label: 'Måneds Mål', current: 152, target: 100, color: '#F97316', status: '✓ Mål nådd!' },
-  ];
+  const allBadges = ['🏆', '👑', '⭐', '🎓', '🚀', '🎯', '🔥', '💎', '💪', '☀️', '⚡', '🎭', '🏅', '🎖️'];
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '2rem', color: '#999' }}>
+        Laster personlig data...
+      </div>
+    );
+  }
 
   return (
     <div className="minside-container">
       {/* Profile Banner */}
       <div className="profile-banner">
         <div className="banner-left">
-          <div className="profile-image">{userData.profileImage}</div>
+          <div className="profile-image">👤</div>
         </div>
         
         <div className="banner-center">
-          <h1 className="user-name">{userData.name}</h1>
-          <p className="user-subtitle">{userData.role} • {userData.project}</p>
+          <h1 className="user-name">{user?.name}</h1>
+          <p className="user-subtitle">{user?.role || '-'} • {user?.department || '-'} • {user?.project || '-'}</p>
           <div className="badges-row">
-            {badges.map((badge, idx) => (
-              <div key={idx} className="badge-circle">{badge}</div>
+            {allBadges.map((badge, idx) => (
+              <div key={idx} className={`badge-circle ${earnedBadges.includes(badge) ? '' : 'unused'}`} style={{ opacity: earnedBadges.includes(badge) ? 1 : 0.3 }}>
+                {badge}
+              </div>
             ))}
           </div>
         </div>
@@ -98,53 +170,6 @@ export default function MinSide() {
 
           <div className="trophy-right">🏆</div>
         </div>
-
-        {/* Right: Goals Sidebar */}
-        <div className="goals-sidebar">
-          <h2>🎯 Mine Mål</h2>
-          <p className="goals-subtitle">Ukesmål & Månedsmål</p>
-          
-          <div className="goals-grid">
-            <div className="goal-item">
-              <label>UKESMÅL</label>
-              <p className="goal-value">{goals.weekly.current}</p>
-              <span className="goal-unit">{goals.weekly.unit}</span>
-            </div>
-            
-            <div className="goal-item">
-              <label>MÅNEDSMÅL</label>
-              <p className="goal-value">{goals.monthly.current}</p>
-              <span className="goal-unit">{goals.monthly.unit}</span>
-            </div>
-          </div>
-
-          <button className="endre-mal-btn">Endre mål</button>
-        </div>
-      </div>
-
-      {/* Progress Bars Section */}
-      <div className="progress-section">
-        {progressData.map((item, idx) => (
-          <div key={idx} className="progress-item">
-            <div className="progress-header">
-              <label>{item.label}</label>
-              <span className="progress-percent">100%</span>
-            </div>
-            <div className="progress-bar-container">
-              <div 
-                className="progress-bar"
-                style={{ 
-                  backgroundColor: item.color,
-                  width: '100%'
-                }}
-              />
-            </div>
-            <div className="progress-footer">
-              <span className="progress-fraction">{item.current} / {item.target}</span>
-              <span className="progress-status">{item.status}</span>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );

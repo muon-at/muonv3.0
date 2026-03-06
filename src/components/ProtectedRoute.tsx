@@ -24,7 +24,8 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
   };
 
   // Check if user has required role or higher
-  if (roleHierarchy[user.role] < roleHierarchy[requiredRole]) {
+  const userRoleLevel = user.role ? roleHierarchy[user.role] : 0;
+  if (userRoleLevel < roleHierarchy[requiredRole]) {
     return <Navigate to="/min-side" replace />;
   }
 
