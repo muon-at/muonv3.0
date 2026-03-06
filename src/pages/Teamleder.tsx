@@ -98,9 +98,14 @@ export default function Teamleder() {
         });
         setDepartmentData(deptMap);
 
-        // All sellers with department
+        // All sellers - THIS MONTH ONLY
+        const monthContracts = contracts.filter(c => {
+          const cDate = new Date(c.dato);
+          return cDate >= monthStart && cDate <= today;
+        });
+
         const sellerMap: any = {};
-        contracts.forEach(c => {
+        monthContracts.forEach(c => {
           const sellerKey = c.selger || 'Unknown';
           const dept = c.avdeling || 'Ukjent';
           if (!sellerMap[sellerKey]) {
@@ -308,10 +313,10 @@ export default function Teamleder() {
           ))}
         </div>
 
-        {/* All Sellers */}
+        {/* All Sellers - This Month */}
         <div className="top-sellers-card">
           <div className="top-sellers-header">
-            <h3>🏆 Alle Sælgere</h3>
+            <h3>🏆 Sælgere Denne Måneden</h3>
           </div>
           <div className="sellers-list">
             {topSellers.map((seller: any, idx: number) => (
