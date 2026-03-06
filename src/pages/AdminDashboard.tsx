@@ -1043,6 +1043,8 @@ export default function AdminDashboard() {
       });
       
       setEmployees(employeeList.sort((a, b) => a.name.localeCompare(b.name)));
+      console.log('🔍 DEBUG - Employees loaded:', employeeList.length, 'records');
+      console.log('📋 Sample employee:', employeeList[0]);
     } catch (err) {
       console.error('Error fetching employees:', err);
     } finally {
@@ -2145,6 +2147,11 @@ export default function AdminDashboard() {
               </p>
             ) : (
               <>
+                {employees.length === 0 && (
+                  <p style={{ textAlign: 'center', color: '#dc2626', padding: '2rem', fontWeight: '600' }}>
+                    ⚠️ Ingen ansatte funnet i Firestore. Klikk "➕ Legg til Ansatt" for å legge til.
+                  </p>
+                )}
                 {/* Statistics Cards - 4 Columns */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
                   <div style={{ background: '#667eea', borderRadius: '12px', padding: '2rem', textAlign: 'center', color: 'white', boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)' }}>
@@ -2217,7 +2224,7 @@ export default function AdminDashboard() {
                         };
                         return (
                       <div key={emp.id} style={{ display: 'grid', gridTemplateColumns: '180px 200px 100px 140px 120px 140px 120px 180px 150px', gap: '0.5rem', padding: '0.75rem 0.5rem', background: 'white', borderBottom: '1px solid #e5e7eb', alignItems: 'center', fontWeight: '600', fontSize: '0.9rem' }}>
-                        <div>{emp.name}</div>
+                        <div style={{ fontWeight: '700', color: '#333' }}>{emp.name && emp.name !== 'N/A' ? emp.name : '⚠️ Ingen navn'}</div>
                         <div style={{ fontSize: '0.85rem', color: '#666' }}>{emp.email || '-'}</div>
                         <div><span style={{ background: getRoleColor(emp.role), color: 'white', padding: '0.3rem 0.6rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600', whiteSpace: 'nowrap' }}>{getRoleLabel(emp.role)}</span></div>
                         <div>{emp.project || '-'}</div>
