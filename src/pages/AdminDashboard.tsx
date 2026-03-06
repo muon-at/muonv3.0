@@ -9,6 +9,8 @@ interface Employee {
   id: string;
   name: string;
   email?: string;
+  username?: string;
+  password?: string;
   department?: string;
   role?: string;
   project?: string;
@@ -58,6 +60,8 @@ export default function AdminDashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
+    username: '',
+    password: '',
     role: 'employee',
     project: '',
     department: 'OSL',
@@ -842,6 +846,8 @@ export default function AdminDashboard() {
       const empRef = doc(db, 'employees', editingEmployee.id);
       await updateDoc(empRef, {
         name: editingEmployee.name || '',
+        username: editingEmployee.username || '',
+        password: editingEmployee.password || '',
         role: editingEmployee.role || '',
         project: editingEmployee.project || '',
         department: editingEmployee.department || '',
@@ -857,6 +863,7 @@ export default function AdminDashboard() {
       
       setShowEditModal(false);
       setEditingEmployee(null);
+      alert('✅ Ansatt oppdatert!');
     } catch (err) {
       console.error('Error saving employee:', err);
       alert('Feil ved lagring av ansatt');
@@ -950,11 +957,21 @@ export default function AdminDashboard() {
       alert('Navn er påkrevd');
       return;
     }
+    if (!newEmployee.username?.trim()) {
+      alert('Brukernavn er påkrevd');
+      return;
+    }
+    if (!newEmployee.password?.trim()) {
+      alert('Passord er påkrevd');
+      return;
+    }
 
     try {
       const empCollection = collection(db, 'employees');
       const docRef = await addDoc(empCollection, {
         name: newEmployee.name,
+        username: newEmployee.username,
+        password: newEmployee.password,
         role: newEmployee.role,
         project: newEmployee.project || '',
         department: newEmployee.department,
@@ -970,6 +987,8 @@ export default function AdminDashboard() {
       setShowAddModal(false);
       setNewEmployee({
         name: '',
+        username: '',
+        password: '',
         role: 'employee',
         project: '',
         department: 'OSL',
@@ -977,6 +996,7 @@ export default function AdminDashboard() {
         externalName: '',
         tmgName: '',
       });
+      alert('✅ Ansatt opprettet!');
     } catch (err) {
       console.error('Error adding employee:', err);
       alert('Feil ved opprettelse av ansatt');
@@ -2117,6 +2137,8 @@ export default function AdminDashboard() {
                 <div className="employees-table">
                   <div className="table-header">
                     <div className="col-name">Navn</div>
+                    <div className="col-username">Brukernavn</div>
+                    <div className="col-password">Passord</div>
                     <div className="col-role">Rolle</div>
                     <div className="col-project">Prosjekt</div>
                     <div className="col-dept">Avdeling</div>
@@ -2128,6 +2150,8 @@ export default function AdminDashboard() {
                   {employees.map((emp) => (
                     <div key={emp.id} className="table-row">
                       <div className="col-name">{emp.name}</div>
+                      <div className="col-username" style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{emp.username || '-'}</div>
+                      <div className="col-password" style={{ fontFamily: 'monospace', fontSize: '0.9rem', maxWidth: '150px', wordBreak: 'break-all' }}>{emp.password || '-'}</div>
                       <div className="col-role">{emp.role || '-'}</div>
                       <div className="col-project">{emp.project || '-'}</div>
                       <div className="col-dept">{emp.department || '-'}</div>
@@ -2208,6 +2232,24 @@ export default function AdminDashboard() {
                   type="text"
                   value={editingEmployee.name || ''}
                   onChange={(e) => setEditingEmployee({ ...editingEmployee, name: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Brukernavn *</label>
+                <input 
+                  type="text"
+                  value={editingEmployee.username || ''}
+                  onChange={(e) => setEditingEmployee({ ...editingEmployee, username: e.target.value })}
+                  placeholder="f.eks sebastian.moen"
+                />
+              </div>
+              <div className="form-group">
+                <label>Passord *</label>
+                <input 
+                  type="password"
+                  value={editingEmployee.password || ''}
+                  onChange={(e) => setEditingEmployee({ ...editingEmployee, password: e.target.value })}
+                  placeholder="Sikker passord"
                 />
               </div>
               <div className="form-group">
@@ -2306,6 +2348,24 @@ export default function AdminDashboard() {
                 />
               </div>
               <div className="form-group">
+                <label>Brukernavn *</label>
+                <input 
+                  type="text"
+                  value={newEmployee.username || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, username: e.target.value })}
+                  placeholder="f.eks sebastian.moen"
+                />
+              </div>
+              <div className="form-group">
+                <label>Passord *</label>
+                <input 
+                  type="password"
+                  value={newEmployee.password || ''}
+                  onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
+                  placeholder="Sikker passord"
+                />
+              </div>
+              <div className="form-group">
                 <label>Rolle</label>
                 <select 
                   value={newEmployee.role || ''}
@@ -2371,6 +2431,8 @@ export default function AdminDashboard() {
                   setShowAddModal(false);
                   setNewEmployee({
                     name: '',
+                    username: '',
+                    password: '',
                     role: 'employee',
                     project: '',
                     department: 'OSL',
