@@ -563,6 +563,16 @@ export default function AdminDashboard() {
           const produkterMap = new Map<string, any>();
           
           const contracts = contractsSnapshot.docs;
+          contracts.slice(0, 5).forEach((doc, idx) => {
+            const data = doc.data();
+            console.log(`📦 Contract ${idx}:`, {
+              produkt: data.produkt,
+              plattform: data.plattform,
+              'plattform type': typeof data.plattform,
+              'plattform empty?': !data.plattform,
+            });
+          });
+          
           contracts.forEach((doc) => {
             const data = doc.data();
             const produkt = data.produkt || '';
