@@ -11,6 +11,35 @@ export default function Teamleder() {
   const [activeTab, setActiveTab] = useState('status');
 
   const isOwner = user?.role === 'owner';
+
+  // Parse dates in multiple formats (DD/MM/YYYY, DD.MM.YYYY, ISO)
+  const parseDate = (dateStr: string): Date => {
+    if (!dateStr) return new Date(0);
+    
+    // Try DD/MM/YYYY format
+    const ddmmyyyyMatch = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const [, day, month, year] = ddmmyyyyMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try DD.MM.YYYY format
+    const ddmmyyyy2Match = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (ddmmyyyy2Match) {
+      const [, day, month, year] = ddmmyyyy2Match;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try ISO format (YYYY-MM-DD)
+    const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+      const [, year, month, day] = isoMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Fallback to default Date parsing
+    return new Date(dateStr);
+  };
   
   const [salesToday, setSalesToday] = useState(0);
   const [salesWeek, setSalesWeek] = useState(0);
@@ -51,17 +80,17 @@ export default function Teamleder() {
 
         // Filter and count
         const todaySales = contracts.filter(c => {
-          const cDate = new Date(c.dato);
+          const cDate = parseDate(c.dato);
           return cDate.toDateString() === today.toDateString();
         }).length;
 
         const weekSales = contracts.filter(c => {
-          const cDate = new Date(c.dato);
+          const cDate = parseDate(c.dato);
           return cDate >= weekStart && cDate <= today;
         }).length;
 
         const monthSales = contracts.filter(c => {
-          const cDate = new Date(c.dato);
+          const cDate = parseDate(c.dato);
           return cDate >= monthStart && cDate <= today;
         }).length;
 
@@ -75,17 +104,17 @@ export default function Teamleder() {
           const deptContracts = contracts.filter(c => c.avdeling === dept);
           
           const deptToday = deptContracts.filter(c => {
-            const cDate = new Date(c.dato);
+            const cDate = parseDate(c.dato);
             return cDate.toDateString() === today.toDateString();
           }).length;
 
           const deptWeek = deptContracts.filter(c => {
-            const cDate = new Date(c.dato);
+            const cDate = parseDate(c.dato);
             return cDate >= weekStart && cDate <= today;
           }).length;
 
           const deptMonth = deptContracts.filter(c => {
-            const cDate = new Date(c.dato);
+            const cDate = parseDate(c.dato);
             return cDate >= monthStart && cDate <= today;
           }).length;
 
@@ -100,7 +129,7 @@ export default function Teamleder() {
 
         // All sellers - THIS MONTH ONLY
         const monthContracts = contracts.filter(c => {
-          const cDate = new Date(c.dato);
+          const cDate = parseDate(c.dato);
           return cDate >= monthStart && cDate <= today;
         });
 
