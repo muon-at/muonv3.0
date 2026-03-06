@@ -330,8 +330,8 @@ export default function Teamleder() {
       <div className="teamleder-content">
         <div style={{ paddingTop: '2rem' }}>
           <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ marginBottom: '0.5rem' }}>🎯 Sett Mål for Avdelingene</h2>
-            <p style={{ color: '#999' }}>Dagsmål, Ukesmål, Månedsmål per avdeling</p>
+            <h2 style={{ marginBottom: '0.5rem', color: '#333', fontWeight: '700' }}>🎯 Sett Mål for Avdelingene</h2>
+            <p style={{ color: '#666', fontSize: '0.95rem' }}>Dagsmål, Ukesmål, Månedsmål per avdeling</p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
@@ -345,7 +345,7 @@ export default function Teamleder() {
                 <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', color: '#333', fontWeight: '700' }}>{dept}</h3>
                 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Dagsmål</label>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem', color: '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>DAG</label>
                   <input
                     type="number"
                     value={goals[dept]?.dag || ''}
@@ -353,7 +353,7 @@ export default function Teamleder() {
                       ...goals,
                       [dept]: { ...goals[dept], dag: e.target.value }
                     })}
-                    placeholder="f.eks 10"
+                    placeholder="0"
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -361,20 +361,25 @@ export default function Teamleder() {
                       borderRadius: '4px',
                       fontSize: '1rem',
                       color: '#333',
+                      background: '#f8f8f8',
                     }}
                   />
                 </div>
 
                 <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Ukesmål</label>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem', color: '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>UKE</label>
                   <input
                     type="number"
                     value={goals[dept]?.uke || ''}
-                    onChange={(e) => setGoals({
-                      ...goals,
-                      [dept]: { ...goals[dept], uke: e.target.value }
-                    })}
-                    placeholder="f.eks 50"
+                    onChange={(e) => {
+                      const ukeVal = e.target.value;
+                      const dagVal = ukeVal ? Math.round(parseInt(ukeVal) / 5) : '';
+                      setGoals({
+                        ...goals,
+                        [dept]: { ...goals[dept], uke: ukeVal, dag: dagVal }
+                      });
+                    }}
+                    placeholder="0"
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -382,12 +387,16 @@ export default function Teamleder() {
                       borderRadius: '4px',
                       fontSize: '1rem',
                       color: '#333',
+                      background: '#f8f8f8',
                     }}
                   />
+                  <small style={{ display: 'block', marginTop: '0.25rem', color: '#999', fontSize: '0.75rem' }}>
+                    (DAG settes automatisk: UKE ÷ 5)
+                  </small>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.9rem' }}>Månedsmål</label>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem', color: '#333', textTransform: 'uppercase', letterSpacing: '0.5px' }}>MND</label>
                   <input
                     type="number"
                     value={goals[dept]?.måned || ''}
@@ -395,7 +404,7 @@ export default function Teamleder() {
                       ...goals,
                       [dept]: { ...goals[dept], måned: e.target.value }
                     })}
-                    placeholder="f.eks 200"
+                    placeholder="0"
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -403,6 +412,7 @@ export default function Teamleder() {
                       borderRadius: '4px',
                       fontSize: '1rem',
                       color: '#333',
+                      background: '#f8f8f8',
                     }}
                   />
                 </div>
