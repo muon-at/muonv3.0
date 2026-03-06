@@ -132,7 +132,7 @@ export default function AdminDashboard() {
           // Parse contracts and group by seller
           const sellerStats: { [key: string]: { month: number; week: number; total: number; weeks: { [key: string]: number }; months: { [key: string]: number } } } = {};
           
-          contracts.forEach((data) => {
+          contracts.forEach((data, idx) => {
             const selger = data.selger || 'Ukjent';
             const orderedateStr = data.orderdato || '';
             
@@ -151,6 +151,16 @@ export default function AdminDashboard() {
                 const month = parseInt(parts[1]);
                 const year = parseInt(parts[2]);
                 const orderDate = new Date(year, month - 1, day);
+                
+                // Debug first contract
+                if (idx === 0) {
+                  console.log('🗓️ First contract date parsing:', {
+                    raw: orderedateStr,
+                    parts: parts,
+                    parsed: { day, month, year },
+                    orderDate: orderDate.toISOString().split('T')[0],
+                  });
+                }
                 
                 // Count this month
                 if (orderDate >= startOfMonth && orderDate <= today) {
