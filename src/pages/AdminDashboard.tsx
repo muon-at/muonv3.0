@@ -54,6 +54,7 @@ export default function AdminDashboard() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
   const [deleting, setDeleting] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
+  const [showPasswordInEdit, setShowPasswordInEdit] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
@@ -965,6 +966,7 @@ export default function AdminDashboard() {
       
       setShowEditModal(false);
       setEditingEmployee(null);
+      setShowPasswordInEdit(false);
       alert('✅ Ansatt oppdatert!');
     } catch (err) {
       console.error('Error saving employee:', err);
@@ -2385,12 +2387,30 @@ export default function AdminDashboard() {
               </div>
               <div className="form-group">
                 <label>Passord *</label>
-                <input 
-                  type="password"
-                  value={editingEmployee.password || ''}
-                  onChange={(e) => setEditingEmployee({ ...editingEmployee, password: e.target.value })}
-                  placeholder="Sikker passord"
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input 
+                    type={showPasswordInEdit ? "text" : "password"}
+                    value={editingEmployee.password || ''}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, password: e.target.value })}
+                    placeholder="Sikker passord"
+                    style={{ paddingRight: '40px', width: '100%' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordInEdit(!showPasswordInEdit)}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1.2rem',
+                      color: '#667eea',
+                    }}
+                  >
+                    {showPasswordInEdit ? '👁️' : '👁️‍🗨️'}
+                  </button>
+                </div>
               </div>
               <div className="form-group">
                 <label>Rolle</label>
@@ -2472,6 +2492,7 @@ export default function AdminDashboard() {
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingEmployee(null);
+                  setShowPasswordInEdit(false);
                 }}
               >
                 Avbryt
