@@ -372,7 +372,14 @@ export default function Chat() {
     if (state?.selectedChannel && channels.length > 0) {
       console.log('🔍 Looking for channel:', state.selectedChannel, 'in', channels.length, 'available channels');
       // Find the channel with matching type or id
-      const channelToSelect = channels.find(c => c.id === state.selectedChannel || c.type === state.selectedChannel);
+      let channelToSelect = channels.find(c => c.id === state.selectedChannel || c.type === state.selectedChannel);
+      
+      // Fallback: For Allente, also check project-muon (legacy ID)
+      if (!channelToSelect && state.selectedChannel === 'project-allente') {
+        console.log('🔄 Fallback: Looking for legacy project-muon...');
+        channelToSelect = channels.find(c => c.id === 'project-muon' || c.name === 'Allente');
+      }
+      
       if (channelToSelect) {
         console.log('✅ Found channel:', channelToSelect.name, 'with ID:', channelToSelect.id);
         setSelectedChannel(channelToSelect.id);
