@@ -559,9 +559,21 @@ export default function Chat() {
     switch (type) {
       case 'project':
         // User can access project channels matching their project
-        // Map MUON to Allente
+        // Map MUON to Allente (both directions for flexibility)
         const userProject = (user as any)?.project === 'MUON' ? 'Allente' : (user as any)?.project;
-        return userProject === project || user?.role === 'owner';
+        const channelProject = project === 'Muon' || project === 'MUON' ? 'Allente' : project;
+        console.log('🔐 Project access check:', {
+          userProject,
+          channelProject,
+          userRole: user?.role,
+          match: userProject === channelProject || user?.role === 'owner',
+          isAllente: channelProject === 'Allente'
+        });
+        // Allente is open to all employees (public group)
+        if (channelProject === 'Allente') {
+          return true; // Everyone can see Allente
+        }
+        return userProject === channelProject || user?.role === 'owner';
       case 'team':
         return user?.role === 'teamlead' || user?.role === 'owner';
       case 'admin':
