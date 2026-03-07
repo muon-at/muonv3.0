@@ -1314,36 +1314,96 @@ export default function Chat() {
               <div className="messages-area">
                 {getMessagesGroupedByDate(filteredMessages).map((group, groupIdx) => (
                   <div key={groupIdx}>
-                    {/* Date Separator */}
+                    {/* Date Separator - Slack Style Button */}
                     <div style={{
                       display: 'flex',
-                      alignItems: 'center',
+                      justifyContent: 'center',
                       margin: '1.5rem 0 1rem',
-                      gap: '1rem'
                     }}>
-                      <div style={{ flex: 1, height: '1px', background: '#ddd' }}></div>
-                      <span style={{
+                      <button style={{
+                        padding: '0.5rem 1rem',
+                        background: 'transparent',
+                        border: '1px solid #666',
+                        borderRadius: '20px',
+                        color: '#999',
                         fontSize: '0.85rem',
-                        fontWeight: 600,
-                        color: '#666',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        whiteSpace: 'nowrap'
-                      }}>
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.background = '#333';
+                        e.currentTarget.style.borderColor = '#999';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.background = 'transparent';
+                        e.currentTarget.style.borderColor = '#666';
+                      }}
+                      >
                         {group.date}
-                      </span>
-                      <div style={{ flex: 1, height: '1px', background: '#ddd' }}></div>
+                      </button>
                     </div>
 
-                    {/* Messages for this date */}
-                    {group.messages.map(msg => (
-                      <div key={msg.id} className="message">
-                    {msg.replyTo && (
-                      <div className="reply-context">
-                        <span className="reply-sender">{msg.replyTo.sender}</span>
-                        <span className="reply-content">{msg.replyTo.content.substring(0, 50)}...</span>
-                      </div>
-                    )}
+                    {/* Messages for this date - grouped by sender */}
+                    {group.messages.map((msg, msgIdx) => {
+                      const isFirstFromSender = msgIdx === 0 || group.messages[msgIdx - 1].sender !== msg.sender;
+                      return (
+                        <div key={msg.id} style={{
+                          display: 'flex',
+                          gap: '0.75rem',
+                          marginBottom: isFirstFromSender ? '1rem' : '0.25rem',
+                          paddingLeft: '0.5rem'
+                        }}>
+                          {/* Avatar - only show on first message from sender */}
+                          <div style={{
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: '#667eea',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#fff',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            flexShrink: 0,
+                            opacity: isFirstFromSender ? 1 : 0,
+                            width: isFirstFromSender ? '40px' : '0px',
+                            marginRight: isFirstFromSender ? '0.5rem' : '-0.5rem',
+                            transition: 'all 0.2s',
+                            overflow: 'hidden'
+                          }}>
+                            {msg.sender?.charAt(0).toUpperCase()}
+                          </div>
+
+                          {/* Message content */}
+                          <div style={{ flex: 1 }}>
+                            {/* Header: Name + Time (only on first message from sender) */}
+                            {isFirstFromSender && (
+                              <div style={{
+                                display: 'flex',
+                                gap: '0.5rem',
+                                marginBottom: '0.25rem',
+                                alignItems: 'center'
+                              }}>
+                                <strong style={{ fontSize: '0.95rem', color: '#fff' }}>
+                                  {msg.sender}
+                                </strong>
+                                <span style={{ fontSize: '0.8rem', color: '#999' }}>
+                                  {new Date(msg.timestamp).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Reply context */}
+                            {msg.replyTo && (
+                              <div className="reply-context">
+                                <span className="reply-sender">{msg.replyTo.sender}</span>
+                                <span className="reply-content">{msg.replyTo.content.substring(0, 50)}...</span>
+                              </div>
+                            )}
                     {editingMessageId === msg.id ? (
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                         <input
@@ -1510,8 +1570,10 @@ export default function Chat() {
                         ))}
                       </div>
                     )}
-                  </div>
-                    ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
                 
