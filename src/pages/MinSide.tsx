@@ -164,19 +164,35 @@ export default function MinSide() {
 
       // Calculate badges based on definitions
       const earnedBadgesList: { badge: string; earned: boolean }[] = [];
+      const externalName = user?.externalName || '';
+      
+      console.log('🔍 Badge Calculation Debug:', {
+        userName: user?.name,
+        externalName,
+        salesToday,
+        total,
+        bestOverall,
+        bestThisMonth,
+        bestToday,
+        userStats: employeeStats[externalName],
+        allStats: employeeStats,
+      });
       
       badgeDefinitions.forEach(def => {
         let earned = false;
-        const externalName = user?.externalName || '';
         
         if (def.navn === 'BEST') {
           earned = externalName !== '' && employeeStats[externalName]?.total > 0 && bestOverall === externalName;
+          console.log(`  🏆 BEST: externalName="${externalName}", bestOverall="${bestOverall}", earned=${earned}`);
         } else if (def.navn === 'MVP MÅNED') {
           earned = externalName !== '' && employeeStats[externalName]?.month > 0 && bestThisMonth === externalName;
+          console.log(`  👑 MVP MÅNED: externalName="${externalName}", bestThisMonth="${bestThisMonth}", earned=${earned}`);
         } else if (def.navn === 'MVP DAG') {
           earned = externalName !== '' && employeeStats[externalName]?.today > 0 && bestToday === externalName;
+          console.log(`  ⭐ MVP DAG: externalName="${externalName}", bestToday="${bestToday}", earned=${earned}`);
         } else if (def.navn === 'FØRSTE SALGET') {
           earned = total > 0;
+          console.log(`  🎓 FØRSTE SALGET: total=${total}, earned=${earned}`);
         } else if (def.navn === '5 SALG') {
           earned = salesToday >= 5;
         } else if (def.navn === '10 SALG') {
@@ -190,7 +206,7 @@ export default function MinSide() {
         earnedBadgesList.push({ badge: def.emoji, earned });
       });
 
-      console.log('📊 Min Side Badges:', { salesToday, total, employeeStats, earnedBadgesList });
+      console.log('📊 Final Earned Badges:', earnedBadgesList);
       setEarnedBadges(earnedBadgesList.map(b => b.badge));
       
       // Store earned status map for styling
