@@ -909,7 +909,7 @@ export default function Chat() {
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <h1 style={{ margin: 0 }}>💬 Chat</h1>
+        <div style={{ width: '200px' }}></div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {user?.role === 'owner' && (
             <button 
