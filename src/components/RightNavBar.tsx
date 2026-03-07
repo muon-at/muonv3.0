@@ -89,6 +89,19 @@ export const RightNavBar: React.FC = () => {
           <div className="nav-tooltip">Min Side</div>
         </button>
 
+        {/* CHAT SECTION HEADER */}
+        <div style={{
+          textAlign: 'center',
+          color: '#667eea',
+          fontSize: '0.75rem',
+          fontWeight: '700',
+          letterSpacing: '1px',
+          margin: '1rem 0 0.5rem',
+          opacity: 0.7,
+        }}>
+          CHAT
+        </div>
+
         {/* GLOBAL CHAT - Globe icon */}
         <button 
           className="nav-button"
@@ -122,6 +135,18 @@ export const RightNavBar: React.FC = () => {
           <div className="avdeling-circle">OSL</div>
           <div className="nav-tooltip">OSL</div>
         </button>
+
+        {/* SKN CHAT - Owner only */}
+        {user?.role === 'owner' && (
+          <button 
+            className="nav-button"
+            onClick={() => navigate('/chat', { state: { selectedChannel: 'dept-skien' } })}
+            title="SKN Chat"
+          >
+            <div className="avdeling-circle">SKN</div>
+            <div className="nav-tooltip">SKN</div>
+          </button>
+        )}
 
         {/* AVDELING CHAT - Circle with text (user's department) */}
         {user?.department && user.department !== 'MUON' && (
