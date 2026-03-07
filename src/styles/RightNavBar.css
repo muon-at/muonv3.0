@@ -29,7 +29,7 @@
   height: 60px;
   border-radius: 8px;
   border: none;
-  background: rgba(255, 255, 255, 0.2);
+  background: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@
 }
 
 .nav-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   transform: scale(1.1);
 }
 
