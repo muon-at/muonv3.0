@@ -154,6 +154,15 @@ export default function MinSide() {
         </button>
       </div>
 
+      {/* BADGES ROW - BELOW HEADER */}
+      <div className="badges-row">
+        {allBadges.map((badge, idx) => (
+          <div key={idx} className={`badge-mini ${earnedBadges.includes(badge) ? 'earned' : 'locked'}`} title={`Badge ${idx + 1}`}>
+            <span className="badge-mini-icon">{badge}</span>
+          </div>
+        ))}
+      </div>
+
       {/* MAIN CONTENT */}
       {activeTab === 'stats' && (
       <div className="minside-main">
@@ -236,24 +245,6 @@ export default function MinSide() {
 
       {activeTab === 'stats' && (
       <>
-      {/* BADGES SECTION */}
-      <div className="badges-section">
-        <div className="badges-header">
-          <h2>🎖️ Dine Merker</h2>
-          <p>Oppsummering av dine prestasjonsbadges</p>
-        </div>
-        <div className="badges-grid">
-          {allBadges.map((badge, idx) => (
-            <div key={idx} className={`badge-item ${earnedBadges.includes(badge) ? 'earned' : 'locked'}`}>
-              <div className="badge-icon">{badge}</div>
-              <div className="badge-info">
-                <div className="badge-name">Badge {idx + 1}</div>
-                <div className="badge-desc">{earnedBadges.includes(badge) ? '✓ Oppnådd' : 'Låst'}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* PROGRESS BARS */}
       <div className="progress-section">
