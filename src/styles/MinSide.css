@@ -31,20 +31,7 @@
   gap: 1.5rem;
 }
 
-/* MIN SIDE CUSTOM HEADER - CENTERED USER NAME */
-.minside-header-custom {
-  justify-content: center !important;
-  align-items: center !important;
-  min-height: 120px !important;
-}
 
-.header-name-centered {
-  margin: 0 !important;
-  font-size: 4.8rem !important;
-  font-weight: 700 !important;
-  color: white !important;
-  text-align: center !important;
-}
 
 .page-header-standard h1 {
   margin: 0;
