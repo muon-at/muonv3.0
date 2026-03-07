@@ -278,6 +278,8 @@ export default function AdminDashboard() {
           const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
           const startOfWeek = new Date(today);
           startOfWeek.setDate(today.getDate() - today.getDay());
+          const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
           
           // Convert snapshot to array for easier processing
           const contracts: any[] = [];
@@ -286,7 +288,7 @@ export default function AdminDashboard() {
           });
           
           // Parse contracts and group by seller
-          const sellerStats: { [key: string]: { month: number; week: number; total: number; weeks: { [key: string]: number }; months: { [key: string]: number } } } = {};
+          const sellerStats: { [key: string]: { month: number; week: number; total: number; today: number; todayGem: number; todayGift: number; weeks: { [key: string]: number }; months: { [key: string]: number } } } = {};
           
           contracts.forEach((data) => {
             const selger = data.selger || 'Ukjent';
@@ -294,7 +296,7 @@ export default function AdminDashboard() {
             
             // Initialize seller if not exists
             if (!sellerStats[selger]) {
-              sellerStats[selger] = { month: 0, week: 0, total: 0, weeks: {}, months: {} };
+              sellerStats[selger] = { month: 0, week: 0, total: 0, today: 0, todayGem: 0, todayGift: 0, weeks: {}, months: {} };
             }
             
             sellerStats[selger].total++;
@@ -307,6 +309,13 @@ export default function AdminDashboard() {
                 const month = parseInt(parts[1]);
                 const year = parseInt(parts[2]);
                 const orderDate = new Date(year, month - 1, day);
+                
+                // Count today
+                if (orderDate >= startOfDay && orderDate < endOfDay) {
+                  sellerStats[selger].today++;
+                  sellerStats[selger].todayGem++;
+                  sellerStats[selger].todayGift++;
+                }
                 
                 // Count this month
                 if (orderDate >= startOfMonth && orderDate <= today) {
@@ -347,6 +356,9 @@ export default function AdminDashboard() {
               total: stats.total,
               bestWeek,
               bestMonth,
+              today: stats.today,
+              todayGem: stats.todayGem,
+              todayGift: stats.todayGift,
             };
           });
           
@@ -1637,6 +1649,9 @@ export default function AdminDashboard() {
                   <div className="progresjon-table">
                     <div className="table-header">
                       <div className="col-selger">Ekstern Navn</div>
+                      <div className="col-today-bell">I DAG 🔔</div>
+                      <div className="col-today-gem">I DAG 💎</div>
+                      <div className="col-today-gift">I DAG 🎁</div>
                       <div className="col-week">Uke</div>
                       <div className="col-month">Måned</div>
                       <div className="col-total">Totalt</div>
@@ -1647,6 +1662,15 @@ export default function AdminDashboard() {
                     {progresjonData.map((row, idx) => (
                       <div key={idx} className="table-row">
                         <div className="col-selger">{row.selger}</div>
+                        <div className="col-today-bell" style={{ textAlign: 'center', fontWeight: '600', color: '#f59e0b' }}>
+                          {row.today || 0}
+                        </div>
+                        <div className="col-today-gem" style={{ textAlign: 'center', fontWeight: '600', color: '#ec4899' }}>
+                          {row.todayGem || 0}
+                        </div>
+                        <div className="col-today-gift" style={{ textAlign: 'center', fontWeight: '600', color: '#8b5cf6' }}>
+                          {row.todayGift || 0}
+                        </div>
                         <div className="col-week" style={{ textAlign: 'center', fontWeight: '600', color: '#667eea' }}>
                           {row.week}
                         </div>

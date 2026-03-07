@@ -1075,7 +1075,7 @@
 .progresjon-table .table-header {
   background: #fffbf0;
   display: grid;
-  grid-template-columns: 200px 100px 100px 100px 100px 100px 80px;
+  grid-template-columns: 200px 100px 100px 100px 100px 100px 100px 100px 100px 80px;
   gap: 1rem;
   padding: 1rem;
   font-weight: 600;
@@ -1088,7 +1088,7 @@
 
 .progresjon-table .table-row {
   display: grid;
-  grid-template-columns: 200px 100px 100px 100px 100px 100px 80px;
+  grid-template-columns: 200px 100px 100px 100px 100px 100px 100px 100px 100px 80px;
   gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
@@ -1104,6 +1104,9 @@
 .progresjon-table .col-month,
 .progresjon-table .col-total,
 .progresjon-table .col-best-week,
-.progresjon-table .col-best-month {
+.progresjon-table .col-best-month,
+.progresjon-table .col-today-bell,
+.progresjon-table .col-today-gem,
+.progresjon-table .col-today-gift {
   color: #333;
 }
