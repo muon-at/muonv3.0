@@ -405,8 +405,21 @@ export default function AdminDashboard() {
             const months = Object.values(stats.months);
             const bestMonth = months.length > 0 ? Math.max(...months) : 0;
             
-            // Get emoji counts from chat (will be populated by loadEmojiCounts)
-            const selgerEmojiCounts = emojiCounts[selger] || { '🔔': 0, '💎': 0, '🎁': 0 };
+            // Match emoji counts from chat
+            // selger format is "Name / role" but chat sender is just "Name"
+            // Extract just the name part
+            const selgerName = selger.split(' / ')[0].trim();
+            
+            // Look for emoji counts - try both full selger name and just the name part
+            let selgerEmojiCounts = emojiCounts[selger];
+            if (!selgerEmojiCounts) {
+              selgerEmojiCounts = emojiCounts[selgerName];
+            }
+            if (!selgerEmojiCounts) {
+              selgerEmojiCounts = { '🔔': 0, '💎': 0, '🎁': 0 };
+            }
+            
+            console.log('📊 Progresjon row:', { selger, selgerName, emojiCounts: selgerEmojiCounts, allEmojis: emojiCounts });
             
             return {
               selger,
