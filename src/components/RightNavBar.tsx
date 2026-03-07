@@ -153,8 +153,11 @@ export const RightNavBar: React.FC = () => {
         {user?.project && (
           <button 
             className="nav-button"
-            onClick={() => navigate('/chat', { state: { selectedChannel: `project-${(user.project || '').toLowerCase()}` } })}
-            title={`${user.project} Chat`}
+            onClick={() => {
+              const projectId = user.project === 'MUON' ? 'allente' : (user.project || '').toLowerCase();
+              navigate('/chat', { state: { selectedChannel: `project-${projectId}` } });
+            }}
+            title={user.project === 'MUON' ? 'Allente Chat' : `${user.project} Chat`}
           >
             <div className="icon-circle">
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
