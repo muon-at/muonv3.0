@@ -296,13 +296,19 @@ export default function Chat() {
         const canAccess = checkChannelAccess(data.type, data.avdeling, data.allowedUsers, data.project);
         
         if (canAccess) {
+          // Map Muon to Allente, handle case-insensitive
+          let displayName = data.name;
+          if (data.name?.toLowerCase() === 'muon' || data.name === 'Muon' || data.name === 'MUON') {
+            displayName = 'Allente';
+          }
+          
           allowedChannels.push({
             id: doc.id,
-            name: data.name?.toLowerCase() === 'muon' ? 'Allente' : data.name,
+            name: displayName,
             type: data.type,
             unread: 0,
             allowedUsers: data.allowedUsers,
-            emoji: getChannelEmoji(data.name, data.emoji),
+            emoji: getChannelEmoji(displayName, data.emoji),
           });
         }
       });
@@ -1097,6 +1103,8 @@ export default function Chat() {
                       <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
                         {(() => {
                           const name = channels.find(c => c.id === selectedChannel)?.name;
+                          // If name is already "Allente", show it as is
+                          if (name === 'Allente') return 'Allente';
                           if (name?.toLowerCase() === 'muon') return 'Allente';
                           if (name === 'team') return 'Teamledere';
                           return name;
