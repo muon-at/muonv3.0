@@ -255,7 +255,8 @@ export default function MinSide() {
         } else if (def.navn === 'MVP MÅNED') {
           earned = userStatsKey !== '' && employeeStats[userStatsKey]?.month > 0 && bestThisMonth === userStatsKey;
         } else if (def.navn === 'MVP DAG') {
-          earned = userStatsKey !== '' && employeeStats[userStatsKey]?.today > 0 && bestToday === userStatsKey;
+          // MVP DAG: Best day ever (not just today) - has 12+ sales in best day
+          earned = userBestDay >= 10;  // If they had 10+ salg on their best day
         } else if (def.navn === 'FØRSTE SALGET') {
           earned = total > 0;
         } else if (def.navn === '5 SALG') {
