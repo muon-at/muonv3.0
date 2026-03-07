@@ -92,15 +92,23 @@ export default function MinSide() {
       snapshot.forEach(doc => {
         const badgeData = doc.data();
         const emoji = badgeData.emoji;
+        const selger = badgeData.selger || '';
         
-        // Check if this badge belongs to current user (by checking selger field)
-        if (badgeData.selger === externalName || badgeData.selger?.includes(externalName)) {
-          if (statusMap[emoji] !== undefined) {
-            statusMap[emoji] = true;
-            userEarnedBadges.push(emoji);
-          }
+        // Check if this badge belongs to current user
+        // Handle both "Name" and "Name / rolle" formats
+        const matches = 
+          selger === externalName || 
+          selger.includes(externalName) || 
+          selger.startsWith(externalName + ' /');
+        
+        if (matches && statusMap[emoji] !== undefined) {
+          statusMap[emoji] = true;
+          userEarnedBadges.push(emoji);
+          console.log(`  ✅ ${emoji} earned for ${selger}`);
         }
       });
+      
+      console.log(`📥 Found ${userEarnedBadges.length} badges for ${externalName}:`, userEarnedBadges);
       
       console.log('📥 Loaded badges from allente_badges for', externalName, userEarnedBadges);
       setEarnedBadges(userEarnedBadges);
