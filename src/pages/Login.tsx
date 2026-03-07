@@ -8,7 +8,7 @@ import '../styles/Login.css';
 export default function Login() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [username, setUsername] = useState('');
+  const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,61 +25,48 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    if (!username || !password) {
-      setError('Vennligst fyll inn både brukernavn og passord');
+    if (!emailOrUsername || !password) {
+      setError('Vennligst fyll inn både e-post/brukernavn og passord');
       return;
     }
 
     setLoading(true);
     
     try {
-      // Lookup employee by username in Firestore
+      // Lookup employee by username OR email in Firestore
       const employeesRef = collection(db, 'employees');
       const snapshot = await getDocs(employeesRef);
       
       let foundEmployee: any = null;
-      let debugInfo = { checked: 0, usernameMatch: false, passwordMatch: false, archived: false };
       
       snapshot.forEach((doc) => {
         const data = doc.data();
-        debugInfo.checked++;
         
-        if (data.username === username) {
-          debugInfo.usernameMatch = true;
-          console.log('✅ Username matched:', data.name);
-          
-          if (data.password === password) {
-            debugInfo.passwordMatch = true;
-            console.log('✅ Password matched');
-            
-            if (!data.archived) {
-              console.log('✅ Not archived - LOGIN SUCCESS');
-              foundEmployee = { id: doc.id, ...data };
-            } else {
-              debugInfo.archived = true;
-              console.log('❌ User is archived');
-            }
-          } else {
-            console.log('❌ Password mismatch. Expected:', data.password, 'Got:', password);
-          }
+        // Check if matches by username or email
+        const usernameMatch = data.username === emailOrUsername;
+        const emailMatch = data.email === emailOrUsername;
+        
+        if ((usernameMatch || emailMatch) && data.password === password && !data.archived) {
+          console.log('✅ LOGIN SUCCESS:', data.name);
+          foundEmployee = { id: doc.id, ...data };
         }
       });
-
-      console.log('🔍 Debug Info:', debugInfo);
 
       if (foundEmployee) {
         // Check if default password - must change it
         if (foundEmployee.password === '1234' || !foundEmployee.passwordChanged) {
-          // Store employee for password reset page
+          console.log('🔄 First login - redirecting to password reset');
           localStorage.setItem('tempEmployee', JSON.stringify(foundEmployee));
           navigate('/reset-password');
         } else {
           // Normal login
+          console.log('✅ Logging in:', foundEmployee.name);
           login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
           navigate('/min-side');
         }
       } else {
-        setError('Feil brukernavn eller passord');
+        setError('Feil e-post/brukernavn eller passord');
+        console.log('❌ Login failed for:', emailOrUsername);
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -103,13 +90,13 @@ export default function Login() {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="username">Brukernavn</label>
+            <label htmlFor="emailOrUsername">E-post eller Brukernavn</label>
             <input
-              id="username"
+              id="emailOrUsername"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="f.eks sebastian.moen"
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
+              placeholder="f.eks stian@muonas.no eller stian_73280"
               disabled={loading}
               autoFocus
             />
@@ -162,35 +149,66 @@ export default function Login() {
 
         {/* Demo Test Mode */}
         <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff8dc', borderRadius: '6px', textAlign: 'center' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#999' }}>Testing/Development:</p>
-          <button
-            type="button"
-            onClick={() => {
-              // Demo login as owner for testing
-              const demoUser = {
-                id: 'demo-owner',
-                name: 'Stian Abrahamsen',
-                role: 'owner',
-                department: 'MUON',
-                project: 'Muon',
-                username: 'stian_73280',
-                externalName: 'Stian Abrahamsen',
-              };
-              login(demoUser.name, demoUser.id, demoUser.role, demoUser);
-              navigate('/min-side');
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#667eea',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              fontSize: '0.9rem',
-              padding: 0,
-            }}
-          >
-            🧪 Demo Login as Owner
-          </button>
+          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.8rem', color: '#999' }}>🧪 Testing/Development:</p>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const demoUser = {
+                  id: 'demo-owner',
+                  name: 'Stian Abrahamsen',
+                  role: 'owner',
+                  department: 'MUON',
+                  project: 'Muon',
+                  username: 'stian_73280',
+                  email: 'stian@muonas.no',
+                  externalName: 'Stian Abrahamsen',
+                };
+                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
+                navigate('/min-side');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#667eea',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                fontSize: '0.9rem',
+                padding: 0,
+              }}
+            >
+              👑 Owner (Stian)
+            </button>
+            <span style={{ color: '#999' }}>·</span>
+            <button
+              type="button"
+              onClick={() => {
+                const demoUser = {
+                  id: 'demo-employee',
+                  name: 'Oliver T Jenssen',
+                  role: 'employee',
+                  department: 'KRS',
+                  project: 'Allente',
+                  username: 'oliver.j',
+                  email: 'oliver@muonas.no',
+                  externalName: 'Oliver T Jenssen',
+                };
+                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
+                navigate('/min-side');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#10b981',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                fontSize: '0.9rem',
+                padding: 0,
+              }}
+            >
+              👤 Employee (Oliver)
+            </button>
+          </div>
         </div>
 
         {/* Footer */}
