@@ -25,21 +25,20 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
 .profile-avatar {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #667eea;
-  border: 3px solid #c4b0d4;
+  border: 4px solid #c4b0d4;
   flex-shrink: 0;
 }
 
@@ -49,51 +48,18 @@
 
 .banner-name {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #a989c4;
 }
 
 .banner-role {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.95rem;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
   color: #b0a0c8;
 }
 
-/* BADGES ROW */
-.badges-row {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
 
-.badge-circle {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  border: 2px solid #d4c5e0;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.badge-circle.earned {
-  border-color: #667eea;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-}
-
-.badge-circle.locked {
-  opacity: 0.3;
-}
-
-.badge-circle:hover {
-  transform: scale(1.1);
-}
 
 /* MAIN CONTENT */
 .minside-main {
@@ -245,6 +211,95 @@
   border-radius: 4px;
   font-size: 0.9rem;
   color: #333;
+}
+
+/* BADGES SECTION */
+.badges-section {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.badges-header {
+  margin-bottom: 2rem;
+}
+
+.badges-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+  font-weight: 700;
+}
+
+.badges-header p {
+  margin: 0.5rem 0 0 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1.5rem;
+}
+
+.badge-item {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid #e2e8f0;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.badge-item.earned {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  background: #f8f9ff;
+}
+
+.badge-item.locked {
+  opacity: 0.5;
+}
+
+.badge-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.badge-icon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60px;
+}
+
+.badge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.badge-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.badge-desc {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.badge-item.earned .badge-desc {
+  color: #16a34a;
+  font-weight: 600;
 }
 
 /* PROGRESS SECTION */

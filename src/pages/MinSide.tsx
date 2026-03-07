@@ -133,13 +133,6 @@ export default function MinSide() {
               <p className="banner-role">{user?.role} • {user?.department}</p>
             </div>
           </div>
-          <div className="badges-row">
-            {allBadges.map((badge, idx) => (
-              <div key={idx} className={`badge-circle ${earnedBadges.includes(badge) ? 'earned' : 'locked'}`}>
-                {badge}
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -198,6 +191,25 @@ export default function MinSide() {
               />
             </div>
           )}
+        </div>
+      </div>
+
+      {/* BADGES SECTION */}
+      <div className="badges-section">
+        <div className="badges-header">
+          <h2>🎖️ Dine Merker</h2>
+          <p>Oppsummering av dine prestasjonsbadges</p>
+        </div>
+        <div className="badges-grid">
+          {allBadges.map((badge, idx) => (
+            <div key={idx} className={`badge-item ${earnedBadges.includes(badge) ? 'earned' : 'locked'}`}>
+              <div className="badge-icon">{badge}</div>
+              <div className="badge-info">
+                <div className="badge-name">Badge {idx + 1}</div>
+                <div className="badge-desc">{earnedBadges.includes(badge) ? '✓ Oppnådd' : 'Låst'}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
