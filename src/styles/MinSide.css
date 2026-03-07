@@ -39,11 +39,11 @@
 }
 
 .header-name-centered {
-  margin: 0;
-  font-size: 7.5rem;
-  font-weight: 700;
-  color: white;
-  text-align: center;
+  margin: 0 !important;
+  font-size: 7.5rem !important;
+  font-weight: 700 !important;
+  color: white !important;
+  text-align: center !important;
 }
 
 .page-header-standard h1 {
