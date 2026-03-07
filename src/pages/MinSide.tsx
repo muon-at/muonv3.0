@@ -228,7 +228,18 @@ export default function MinSide() {
         earnedBadgesList.push({ badge: def.emoji, earned });
       });
 
-      console.log('✅ Badges calculated and saving to Firestore:', earnedBadgesList);
+      // Debug logging
+      const earnedCount = earnedBadgesList.filter(b => b.earned).length;
+      console.log(`✅ ${user?.name} badges:`, {
+        earned: earnedBadgesList.filter(b => b.earned).map(b => b.badge),
+        unearned: earnedBadgesList.filter(b => !b.earned).map(b => b.badge),
+        earnedCount,
+        salesToday,
+        totalSales: total,
+        bestToday,
+        bestThisMonth,
+        bestOverall
+      });
       setEarnedBadges(earnedBadgesList.map(b => b.badge));
       
       // Store earned status map for styling
