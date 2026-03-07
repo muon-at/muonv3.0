@@ -74,6 +74,7 @@ export default function Chat() {
   const [emojiPickerMessageId, setEmojiPickerMessageId] = useState<string | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingMessageContent, setEditingMessageContent] = useState('');
+  const [hoveredMessageId, setHoveredMessageId] = useState<string | null>(null); // Track which message is hovered
   const [topDepartment, setTopDepartment] = useState<string | null>(null); // Best department this week
   const [employeeMap, setEmployeeMap] = useState<any>({}); // Map of externalName -> {department, name}
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1534,12 +1535,23 @@ export default function Chat() {
                     {group.messages.map((msg, msgIdx) => {
                       const isFirstFromSender = msgIdx === 0 || group.messages[msgIdx - 1].sender !== msg.sender;
                       return (
-                        <div key={msg.id} style={{
-                          display: 'flex',
-                          gap: '0.75rem',
-                          marginBottom: isFirstFromSender ? '1rem' : '0.25rem',
-                          paddingLeft: '0.5rem'
-                        }}>
+                        <div 
+                          key={msg.id} 
+                          onMouseEnter={() => setHoveredMessageId(msg.id)}
+                          onMouseLeave={() => setHoveredMessageId(null)}
+                          style={{
+                            display: 'flex',
+                            gap: '0.75rem',
+                            marginBottom: isFirstFromSender ? '1rem' : '0.25rem',
+                            paddingLeft: '0.5rem',
+                            paddingRight: '0.5rem',
+                            paddingTop: '0.25rem',
+                            paddingBottom: '0.25rem',
+                            borderRadius: '4px',
+                            transition: 'background 0.15s',
+                            background: hoveredMessageId === msg.id ? '#f5f5f5' : 'transparent'
+                          }}
+                        >
                           {/* Message content */}
                           <div style={{ flex: 1 }}>
                             {/* Header: Name + Time (only on first message from sender) */}
@@ -1669,63 +1681,134 @@ export default function Chat() {
                         ✔️ Seen by {msg.seenBy.length} {msg.seenBy.length === 1 ? 'person' : 'people'}
                       </div>
                     )}
-                    <div className="message-actions">
-                      <button 
-                        className="reply-button"
-                        onClick={() => setReplyingTo(msg)}
-                      >
-                        ↩️ Reply
-                      </button>
-                      <button 
-                        className="reply-button"
-                        onClick={() => pinMessage(msg.id, msg)}
-                      >
-                        📌 Pin
-                      </button>
-                      {['👍', '❤️', '😂', '🔥', '👏'].map(emoji => (
+                    {hoveredMessageId === msg.id && (
+                      <div className="message-actions" style={{
+                        display: 'flex',
+                        gap: '0.25rem',
+                        alignItems: 'center'
+                      }}>
                         <button 
-                          key={emoji}
-                          className="reaction-button"
-                          onClick={() => addReaction(msg.id, emoji)}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                      <button 
-                        className="add-reaction-btn"
-                        onClick={() => {
-                          setEmojiPickerMessageId(msg.id);
-                          setEmojiPickerOpen(true);
-                        }}
-                      >
-                        ➕
-                      </button>
-                      {msg.sender === user?.name && !msg.isDeleted && (
-                        <button
                           className="reply-button"
-                          onClick={() => {
-                            setEditingMessageId(msg.id);
-                            setEditingMessageContent(msg.content);
+                          onClick={() => setReplyingTo(msg)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            transition: 'background 0.15s',
+                            color: '#999'
                           }}
-                          style={{ color: '#667eea' }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          ✏️ Edit
+                          ↩️ Reply
                         </button>
-                      )}
-                      {user?.role === 'owner' && !msg.isDeleted && (
-                        <button
+                        <button 
                           className="reply-button"
-                          onClick={() => {
-                            if (confirm('Delete this message?')) {
-                              deleteMessage(msg.id);
-                            }
+                          onClick={() => pinMessage(msg.id, msg)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            transition: 'background 0.15s',
+                            color: '#999'
                           }}
-                          style={{ color: '#ff4757' }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          🗑️ Delete
+                          📌 Pin
                         </button>
-                      )}
-                    </div>
+                        {['👍', '❤️', '😂', '🔥', '👏'].map(emoji => (
+                          <button 
+                            key={emoji}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '4px',
+                              transition: 'background 0.15s',
+                            }}
+                            onClick={() => addReaction(msg.id, emoji)}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                        <button 
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            transition: 'background 0.15s',
+                            color: '#999'
+                          }}
+                          onClick={() => {
+                            setEmojiPickerMessageId(msg.id);
+                            setEmojiPickerOpen(true);
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          ➕
+                        </button>
+                        {msg.sender === user?.name && !msg.isDeleted && (
+                          <button
+                            onClick={() => {
+                              setEditingMessageId(msg.id);
+                              setEditingMessageContent(msg.content);
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '4px',
+                              transition: 'background 0.15s',
+                              color: '#667eea'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            ✏️ Edit
+                          </button>
+                        )}
+                        {user?.role === 'owner' && !msg.isDeleted && (
+                          <button
+                            onClick={() => {
+                              if (confirm('Delete this message?')) {
+                                deleteMessage(msg.id);
+                              }
+                            }}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              fontSize: '0.85rem',
+                              padding: '0.25rem 0.5rem',
+                              borderRadius: '4px',
+                              transition: 'background 0.15s',
+                              color: '#ff4757'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+                          >
+                            🗑️ Delete
+                          </button>
+                        )}
+                      </div>
+                    )}
                     {msg.reactions && (
                       <div className="message-reactions">
                         {Object.entries(msg.reactions).map(([emoji, users]) => (
