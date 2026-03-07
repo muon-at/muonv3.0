@@ -50,6 +50,9 @@ export default function Chat() {
   const { user } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [selectedDM, setSelectedDM] = useState<string | null>(null);
+  const [selectedDMUser, setSelectedDMUser] = useState<any>(null);
+  const [isDMMode, setIsDMMode] = useState(false);
+  const [dmSearchQuery, setDmSearchQuery] = useState('');
   const [channels, setChannels] = useState<Channel[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -64,7 +67,6 @@ export default function Chat() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMessages, setFilteredMessages] = useState<Message[]>([]);
   const [isChannelModalOpen, setIsChannelModalOpen] = useState(false);
-  const [isDMModalOpen, setIsDMModalOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [emojiPickerMessageId, setEmojiPickerMessageId] = useState<string | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -199,9 +201,10 @@ export default function Chat() {
     
     // Handle selectedDM state
     if (state?.selectedDM === 'list') {
-      setIsDMModalOpen(true);
+      setIsDMMode(true);
       setSelectedChannel(null);
       setSelectedDM(null);
+      setSelectedDMUser(null);
       return;
     }
     
@@ -346,7 +349,9 @@ export default function Chat() {
       if (existingDMId) {
         // Open existing DM
         setSelectedDM(existingDMId);
+        setSelectedDMUser(otherUser);
         setSelectedChannel(null);
+        setIsDMMode(true);
       } else {
         // Create new DM
         const newDMRef = await addDoc(dmsRef, {
@@ -356,12 +361,14 @@ export default function Chat() {
           createdAt: new Date(),
         });
         setSelectedDM(newDMRef.id);
+        setSelectedDMUser(otherUser);
         setSelectedChannel(null);
+        setIsDMMode(true);
         // Reload DMs to show the new one
         await loadDMs();
       }
       
-      // setDmSearchQuery(''); // Removed - sidebar no longer used
+      setDmSearchQuery('');
     } catch (err) {
       console.error('Error starting DM:', err);
     }
@@ -912,75 +919,167 @@ export default function Chat() {
         allUsers={allUsers}
       />
 
-      {/* DM Selection Modal */}
-      {isDMModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-        }}>
+      {isDMMode ? (
+        // DM MODE - SPLIT VIEW
+        <div style={{ display: 'flex', height: '100%', gap: '0' }}>
+          {/* LEFT SIDEBAR - DM List */}
           <div style={{
-            background: 'white',
-            borderRadius: '8px',
-            padding: '2rem',
-            maxWidth: '400px',
-            maxHeight: '80vh',
-            overflow: 'auto',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            width: '300px',
+            background: '#f8f9fa',
+            borderRight: '1px solid #ddd',
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
           }}>
-            <h2 style={{ margin: '0 0 1.5rem', color: '#333' }}>Start Direct Message</h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {allUsers.filter(u => u.name !== user?.name).map(u => (
-                <button
-                  key={u.name}
-                  onClick={() => {
-                    startOrOpenDM(u);
-                    setIsDMModalOpen(false);
-                  }}
-                  style={{
-                    padding: '0.75rem 1rem',
-                    background: '#f0f0f0',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'background 0.2s',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = '#e0e0e0')}
-                  onMouseOut={(e) => (e.currentTarget.style.background = '#f0f0f0')}
-                >
-                  <strong>{u.name}</strong>
-                  <div style={{ fontSize: '0.85rem', color: '#666' }}>{u.role}</div>
-                </button>
-              ))}
+            <div style={{ padding: '1rem', borderBottom: '1px solid #ddd' }}>
+              <h3 style={{ margin: '0 0 1rem', color: '#333', fontSize: '1.1rem' }}>Start Direct Message</h3>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={dmSearchQuery}
+                onChange={(e) => setDmSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  boxSizing: 'border-box',
+                  fontSize: '0.9rem',
+                }}
+              />
             </div>
-            <button
-              onClick={() => setIsDMModalOpen(false)}
-              style={{
-                marginTop: '1.5rem',
-                padding: '0.75rem 1.5rem',
-                background: '#999',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                width: '100%',
-              }}
-            >
-              Cancel
-            </button>
+            
+            {/* DM List */}
+            <div style={{ flex: 1, overflow: 'auto', padding: '0.5rem' }}>
+              {allUsers
+                .filter(u => u.name !== user?.name && u.name.toLowerCase().includes(dmSearchQuery.toLowerCase()))
+                .map(u => (
+                  <button
+                    key={u.name}
+                    onClick={() => startOrOpenDM(u)}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      background: selectedDMUser?.name === u.name ? '#667eea' : '#fff',
+                      color: selectedDMUser?.name === u.name ? '#fff' : '#333',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      marginBottom: '0.5rem',
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      if (selectedDMUser?.name !== u.name) {
+                        e.currentTarget.style.background = '#eee';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (selectedDMUser?.name !== u.name) {
+                        e.currentTarget.style.background = '#fff';
+                      }
+                    }}
+                  >
+                    <strong style={{ display: 'block' }}>{u.name}</strong>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.25rem' }}>{u.role} • {u.department || 'N/A'}</div>
+                  </button>
+                ))}
+            </div>
+          </div>
+
+          {/* RIGHT SIDE - Chat */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff' }}>
+            {selectedDMUser ? (
+              <>
+                {/* DM Header */}
+                <div style={{
+                  padding: '1rem 1.5rem',
+                  background: '#667eea',
+                  color: 'white',
+                  borderBottom: '1px solid #e2e8f0',
+                }}>
+                  <h2 style={{ margin: 0, fontSize: '1.3rem' }}>{selectedDMUser.name}</h2>
+                  <div style={{ fontSize: '0.9rem', opacity: 0.9, marginTop: '0.25rem' }}>
+                    {selectedDMUser.role} • {selectedDMUser.department || 'N/A'}
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem' }}>
+                  {filteredMessages.map((msg, idx) => (
+                    <div key={idx} style={{
+                      marginBottom: '1rem',
+                      display: 'flex',
+                      justifyContent: msg.sender === user?.name ? 'flex-end' : 'flex-start',
+                    }}>
+                      <div style={{
+                        maxWidth: '70%',
+                        padding: '0.75rem 1rem',
+                        background: msg.sender === user?.name ? '#667eea' : '#f0f0f0',
+                        color: msg.sender === user?.name ? '#fff' : '#333',
+                        borderRadius: '8px',
+                        wordBreak: 'break-word',
+                      }}>
+                        <strong style={{ fontSize: '0.9rem' }}>{msg.sender}</strong>
+                        <div style={{ marginTop: '0.25rem' }}>{msg.content}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Message Input */}
+                <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && newMessage.trim()) {
+                        sendMessage();
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.9rem',
+                    }}
+                  />
+                  <button
+                    onClick={() => sendMessage()}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      background: '#667eea',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Send
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#999',
+                fontSize: '1.1rem',
+              }}>
+                Choose someone to chat with
+              </div>
+            )}
           </div>
         </div>
-      )}
-
-      <div className="chat-content">
+      ) : (
+        // CHANNEL MODE - Normal layout
+        <div className="chat-content">
 
 
         {/* Message Area */}
@@ -1408,6 +1507,7 @@ export default function Chat() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
