@@ -173,23 +173,36 @@ export default function Chat() {
     try {
       const employeesRef = collection(db, 'employees');
       const snapshot = await getDocs(employeesRef);
-      const users: any[] = [];
+      const userMap: { [key: string]: any } = {}; // Deduplicate by name
+      const rolePriority = { 'owner': 3, 'teamlead': 2, 'employee': 1, 'ansatt': 1 };
       
       snapshot.forEach(doc => {
         const data = doc.data();
         // Only add users that are not the current user
         if (data.name !== user?.name) {
-          users.push({
+          const newUser = {
             id: doc.id,
             name: data.name,
             email: data.email,
             department: data.department,
             role: data.role,
-          });
+          };
+          
+          // Keep the version with the highest role priority
+          if (!userMap[data.name]) {
+            userMap[data.name] = newUser;
+          } else {
+            const existingPriority = rolePriority[userMap[data.name].role as keyof typeof rolePriority] || 0;
+            const newPriority = rolePriority[data.role as keyof typeof rolePriority] || 0;
+            if (newPriority > existingPriority) {
+              userMap[data.name] = newUser;
+            }
+          }
         }
       });
       
-      setAllUsers(users.sort((a, b) => a.name.localeCompare(b.name)));
+      const users = Object.values(userMap).sort((a, b) => a.name.localeCompare(b.name));
+      setAllUsers(users);
     } catch (err) {
       console.error('Error loading users:', err);
     }
