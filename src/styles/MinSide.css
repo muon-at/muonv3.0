@@ -23,9 +23,7 @@
   margin-bottom: 0;
 }
 
-.minside-header-centered {
-  padding: 2.5rem 2rem !important;
-}
+
 
 .header-left {
   display: flex;
@@ -33,32 +31,10 @@
   gap: 1.5rem;
 }
 
-/* MIN SIDE LEFT-ALIGNED HEADER - NO BOX */
-.minside-header-centered {
-  justify-content: flex-start;
-  text-align: left;
-  padding-left: 3rem !important;
-}
-
-.header-content-centered {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-}
-
-.header-content-centered h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-}
-
-.header-content-centered .subtitle {
-  margin: 0;
-  font-size: 0.9rem;
-  opacity: 0.9;
-  color: rgba(255, 255, 255, 0.95);
+/* MIN SIDE CUSTOM HEADER - EMPTY/CLEAN */
+.minside-header-custom {
+  /* Empty - ready for content */
+  min-height: 100px;
 }
 
 .page-header-standard h1 {
