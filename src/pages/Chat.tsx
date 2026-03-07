@@ -62,6 +62,7 @@ export default function Chat() {
   const [gifs, setGifs] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); // Track unread messages per DM
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -303,6 +304,8 @@ export default function Chat() {
             email: data.email,
             department: data.department,
             role: data.role,
+            lastMessageTime: 0, // Will be populated from DMs
+            unread: 0, // Will be populated from DMs
           };
           
           // Keep the version with the highest role priority
@@ -318,7 +321,34 @@ export default function Chat() {
         }
       });
       
-      const users = Object.values(userMap).sort((a, b) => a.name.localeCompare(b.name));
+      // Load DM info (last message time + unread counts)
+      const dmsRef = collection(db, 'chat_dms');
+      const dmsSnap = await getDocs(dmsRef);
+      const dmUnread: Record<string, number> = {};
+      
+      dmsSnap.forEach(doc => {
+        const data = doc.data();
+        if (data.participants && data.participants.includes(user?.name)) {
+          // Find the other participant
+          const otherParticipant = data.participants.find((p: string) => p !== user?.name);
+          if (otherParticipant && userMap[otherParticipant]) {
+            userMap[otherParticipant].lastMessageTime = data.lastMessageTime || 0;
+            userMap[otherParticipant].unread = (user?.name && data.unread?.[user.name]) || 0;
+            dmUnread[otherParticipant] = (user?.name && data.unread?.[user.name]) || 0;
+          }
+        }
+      });
+      
+      setDmUnreadCounts(dmUnread);
+      
+      // Sort by lastMessageTime (newest first), then alphabetically
+      const users = Object.values(userMap).sort((a, b) => {
+        if (b.lastMessageTime !== a.lastMessageTime) {
+          return b.lastMessageTime - a.lastMessageTime; // Most recent first
+        }
+        return a.name.localeCompare(b.name); // Alphabetical fallback
+      });
+      
       setAllUsers(users);
     } catch (err) {
       console.error('Error loading users:', err);
@@ -492,6 +522,15 @@ export default function Chat() {
         setSelectedDMUser(otherUser);
         setSelectedChannel(null);
         setIsDMMode(true);
+        
+        // Clear unread count for this user
+        setDmUnreadCounts(prev => ({ ...prev, [otherUser.name]: 0 }));
+        
+        // Mark messages as read in Firestore
+        const dmRef = doc(db, 'chat_dms', existingDMId);
+        await updateDoc(dmRef, {
+          [`unread.${user?.name}`]: 0,
+        }).catch(() => {}); // Ignore errors if field doesn't exist
       } else {
         // Create new DM
         const newDMRef = await addDoc(dmsRef, {
@@ -679,12 +718,23 @@ export default function Chat() {
         }
         await addDoc(messagesRef, msgData);
         
-        // Update DM thread with last message
+        // Update DM thread with last message + increment unread for other participant
         const dmRef = doc(db, 'chat_dms', selectedDM);
+        const dmData = await getDoc(dmRef);
+        const currentUnread = dmData.data()?.unread || {};
+        
+        // Find the other participant
+        const otherParticipant = selectedDMUser?.name;
+        const newUnreadCount = (currentUnread[otherParticipant] || 0) + 1;
+        
         await updateDoc(dmRef, {
           lastMessage: messageContent,
           lastMessageTime: Date.now(),
+          [`unread.${otherParticipant}`]: newUnreadCount,
         });
+        
+        // Reload allUsers to re-sort DM list (newer DMs float to top)
+        await loadAllUsers();
         
         console.log('✅ Message sent successfully! Will auto-delete on:', deleteAtDate.toLocaleDateString());
       }
@@ -1085,7 +1135,11 @@ export default function Chat() {
                 .map(u => (
                   <button
                     key={u.name}
-                    onClick={() => startOrOpenDM(u)}
+                    onClick={() => {
+                      startOrOpenDM(u);
+                      // Clear unread for this user
+                      setDmUnreadCounts(prev => ({ ...prev, [u.name]: 0 }));
+                    }}
                     style={{
                       width: '100%',
                       padding: '0.75rem',
@@ -1097,6 +1151,10 @@ export default function Chat() {
                       textAlign: 'left',
                       marginBottom: '0.5rem',
                       transition: 'background 0.2s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      position: 'relative',
                     }}
                     onMouseOver={(e) => {
                       if (selectedDMUser?.name !== u.name) {
@@ -1109,8 +1167,51 @@ export default function Chat() {
                       }
                     }}
                   >
-                    <strong style={{ display: 'block' }}>{u.name}</strong>
-                    <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.25rem' }}>{u.role} • {u.department || 'N/A'}</div>
+                    {/* Avatar */}
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: '#667eea',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      flexShrink: 0,
+                    }}>
+                      {u.name?.charAt(0).toUpperCase()}
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {u.name}
+                      </strong>
+                      <div style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '0.25rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {u.role} • {u.department || 'N/A'}
+                      </div>
+                    </div>
+
+                    {/* Unread Badge */}
+                    {(dmUnreadCounts[u.name] || 0) > 0 && (
+                      <div style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        background: '#dc2626',
+                        color: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 600,
+                        fontSize: '0.85rem',
+                        flexShrink: 0,
+                      }}>
+                        {dmUnreadCounts[u.name]}
+                      </div>
+                    )}
                   </button>
                 ))}
             </div>
