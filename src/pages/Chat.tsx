@@ -48,11 +48,9 @@ interface Message {
 export default function Chat() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'channels' | 'dms'>('channels');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [selectedDM, setSelectedDM] = useState<string | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
-  const [dms, setDMs] = useState<DMThread[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
@@ -61,7 +59,6 @@ export default function Chat() {
   const [gifs, setGifs] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [dmSearchQuery, setDmSearchQuery] = useState('');
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -282,12 +279,13 @@ export default function Chat() {
       
       // Sort by most recent first
       userDMs.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
-      setDMs(userDMs);
+      // setDMs(userDMs); // Removed - sidebar no longer used
     } catch (err) {
       console.error('Error loading DMs:', err);
     }
   };
 
+  // @ts-ignore - Removed - sidebar no longer used
   const startOrOpenDM = async (otherUser: any) => {
     try {
       const participants = [user?.name || 'Unknown', otherUser.name].sort();
@@ -323,7 +321,7 @@ export default function Chat() {
         await loadDMs();
       }
       
-      setDmSearchQuery('');
+      // setDmSearchQuery(''); // Removed - sidebar no longer used
     } catch (err) {
       console.error('Error starting DM:', err);
     }
@@ -885,135 +883,7 @@ export default function Chat() {
       />
 
       <div className="chat-content">
-        {/* Sidebar */}
-        <div className="chat-sidebar">
-          <div className="chat-tabs">
-            <button
-              className={`chat-tab ${activeTab === 'channels' ? 'active' : ''}`}
-              onClick={() => setActiveTab('channels')}
-            >
-              # Kanaler
-            </button>
-            <button
-              className={`chat-tab ${activeTab === 'dms' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dms')}
-            >
-              💬 DM
-            </button>
-          </div>
 
-          {activeTab === 'channels' && (
-            <div className="chat-list">
-              {channels.map(channel => (
-                <div
-                  key={channel.id}
-                  className={`chat-item-compact ${selectedChannel === channel.id ? 'active' : ''}`}
-                  onClick={() => {
-                    setSelectedChannel(channel.id);
-                    setSelectedDM(null);
-                  }}
-                  style={{ position: 'relative' }}
-                >
-                  <div 
-                    className={`emoji-circle ${channel.unread > 0 ? 'unread' : ''}`}
-                    data-tooltip={channel.name}
-                    style={{
-                      background: selectedChannel === channel.id ? '#764ba2' : '#667eea',
-                    }}
-                  >
-                    {renderChannelEmoji(channel.emoji)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'dms' && (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-              {/* Search field */}
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={dmSearchQuery}
-                onChange={(e) => setDmSearchQuery(e.target.value)}
-                style={{
-                  padding: '0.75rem',
-                  margin: '0.5rem',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontFamily: 'inherit',
-                  fontSize: '0.9rem',
-                  color: '#fff',
-                  background: '#2d3748',
-                }}
-              />
-              
-              {/* Search results or DM list */}
-              <div className="chat-list" style={{ flex: 1, overflow: 'auto' }}>
-                {dmSearchQuery.trim() ? (
-                  /* Show search results */
-                  <>
-                    {allUsers
-                      .filter(u => u.name.toLowerCase().includes(dmSearchQuery.toLowerCase()))
-                      .map(user => (
-                        <div
-                          key={user.id}
-                          className="chat-item"
-                          onClick={() => startOrOpenDM(user)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <span className="chat-name">👤 {user.name}</span>
-                          <span style={{ fontSize: '0.75rem', color: '#999' }}>
-                            {user.department}
-                          </span>
-                        </div>
-                      ))}
-                    {allUsers.filter(u => u.name.toLowerCase().includes(dmSearchQuery.toLowerCase())).length === 0 && (
-                      <p style={{ padding: '1rem', color: '#999', fontSize: '0.85rem' }}>
-                        No users found
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  /* Show active DMs */
-                  <>
-                    {dms.length === 0 ? (
-                      <p style={{ padding: '1rem', color: '#999', fontSize: '0.85rem' }}>
-                        No DMs yet. Search for a user to start chatting!
-                      </p>
-                    ) : (
-                      dms.map(dm => {
-                        const otherParticipant = dm.participants.find(p => p !== user?.name) || 'Unknown';
-                        return (
-                          <div
-                            key={dm.id}
-                            className={`chat-item-compact ${selectedDM === dm.id ? 'active' : ''}`}
-                            onClick={() => {
-                              setSelectedDM(dm.id);
-                              setSelectedChannel(null);
-                            }}
-                            style={{ position: 'relative' }}
-                          >
-                            <div 
-                              className={`emoji-circle ${dm.unread > 0 ? 'unread' : ''}`}
-                              data-tooltip={otherParticipant}
-                              style={{
-                                background: selectedDM === dm.id ? '#764ba2' : '#667eea',
-                                fontSize: '1.2rem',
-                              }}
-                            >
-                              👤
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Message Area */}
         <div className="chat-main">
