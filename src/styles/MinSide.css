@@ -31,9 +31,9 @@
   gap: 1.5rem;
 }
 
-/* MIN SIDE CUSTOM HEADER - CENTERED USER NAME */
+/* MIN SIDE CUSTOM HEADER - LEFT ALIGNED USER NAME */
 .minside-header-custom {
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   min-height: 120px;
 }
