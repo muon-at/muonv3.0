@@ -121,17 +121,20 @@ export default function MinSide() {
 
   return (
     <div className="minside-container">
-      {/* HEADER - SAME AS ADMIN */}
-      <div className="page-header-standard">
-        <div className="header-left">
-          <div>
-            <h1>👤 {user?.name}</h1>
-            <p className="subtitle">{user?.role} • {user?.department}</p>
+      {/* HEADER - PROFILE STYLE */}
+      <div className="minside-header">
+        <div className="minside-header-content">
+          <div className="header-profile-section">
+            <div className="header-avatar">
+              {user?.name?.charAt(0).toUpperCase()}
+            </div>
+            <div className="header-info">
+              <h1 className="header-name">{user?.name}</h1>
+              <p className="header-meta">{user?.role} • {user?.department}</p>
+            </div>
           </div>
-        </div>
-        <div className="header-buttons">
           <button 
-            className="back-btn-standard"
+            className="back-btn-header"
             onClick={() => window.history.back()}
           >
             ← Tilbake
@@ -139,16 +142,7 @@ export default function MinSide() {
         </div>
       </div>
 
-      {/* PROFILE SECTION */}
-      <div className="profile-section">
-        <div className="profile-avatar-large">
-          {user?.name?.charAt(0).toUpperCase()}
-        </div>
-        <div className="profile-info">
-          <h2>{user?.name}</h2>
-          <p>{user?.role} • {user?.department}</p>
-        </div>
-      </div>
+
 
       {/* MAIN CONTENT */}
       <div className="minside-main">
