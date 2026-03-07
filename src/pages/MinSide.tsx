@@ -74,11 +74,16 @@ export default function MinSide() {
   const loadCachedBadges = async () => {
     try {
       const externalName = user?.externalName || '';
-      if (!externalName) return;
+      console.log('🔍 loadCachedBadges called for:', externalName);
+      if (!externalName) {
+        console.log('⚠️ No externalName, skipping');
+        return;
+      }
       
       // Load badges from allente_badges collection (where Admin Dashboard stores them)
       const badgesRef = collection(db, 'allente_badges');
       const snapshot = await getDocs(badgesRef);
+      console.log(`📊 Found ${snapshot.size} total badges in Firestore`);
       
       const userEarnedBadges: string[] = [];
       const statusMap: { [key: string]: boolean } = {};
@@ -108,9 +113,8 @@ export default function MinSide() {
         }
       });
       
-      console.log(`📥 Found ${userEarnedBadges.length} badges for ${externalName}:`, userEarnedBadges);
+      console.log(`✅ FINAL: ${userEarnedBadges.length} badges for ${externalName}:`, userEarnedBadges);
       
-      console.log('📥 Loaded badges from allente_badges for', externalName, userEarnedBadges);
       setEarnedBadges(userEarnedBadges);
       setBadgeStatus(statusMap);
     } catch (err) {
