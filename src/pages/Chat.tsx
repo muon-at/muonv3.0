@@ -221,13 +221,15 @@ export default function Chat() {
       return;
     }
     
-    // Handle selectedChannel state
+    // Handle selectedChannel state - ALWAYS switch out of DM mode when channel is selected
     if (state?.selectedChannel && channels.length > 0) {
       // Find the channel with matching type or id
       const channelToSelect = channels.find(c => c.id === state.selectedChannel || c.type === state.selectedChannel);
       if (channelToSelect) {
         setSelectedChannel(channelToSelect.id);
         setSelectedDM(null);
+        setSelectedDMUser(null);
+        setIsDMMode(false);  // EXIT DM MODE when selecting a channel
       }
     }
   }, [location.state, channels]);
