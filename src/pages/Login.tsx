@@ -160,6 +160,39 @@ export default function Login() {
           {/* Rolle og prosjekt hentes fra Firestore */}
         </form>
 
+        {/* Demo Test Mode */}
+        <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff8dc', borderRadius: '6px', textAlign: 'center' }}>
+          <p style={{ margin: '0 0 0.5rem 0', fontSize: '0.8rem', color: '#999' }}>Testing/Development:</p>
+          <button
+            type="button"
+            onClick={() => {
+              // Demo login as owner for testing
+              const demoUser = {
+                id: 'demo-owner',
+                name: 'Stian Abrahamsen',
+                role: 'owner',
+                department: 'MUON',
+                project: 'Muon',
+                username: 'stian_73280',
+                externalName: 'Stian Abrahamsen',
+              };
+              login(demoUser.name, demoUser.id, demoUser.role, demoUser);
+              navigate('/min-side');
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#667eea',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              fontSize: '0.9rem',
+              padding: 0,
+            }}
+          >
+            🧪 Demo Login as Owner
+          </button>
+        </div>
+
         {/* Footer */}
         <div className="login-footer">
           <p className="forgot-password">
