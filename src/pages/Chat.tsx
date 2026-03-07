@@ -298,7 +298,7 @@ export default function Chat() {
         if (canAccess) {
           allowedChannels.push({
             id: doc.id,
-            name: data.name,
+            name: data.name?.toLowerCase() === 'muon' ? 'Allente' : data.name,
             type: data.type,
             unread: 0,
             allowedUsers: data.allowedUsers,
@@ -1097,7 +1097,7 @@ export default function Chat() {
                       <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
                         {(() => {
                           const name = channels.find(c => c.id === selectedChannel)?.name;
-                          if (name === 'Muon') return 'Allente';
+                          if (name?.toLowerCase() === 'muon') return 'Allente';
                           if (name === 'team') return 'Teamledere';
                           return name;
                         })()}
