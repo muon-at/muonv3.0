@@ -74,13 +74,9 @@ export default function MinSide() {
   const loadCachedBadges = async () => {
     try {
       const externalName = user?.externalName || '';
-      console.log('🔍 loadCachedBadges called for:', externalName);
-      if (!externalName) {
-        console.log('⚠️ No externalName, skipping');
-        return;
-      }
+      if (!externalName) return;
       
-      // Load badges from user_earned_badges collection (where Min Side stores calculated badges)
+      // Load badges from user_earned_badges collection (cached from last calculation)
       const badgeDocRef = doc(db, 'user_earned_badges', externalName);
       const badgeSnapshot = await getDoc(badgeDocRef);
       
@@ -89,12 +85,8 @@ export default function MinSide() {
         const userEarnedBadges = badgeData.badges || [];
         const statusMap = badgeData.badgeMap || {};
         
-        console.log(`✅ Loaded ${userEarnedBadges.length} saved badges for ${externalName}:`, userEarnedBadges);
-        
         setEarnedBadges(userEarnedBadges);
         setBadgeStatus(statusMap);
-      } else {
-        console.log(`ℹ️ No saved badges for ${externalName} yet (will calculate on load)`);
       }
     } catch (err) {
       console.error('Error loading cached badges:', err);
@@ -114,7 +106,6 @@ export default function MinSide() {
         badgeMap: badgeMap,
         updatedAt: new Date() 
       });
-      console.log('💾 Saved', earnedBadges.length, 'badges to Firestore for', externalName);
     } catch (err) {
       console.error('Error saving badges:', err);
     }
@@ -193,8 +184,6 @@ export default function MinSide() {
         // Track sales by day to find best day
         if (dateStr) {
           employeeStats[selger].salesByDay[dateStr] = (employeeStats[selger].salesByDay[dateStr] || 0) + 1;
-        } else if (selger.includes('Oliver')) {
-          console.log(`⚠️ Oliver contract with no valid date:`, { dato: c.dato, parsed: date });
         }
       });
       
@@ -203,11 +192,7 @@ export default function MinSide() {
         const salesByDay = employeeStats[selger].salesByDay;
         employeeStats[selger].bestDay = Math.max(0, ...Object.values(salesByDay));
         
-        // Debug log for Oliver
-        if (selger.includes('Oliver')) {
-          console.log(`🔍 Oliver's salesByDay:`, salesByDay);
-          console.log(`🔍 Oliver's bestDay:`, employeeStats[selger].bestDay);
-        }
+
       });
 
       // Find best performers
@@ -215,8 +200,6 @@ export default function MinSide() {
       let maxTotal = -1;
       let bestThisMonth = '';
       let maxMonth = -1;
-      let bestToday = '';
-      let maxToday = -1;
 
       Object.entries(employeeStats).forEach(([name, stats]) => {
         if (stats.total > maxTotal) {
@@ -226,10 +209,6 @@ export default function MinSide() {
         if (stats.month > maxMonth) {
           maxMonth = stats.month;
           bestThisMonth = name;
-        }
-        if (stats.today > maxToday) {
-          maxToday = stats.today;
-          bestToday = name;
         }
       });
 
@@ -289,19 +268,7 @@ export default function MinSide() {
         earnedBadgesList.push({ badge: def.emoji, earned });
       });
 
-      // Debug logging
-      const earnedCount = earnedBadgesList.filter(b => b.earned).length;
-      console.log(`✅ ${user?.name} badges:`, {
-        earned: earnedBadgesList.filter(b => b.earned).map(b => b.badge),
-        unearned: earnedBadgesList.filter(b => !b.earned).map(b => b.badge),
-        earnedCount,
-        salesToday,
-        bestDayEver: userBestDay,
-        totalSales: total,
-        bestToday,
-        bestThisMonth,
-        bestOverall
-      });
+      // Badge calculation complete
       setEarnedBadges(earnedBadgesList.map(b => b.badge));
       
       // Store earned status map for styling
@@ -312,7 +279,7 @@ export default function MinSide() {
       setBadgeStatus(statusMap);
       console.log('✅ Badge Status Map:', statusMap);
       
-      // Save badges to Firestore for persistence across pages
+      // Save badges to Firestore for all employees to see on their Min Side
       await saveBadges(statusMap);
       
       setLoading(false);
@@ -338,7 +305,12 @@ export default function MinSide() {
               {earnedBadges.length > 0 && (
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   {earnedBadges.map((badge, idx) => {
-                    const isEarned = badgeStatus[badge] !== false; // Treat undefined as earned for backwards compat
+                    const isEarned = badgeStatus[badge] !== false;
+                    // Find badge definition to get name
+                    const badgeDef = badgeDefinitions.find(b => b.emoji === badge);
+                    const badgeName = badgeDef?.navn || `Badge ${idx + 1}`;
+                    const tooltipText = `${badge} ${badgeName}${isEarned ? '' : ' (locked)'}`;
+                    
                     return (
                       <span 
                         key={idx} 
@@ -347,9 +319,10 @@ export default function MinSide() {
                           lineHeight: '1',
                           opacity: isEarned ? 1 : 0.3,
                           filter: isEarned ? 'none' : 'grayscale(100%)',
-                          transition: 'opacity 0.3s ease'
+                          transition: 'opacity 0.3s ease',
+                          cursor: 'pointer'
                         }} 
-                        title={isEarned ? `Badge ${idx + 1} - Earned` : `Badge ${idx + 1} - Locked`}
+                        title={tooltipText}
                       >
                         {badge}
                       </span>
