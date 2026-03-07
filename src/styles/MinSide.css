@@ -5,8 +5,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   display: flex;
   flex-direction: column;
-  padding-right: 80px;
-  box-sizing: border-box;
+  margin-right: 80px;
 }
 
 /* STANDARD PAGE HEADER - SHARED ACROSS ALL PAGES */
@@ -17,7 +16,8 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 100%;
+  width: calc(100% + 80px);
+  margin-right: -80px;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
