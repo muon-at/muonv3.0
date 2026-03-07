@@ -33,38 +33,32 @@
   gap: 1.5rem;
 }
 
-/* MIN SIDE CENTERED HEADER WITH BOX */
+/* MIN SIDE RIGHT-ALIGNED HEADER - NO BOX */
 .minside-header-centered {
-  justify-content: center;
-  text-align: center;
-  padding: 2rem !important;
+  justify-content: flex-end;
+  text-align: right;
+  padding-right: 3rem !important;
 }
 
 .header-content-centered {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.25);
-  padding: 1.5rem 3rem;
-  border-radius: 8px;
-  backdrop-filter: blur(10px);
-  max-width: 500px;
+  align-items: flex-end;
+  gap: 0.25rem;
 }
 
 .header-content-centered h1 {
   margin: 0;
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 700;
   color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .header-content-centered .subtitle {
   margin: 0;
-  font-size: 1rem;
-  opacity: 0.95;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .page-header-standard h1 {
