@@ -78,7 +78,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 
 .nav-button:hover .icon-circle {
@@ -118,6 +119,8 @@
   font-weight: 700;
   color: #999;
   flex-shrink: 0;
+  position: relative;
+  overflow: visible;
 }
 
 .nav-tooltip {
@@ -156,4 +159,29 @@
 
 .nav-items::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* UNREAD NOTIFICATION HALO */
+@keyframes pulse-halo {
+  0% {
+    box-shadow: 0 0 0 4px rgba(218, 165, 32, 0.6);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(218, 165, 32, 0.3);
+    opacity: 0.8;
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(218, 165, 32, 0.1);
+    opacity: 0.6;
+  }
+}
+
+.unread-halo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulse-halo 1.5s ease-in-out infinite;
+  pointer-events: none;
 }

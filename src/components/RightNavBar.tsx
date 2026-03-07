@@ -1,16 +1,72 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import { db } from '../lib/firebase';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import '../styles/RightNavBar.css';
 
 export const RightNavBar: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
+  const [unreadChannels, setUnreadChannels] = useState<Set<string>>(new Set());
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  // Listen for new messages in all accessible channels
+  useEffect(() => {
+    if (!user) return;
+
+    const channelsToTrack = [
+      'global',
+      'dept-krs',
+      'dept-osl',
+      'dept-skien',
+      'team',
+      `dept-${(user.department || '').toLowerCase()}`,
+      `project-${(user.project || '').toLowerCase()}`,
+      'admin'
+    ];
+
+    const unsubscribers: (() => void)[] = [];
+
+    channelsToTrack.forEach(channelName => {
+      try {
+        const messagesRef = collection(db, 'chat_channels', channelName, 'messages');
+        const q = query(messagesRef);
+
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
+          if (snapshot.docs.length > 0) {
+            // Mark channel as having unread messages
+            setUnreadChannels(prev => new Set(prev).add(channelName));
+          }
+        });
+
+        unsubscribers.push(unsubscribe);
+      } catch (err) {
+        // Channel doesn't exist, skip
+      }
+    });
+
+    return () => {
+      unsubscribers.forEach(unsub => unsub());
+    };
+  }, [user]);
+
+  // Clear unread when entering a channel
+  useEffect(() => {
+    const channelId = location.state?.selectedChannel;
+    if (channelId) {
+      setUnreadChannels(prev => {
+        const next = new Set(prev);
+        next.delete(channelId);
+        return next;
+      });
+    }
+  }, [location.state?.selectedChannel]);
 
   return (
     <div className="right-nav-bar">
@@ -104,11 +160,12 @@ export const RightNavBar: React.FC = () => {
 
         {/* GLOBAL CHAT - Globe icon */}
         <button 
-          className="nav-button"
+          className={`nav-button ${unreadChannels.has('global') ? 'unread' : ''}`}
           onClick={() => navigate('/chat', { state: { selectedChannel: 'global' } })}
           title="Global"
         >
           <div className="icon-circle">
+            {unreadChannels.has('global') && <div className="unread-halo"></div>}
             <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
@@ -118,32 +175,41 @@ export const RightNavBar: React.FC = () => {
 
         {/* KRS CHAT - Circle with text */}
         <button 
-          className="nav-button"
+          className={`nav-button ${unreadChannels.has('dept-krs') ? 'unread' : ''}`}
           onClick={() => navigate('/chat', { state: { selectedChannel: 'dept-krs' } })}
           title="KRS"
         >
-          <div className="avdeling-circle">KRS</div>
+          <div className="avdeling-circle">
+            {unreadChannels.has('dept-krs') && <div className="unread-halo"></div>}
+            KRS
+          </div>
           <div className="nav-tooltip">KRS</div>
         </button>
 
         {/* OSL CHAT - Circle with text */}
         <button 
-          className="nav-button"
+          className={`nav-button ${unreadChannels.has('dept-osl') ? 'unread' : ''}`}
           onClick={() => navigate('/chat', { state: { selectedChannel: 'dept-osl' } })}
           title="OSL"
         >
-          <div className="avdeling-circle">OSL</div>
+          <div className="avdeling-circle">
+            {unreadChannels.has('dept-osl') && <div className="unread-halo"></div>}
+            OSL
+          </div>
           <div className="nav-tooltip">OSL</div>
         </button>
 
         {/* SKN CHAT - Owner only */}
         {user?.role === 'owner' && (
           <button 
-            className="nav-button"
+            className={`nav-button ${unreadChannels.has('dept-skien') ? 'unread' : ''}`}
             onClick={() => navigate('/chat', { state: { selectedChannel: 'dept-skien' } })}
             title="SKN"
           >
-            <div className="avdeling-circle">SKN</div>
+            <div className="avdeling-circle">
+              {unreadChannels.has('dept-skien') && <div className="unread-halo"></div>}
+              SKN
+            </div>
             <div className="nav-tooltip">SKN</div>
           </button>
         )}
@@ -162,11 +228,12 @@ export const RightNavBar: React.FC = () => {
 
         {/* DM - Chat message icon */}
         <button 
-          className="nav-button"
+          className={`nav-button ${unreadChannels.has('dm-list') ? 'unread' : ''}`}
           onClick={() => navigate('/chat', { state: { selectedDM: 'list' } })}
           title="Direct Messages"
         >
           <div className="icon-circle">
+            {unreadChannels.has('dm-list') && <div className="unread-halo"></div>}
             <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
@@ -177,7 +244,7 @@ export const RightNavBar: React.FC = () => {
         {/* PROSJEKT CHAT - Briefcase icon */}
         {user?.project && (
           <button 
-            className="nav-button"
+            className={`nav-button ${unreadChannels.has('project-allente') ? 'unread' : ''}`}
             onClick={() => {
               // BOTH MUON and Allente users go to project-allente channel
               // This allows organization-wide Allente discussions
@@ -186,6 +253,7 @@ export const RightNavBar: React.FC = () => {
             title="Allente"
           >
             <div className="icon-circle">
+              {unreadChannels.has('project-allente') && <div className="unread-halo"></div>}
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
               </svg>
@@ -197,11 +265,12 @@ export const RightNavBar: React.FC = () => {
         {/* TEAMLEDERE CHAT - People icon */}
         {(user?.role === 'owner' || user?.role === 'teamlead') && (
           <button 
-            className="nav-button"
+            className={`nav-button ${unreadChannels.has('team') ? 'unread' : ''}`}
             onClick={() => navigate('/chat', { state: { selectedChannel: 'team' } })}
             title="Teamledere"
           >
             <div className="icon-circle">
+              {unreadChannels.has('team') && <div className="unread-halo"></div>}
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
               </svg>
@@ -213,11 +282,12 @@ export const RightNavBar: React.FC = () => {
         {/* ADMIN CHAT - Lock icon */}
         {(user?.role === 'owner') && (
           <button 
-            className="nav-button"
+            className={`nav-button ${unreadChannels.has('admin') ? 'unread' : ''}`}
             onClick={() => navigate('/chat', { state: { selectedChannel: 'admin' } })}
             title="Admin"
           >
             <div className="icon-circle">
+              {unreadChannels.has('admin') && <div className="unread-halo"></div>}
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
               </svg>
