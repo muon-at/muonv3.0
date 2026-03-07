@@ -13,6 +13,8 @@ interface Channel {
   unread: number;
   allowedUsers?: string[];
   emoji?: string;
+  project?: string;
+  avdeling?: string;
 }
 
 interface DMThread {
@@ -370,7 +372,11 @@ export default function Chat() {
     
     // Handle selectedChannel state - ALWAYS switch out of DM mode when channel is selected
     if (state?.selectedChannel && channels.length > 0) {
-      console.log('🔍 Looking for channel:', state.selectedChannel, 'in', channels.length, 'available channels');
+      console.log('🔍 SELECTING CHANNEL', {
+        user: user?.name,
+        requestedChannel: state.selectedChannel,
+        availableChannels: channels.map(c => ({ id: c.id, name: c.name, type: c.type }))
+      });
       // Find the channel with matching type or id
       let channelToSelect = channels.find(c => c.id === state.selectedChannel || c.type === state.selectedChannel);
       
@@ -381,7 +387,11 @@ export default function Chat() {
       }
       
       if (channelToSelect) {
-        console.log('✅ Found channel:', channelToSelect.name, 'with ID:', channelToSelect.id);
+        console.log('✅ CHANNEL SELECTED:', {
+          user: user?.name,
+          channelName: channelToSelect.name,
+          channelId: channelToSelect.id
+        });
         setSelectedChannel(channelToSelect.id);
         setSelectedDM(null);
         setSelectedDMUser(null);
@@ -467,6 +477,8 @@ export default function Chat() {
             unread: 0,
             allowedUsers: data.allowedUsers,
             emoji: getChannelEmoji(displayName, data.emoji),
+            project: data.project,
+            avdeling: data.avdeling,
           });
         }
       });
@@ -639,7 +651,14 @@ export default function Chat() {
 
   const loadChannelMessages = async (channelId: string) => {
     try {
-      console.log('📨 Loading messages from channel:', channelId);
+      const channelInfo = channels.find(c => c.id === channelId);
+      console.log('📨 LOADING MESSAGES', {
+        user: user?.name,
+        channelId,
+        channelName: channelInfo?.name,
+        userProject: user?.project,
+        channelProject: channelInfo?.project
+      });
       const messagesRef = collection(db, 'chat_channels', channelId, 'messages');
       const q = query(messagesRef, orderBy('timestamp', 'asc'));
       
@@ -651,13 +670,17 @@ export default function Chat() {
             ...doc.data() as any,
           });
         });
-        console.log('📦 Loaded', msgs.length, 'messages from', channelId);
+        console.log('📦 Loaded', msgs.length, 'messages from channel', channelId, 'for user', user?.name);
+        if (msgs.length > 0) {
+          console.log('First message:', msgs[0]);
+          console.log('Last message:', msgs[msgs.length - 1]);
+        }
         setMessages(msgs);
       });
       
       return unsubscribe;
     } catch (err) {
-      console.error('Error loading channel messages:', err);
+      console.error('❌ Error loading channel messages:', err);
     }
   };
 
@@ -698,7 +721,15 @@ export default function Chat() {
       if (selectedChannel) {
         // Find channel name for debugging
         const channelName = channels.find(c => c.id === selectedChannel)?.name;
-        console.log('📝 Sending to channel:', selectedChannel, '(' + channelName + ')');
+        const channelData = channels.find(c => c.id === selectedChannel);
+        console.log('📝 SENDING MESSAGE', {
+          sender: user?.name,
+          selectedChannel,
+          channelName,
+          channelId: selectedChannel,
+          project: user?.project,
+          fullChannelData: channelData
+        });
         const messagesRef = collection(db, 'chat_channels', selectedChannel, 'messages');
         const msgData: any = {
           sender: user?.name || 'Unknown',
