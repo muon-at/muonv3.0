@@ -76,6 +76,8 @@ export default function Chat() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  const quickEmojis = ['🔔', '💎', '🎁']; // Quick emoji buttons for chat
+  
   const emojiList = [
     '👍', '❤️', '😂', '🔥', '👏', '😍', '🎉', '💯', '😢', '😡',
     '😱', '🤔', '😎', '🙌', '💪', '🎯', '✨', '🎊', '🎈', '🚀',
@@ -1448,6 +1450,30 @@ export default function Chat() {
                 >
                   🎬
                 </button>
+                {/* Quick Emoji Buttons */}
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  {quickEmojis.map(emoji => (
+                    <button
+                      key={emoji}
+                      onClick={() => setNewMessage(newMessage + emoji)}
+                      style={{
+                        padding: '0.5rem 0.75rem',
+                        fontSize: '1.2rem',
+                        background: '#f0f0f0',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.background = '#e0e0e0')}
+                      onMouseOut={(e) => (e.currentTarget.style.background = '#f0f0f0')}
+                      title={`Insert ${emoji}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+
                 <textarea
                   value={newMessage}
                   onChange={(e) => {
