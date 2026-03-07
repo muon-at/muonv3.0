@@ -771,15 +771,17 @@ export default function Chat() {
     return () => clearTimeout(timer);
   }, [messages, user, selectedChannel, selectedDM]);
 
-  // Filter messages by search query
+  // Filter messages by search query and remove deleted messages
   useEffect(() => {
+    let filtered = messages.filter(msg => !msg.isDeleted); // Remove deleted messages
+    
     if (!searchQuery.trim()) {
-      setFilteredMessages(messages);
+      setFilteredMessages(filtered);
       return;
     }
     
     const query = searchQuery.toLowerCase();
-    const filtered = messages.filter(msg => 
+    filtered = filtered.filter(msg => 
       msg.content.toLowerCase().includes(query) ||
       msg.sender.toLowerCase().includes(query)
     );
