@@ -1,16 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, setDoc, doc } from 'firebase/firestore';
 import '../styles/Teamleder.css';
 
 export default function Teamleder() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('status');
-
-  const isOwner = user?.role === 'owner';
 
   // Parse dates in multiple formats (DD/MM/YYYY, DD.MM.YYYY, ISO)
   const parseDate = (dateStr: string): Date => {
@@ -318,30 +312,8 @@ export default function Teamleder() {
       {/* Header */}
       <div className="teamleder-header">
         <div>
-          <h1>Teamleder Dashboard</h1>
+          <h1>👔 Teamleder Dashboard</h1>
           <p className="subtitle">Oversikt og styring av ditt team</p>
-        </div>
-        <div className="header-nav-buttons">
-          <button 
-            className="nav-button back-btn-header"
-            onClick={() => navigate('/')}
-          >
-            ← Min Side
-          </button>
-          {isOwner && (
-            <button 
-              className="nav-button admin-btn-header"
-              onClick={() => navigate('/admin-dashboard')}
-            >
-              Admin →
-            </button>
-          )}
-          <button 
-            className="nav-button logout-btn-header"
-            onClick={logout}
-          >
-            Logg ut
-          </button>
         </div>
       </div>
 
