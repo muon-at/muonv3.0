@@ -50,7 +50,7 @@
   background: transparent;
   cursor: pointer;
   font-weight: 600;
-  color: #333;
+  color: #000 !important;
   border-right: 3px solid transparent;
   transition: all 0.3s ease;
   font-size: 0.7rem;
@@ -144,20 +144,20 @@
 
 .message-sender {
   font-weight: 600;
-  color: #333;
+  color: #000 !important;
   display: inline;
   margin-right: 0.75rem;
 }
 
 .message-time {
   font-size: 0.75rem;
-  color: #999;
+  color: #666;
   display: inline;
   margin-left: 0.75rem;
 }
 
 .message-content {
-  color: #333;
+  color: #000 !important;
   line-height: 1.5;
   word-wrap: break-word;
   white-space: pre-wrap;
