@@ -10,28 +10,65 @@
 }
 
 /* Header */
-.teamleder-header {
+/* STANDARD PAGE HEADER - SHARED ACROSS ALL PAGES */
+.page-header-standard {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
   width: 100%;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.teamleder-header h1 {
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.muon-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  min-width: 60px;
+}
+
+.page-header-standard h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
 }
 
-.teamleder-header .subtitle {
+.page-header-standard .subtitle {
   margin: 0.25rem 0 0 0;
-  opacity: 0.95;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.back-btn-standard {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
   font-size: 0.95rem;
+}
+
+.back-btn-standard:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
 }
 
 .header-nav-buttons {

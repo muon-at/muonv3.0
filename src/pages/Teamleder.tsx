@@ -309,11 +309,22 @@ export default function Teamleder() {
 
   return (
     <div className="teamleder-container">
-      {/* Header */}
-      <div className="teamleder-header">
-        <div>
-          <h1>👔 Teamleder Dashboard</h1>
-          <p className="subtitle">Oversikt og styring av ditt team</p>
+      {/* Header - SAME AS ADMIN & MIN SIDE */}
+      <div className="page-header-standard">
+        <div className="header-left">
+          <span className="muon-logo">muon</span>
+          <div>
+            <h1>👔 Teamleder Dashboard</h1>
+            <p className="subtitle">Oversikt og styring av ditt team</p>
+          </div>
+        </div>
+        <div className="header-buttons">
+          <button 
+            className="back-btn-standard"
+            onClick={() => window.history.back()}
+          >
+            ← Tilbake
+          </button>
         </div>
       </div>
 

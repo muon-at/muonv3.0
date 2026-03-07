@@ -121,18 +121,33 @@ export default function MinSide() {
 
   return (
     <div className="minside-container">
-      {/* BANNER */}
-      <div className="minside-banner">
-        <div className="banner-content">
-          <div className="banner-profile">
-            <div className="profile-avatar">
-              {user?.name?.charAt(0).toUpperCase()}
-            </div>
-            <div className="banner-text">
-              <h1 className="banner-name">{user?.name}</h1>
-              <p className="banner-role">{user?.role} • {user?.department}</p>
-            </div>
+      {/* HEADER - SAME AS ADMIN */}
+      <div className="page-header-standard">
+        <div className="header-left">
+          <span className="muon-logo">muon</span>
+          <div>
+            <h1>👤 Min Side</h1>
+            <p className="subtitle">Din personlige oversikt og prestasjonsbadges</p>
           </div>
+        </div>
+        <div className="header-buttons">
+          <button 
+            className="back-btn-standard"
+            onClick={() => window.history.back()}
+          >
+            ← Tilbake
+          </button>
+        </div>
+      </div>
+
+      {/* PROFILE SECTION */}
+      <div className="profile-section">
+        <div className="profile-avatar-large">
+          {user?.name?.charAt(0).toUpperCase()}
+        </div>
+        <div className="profile-info">
+          <h2>{user?.name}</h2>
+          <p>{user?.role} • {user?.department}</p>
         </div>
       </div>
 
