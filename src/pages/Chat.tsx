@@ -266,14 +266,16 @@ export default function Chat() {
       }
 
       // Create project channel for user's project if it exists and doesn't have a channel yet
-      if (user?.project && user.project !== 'MUON') {
-        const projectId = `project-${user.project.toLowerCase()}`;
+      if (user?.project) {
+        // Map MUON to allente
+        const projectName = user.project === 'MUON' ? 'Allente' : user.project;
+        const projectId = `project-${projectName.toLowerCase()}`;
         if (!existingIds.has(projectId)) {
-          const projectEmoji = user.project === 'Allente' ? '📊' : '💼';
+          const projectEmoji = projectName === 'Allente' ? '📊' : '💼';
           await setDoc(doc(db, 'chat_channels', projectId), {
-            name: user.project,
+            name: projectName,
             type: 'project',
-            project: user.project,
+            project: projectName,
             emoji: projectEmoji,
             createdAt: new Date().toISOString(),
             messages: [],
@@ -432,7 +434,9 @@ export default function Chat() {
     switch (type) {
       case 'project':
         // User can access project channels matching their project
-        return (user as any)?.project === project || user?.role === 'owner';
+        // Map MUON to Allente
+        const userProject = (user as any)?.project === 'MUON' ? 'Allente' : (user as any)?.project;
+        return userProject === project || user?.role === 'owner';
       case 'team':
         return user?.role === 'teamlead' || user?.role === 'owner';
       case 'admin':
@@ -934,7 +938,7 @@ export default function Chat() {
 
       {isDMMode ? (
         // DM MODE - SPLIT VIEW
-        <div style={{ display: 'flex', height: '100%', gap: '0' }}>
+        <div style={{ display: 'flex', height: '100%', gap: '0', position: 'relative' }}>
           {/* LEFT SIDEBAR - DM List */}
           <div style={{
             width: '300px',
@@ -1001,7 +1005,7 @@ export default function Chat() {
           </div>
 
           {/* RIGHT SIDE - Chat */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#fff', position: 'relative' }}>
             {selectedDMUser ? (
               <>
                 {/* DM Header */}
@@ -1018,7 +1022,7 @@ export default function Chat() {
                 </div>
 
                 {/* Messages */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem' }}>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', paddingBottom: '100px' }}>
                   {filteredMessages.map((msg, idx) => (
                     <div key={idx} style={{
                       marginBottom: '1rem',
@@ -1040,8 +1044,8 @@ export default function Chat() {
                   ))}
                 </div>
 
-                {/* Message Input */}
-                <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem' }}>
+                {/* Message Input - Fixed to bottom */}
+                <div style={{ position: 'absolute', bottom: 0, left: 300, right: 0, padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '0.5rem', background: '#fff', zIndex: 10 }}>
                   <input
                     type="text"
                     placeholder="Type a message..."
@@ -1116,7 +1120,7 @@ export default function Chat() {
                     </span>
                     <div>
                       <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
-                        {selectedChannel === 'project-allente' ? 'Allente' : channels.find(c => c.id === selectedChannel)?.name}
+                        {channels.find(c => c.id === selectedChannel)?.name === 'Muon' ? 'Allente' : channels.find(c => c.id === selectedChannel)?.name}
                       </h2>
                       <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>
                         {channels.find(c => c.id === selectedChannel)?.type}
