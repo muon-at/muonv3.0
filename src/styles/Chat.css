@@ -3,7 +3,7 @@
   flex-direction: column;
   height: 100vh;
   background: #f5f5f5;
-  margin-right: 85px;
+  margin-right: 72px;
 }
 
 .chat-header {
@@ -12,8 +12,8 @@
   align-items: center;
   padding: 1rem 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  width: calc(100% + 85px);
-  margin-right: -85px;
+  width: calc(100% + 72px);
+  margin-right: -72px;
   color: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
