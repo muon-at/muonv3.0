@@ -8,6 +8,15 @@
   margin-right: 80px;
 }
 
+/* MIN SIDE HEADER - LARGE TEXT */
+.minside-header-large h1 {
+  font-size: 3rem !important;
+}
+
+.minside-header-large .subtitle {
+  font-size: 1.8rem !important;
+}
+
 /* TABS - SAME AS ADMIN DASHBOARD */
 .main-tabs {
   background: #fff;

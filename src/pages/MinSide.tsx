@@ -123,7 +123,7 @@ export default function MinSide() {
   return (
     <div className="minside-container">
       {/* HEADER - SHOW USER NAME + ROLE */}
-      <div className="page-header-standard">
+      <div className="page-header-standard minside-header-large">
         <div className="header-left">
           <div>
             <h1>{user?.name}</h1>
