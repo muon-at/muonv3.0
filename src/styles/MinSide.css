@@ -8,6 +8,67 @@
   margin-right: 80px;
 }
 
+/* TABS - SAME AS ADMIN DASHBOARD */
+.main-tabs {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  gap: 0;
+  padding: 0;
+  width: 100%;
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.main-tab {
+  padding: 1rem 2rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: .95rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: all .2s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+
+.main-tab:hover {
+  color: #333;
+  background: #f8fafc;
+}
+
+.main-tab.active {
+  color: #c86d4d;
+  border-bottom-color: #c86d4d;
+}
+
+/* TAB CONTENT */
+.tab-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 2rem;
+}
+
+.content-title {
+  margin-bottom: 1.5rem;
+}
+
+.content-title h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.content-subtitle {
+  margin: .5rem 0 0;
+  color: #999;
+  font-size: .9rem;
+}
+
 /* STANDARD PAGE HEADER - SHARED ACROSS ALL PAGES */
 .page-header-standard {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

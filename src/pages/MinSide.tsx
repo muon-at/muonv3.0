@@ -45,6 +45,7 @@ export default function MinSide() {
   const [weeklyGoal, setWeeklyGoal] = useState<number>(0);
   const [monthlyGoal, setMonthlyGoal] = useState<number>(0);
   const [showGoalEdit, setShowGoalEdit] = useState(false);
+  const [activeTab, setActiveTab] = useState('stats');
 
   useEffect(() => {
     loadEmployeeData();
@@ -131,9 +132,30 @@ export default function MinSide() {
         </div>
       </div>
 
-
+      {/* TABS */}
+      <div className="main-tabs">
+        <button 
+          className={`main-tab ${activeTab === 'stats' ? 'active' : ''}`}
+          onClick={() => setActiveTab('stats')}
+        >
+          📊 Mine Stats
+        </button>
+        <button 
+          className={`main-tab ${activeTab === 'avd' ? 'active' : ''}`}
+          onClick={() => setActiveTab('avd')}
+        >
+          🏢 Min Avdeling
+        </button>
+        <button 
+          className={`main-tab ${activeTab === 'project' ? 'active' : ''}`}
+          onClick={() => setActiveTab('project')}
+        >
+          💼 Prosjekt
+        </button>
+      </div>
 
       {/* MAIN CONTENT */}
+      {activeTab === 'stats' && (
       <div className="minside-main">
         <div className="stats-circles">
           <div className="trophy-placeholder">🏆</div>
@@ -190,7 +212,30 @@ export default function MinSide() {
           )}
         </div>
       </div>
+      )}
 
+      {activeTab === 'avd' && (
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Avdeling: {user?.department}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra {user?.department}</p>
+        </div>
+        <p>Innhold for avdeling kommer snart...</p>
+      </div>
+      )}
+
+      {activeTab === 'project' && (
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Prosjekt: {user?.project}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra prosjektet ditt</p>
+        </div>
+        <p>Innhold for prosjekt kommer snart...</p>
+      </div>
+      )}
+
+      {activeTab === 'stats' && (
+      <>
       {/* BADGES SECTION */}
       <div className="badges-section">
         <div className="badges-header">
@@ -245,6 +290,8 @@ export default function MinSide() {
           <div className="progress-text">103 / 100 <span className="checkmark">✓ Mål nådd</span></div>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
