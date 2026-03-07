@@ -1229,9 +1229,8 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="admin-header">
         <div className="header-left">
-          <span className="muon-logo">muon</span>
           <div>
-            <h1>Admin Dashboard</h1>
+            <h1>⚙️ Admin Dashboard</h1>
             <p className="subtitle">Sentralisert oversikt over kontrakter og brukerstatistikk</p>
           </div>
         </div>

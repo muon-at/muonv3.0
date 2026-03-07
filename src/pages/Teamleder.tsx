@@ -312,7 +312,6 @@ export default function Teamleder() {
       {/* Header - SAME AS ADMIN & MIN SIDE */}
       <div className="page-header-standard">
         <div className="header-left">
-          <span className="muon-logo">muon</span>
           <div>
             <h1>👔 Teamleder Dashboard</h1>
             <p className="subtitle">Oversikt og styring av ditt team</p>

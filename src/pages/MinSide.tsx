@@ -124,10 +124,9 @@ export default function MinSide() {
       {/* HEADER - SAME AS ADMIN */}
       <div className="page-header-standard">
         <div className="header-left">
-          <span className="muon-logo">muon</span>
           <div>
-            <h1>👤 Min Side</h1>
-            <p className="subtitle">Din personlige oversikt og prestasjonsbadges</p>
+            <h1>👤 {user?.name}</h1>
+            <p className="subtitle">{user?.role} • {user?.department}</p>
           </div>
         </div>
         <div className="header-buttons">
