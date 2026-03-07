@@ -8,7 +8,7 @@ import '../styles/Login.css';
 export default function Login() {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
-  const [emailOrUsername, setEmailOrUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,15 +25,15 @@ export default function Login() {
     e.preventDefault();
     setError('');
 
-    if (!emailOrUsername || !password) {
-      setError('Vennligst fyll inn både e-post/brukernavn og passord');
+    if (!email || !password) {
+      setError('Vennligst fyll inn både e-post og passord');
       return;
     }
 
     setLoading(true);
     
     try {
-      // Lookup employee by username OR email in Firestore
+      // Lookup employee by email in Firestore
       const employeesRef = collection(db, 'employees');
       const snapshot = await getDocs(employeesRef);
       
@@ -42,11 +42,8 @@ export default function Login() {
       snapshot.forEach((doc) => {
         const data = doc.data();
         
-        // Check if matches by username or email
-        const usernameMatch = data.username === emailOrUsername;
-        const emailMatch = data.email === emailOrUsername;
-        
-        if ((usernameMatch || emailMatch) && data.password === password && !data.archived) {
+        // Check if email matches and password is correct
+        if (data.email === email && data.password === password && !data.archived) {
           console.log('✅ LOGIN SUCCESS:', data.name);
           foundEmployee = { id: doc.id, ...data };
         }
@@ -65,8 +62,8 @@ export default function Login() {
           navigate('/min-side');
         }
       } else {
-        setError('Feil e-post/brukernavn eller passord');
-        console.log('❌ Login failed for:', emailOrUsername);
+        setError('Feil e-post eller passord');
+        console.log('❌ Login failed for:', email);
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -90,13 +87,13 @@ export default function Login() {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="emailOrUsername">E-post eller Brukernavn</label>
+            <label htmlFor="email">E-post</label>
             <input
-              id="emailOrUsername"
-              type="text"
-              value={emailOrUsername}
-              onChange={(e) => setEmailOrUsername(e.target.value)}
-              placeholder="f.eks stian@muonas.no eller stian_73280"
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="f.eks stian@muonas.no"
               disabled={loading}
               autoFocus
             />
@@ -160,7 +157,6 @@ export default function Login() {
                   role: 'owner',
                   department: 'MUON',
                   project: 'Muon',
-                  username: 'stian_73280',
                   email: 'stian@muonas.no',
                   externalName: 'Stian Abrahamsen',
                 };
@@ -189,7 +185,6 @@ export default function Login() {
                   role: 'employee',
                   department: 'KRS',
                   project: 'Allente',
-                  username: 'oliver.j',
                   email: 'oliver@muonas.no',
                   externalName: 'Oliver T Jenssen',
                 };
