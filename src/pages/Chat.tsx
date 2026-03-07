@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
@@ -47,6 +47,7 @@ interface Message {
 
 export default function Chat() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [selectedDM, setSelectedDM] = useState<string | null>(null);
@@ -191,6 +192,19 @@ export default function Chat() {
       console.error('Error loading users:', err);
     }
   };
+
+  // Auto-select channel if passed via navigation state (e.g., clicking Global in navbar)
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.selectedChannel && channels.length > 0) {
+      // Find the channel with matching type or id
+      const channelToSelect = channels.find(c => c.id === state.selectedChannel || c.type === state.selectedChannel);
+      if (channelToSelect) {
+        setSelectedChannel(channelToSelect.id);
+        setSelectedDM(null);
+      }
+    }
+  }, [location.state, channels]);
 
   // Load messages when channel/DM changes
   useEffect(() => {

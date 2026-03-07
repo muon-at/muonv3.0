@@ -92,7 +92,7 @@ export const RightNavBar: React.FC = () => {
         {/* GLOBAL CHAT - Globe icon */}
         <button 
           className="nav-button"
-          onClick={() => navigate('/chat')}
+          onClick={() => navigate('/chat', { state: { selectedChannel: 'global' } })}
           title="Global Chat"
         >
           <div className="icon-circle">
