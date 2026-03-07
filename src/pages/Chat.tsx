@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
@@ -46,7 +46,6 @@ interface Message {
 }
 
 export default function Chat() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
@@ -892,19 +891,6 @@ export default function Chat() {
               🆕 New Channel
             </button>
           )}
-          <button 
-            onClick={() => navigate('/min-side')}
-            style={{
-              padding: '0.5rem 1rem',
-              background: '#667eea',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            ← Min Side
-          </button>
         </div>
       </div>
 
