@@ -67,9 +67,6 @@ export default function MinSideTest() {
               👥 Teamleder →
             </button>
           )}
-          <button className="logout-button-minside" onClick={() => navigate('/')}>
-            ← Tilbake
-          </button>
         </div>
       </div>
 

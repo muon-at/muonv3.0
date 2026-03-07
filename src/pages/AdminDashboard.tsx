@@ -1242,7 +1242,6 @@ export default function AdminDashboard() {
           >
             ← Tilbake
           </button>
-          <button className="logout-btn">LOGG UT</button>
         </div>
       </div>
 

@@ -13,7 +13,7 @@ interface SalesRecord {
 
 export default function MinSide() {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
@@ -142,9 +142,6 @@ export default function MinSide() {
               👥 Teamleder →
             </button>
           )}
-          <button className="logout-button-minside" onClick={logout}>
-            Logg ut
-          </button>
         </div>
       </div>
 
