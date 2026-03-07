@@ -164,14 +164,7 @@ export default function MinSide() {
         </button>
       </div>
 
-      {/* BADGES ROW - BELOW HEADER */}
-      <div className="badges-row">
-        {allBadges.map((badge, idx) => (
-          <div key={idx} className={`badge-mini ${earnedBadges.includes(badge) ? 'earned' : 'locked'}`} title={`Badge ${idx + 1}`}>
-            <span className="badge-mini-icon">{badge}</span>
-          </div>
-        ))}
-      </div>
+
 
       {/* MAIN CONTENT */}
       {activeTab === 'stats' && (
