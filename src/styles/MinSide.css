@@ -416,6 +416,9 @@
 
 /* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
+  * {
+    box-sizing: border-box;
+  }
   .minside-main {
     gap: 1rem;
     padding: 1.5rem 1rem;
@@ -533,5 +536,74 @@
 
   .earnings-period-runrate-value {
     font-size: 0.9rem;
+  }
+}
+@media (max-width: 768px) {
+  .minside-main {
+    gap: 1rem !important;
+    padding: 1.5rem 1rem !important;
+  }
+
+  .stats-circles {
+    gap: 0.8rem !important;
+    flex-direction: column !important;
+  }
+
+  .stat-circle {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+  .stat-number {
+    font-size: 1.6rem !important;
+  }
+
+  .stat-label {
+    font-size: 0.7rem !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+  }
+
+  .progress-section {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .runrate-section {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .stats-and-earnings-container {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .earnings-overview {
+    grid-template-columns: 1fr !important;
+  }
+
+  .trophy-placeholder {
+    font-size: 1.6rem !important;
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .minside-main {
+    padding: 1rem !important;
+  }
+
+  .stats-circles {
+    gap: 0.6rem !important;
+  }
+
+  .stat-circle {
+    width: 75px !important;
+    height: 75px !important;
+  }
+
+  .stat-number {
+    font-size: 1.3rem !important;
   }
 }
