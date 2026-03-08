@@ -799,13 +799,6 @@ export default function MinSide() {
                 </div>
               </div>
 
-              {/* Total Earnings */}
-              <div className="earnings-stat">
-                <span className="earnings-label">LØNN TIL NÅ</span>
-                <span className="earnings-value">{earnings.total.toLocaleString('no-NO')}</span>
-                <span className="earnings-unit">kr</span>
-              </div>
-
               {/* Three Column Layout: DAG | UKE | MÅNED */}
               <div className="earnings-overview">
                 {/* DAG */}
@@ -834,9 +827,6 @@ export default function MinSide() {
                     <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
                   </div>
-                  <div className="earnings-period-runrate">
-                    <span className="earnings-period-label-small">runrate</span>
-                  </div>
                 </div>
 
                 {/* MÅNED */}
@@ -845,9 +835,6 @@ export default function MinSide() {
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
-                  </div>
-                  <div className="earnings-period-runrate">
-                    <span className="earnings-period-label-small">runrate</span>
                   </div>
                 </div>
               </div>

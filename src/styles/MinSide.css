@@ -703,13 +703,7 @@
   color: #999;
 }
 
-.earnings-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 1.25rem 0;
-  border-bottom: 1px solid #e2e8f0;
-}
+
 
 .earnings-label {
   font-size: 0.75rem;
@@ -777,7 +771,8 @@
   font-weight: 500;
 }
 
-.earnings-period-runrate {
+/* DAG runrate styles */
+.earnings-period:first-child .earnings-period-runrate {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -801,12 +796,6 @@
 .earnings-period-amount {
   font-weight: 700;
   color: #16a34a;
-}
-
-.earnings-period-label-small {
-  font-size: 0.65rem;
-  color: #999;
-  font-style: italic;
 }
 
 /* RESPONSIVE */
