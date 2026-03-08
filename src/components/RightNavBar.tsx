@@ -78,7 +78,7 @@ export const RightNavBar: React.FC = () => {
         className="right-nav-bar right-nav-bar-desktop"
         style={{
           background: isAllenteChat 
-            ? 'linear-gradient(135deg, #1e3f52 0%, #0f2438 100%)'
+            ? 'linear-gradient(135deg, #5B7FFF 0%, #4169E1 100%)'
             : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
         }}
       >
@@ -322,7 +322,7 @@ export const RightNavBar: React.FC = () => {
           title="Menu"
           style={{
             background: isAllenteChat
-              ? 'linear-gradient(135deg, #1e3f52 0%, #0f2438 100%)'
+              ? 'linear-gradient(135deg, #5B7FFF 0%, #4169E1 100%)'
               : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
           }}
         >
