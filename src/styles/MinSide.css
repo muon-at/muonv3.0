@@ -180,8 +180,8 @@
 .minside-main {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: 2rem;
+  padding: 2rem;
   max-width: 100%;
   margin: 0 auto;
   width: 100%;
@@ -196,13 +196,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.2rem;
   flex-wrap: nowrap;
   width: 100%;
   max-width: 900px;
   overflow: visible;
-  padding: 0 2rem;
-  margin: 0 -2rem;
+  padding: 1rem 0;
 }
 
 .trophy-placeholder {
@@ -478,7 +477,7 @@
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0;
 }
 
 .progress-item {
@@ -568,8 +567,8 @@
   gap: 1.5rem;
   max-width: 900px;
   width: 100%;
-  margin: 2.5rem auto 0;
-  padding: 0 1.5rem;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .runrate-box {
@@ -641,18 +640,18 @@
 .stats-and-earnings-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+  gap: 2.5rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   align-items: start;
 }
 
 .stats-left-section {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .earnings-right-section {
@@ -665,10 +664,10 @@
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  padding: 2rem;
+  padding: 1.75rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   width: 100%;
-  max-width: 350px;
+  max-width: 380px;
   transition: all 0.2s ease;
 }
 
@@ -706,7 +705,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  padding: 1rem 0;
+  padding: 1.25rem 0;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -729,91 +728,83 @@
   font-weight: 500;
 }
 
-.earnings-daily {
-  padding: 1rem 0;
+/* EARNINGS OVERVIEW - 3 COLUMN LAYOUT */
+.earnings-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid #e2e8f0;
   border-bottom: 1px solid #e2e8f0;
 }
 
-.earnings-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.earnings-metric {
+.earnings-period {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #fffbf0;
+  border-radius: 6px;
+  border: 1px solid #fde9d4;
+  text-align: center;
+}
+
+.earnings-period-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.earnings-period-stat {
+  display: flex;
+  flex-direction: column;
   gap: 0.25rem;
 }
 
-.earnings-metric-small {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-.earnings-amount {
+.earnings-period-value {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #333;
+  color: #16a34a;
 }
 
-.earnings-amount-small {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.earnings-time {
-  font-size: 0.65rem;
-  color: #999;
-}
-
-.earnings-unit-small {
+.earnings-period-unit {
   font-size: 0.65rem;
   color: #999;
   font-weight: 500;
 }
 
-.earnings-divider {
-  color: #e2e8f0;
-  font-size: 1rem;
-  opacity: 0.5;
-}
-
-.earnings-runrate {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding-top: 1rem;
-}
-
-.earnings-runrate-item {
+.earnings-period-runrate {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.75rem;
-  background: #fffbf0;
-  border-radius: 4px;
-  border: 1px solid #fde9d4;
+  padding-top: 0.75rem;
+  border-top: 1px solid #fde9d4;
 }
 
-.earnings-label-small {
-  font-size: 0.65rem;
-  font-weight: 700;
+.earnings-period-rate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.earnings-period-time {
   color: #999;
-  letter-spacing: 0.3px;
+  font-weight: 500;
 }
 
-.earnings-value-small {
-  font-size: 1rem;
+.earnings-period-amount {
   font-weight: 700;
   color: #16a34a;
+}
+
+.earnings-period-label-small {
+  font-size: 0.65rem;
+  color: #999;
+  font-style: italic;
 }
 
 /* RESPONSIVE */
@@ -1037,12 +1028,17 @@
     font-size: 1.4rem;
   }
 
-  .earnings-row {
-    flex-direction: column;
-    gap: 0.5rem;
+  .earnings-overview {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 1rem 0;
   }
 
-  .earnings-runrate {
-    grid-template-columns: 1fr;
+  .earnings-period {
+    padding: 0.75rem;
+  }
+
+  .earnings-period-value {
+    font-size: 1.1rem;
   }
 }

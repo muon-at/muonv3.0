@@ -806,38 +806,49 @@ export default function MinSide() {
                 <span className="earnings-unit">kr</span>
               </div>
 
-              {/* Daily Earnings with Runrate */}
-              <div className="earnings-daily">
-                <div className="earnings-label">LØNN I DAG</div>
-                <div className="earnings-row">
-                  <div className="earnings-metric">
-                    <span className="earnings-amount">{earnings.daily.toLocaleString('no-NO')}</span>
-                    <span className="earnings-unit">kr</span>
+              {/* Three Column Layout: DAG | UKE | MÅNED */}
+              <div className="earnings-overview">
+                {/* DAG */}
+                <div className="earnings-period">
+                  <div className="earnings-period-label">DAG</div>
+                  <div className="earnings-period-stat">
+                    <span className="earnings-period-value">{earnings.daily.toLocaleString('no-NO')}</span>
+                    <span className="earnings-period-unit">kr</span>
                   </div>
-                  <div className="earnings-divider">|</div>
-                  <div className="earnings-metric-small">
-                    <span className="earnings-time">→ 16:00</span>
-                    <span className="earnings-amount-small">{earnings.dailyTo16.toLocaleString('no-NO')}</span>
-                    <span className="earnings-unit-small">kr</span>
-                  </div>
-                  <div className="earnings-divider">|</div>
-                  <div className="earnings-metric-small">
-                    <span className="earnings-time">→ 21:00</span>
-                    <span className="earnings-amount-small">{earnings.dailyTo21.toLocaleString('no-NO')}</span>
-                    <span className="earnings-unit-small">kr</span>
+                  <div className="earnings-period-runrate">
+                    <div className="earnings-period-rate">
+                      <span className="earnings-period-time">→ 16:00</span>
+                      <span className="earnings-period-amount">{earnings.dailyTo16.toLocaleString('no-NO')}</span>
+                    </div>
+                    <div className="earnings-period-rate">
+                      <span className="earnings-period-time">→ 21:00</span>
+                      <span className="earnings-period-amount">{earnings.dailyTo21.toLocaleString('no-NO')}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Weekly and Monthly Runrate */}
-              <div className="earnings-runrate">
-                <div className="earnings-runrate-item">
-                  <span className="earnings-label-small">UKE RUNRATE</span>
-                  <span className="earnings-value-small">{earnings.weekly.toLocaleString('no-NO')} kr</span>
+                {/* UKE */}
+                <div className="earnings-period">
+                  <div className="earnings-period-label">UKE</div>
+                  <div className="earnings-period-stat">
+                    <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
+                    <span className="earnings-period-unit">kr</span>
+                  </div>
+                  <div className="earnings-period-runrate">
+                    <span className="earnings-period-label-small">runrate</span>
+                  </div>
                 </div>
-                <div className="earnings-runrate-item">
-                  <span className="earnings-label-small">MÅNED RUNRATE</span>
-                  <span className="earnings-value-small">{earnings.monthly.toLocaleString('no-NO')} kr</span>
+
+                {/* MÅNED */}
+                <div className="earnings-period">
+                  <div className="earnings-period-label">MÅNED</div>
+                  <div className="earnings-period-stat">
+                    <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
+                    <span className="earnings-period-unit">kr</span>
+                  </div>
+                  <div className="earnings-period-runrate">
+                    <span className="earnings-period-label-small">runrate</span>
+                  </div>
                 </div>
               </div>
             </div>
