@@ -502,9 +502,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #333;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #999;
+  letter-spacing: 0.3px;
 }
 
 .progress-bar {
@@ -545,16 +546,19 @@
 
 .progress-text {
   font-size: 0.85rem;
-  color: #666;
+  color: #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
 }
 
 .checkmark {
   color: #16a34a;
   font-weight: 600;
+  font-size: 0.75rem;
   margin-left: auto;
+  text-transform: capitalize;
 }
 
 /* RUN RATE BOXES - MATCHING PROGRESS BAR DESIGN */
@@ -590,7 +594,7 @@
   font-weight: 700;
   color: #999;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   margin-bottom: 0.5rem;
 }
 
@@ -610,19 +614,19 @@
 
 .runrate-time {
   font-size: 0.7rem;
-  color: #aaa;
+  color: #999;
   font-weight: 500;
   letter-spacing: 0.3px;
 }
 
 .runrate-value {
-  font-size: 1.7rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #333;
 }
 
 .runrate-unit {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   color: #999;
   font-weight: 500;
 }
