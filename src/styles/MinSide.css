@@ -181,14 +181,14 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem;
+  padding: 2.5rem;
+  margin: 2rem auto 3rem auto;
   max-width: 100%;
-  margin: 0 auto;
   width: 100%;
   flex: 1;
   align-items: center;
   justify-content: flex-start;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* STATS CIRCLES */
@@ -640,11 +640,11 @@
 .stats-and-earnings-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 2.5rem;
+  gap: 3rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0;
   align-items: start;
 }
 
@@ -1016,7 +1016,12 @@
   .stats-and-earnings-container {
     grid-template-columns: 1fr;
     gap: 1.5rem;
-    padding: 0 1rem;
+    padding: 0;
+  }
+
+  .minside-main {
+    padding: 1.5rem;
+    margin: 1rem auto 2rem auto;
   }
 
   .earnings-box {
