@@ -1436,7 +1436,7 @@ export default function Chat() {
               {selectedChannel && channels.find(c => c.id === selectedChannel) && (
                 <div style={{
                   padding: '1rem 1.5rem',
-                  background: selectedChannel === 'project-allente' ? '#FF8C42' : '#667eea',
+                  background: selectedChannel === 'project-allente' ? '#D95A2B' : '#667eea',
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
@@ -1448,8 +1448,8 @@ export default function Chat() {
                       src="https://www.antennhakan.se/wp-content/uploads/2024/01/allente-logo2.png"
                       alt="Allente"
                       style={{
-                        height: '40px',
-                        maxWidth: '300px',
+                        height: '50px',
+                        maxWidth: '95%',
                         objectFit: 'contain',
                       }}
                     />
