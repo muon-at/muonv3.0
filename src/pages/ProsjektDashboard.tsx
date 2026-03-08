@@ -406,26 +406,32 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
           <div className="top-five">
             <div className="top-five-title">TOP 3 AVDELING</div>
             {topAvdeling.dag.length > 0 ? (
-              topAvdeling.dag.map((dept, idx) => (
-                <div key={idx} className="top-five-item">
-                  <span className="rank">{idx + 1}.</span>
-                  <span className="name">{dept.avdeling}</span>
-                  <span className="count">{dept.salg}</span>
-                </div>
-              ))
+              topAvdeling.dag.map((dept, idx) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                return (
+                  <div key={idx} className="top-five-item">
+                    <span className="rank">{medals[idx]}</span>
+                    <span className="name">{dept.avdeling}</span>
+                    <span className="count">{dept.salg}</span>
+                  </div>
+                );
+              })
             ) : (
               <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen avdelinger</p>
             )}
             <div style={{ marginTop: '0.8rem', borderTop: '1px solid #ddd', paddingTop: '0.8rem' }}>
               <div className="top-five-title" style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>TOP 3 ANSATT</div>
               {topFive.dag.length > 0 ? (
-                topFive.dag.map((emp, idx) => (
-                  <div key={idx} className="top-five-item">
-                    <span className="rank">{idx + 1}.</span>
-                    <span className="name">{emp.displayName}</span>
-                    <span className="count">{emp.salg}</span>
-                  </div>
-                ))
+                topFive.dag.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} className="top-five-item">
+                      <span className="rank">{medals[idx]}</span>
+                      <span className="name">{emp.displayName}</span>
+                      <span className="count">{emp.salg}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen salg i dag</p>
               )}
@@ -458,26 +464,32 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
           <div className="top-five">
             <div className="top-five-title">TOP 3 AVDELING</div>
             {topAvdeling.uke.length > 0 ? (
-              topAvdeling.uke.map((dept, idx) => (
-                <div key={idx} className="top-five-item">
-                  <span className="rank">{idx + 1}.</span>
-                  <span className="name">{dept.avdeling}</span>
-                  <span className="count">{dept.salg}</span>
-                </div>
-              ))
+              topAvdeling.uke.map((dept, idx) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                return (
+                  <div key={idx} className="top-five-item">
+                    <span className="rank">{medals[idx]}</span>
+                    <span className="name">{dept.avdeling}</span>
+                    <span className="count">{dept.salg}</span>
+                  </div>
+                );
+              })
             ) : (
               <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen avdelinger</p>
             )}
             <div style={{ marginTop: '0.8rem', borderTop: '1px solid #ddd', paddingTop: '0.8rem' }}>
               <div className="top-five-title" style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>TOP 3 ANSATT</div>
               {topFive.uke.length > 0 ? (
-                topFive.uke.map((emp, idx) => (
-                  <div key={idx} className="top-five-item">
-                    <span className="rank">{idx + 1}.</span>
-                    <span className="name">{emp.displayName}</span>
-                    <span className="count">{emp.salg}</span>
-                  </div>
-                ))
+                topFive.uke.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} className="top-five-item">
+                      <span className="rank">{medals[idx]}</span>
+                      <span className="name">{emp.displayName}</span>
+                      <span className="count">{emp.salg}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen salg denne uka</p>
               )}
@@ -510,26 +522,32 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
           <div className="top-five">
             <div className="top-five-title">TOP 3 AVDELING</div>
             {topAvdeling.maned.length > 0 ? (
-              topAvdeling.maned.map((dept, idx) => (
-                <div key={idx} className="top-five-item">
-                  <span className="rank">{idx + 1}.</span>
-                  <span className="name">{dept.avdeling}</span>
-                  <span className="count">{dept.salg}</span>
-                </div>
-              ))
+              topAvdeling.maned.map((dept, idx) => {
+                const medals = ['🥇', '🥈', '🥉'];
+                return (
+                  <div key={idx} className="top-five-item">
+                    <span className="rank">{medals[idx]}</span>
+                    <span className="name">{dept.avdeling}</span>
+                    <span className="count">{dept.salg}</span>
+                  </div>
+                );
+              })
             ) : (
               <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen avdelinger</p>
             )}
             <div style={{ marginTop: '0.8rem', borderTop: '1px solid #ddd', paddingTop: '0.8rem' }}>
               <div className="top-five-title" style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>TOP 3 ANSATT</div>
               {topFive.maned.length > 0 ? (
-                topFive.maned.map((emp, idx) => (
-                  <div key={idx} className="top-five-item">
-                    <span className="rank">{idx + 1}.</span>
-                    <span className="name">{emp.displayName}</span>
-                    <span className="count">{emp.salg}</span>
-                  </div>
-                ))
+                topFive.maned.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} className="top-five-item">
+                      <span className="rank">{medals[idx]}</span>
+                      <span className="name">{emp.displayName}</span>
+                      <span className="count">{emp.salg}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <p style={{ fontSize: '0.85rem', color: '#999' }}>Ingen salg denne måneden</p>
               )}
