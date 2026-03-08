@@ -1965,7 +1965,7 @@ export default function Chat() {
                     <>
                       <button
                         onClick={() => setNewMessage(newMessage + '🔔')}
-                        title="🔔 = BTV"
+                        title="BTV"
                         style={{
                           background: 'transparent',
                           border: 'none',
@@ -1974,7 +1974,10 @@ export default function Chat() {
                           opacity: 0.6,
                           transition: 'opacity 0.2s',
                           padding: '0.2rem 0.25rem',
-                          color: '#a0a0a0'
+                          filter: 'grayscale(100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
                         onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
@@ -1983,7 +1986,7 @@ export default function Chat() {
                       </button>
                       <button
                         onClick={() => setNewMessage(newMessage + '💎')}
-                        title="💎 = DTH"
+                        title="DTH"
                         style={{
                           background: 'transparent',
                           border: 'none',
@@ -1992,7 +1995,10 @@ export default function Chat() {
                           opacity: 0.6,
                           transition: 'opacity 0.2s',
                           padding: '0.2rem 0.25rem',
-                          color: '#a0a0a0'
+                          filter: 'grayscale(100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
                         onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
@@ -2001,7 +2007,7 @@ export default function Chat() {
                       </button>
                       <button
                         onClick={() => setNewMessage(newMessage + '🎁')}
-                        title="🎁 = GRATIS DEKODER"
+                        title="FREE BOX"
                         style={{
                           background: 'transparent',
                           border: 'none',
@@ -2010,7 +2016,10 @@ export default function Chat() {
                           opacity: 0.6,
                           transition: 'opacity 0.2s',
                           padding: '0.2rem 0.25rem',
-                          color: '#a0a0a0'
+                          filter: 'grayscale(100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
                         onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
