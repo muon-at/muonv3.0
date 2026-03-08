@@ -77,8 +77,8 @@
   font-size: 0.85rem;
   font-weight: 600;
   margin-top: 0.5rem;
-  opacity: 1;
-  color: #000000;
+  opacity: 1 !important;
+  color: #000000 !important;
 }
 
 /* PROGRESS BARS - COMPACT */
@@ -447,9 +447,9 @@
 
   .stat-label {
     font-size: 0.7rem;
-    color: #000000;
+    color: #000000 !important;
     font-weight: 700;
-    opacity: 1;
+    opacity: 1 !important;
   }
 
   .stat-number {
