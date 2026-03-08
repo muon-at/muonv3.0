@@ -69,7 +69,7 @@ export const RightNavBar: React.FC = () => {
     }
   }, [location.state?.selectedChannel]);
 
-  const isAllenteChat = location.state?.selectedChannel === 'allente';
+  const isAllenteChat = location.state?.selectedChannel === 'project-allente';
 
   return (
     <>
