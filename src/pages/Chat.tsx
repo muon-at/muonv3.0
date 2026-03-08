@@ -1443,23 +1443,33 @@ export default function Chat() {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                  <h2 style={{
-                    margin: 0,
-                    fontSize: selectedChannel === 'global' ? '2.5rem' : '2.2rem',
-                    fontWeight: 700,
-                    letterSpacing: '-0.03em',
-                    fontFamily: selectedChannel === 'project-allente' ? 'sans-serif' : 'Arial, sans-serif',
-                    fontStyle: selectedChannel === 'project-allente' ? 'italic' : 'normal',
-                    textRendering: 'optimizeLegibility',
-                    WebkitFontSmoothing: 'antialiased',
-                  }}>
-                    {(() => {
-                      if (selectedChannel === 'project-allente') return 'allente';
-                      if (selectedChannel === 'global') return 'muon';
-                      const channel = channels.find(c => c.id === selectedChannel);
-                      return channel?.emoji || '💬';
-                    })()}
-                  </h2>
+                  {selectedChannel === 'project-allente' ? (
+                    <img 
+                      src="https://www.antennhakan.se/wp-content/uploads/2024/01/allente-logo2.png"
+                      alt="Allente"
+                      style={{
+                        height: '40px',
+                        maxWidth: '300px',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  ) : (
+                    <h2 style={{
+                      margin: 0,
+                      fontSize: selectedChannel === 'global' ? '2.5rem' : '2.2rem',
+                      fontWeight: 700,
+                      letterSpacing: '-0.03em',
+                      fontFamily: 'Arial, sans-serif',
+                      textRendering: 'optimizeLegibility',
+                      WebkitFontSmoothing: 'antialiased',
+                    }}>
+                      {(() => {
+                        if (selectedChannel === 'global') return 'muon';
+                        const channel = channels.find(c => c.id === selectedChannel);
+                        return channel?.emoji || '💬';
+                      })()}
+                    </h2>
+                  )}
                 </div>
               )}
 
