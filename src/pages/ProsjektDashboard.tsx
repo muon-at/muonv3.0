@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/AvdelingDashboard.css';
 
@@ -57,18 +57,21 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
     try {
       const today = new Date();
 
-      // Fetch project goals
-      const goalsRef = collection(db, 'allente_targets');
-      const goalsQuery = query(goalsRef, where('project', '==', proj));
-      const goalsSnap = await getDocs(goalsQuery);
-
-      if (!goalsSnap.empty) {
-        const goalData = goalsSnap.docs[0].data();
-        setGoals({
-          dag: goalData.dag_mal || 50,
-          uke: goalData.uke_mal || 250,
-          maned: goalData.maned_mal || 1000,
-        });
+      // Fetch project goals (doc ID is the project name, e.g., "Allente")
+      try {
+        const goalsDocRef = doc(db, 'allente_targets', proj);
+        const goalsSnap = await getDoc(goalsDocRef);
+        
+        if (goalsSnap.exists()) {
+          const data = goalsSnap.data();
+          setGoals({
+            dag: parseInt(data.dag) || 50,
+            uke: parseInt(data.uke) || 250,
+            maned: parseInt(data.måned) || 1000,
+          });
+        }
+      } catch (err) {
+        console.log('Goals using defaults:', err);
       }
 
       // Fetch all employees from project
