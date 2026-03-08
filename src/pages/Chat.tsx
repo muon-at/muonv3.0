@@ -667,18 +667,6 @@ export default function Chat() {
     return emojiMap[lower] || '💬';
   };
 
-  const renderChannelEmoji = (emoji?: string) => {
-    const emojiStr = emoji || '💬';
-    
-    // Check if it's a data URL (custom emoji image)
-    if (emojiStr.startsWith('data:') || emojiStr.startsWith('http')) {
-      return <img src={emojiStr} alt="emoji" style={{ width: '1.5rem', height: '1.5rem', borderRadius: '4px' }} />;
-    }
-    
-    // Regular emoji
-    return emojiStr;
-  };
-
   const checkChannelAccess = (type: string, avdeling?: string, allowedUsers?: string[], project?: string): boolean => {
     // If allowedUsers is set, check if user is in the list
     if (allowedUsers && allowedUsers.length > 0) {
@@ -1452,53 +1440,21 @@ export default function Chat() {
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
-                  justifyContent: 'space-between',
+                  justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontSize: '1.5rem', display: 'flex', alignItems: 'center' }}>
-                      {renderChannelEmoji(channels.find(c => c.id === selectedChannel)?.emoji)}
-                    </span>
-                    <div>
-                      <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>
-                        {(() => {
-                          const name = channels.find(c => c.id === selectedChannel)?.name;
-                          // If name is already "Allente", show it as is
-                          if (name === 'Allente') return 'Allente';
-                          if (name?.toLowerCase() === 'muon') return 'Allente';
-                          if (name === 'team') return 'Teamledere';
-                          return name;
-                        })()}
-                      </h2>
-                      <span style={{ fontSize: '0.85rem', opacity: 0.9 }}>
-                        {channels.find(c => c.id === selectedChannel)?.type}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <button style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                    }}>
-                      📄 Files
-                    </button>
-                    <button style={{
-                      background: 'rgba(255,255,255,0.2)',
-                      border: 'none',
-                      color: 'white',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                    }}>
-                      📌 Pins
-                    </button>
-                  </div>
+                  <h2 style={{
+                    margin: 0,
+                    fontSize: '2.5rem',
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    fontFamily: 'Arial, sans-serif',
+                    textRendering: 'optimizeLegibility',
+                    WebkitFontSmoothing: 'antialiased',
+                    opacity: 0.95,
+                  }}>
+                    muon
+                  </h2>
                 </div>
               )}
 
