@@ -69,10 +69,19 @@ export const RightNavBar: React.FC = () => {
     }
   }, [location.state?.selectedChannel]);
 
+  const isAllenteChat = location.state?.selectedChannel === 'allente';
+
   return (
     <>
       {/* Desktop NavBar (hidden on mobile) */}
-      <div className="right-nav-bar right-nav-bar-desktop">
+      <div 
+        className={`right-nav-bar right-nav-bar-desktop ${isAllenteChat ? 'allente-nav' : ''}`}
+        style={{
+          background: isAllenteChat 
+            ? 'linear-gradient(135deg, #FFB366 0%, #FFA64D 100%)'
+            : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+        }}
+      >
       <div className="nav-items">
         {/* LOGOUT - Door icon */}
         <button 
@@ -311,6 +320,11 @@ export const RightNavBar: React.FC = () => {
           className="mobile-hamburger"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           title="Menu"
+          style={{
+            background: isAllenteChat
+              ? 'linear-gradient(135deg, #FFB366 0%, #FFA64D 100%)'
+              : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          }}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="24" height="24">
             {isMobileMenuOpen ? (

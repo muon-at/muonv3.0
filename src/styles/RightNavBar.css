@@ -4,7 +4,7 @@
   top: 0;
   bottom: 0;
   width: 72px;
-  background: linear-gradient(135deg, #FFB366 0%, #FFA64D 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0;
@@ -213,7 +213,7 @@
 .mobile-hamburger {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #FFB366 0%, #FFA64D 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -288,7 +288,7 @@
 
 .mobile-nav-button svg {
   flex-shrink: 0;
-  color: #FF8C00;
+  color: #667eea;
 }
 
 .mobile-nav-button span {
@@ -306,4 +306,10 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: -1;
+}
+
+/* Allente chat mobile nav icon color */
+.mobile-nav-menu.open + * .mobile-nav-button svg,
+.right-nav-bar.allente-nav ~ .mobile-nav-menu .mobile-nav-button svg {
+  color: #FF8C00 !important;
 }
