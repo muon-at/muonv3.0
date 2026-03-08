@@ -193,35 +193,8 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
         }
       });
 
-      // Fetch emoji counts for entire week
-      const weekStart = new Date(today);
-      const dayOfWeek = weekStart.getDay();
-      const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-      weekStart.setDate(diff);
-
-      const emojiCountsWeek = new Map<string, number>();
-      const currentDate = new Date(weekStart);
-      while (currentDate <= today) {
-        const dailyCounts = await getEmojiCountsForDate(currentDate);
-        dailyCounts.forEach((count, employeeName) => {
-          const existing = emojiCountsWeek.get(employeeName) || 0;
-          emojiCountsWeek.set(employeeName, existing + count);
-        });
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      // Fetch emoji counts for entire month
-      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-      const emojiCountsMonth = new Map<string, number>();
-      const currentDateMonth = new Date(monthStart);
-      while (currentDateMonth <= today) {
-        const dailyCounts = await getEmojiCountsForDate(currentDateMonth);
-        dailyCounts.forEach((count, employeeName) => {
-          const existing = emojiCountsMonth.get(employeeName) || 0;
-          emojiCountsMonth.set(employeeName, existing + count);
-        });
-        currentDateMonth.setDate(currentDateMonth.getDate() + 1);
-      }
+      // Emojis only from TODAY are used for UKE and MÅNED
+      // (contracts provide the historical totals, emojis are just for today's progress)
 
       // Count sales for week and month
       allSales.forEach((sale: any) => {
@@ -267,12 +240,12 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
         const displayName = employeeNameMap.get(externalName) || externalName;
         
         // Look up emojis using displayName (e.g., "Oliver T Jenssen")
-        const ukeEmojis = emojiCountsWeek.get(displayName) || 0;
-        const maanedEmojis = emojiCountsMonth.get(displayName) || 0;
+        // Emojis only from TODAY for both UKE and MÅNED
+        const todayEmojis = emojiCountsToday.get(displayName) || 0;
 
         const dagTotal = counts.dag;
-        const ukeTotal = counts.uke + ukeEmojis;
-        const maanedTotal = counts.maned + maanedEmojis;
+        const ukeTotal = counts.uke + todayEmojis;
+        const maanedTotal = counts.maned + todayEmojis;
 
         totalDag += dagTotal;
         totalUke += ukeTotal;
