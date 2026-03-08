@@ -645,6 +645,7 @@
   width: 100%;
   margin: 0 auto;
   padding: 0;
+  padding-right: 20px;
   align-items: start;
 }
 
@@ -658,6 +659,7 @@
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  margin-right: 20px;
 }
 
 .earnings-box {
@@ -1017,6 +1019,11 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 0;
+    padding-right: 15px;
+  }
+
+  .earnings-right-section {
+    margin-right: 0;
   }
 
   .minside-main {
