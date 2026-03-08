@@ -296,9 +296,7 @@ export default function Chat() {
       // Find top department
       const topDept = Object.entries(deptSales).sort((a, b) => (b[1] as any) - (a[1] as any))[0]?.[0];
       setTopDepartment(topDept || null);
-      console.log('👑 Top department this week (with emojis):', topDept, deptSales);
-      console.log('📋 Employee map by name:', empByName);
-      console.log('🔍 Top Dept Value:', topDept);
+      console.log('👑 Top department this week:', topDept, deptSales);
     } catch (err) {
       console.error('Error calculating top department:', err);
     }
@@ -1687,24 +1685,9 @@ export default function Chat() {
                     ) : (
                       <div className="message-header">
                         <span className="message-sender">
-                          {(() => {
-                            const shouldShowCrown = topDepartment && employeeMapByName[msg.sender]?.department === topDepartment;
-                            if (msg.sender === 'Oliver T Jenssen') {
-                              console.log(`🔍 CROWN CHECK for Oliver:`, { 
-                                topDepartment, 
-                                senderName: msg.sender,
-                                senderDept: employeeMapByName[msg.sender]?.department,
-                                shouldShow: shouldShowCrown,
-                                fullMap: employeeMapByName
-                              });
-                            }
-                            return shouldShowCrown ? '👑' : '';
-                          })()}
+                          {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? '👑' : ''}
                           {msg.sender}
-                          {(() => {
-                            const shouldShowCrown = topDepartment && employeeMapByName[msg.sender]?.department === topDepartment;
-                            return shouldShowCrown ? '👑' : '';
-                          })()}
+                          {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? '👑' : ''}
                         </span>
                         <span className="message-content" style={{
                           color: msg.isDeleted ? '#999' : '#333',
