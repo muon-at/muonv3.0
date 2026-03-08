@@ -73,6 +73,13 @@ export default function MinSide() {
     monthlyGoalValue: 0,
   });
 
+  const [runRates, setRunRates] = useState({
+    dailyTo16: 0,
+    dailyTo21: 0,
+    weekly: 0,
+    monthly: 0,
+  });
+
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
     try {
@@ -100,6 +107,81 @@ export default function MinSide() {
     loadCachedBadges();
   }, [user]);
 
+  // Count working days (weekdays only, no weekends)
+  const countWorkingDaysInMonth = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    let count = 0;
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++; // Skip Sunday (0) and Saturday (6)
+    }
+    return count;
+  };
+
+  // Count working days from start of week to today
+  const countWorkingDaysThisWeek = (date: Date) => {
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1)); // Monday
+    
+    let count = 0;
+    for (let d = new Date(weekStart); d <= date; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++;
+    }
+    return count;
+  };
+
+  // Count working days from start of month to today
+  const countWorkingDaysThisMonth = (date: Date) => {
+    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+    
+    let count = 0;
+    for (let d = new Date(monthStart); d <= date; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++;
+    }
+    return count;
+  };
+
+  // Calculate run rates
+  const calculateRunRates = (
+    emojiCount: number,
+    salesWeekly: number,
+    salesMonthly: number
+  ) => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0); // 09:00
+    const hoursWorked = Math.max(0, (now.getTime() - startOfDay.getTime()) / (1000 * 60 * 60));
+    
+    // Daily to 16:00 (6 working hours: 9-10, 10-11, 11-12, 12-13, 14-15, 15-16)
+    const dailyTo16 = hoursWorked > 0 ? (emojiCount / hoursWorked) * 6 : 0;
+    
+    // Daily to 21:00 (10 working hours: 9-10, 10-11, 11-12, 12-13, 14-15, 15-16, 16-17, 17-18, 18-19, 19-21)
+    const dailyTo21 = hoursWorked > 0 ? (emojiCount / hoursWorked) * 10 : 0;
+    
+    // Weekly: (today's emoji + week sales) / days worked * 5 workdays
+    const workingDaysWeek = countWorkingDaysThisWeek(now);
+    const totalSalesWeek = emojiCount + salesWeekly;
+    const weekly = workingDaysWeek > 0 ? (totalSalesWeek / workingDaysWeek) * 5 : 0;
+    
+    // Monthly: (today's emoji + month sales) / days worked * working days in month
+    const workingDaysMonth = countWorkingDaysThisMonth(now);
+    const totalWorkingDaysInMonth = countWorkingDaysInMonth(now);
+    const totalSalesMonth = emojiCount + salesMonthly;
+    const monthly = workingDaysMonth > 0 ? (totalSalesMonth / workingDaysMonth) * totalWorkingDaysInMonth : 0;
+    
+    return {
+      dailyTo16: Math.round(dailyTo16 * 100) / 100,
+      dailyTo21: Math.round(dailyTo21 * 100) / 100,
+      weekly: Math.round(weekly * 100) / 100,
+      monthly: Math.round(monthly * 100) / 100,
+    };
+  };
+
   // Update progress data when goals change
   useEffect(() => {
     setProgressData(prev => ({
@@ -109,6 +191,28 @@ export default function MinSide() {
       monthlyGoalValue: monthlyGoal,
     }));
   }, [weeklyGoal, monthlyGoal]);
+
+  // Update run rates every minute (real-time tracking)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const rates = calculateRunRates(
+        progressData.dailyProgress,
+        progressData.weeklyProgress - progressData.dailyProgress,
+        progressData.monthlyProgress - progressData.dailyProgress
+      );
+      setRunRates(rates);
+    }, 60000); // Update every minute
+    
+    // Calculate immediately on load
+    const rates = calculateRunRates(
+      progressData.dailyProgress,
+      progressData.weeklyProgress - progressData.dailyProgress,
+      progressData.monthlyProgress - progressData.dailyProgress
+    );
+    setRunRates(rates);
+    
+    return () => clearInterval(timer);
+  }, [progressData]);
 
   const loadCachedBadges = async () => {
     try {
@@ -491,6 +595,49 @@ export default function MinSide() {
               <div className="progress-fill" style={{ width: `${progressData.monthlyGoalValue > 0 ? Math.min((progressData.monthlyProgress / progressData.monthlyGoalValue) * 100, 100) : 0}%` }}></div>
             </div>
             <div className="progress-text">{progressData.monthlyProgress} / {progressData.monthlyGoalValue} <span className="checkmark">{progressData.monthlyProgress >= progressData.monthlyGoalValue ? '✓ Mål nådd' : ''}</span></div>
+          </div>
+        </div>
+
+        {/* RUN RATE BOXES */}
+        <div className="runrate-section">
+          {/* Box 1: Daily Run Rates */}
+          <div className="runrate-box">
+            <div className="runrate-label">Dagens Hastighet</div>
+            <div className="runrate-metrics">
+              <div className="runrate-metric">
+                <span className="runrate-time">→ 16:00</span>
+                <span className="runrate-value">{runRates.dailyTo16.toFixed(1)}</span>
+                <span className="runrate-unit">salg/dag</span>
+              </div>
+              <div className="runrate-divider">|</div>
+              <div className="runrate-metric">
+                <span className="runrate-time">→ 21:00</span>
+                <span className="runrate-value">{runRates.dailyTo21.toFixed(1)}</span>
+                <span className="runrate-unit">salg/dag</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Box 2: Weekly Run Rate */}
+          <div className="runrate-box">
+            <div className="runrate-label">Ukes Hastighet</div>
+            <div className="runrate-metrics">
+              <div className="runrate-metric">
+                <span className="runrate-value">{runRates.weekly.toFixed(1)}</span>
+                <span className="runrate-unit">salg/uke</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Box 3: Monthly Run Rate */}
+          <div className="runrate-box">
+            <div className="runrate-label">Månedens Hastighet</div>
+            <div className="runrate-metrics">
+              <div className="runrate-metric">
+                <span className="runrate-value">{runRates.monthly.toFixed(1)}</span>
+                <span className="runrate-unit">salg/måned</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

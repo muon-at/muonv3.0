@@ -549,6 +549,79 @@
   margin-left: auto;
 }
 
+/* RUN RATE BOXES */
+.runrate-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 900px;
+  width: 100%;
+  margin: 2rem auto 0;
+  padding: 0 1.5rem;
+}
+
+.runrate-box {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.runrate-box:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.runrate-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.runrate-metrics {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.runrate-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.runrate-time {
+  font-size: 0.75rem;
+  color: #bbb;
+  font-weight: 500;
+}
+
+.runrate-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.runrate-unit {
+  font-size: 0.7rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.runrate-divider {
+  color: #e2e8f0;
+  font-size: 1.5rem;
+  opacity: 0.5;
+}
+
 /* RESPONSIVE */
 @media (max-width: 1024px) {
   .minside-main {
@@ -728,5 +801,29 @@
 
   .badge-desc {
     font-size: 0.7rem;
+  }
+
+  /* RUNRATE - MOBILE */
+  .runrate-section {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 1rem;
+    margin: 1.5rem auto 0;
+  }
+
+  .runrate-box {
+    padding: 1rem;
+  }
+
+  .runrate-value {
+    font-size: 1.4rem;
+  }
+
+  .runrate-metrics {
+    gap: 0.5rem;
+  }
+
+  .runrate-label {
+    font-size: 0.75rem;
   }
 }
