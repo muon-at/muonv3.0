@@ -1436,7 +1436,7 @@ export default function Chat() {
               {selectedChannel && channels.find(c => c.id === selectedChannel) && (
                 <div style={{
                   padding: '1rem 1.5rem',
-                  background: selectedChannel === 'project-allente' ? '#D95A2B' : '#667eea',
+                  background: selectedChannel === 'project-allente' ? '#1a3a52' : '#667eea',
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
