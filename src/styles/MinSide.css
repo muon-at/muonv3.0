@@ -78,7 +78,7 @@
   font-weight: 600;
   margin-top: 0.5rem;
   opacity: 0.95;
-  color: #444444;
+  color: #000000;
 }
 
 /* PROGRESS BARS - COMPACT */
@@ -447,7 +447,7 @@
 
   .stat-label {
     font-size: 0.7rem;
-    color: #444444;
+    color: #000000;
     font-weight: 700;
   }
 
@@ -580,7 +580,7 @@
 
   .stat-label {
     font-size: 0.7rem !important;
-    color: #444444 !important;
+    color: #000000 !important;
     font-weight: 700 !important;
   }
 
@@ -634,7 +634,7 @@
   }
 
   .stat-label {
-    color: #444444 !important;
+    color: #000000 !important;
   }
 
   .trophy-placeholder {
