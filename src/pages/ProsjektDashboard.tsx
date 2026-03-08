@@ -4,7 +4,8 @@ import { db } from '../lib/firebase';
 import '../styles/AvdelingDashboard.css';
 
 interface TopFiveItem {
-  name: string;
+  externalName: string;
+  displayName: string;
   salg: number;
 }
 
@@ -79,6 +80,16 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       const employeesQuery = query(employeesRef, where('project', '==', proj));
       const employeesSnap = await getDocs(employeesQuery);
       const employees = employeesSnap.docs.map(doc => doc.data());
+      
+      // Create mapping from externalName → display name
+      const employeeNameMap = new Map<string, string>();
+      employees.forEach(emp => {
+        const externalName = emp.externalName?.trim() || '';
+        const displayName = emp.name || emp.ansattNavn || externalName;
+        if (externalName) {
+          employeeNameMap.set(externalName, displayName);
+        }
+      });
 
       // Fetch all sales
       const salesRef = collection(db, 'allente_salg');
@@ -219,9 +230,11 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         totalUke += ukeTotal;
         totalManed += maanedTotal;
 
-        dagList.push({ name: empName, salg: dagTotal });
-        ukeList.push({ name: empName, salg: ukeTotal });
-        maanedList.push({ name: empName, salg: maanedTotal });
+        const displayName = employeeNameMap.get(empName) || empName;
+
+        dagList.push({ externalName: empName, displayName, salg: dagTotal });
+        ukeList.push({ externalName: empName, displayName, salg: ukeTotal });
+        maanedList.push({ externalName: empName, displayName, salg: maanedTotal });
       });
 
       dagList.sort((a, b) => b.salg - a.salg);
@@ -285,7 +298,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
               topFive.dag.map((emp, idx) => (
                 <div key={idx} className="top-five-item">
                   <span className="rank">{idx + 1}.</span>
-                  <span className="name">{emp.name}</span>
+                  <span className="name">{emp.displayName}</span>
                   <span className="count">{emp.salg}</span>
                 </div>
               ))
@@ -323,7 +336,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
               topFive.uke.map((emp, idx) => (
                 <div key={idx} className="top-five-item">
                   <span className="rank">{idx + 1}.</span>
-                  <span className="name">{emp.name}</span>
+                  <span className="name">{emp.displayName}</span>
                   <span className="count">{emp.salg}</span>
                 </div>
               ))
@@ -361,7 +374,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
               topFive.maned.map((emp, idx) => (
                 <div key={idx} className="top-five-item">
                   <span className="rank">{idx + 1}.</span>
-                  <span className="name">{emp.name}</span>
+                  <span className="name">{emp.displayName}</span>
                   <span className="count">{emp.salg}</span>
                 </div>
               ))
