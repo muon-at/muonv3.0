@@ -8,6 +8,8 @@ interface SalesRecord {
   dato?: string;
   selger?: string;
   id?: string;
+  produkt?: string;
+  [key: string]: any;
 }
 
 interface BadgeDefinition {
@@ -80,6 +82,15 @@ export default function MinSide() {
     monthly: 0,
   });
 
+  const [earnings, setEarnings] = useState({
+    total: 0,
+    daily: 0,
+    dailyTo16: 0,
+    dailyTo21: 0,
+    weekly: 0,
+    monthly: 0,
+  });
+
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
     try {
@@ -106,6 +117,19 @@ export default function MinSide() {
     // Load cached badges from Firestore
     loadCachedBadges();
   }, [user]);
+
+  // Count working days this week (Monday to today)
+  const countWorkingDaysThisWeek = (date: Date) => {
+    const weekStart = new Date(date);
+    weekStart.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
+    
+    let count = 0;
+    for (let d = new Date(weekStart); d <= date; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++;
+    }
+    return count;
+  };
 
   // Count working days (weekdays only, no weekends)
   const countWorkingDaysInMonth = (date: Date) => {
@@ -324,6 +348,124 @@ export default function MinSide() {
       });
       const bestDay = Math.max(0, ...Object.values(dayMap));
       console.log('📅 Best day for', user?.name, ':', bestDay, 'contracts');
+
+      // Load products with provisjon
+      let produktProvisjon: { [key: string]: number } = {};
+      try {
+        const produktRef = collection(db, 'allente_products');
+        const produktSnapshot = await getDocs(produktRef);
+        produktSnapshot.forEach((doc) => {
+          const data = doc.data();
+          const provisjon = parseFloat(data.provisjon || 0);
+          produktProvisjon[doc.id] = provisjon;
+        });
+        console.log('💼 Products loaded:', produktProvisjon);
+      } catch (err) {
+        console.error('Error loading products:', err);
+      }
+
+      // Load gift count (🎁) for today
+      let giftCountToday = 0;
+      try {
+        const today_str = today.toISOString().split('T')[0];
+        const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
+        const emojiDoc = await getDoc(emojiCountsRef);
+        if (emojiDoc.exists()) {
+          const data = emojiDoc.data();
+          const counts = data.counts || {};
+          const userName = user?.name || '';
+          const userEmojis = counts[userName] || { '🎁': 0 };
+          giftCountToday = userEmojis['🎁'] || 0;
+        }
+      } catch (err) {
+        console.error('Error loading gift count:', err);
+      }
+
+      // Get emoji counts for today with breakdown
+      let bellCountToday = 0, gemCountToday = 0;
+      try {
+        const today_str = today.toISOString().split('T')[0];
+        const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
+        const emojiDoc = await getDoc(emojiCountsRef);
+        if (emojiDoc.exists()) {
+          const data = emojiDoc.data();
+          const counts = data.counts || {};
+          const userName = user?.name || '';
+          const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
+          bellCountToday = userEmojis['🔔'] || 0;
+          gemCountToday = userEmojis['💎'] || 0;
+        }
+      } catch (err) {
+        console.error('Error loading emoji counts:', err);
+      }
+
+      // Calculate earnings
+      // Get provisjon per product from contracts
+      const contractEarnings = employeeContracts.reduce((sum, c) => {
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
+        return sum + provisjon;
+      }, 0);
+
+      // Emoji values: 🔔=800, 💎=1000, 🎁=-200
+      const emojiEarningsToday = (bellCountToday * 800) + (gemCountToday * 1000) - (giftCountToday * 200);
+      const totalEarnings = contractEarnings + emojiEarningsToday;
+
+      // Week earnings
+      const contractsWeek = employeeContracts.filter(c => {
+        const date = parseDate(c.dato || '');
+        return date && date >= weekStart && date <= today;
+      });
+      const weekEarnings = contractsWeek.reduce((sum, c) => {
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
+        return sum + provisjon;
+      }, 0) + emojiEarningsToday; // Add today's emoji earnings
+
+      // Month earnings
+      const contractsMonth = employeeContracts.filter(c => {
+        const date = parseDate(c.dato || '');
+        return date && date >= monthStart && date <= today;
+      });
+      const monthEarnings = contractsMonth.reduce((sum, c) => {
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
+        return sum + provisjon;
+      }, 0) + emojiEarningsToday; // Add today's emoji earnings
+
+      // Calculate hours worked today
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0);
+      const hoursWorked = Math.max(0, (now.getTime() - startOfDay.getTime()) / (1000 * 60 * 60));
+
+      // Daily earnings runrate
+      const dailyEarningsTo16 = hoursWorked > 0 ? (emojiEarningsToday / hoursWorked) * 6 : 0;
+      const dailyEarningsTo21 = hoursWorked > 0 ? (emojiEarningsToday / hoursWorked) * 10 : 0;
+
+      // Weekly earnings runrate
+      const workingDaysWeek = Math.max(1, countWorkingDaysThisWeek(now));
+      const weeklyEarningsRunrate = (weekEarnings / workingDaysWeek) * 5;
+
+      // Monthly earnings runrate
+      const workingDaysMonth = countWorkingDaysThisMonth(now);
+      const totalWorkingDaysInMonth = countWorkingDaysInMonth(now);
+      const monthlyEarningsRunrate = workingDaysMonth > 0 ? (monthEarnings / workingDaysMonth) * totalWorkingDaysInMonth : 0;
+
+      setEarnings({
+        total: Math.round(totalEarnings),
+        daily: Math.round(emojiEarningsToday),
+        dailyTo16: Math.round(dailyEarningsTo16 * 100) / 100,
+        dailyTo21: Math.round(dailyEarningsTo21 * 100) / 100,
+        weekly: Math.round(weeklyEarningsRunrate),
+        monthly: Math.round(monthlyEarningsRunrate),
+      });
+
+      console.log('💰 Earnings calculated:', {
+        contractEarnings,
+        emojiEarningsToday,
+        totalEarnings,
+        weekEarnings,
+        monthEarnings,
+      });
 
       // Calculate progress data for bars
       const dailyGoalCalc = weeklyGoal > 0 ? Math.ceil(weeklyGoal / 5) : 0;
@@ -553,7 +695,9 @@ export default function MinSide() {
       {/* MAIN CONTENT - STATS TAB */}
       {activeTab === 'stats' && (
       <div className="minside-main">
-        <div className="stats-circles">
+        <div className="stats-and-earnings-container">
+          <div className="stats-left-section">
+            <div className="stats-circles">
           <div className="trophy-placeholder">🏆</div>
           {stats.map((stat, idx) => (
             <div key={idx} className="stat-circle" style={{ backgroundColor: stat.color }}>
@@ -638,6 +782,63 @@ export default function MinSide() {
               <div className="runrate-metric">
                 <span className="runrate-value">{runRates.monthly.toFixed(1)}</span>
                 <span className="runrate-unit">salg/måned</span>
+              </div>
+            </div>
+          </div>
+        </div>
+          </div>
+
+          {/* EARNINGS BOX - RIGHT SECTION */}
+          <div className="earnings-right-section">
+            <div className="earnings-box">
+              <div className="earnings-header">
+                <span className="earnings-icon">💰</span>
+                <div>
+                  <h3>Lønn</h3>
+                  <p className="earnings-subtitle">Utvikling</p>
+                </div>
+              </div>
+
+              {/* Total Earnings */}
+              <div className="earnings-stat">
+                <span className="earnings-label">LØNN TIL NÅ</span>
+                <span className="earnings-value">{earnings.total.toLocaleString('no-NO')}</span>
+                <span className="earnings-unit">kr</span>
+              </div>
+
+              {/* Daily Earnings with Runrate */}
+              <div className="earnings-daily">
+                <div className="earnings-label">LØNN I DAG</div>
+                <div className="earnings-row">
+                  <div className="earnings-metric">
+                    <span className="earnings-amount">{earnings.daily.toLocaleString('no-NO')}</span>
+                    <span className="earnings-unit">kr</span>
+                  </div>
+                  <div className="earnings-divider">|</div>
+                  <div className="earnings-metric-small">
+                    <span className="earnings-time">→ 16:00</span>
+                    <span className="earnings-amount-small">{earnings.dailyTo16.toLocaleString('no-NO')}</span>
+                    <span className="earnings-unit-small">kr</span>
+                  </div>
+                  <div className="earnings-divider">|</div>
+                  <div className="earnings-metric-small">
+                    <span className="earnings-time">→ 21:00</span>
+                    <span className="earnings-amount-small">{earnings.dailyTo21.toLocaleString('no-NO')}</span>
+                    <span className="earnings-unit-small">kr</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Weekly and Monthly Runrate */}
+              <div className="earnings-runrate">
+                <div className="earnings-runrate-item">
+                  <span className="earnings-label-small">UKE RUNRATE</span>
+                  <span className="earnings-value-small">{earnings.weekly.toLocaleString('no-NO')} kr</span>
+                </div>
+                <div className="earnings-runrate-item">
+                  <span className="earnings-label-small">MÅNED RUNRATE</span>
+                  <span className="earnings-value-small">{earnings.monthly.toLocaleString('no-NO')} kr</span>
+                </div>
               </div>
             </div>
           </div>
