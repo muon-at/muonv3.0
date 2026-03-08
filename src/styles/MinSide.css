@@ -223,7 +223,7 @@
 .stats-and-earnings-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+  gap: 3.5rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -475,7 +475,7 @@
 
   .stats-and-earnings-container {
     grid-template-columns: 1fr;
-    gap: 1.2rem;
+    gap: 1.5rem;
     padding: 0 0.5rem;
     padding-right: 12px;
   }
