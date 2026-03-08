@@ -219,6 +219,34 @@ export default function Login() {
             >
               👤 Employee (Oliver)
             </button>
+            <span style={{ color: '#999' }}>·</span>
+            <button
+              type="button"
+              onClick={() => {
+                const demoUser = {
+                  id: 'demo-employee-ajay',
+                  name: 'Ajay Sureshkumar',
+                  role: 'employee',
+                  department: 'OSL',
+                  project: 'Allente',
+                  email: 'ajay@muonas.no',
+                  externalName: 'Ajay Sureshkumar / selger',
+                };
+                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
+                navigate('/min-side');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#3b82f6',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                fontSize: '0.9rem',
+                padding: 0,
+              }}
+            >
+              👤 Employee (Ajay)
+            </button>
           </div>
         </div>
 
