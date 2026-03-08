@@ -80,6 +80,7 @@ export default function Chat() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const unsubscribeRef = useRef<(() => void) | undefined>(undefined);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Emoji command mapping (e.g., :bell: → 🔔)
   const emojiCommandMap: Record<string, string> = {
@@ -422,6 +423,13 @@ export default function Chat() {
       }
     };
   }, [selectedChannel, selectedDM]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const loadChannels = async () => {
     try {
@@ -1838,6 +1846,8 @@ export default function Chat() {
                       : `${typingUsers.join(', ')} are typing...`}
                   </div>
                 )}
+                {/* Auto-scroll anchor */}
+                <div ref={messagesEndRef} style={{ height: 0 }} />
               </div>
 
               {/* Reply Context */}
