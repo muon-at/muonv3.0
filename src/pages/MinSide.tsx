@@ -292,6 +292,7 @@ export default function MinSide() {
       const weekStart = new Date(today);
       weekStart.setDate(today.getDate() - today.getDay());
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const yearStart = new Date(now.getFullYear(), 0, 1); // Jan 1 of current year
 
       // Load emoji counts for today (🔔 + 💎)
       const emojiCountToday = await loadEmojiCountsForToday();
@@ -306,7 +307,11 @@ export default function MinSide() {
         return date && date >= monthStart && date <= today;
       }).length;
 
-      const avgPerDay = Math.round(employeeContracts.length / 365);
+      const salesThisYear = employeeContracts.filter(c => {
+        const date = parseDate(c.dato || '');
+        return date && date >= yearStart && date <= today;
+      }).length;
+
       const total = employeeContracts.length;
 
       // Calculate best day (highest number of contracts on any single date)
@@ -336,7 +341,7 @@ export default function MinSide() {
         { value: bestDay, label: 'Dag', color: '#E8956E', icon: '📊' },
         { value: salesThisWeek, label: 'Uke', color: '#E8956E', icon: '📈' },
         { value: salesThisMonth, label: 'Måned', color: '#E8956E', icon: '🎯' },
-        { value: avgPerDay, label: 'År', color: '#5B7FFF', icon: '📅' },
+        { value: salesThisYear, label: 'År', color: '#5B7FFF', icon: '📅' },
         { value: total, label: 'Altid', color: '#A855C9', icon: '⭐' },
       ]);
 
