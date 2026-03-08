@@ -4,7 +4,7 @@
   top: 0;
   bottom: 0;
   width: 72px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FFB366 0%, #FFA64D 100%);
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0;
@@ -213,7 +213,7 @@
 .mobile-hamburger {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FFB366 0%, #FFA64D 100%);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -288,7 +288,7 @@
 
 .mobile-nav-button svg {
   flex-shrink: 0;
-  color: #667eea;
+  color: #FF8C00;
 }
 
 .mobile-nav-button span {

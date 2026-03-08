@@ -1259,7 +1259,7 @@ export default function Chat() {
                     style={{
                       width: '100%',
                       padding: '0.75rem',
-                      background: selectedDMUser?.name === u.name ? '#667eea' : '#fff',
+                      background: selectedDMUser?.name === u.name ? '#FF8C00' : '#fff',
                       color: selectedDMUser?.name === u.name ? '#fff' : '#333',
                       border: 'none',
                       borderRadius: '4px',
@@ -1288,7 +1288,7 @@ export default function Chat() {
                       width: '40px',
                       height: '40px',
                       borderRadius: '50%',
-                      background: '#667eea',
+                      background: '#FF8C00',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -1340,7 +1340,7 @@ export default function Chat() {
                 {/* DM Header */}
                 <div style={{
                   padding: '1rem 1.5rem',
-                  background: '#667eea',
+                  background: '#FF8C00',
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                 }}>
@@ -1361,7 +1361,7 @@ export default function Chat() {
                       <div style={{
                         maxWidth: '70%',
                         padding: '0.75rem 1rem',
-                        background: msg.sender === user?.name ? '#667eea' : '#f0f0f0',
+                        background: msg.sender === user?.name ? '#FF8C00' : '#f0f0f0',
                         color: msg.sender === user?.name ? '#fff' : '#333',
                         borderRadius: '8px',
                         wordBreak: 'break-word',
@@ -1397,7 +1397,7 @@ export default function Chat() {
                     onClick={() => sendMessage()}
                     style={{
                       padding: '0.75rem 1.5rem',
-                      background: '#667eea',
+                      background: '#FF8C00',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '4px',
@@ -1436,7 +1436,7 @@ export default function Chat() {
               {selectedChannel && channels.find(c => c.id === selectedChannel) && (
                 <div style={{
                   padding: '1rem 1.5rem',
-                  background: '#667eea',
+                  background: '#FF8C00',
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
@@ -1445,15 +1445,14 @@ export default function Chat() {
                 }}>
                   <h2 style={{
                     margin: 0,
-                    fontSize: '2.5rem',
+                    fontSize: '2.2rem',
                     fontWeight: 700,
-                    letterSpacing: '-0.02em',
+                    letterSpacing: '-0.03em',
                     fontFamily: 'Arial, sans-serif',
                     textRendering: 'optimizeLegibility',
                     WebkitFontSmoothing: 'antialiased',
-                    opacity: 0.95,
                   }}>
-                    muon
+                    🎯 Allente
                   </h2>
                 </div>
               )}
@@ -1620,7 +1619,7 @@ export default function Chat() {
                           onClick={() => editMessage(msg.id, editingMessageContent)}
                           style={{
                             padding: '0.5rem 1rem',
-                            background: '#667eea',
+                            background: '#FF8C00',
                             border: 'none',
                             borderRadius: '4px',
                             color: 'white',
@@ -1786,7 +1785,7 @@ export default function Chat() {
                               padding: '0.25rem 0.5rem',
                               borderRadius: '4px',
                               transition: 'background 0.15s',
-                              color: '#667eea'
+                              color: '#FF8C00'
                             }}
                             onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}

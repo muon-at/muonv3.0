@@ -11,7 +11,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF8C00 0%, #FFB366 100%);
   width: calc(100% + 72px);
   margin-right: -72px;
   color: white;
@@ -61,8 +61,8 @@
 }
 
 .chat-tab.active {
-  color: #667eea;
-  border-right-color: #667eea;
+  color: #FF8C00;
+  border-right-color: #FF8C00;
   background: #f9f9f9;
 }
 
@@ -124,12 +124,12 @@
 .reply-context {
   padding: 0.5rem;
   background: rgba(102, 126, 234, 0.1);
-  border-left: 3px solid #667eea;
+  border-left: 3px solid #FF8C00;
   border-radius: 4px;
   display: flex;
   gap: 0.5rem;
   font-size: 0.85rem;
-  color: #667eea;
+  color: #FF8C00;
   margin-bottom: 0.5rem;
 }
 
@@ -260,7 +260,7 @@
 
 .reaction-count:hover {
   background: #333333;
-  border-color: #667eea;
+  border-color: #FF8C00;
 }
 
 .reply-preview {
@@ -271,7 +271,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
-  color: #667eea;
+  color: #FF8C00;
 }
 
 .reply-preview button {
@@ -318,7 +318,7 @@
 
 .gif-search-input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #FF8C00;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
@@ -344,7 +344,7 @@
 
 .close-gif-picker {
   padding: 0.5rem;
-  background: #667eea;
+  background: #FF8C00;
   color: white;
   border: none;
   border-radius: 4px;
@@ -353,7 +353,7 @@
 }
 
 .close-gif-picker:hover {
-  background: #764ba2;
+  background: #FFB366;
 }
 
 .message-input-area {
@@ -395,7 +395,7 @@
 
 .input-action-btn:hover {
   background: #333333;
-  border-color: #667eea;
+  border-color: #FF8C00;
 }
 
 .message-input {
@@ -432,7 +432,7 @@
 
 .send-button {
   padding: 0.75rem 1.5rem;
-  background: #667eea;
+  background: #FF8C00;
   color: white;
   border: none;
   border-radius: 6px;
@@ -444,7 +444,7 @@
 }
 
 .send-button:hover:not(:disabled) {
-  background: #764ba2;
+  background: #FFB366;
   transform: translateY(-2px);
 }
 
@@ -484,7 +484,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #667eea;
+  background: #FF8C00;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -496,7 +496,7 @@
 }
 
 .emoji-circle:hover {
-  background: #764ba2;
+  background: #FFB366;
   transform: scale(1.1);
 }
 
@@ -564,7 +564,7 @@
 }
 
 .chat-item-compact.active .emoji-circle {
-  background: #764ba2;
+  background: #FFB366;
 }
 
 /* Emoji Picker Modal */
@@ -646,7 +646,7 @@
 
 .emoji-picker-item:hover {
   background: #333333;
-  border-color: #667eea;
+  border-color: #FF8C00;
   transform: scale(1.1);
 }
 
