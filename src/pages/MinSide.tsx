@@ -794,9 +794,10 @@ export default function MinSide() {
               <div className="earnings-header">
                 <span className="earnings-icon">💰</span>
                 <div>
-                  <h3>Lønn</h3>
+                  <h3>Min Lønn</h3>
                   <p className="earnings-subtitle">Utvikling</p>
                 </div>
+                <span className="earnings-icon">💰</span>
               </div>
 
               {/* Three Column Layout: DAG | UKE | MÅNED */}
