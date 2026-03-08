@@ -77,7 +77,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   margin-top: 0.5rem;
-  opacity: 0.95;
+  opacity: 1;
   color: #000000;
 }
 
@@ -449,6 +449,7 @@
     font-size: 0.7rem;
     color: #000000;
     font-weight: 700;
+    opacity: 1;
   }
 
   .stat-number {
@@ -582,6 +583,7 @@
     font-size: 0.7rem !important;
     color: #000000 !important;
     font-weight: 700 !important;
+    opacity: 1 !important;
   }
 
   .progress-section {
@@ -635,6 +637,7 @@
 
   .stat-label {
     color: #000000 !important;
+    opacity: 1 !important;
   }
 
   .trophy-placeholder {

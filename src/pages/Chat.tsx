@@ -1453,10 +1453,8 @@ export default function Chat() {
                     WebkitFontSmoothing: 'antialiased',
                   }}>
                     {(() => {
-                      if (selectedChannel === 'global') return 'muon';
                       if (selectedChannel === 'allente') return '🎯 Allente';
-                      const channel = channels.find(c => c.id === selectedChannel);
-                      return `${channel?.emoji || '💬'} ${channel?.name || 'Channel'}`;
+                      return 'muon';
                     })()}
                   </h2>
                 </div>
