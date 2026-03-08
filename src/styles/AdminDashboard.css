@@ -99,6 +99,73 @@
   border-bottom-color: #C86D4D;
 }
 
+/* Working Days Tracker */
+.working-days-tracker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.working-days-box {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.working-days-box:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.working-days-box.highlight {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+}
+
+.working-days-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #999;
+  margin-bottom: 0.5rem;
+}
+
+.working-days-box.highlight .working-days-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.working-days-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #667eea;
+  margin: 0.5rem 0;
+}
+
+.working-days-box.highlight .working-days-value {
+  color: white;
+}
+
+.working-days-month {
+  font-size: 0.85rem;
+  color: #999;
+  text-transform: capitalize;
+}
+
+.working-days-box.highlight .working-days-month {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 /* Content Area */
 .admin-content {
   flex: 1;
@@ -1109,4 +1176,17 @@
 .progresjon-table .col-today-gem,
 .progresjon-table .col-today-gift {
   color: #333;
+}
+
+/* Mobile - Working Days Tracker */
+@media (max-width: 768px) {
+  .working-days-tracker {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1.5rem;
+  }
+
+  .working-days-value {
+    font-size: 2rem;
+  }
 }

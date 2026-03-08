@@ -44,6 +44,31 @@ interface KontraktsarkivFilters {
 
 export default function AdminDashboard() {
   console.log('✅ AdminDashboard component mounted!');
+  
+  // Calculate working days (weekdays only) for a given month
+  const getWorkingDaysInMonth = (year: number, month: number) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    let count = 0;
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+      const day = d.getDay();
+      if (day !== 0 && day !== 6) count++; // Skip Sunday (0) and Saturday (6)
+    }
+    return count;
+  };
+
+  // Get working days for last, current, and next month
+  const today = new Date();
+  const lastMonthDays = getWorkingDaysInMonth(today.getFullYear(), today.getMonth() - 1);
+  const thisMonthDays = getWorkingDaysInMonth(today.getFullYear(), today.getMonth());
+  const nextMonthDays = getWorkingDaysInMonth(today.getFullYear(), today.getMonth() + 1);
+
+  const getMonthName = (offset: number) => {
+    const d = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    return d.toLocaleString('no-NO', { month: 'long', year: 'numeric' });
+  };
+
   const [activeMainTab, setActiveMainTab] = useState('allente');
   const [activeAllenteTab, setActiveAllenteTab] = useState('salg');
   const [dashboardFromDate, setDashboardFromDate] = useState('');
@@ -1340,6 +1365,25 @@ export default function AdminDashboard() {
             {tab.label}
           </button>
         ))}
+      </div>
+
+      {/* Working Days Tracker */}
+      <div className="working-days-tracker">
+        <div className="working-days-box">
+          <div className="working-days-label">Forrige måned</div>
+          <div className="working-days-value">{lastMonthDays}</div>
+          <div className="working-days-month">{getMonthName(-1)}</div>
+        </div>
+        <div className="working-days-box highlight">
+          <div className="working-days-label">Denne måneden</div>
+          <div className="working-days-value">{thisMonthDays}</div>
+          <div className="working-days-month">{getMonthName(0)}</div>
+        </div>
+        <div className="working-days-box">
+          <div className="working-days-label">Neste måned</div>
+          <div className="working-days-value">{nextMonthDays}</div>
+          <div className="working-days-month">{getMonthName(1)}</div>
+        </div>
       </div>
 
       {/* Content Area */}
