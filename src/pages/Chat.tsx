@@ -1603,7 +1603,7 @@ export default function Chat() {
                             paddingBottom: '0.25rem',
                             borderRadius: '4px',
                             transition: 'background 0.15s',
-                            background: hoveredMessageId === msg.id ? '#f5f5f5' : 'transparent'
+                            background: hoveredMessageId === msg.id ? '#2a2a2a' : 'transparent'
                           }}
                         >
                           {/* Message content */}
@@ -1754,7 +1754,7 @@ export default function Chat() {
                             transition: 'background 0.15s',
                             color: '#999'
                           }}
-                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                           onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                           ↩️ Reply
@@ -1772,7 +1772,7 @@ export default function Chat() {
                             transition: 'background 0.15s',
                             color: '#999'
                           }}
-                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                           onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                           📌 Pin
@@ -1790,7 +1790,7 @@ export default function Chat() {
                               transition: 'background 0.15s',
                             }}
                             onClick={() => addReaction(msg.id, emoji)}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             {emoji}
@@ -1811,7 +1811,7 @@ export default function Chat() {
                             setEmojiPickerMessageId(msg.id);
                             setEmojiPickerOpen(true);
                           }}
-                          onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                          onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                           onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                           ➕
@@ -1832,7 +1832,7 @@ export default function Chat() {
                               transition: 'background 0.15s',
                               color: '#667eea'
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             ✏️ Edit
@@ -1855,7 +1855,7 @@ export default function Chat() {
                               transition: 'background 0.15s',
                               color: '#ff4757'
                             }}
-                            onMouseOver={(e) => e.currentTarget.style.background = '#e8e8e8'}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#333333'}
                             onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
                           >
                             🗑️ Delete
