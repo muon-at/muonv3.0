@@ -115,11 +115,27 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
         }
       };
 
-      // Fetch emoji counts for today (DAG)
+      // First count contracts for today
+      allSales.forEach((sale: any) => {
+        const selgerKey = sale.selger?.trim();
+        if (!selgerKey) return;
+
+        const saleDate = parseDate(sale.dato);
+        if (!saleDate || saleDate.getTime() === 0) return;
+
+        // Count for today
+        if (saleDate.toDateString() === today.toDateString()) {
+          const current = salesByEmployee.get(selgerKey) || { dag: 0, uke: 0, maned: 0 };
+          current.dag += 1;
+          salesByEmployee.set(selgerKey, current);
+        }
+      });
+
+      // Then ADD emoji counts for today
       const emojiCountsToday = await getEmojiCountsForDate(today);
       emojiCountsToday.forEach((count, empName) => {
         const current = salesByEmployee.get(empName) || { dag: 0, uke: 0, maned: 0 };
-        current.dag = count;
+        current.dag += count;  // ADD emojis to existing contract count
         salesByEmployee.set(empName, current);
       });
 
@@ -153,7 +169,7 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
         currentDateMonth.setDate(currentDateMonth.getDate() + 1);
       }
 
-      // Process sales for week and month
+      // Count sales for week and month
       allSales.forEach((sale: any) => {
         const selgerKey = sale.selger?.trim();
         if (!selgerKey) return;
@@ -161,12 +177,13 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;
 
-        // Count for this week
+        // Week calculation
         const weekStart = new Date(today);
         const day = weekStart.getDay();
         const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
         weekStart.setDate(diff);
 
+        // Count for this week
         if (saleDate >= weekStart && saleDate <= today) {
           const current = salesByEmployee.get(selgerKey) || { dag: 0, uke: 0, maned: 0 };
           current.uke += 1;
