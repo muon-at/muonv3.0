@@ -13,6 +13,9 @@
   justify-content: center;
   overflow: visible;
   background: white;
+  border: none;
+  border-top: none;
+  box-shadow: none;
 }
 
 /* STATS CIRCLES - SMALLER */
@@ -301,8 +304,8 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 0.9rem;
   padding: 1.2rem 0;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-top: none;
+  border-bottom: none;
   align-items: stretch;
 }
 
