@@ -13,7 +13,7 @@
 /* Header */
 /* STANDARD PAGE HEADER - SHARED ACROSS ALL PAGES */
 .page-header-standard {
-  background: linear-gradient(135deg, #FF8C00 0%, #FFB366 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 1rem 1.5rem;
   display: flex;
