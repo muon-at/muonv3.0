@@ -164,12 +164,20 @@ export default function MinSide() {
     const dailyTo21 = hoursWorked > 0 ? (emojiCount / hoursWorked) * 10 : 0;
     
     // Weekly: (today's emoji + week sales) / days worked * 5 workdays
-    const workingDaysWeek = countWorkingDaysThisWeek(now);
+    // On weekends with activity, count minimum 1 day
+    let workingDaysWeek = countWorkingDaysThisWeek(now);
+    if (workingDaysWeek === 0 && (emojiCount + salesWeekly) > 0) {
+      workingDaysWeek = 1; // Weekend work counts as 1 day
+    }
     const totalSalesWeek = emojiCount + salesWeekly;
     const weekly = workingDaysWeek > 0 ? (totalSalesWeek / workingDaysWeek) * 5 : 0;
     
     // Monthly: (today's emoji + month sales) / days worked * working days in month
-    const workingDaysMonth = countWorkingDaysThisMonth(now);
+    // On weekends with activity, count minimum 1 day
+    let workingDaysMonth = countWorkingDaysThisMonth(now);
+    if (workingDaysMonth === 0 && (emojiCount + salesMonthly) > 0) {
+      workingDaysMonth = 1; // Weekend work counts as 1 day
+    }
     const totalWorkingDaysInMonth = countWorkingDaysInMonth(now);
     const totalSalesMonth = emojiCount + salesMonthly;
     const monthly = workingDaysMonth > 0 ? (totalSalesMonth / workingDaysMonth) * totalWorkingDaysInMonth : 0;
@@ -602,7 +610,7 @@ export default function MinSide() {
         <div className="runrate-section">
           {/* Box 1: Daily Run Rates */}
           <div className="runrate-box">
-            <div className="runrate-label">Dagens Hastighet</div>
+            <div className="runrate-label">Dagens Runrate</div>
             <div className="runrate-metrics">
               <div className="runrate-metric">
                 <span className="runrate-time">→ 16:00</span>
@@ -620,7 +628,7 @@ export default function MinSide() {
 
           {/* Box 2: Weekly Run Rate */}
           <div className="runrate-box">
-            <div className="runrate-label">Ukes Hastighet</div>
+            <div className="runrate-label">Ukes Runrate</div>
             <div className="runrate-metrics">
               <div className="runrate-metric">
                 <span className="runrate-value">{runRates.weekly.toFixed(1)}</span>
@@ -631,7 +639,7 @@ export default function MinSide() {
 
           {/* Box 3: Monthly Run Rate */}
           <div className="runrate-box">
-            <div className="runrate-label">Månedens Hastighet</div>
+            <div className="runrate-label">Månedens Runrate</div>
             <div className="runrate-metrics">
               <div className="runrate-metric">
                 <span className="runrate-value">{runRates.monthly.toFixed(1)}</span>
