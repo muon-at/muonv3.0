@@ -2021,22 +2021,47 @@ export default function Chat() {
                 
                 {/* Emoji Action Buttons - File & GIF (shown in all chats) */}
                 <div className="emoji-action-buttons">
-                  {/* File Upload */}
+                  {/* File Upload - Binder Icon */}
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="emoji-action-btn"
                     title="Upload file"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '24px',
+                      height: '24px',
+                      opacity: 0.6
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
                   >
-                    📎
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" strokeWidth="1.5">
+                      <path d="M12 2L12 22M5 5L5 19C5 20.1 5.9 21 7 21L17 21C18.1 21 19 20.1 19 19L19 5" />
+                      <path d="M8 5L8 3L16 3L16 5" />
+                      <path d="M8 8L16 8" />
+                      <path d="M8 12L16 12" />
+                      <path d="M8 16L14 16" />
+                    </svg>
                   </button>
                   
-                  {/* GIF Picker */}
+                  {/* GIF Picker - Text Button */}
                   <button
                     onClick={() => setIsPickingGif(!isPickingGif)}
                     className="emoji-action-btn"
                     title="Pick GIF"
+                    style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      color: '#a0a0a0',
+                      padding: '0.2rem 0.4rem',
+                      opacity: 0.6
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
                   >
-                    🎬
+                    GIF
                   </button>
                 </div>
 
