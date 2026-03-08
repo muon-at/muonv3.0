@@ -66,7 +66,7 @@
 /* Main Tab Navigation */
 .main-tabs {
   background: white;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: none;
   display: flex;
   gap: 0;
   padding: 0;
@@ -85,7 +85,7 @@
   color: #64748b;
   transition: all 0.2s ease;
   white-space: nowrap;
-  border-bottom: 3px solid transparent;
+  border-bottom: none;
   margin-bottom: -1px;
 }
 
@@ -96,7 +96,7 @@
 
 .main-tab.active {
   color: #C86D4D;
-  border-bottom-color: #C86D4D;
+  border-bottom-color: transparent;
 }
 
 /* Working Days Tracker */
