@@ -111,13 +111,20 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
       console.log(`📊 TOTAL SALES IN allente_salg:`, allSales.length);
       console.log(`📊 SAMPLE SALES (first 5):`, allSales.slice(0, 5).map(s => ({ selger: s.selger, dato: s.dato })));
 
-      // Count sales by employee
+      // Count sales by employee (ONLY for employees in this department)
       const salesByEmployee = new Map<string, { dag: number; uke: number; maned: number }>();
-
-      // Initialize with all employees
+      
+      // Create a set of externalNames that belong to this department
+      const deptEmployeeNames = new Set<string>();
       employees.forEach(emp => {
+        const externalName = emp.externalName?.trim();
+        if (externalName) {
+          deptEmployeeNames.add(externalName);
+        }
         salesByEmployee.set(emp.externalName, { dag: 0, uke: 0, maned: 0 });
       });
+      
+      console.log(`🔍 Department ${dept} employee names:`, Array.from(deptEmployeeNames));
 
       // Helper function to fetch emoji counts for a date
       const getEmojiCountsForDate = async (date: Date): Promise<Map<string, number>> => {
@@ -164,6 +171,9 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
       allSales.forEach((sale: any) => {
         const selgerKey = sale.selger?.trim();
         if (!selgerKey) return;
+        
+        // ONLY count sales from employees in THIS department
+        if (!deptEmployeeNames.has(selgerKey)) return;
 
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;
@@ -208,6 +218,9 @@ const AvdelingDashboard = ({ userDepartment }: { userDepartment?: string } = {})
       allSales.forEach((sale: any) => {
         const selgerKey = sale.selger?.trim();
         if (!selgerKey) return;
+        
+        // ONLY count sales from employees in THIS department
+        if (!deptEmployeeNames.has(selgerKey)) return;
 
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;

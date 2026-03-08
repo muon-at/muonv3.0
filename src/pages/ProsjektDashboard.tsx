@@ -106,6 +106,17 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       
       console.log(`🔍 PROJECT ${proj} - ALL EMPLOYEES:`, employees.map(e => ({ name: e.name, externalName: e.externalName, department: e.department, project: e.project })));
       
+      // Create a set of externalNames that belong to this project
+      const projEmployeeNames = new Set<string>();
+      employees.forEach(emp => {
+        const externalName = emp.externalName?.trim();
+        if (externalName && emp.project === proj) {
+          projEmployeeNames.add(externalName);
+        }
+      });
+      
+      console.log(`🔍 PROJECT ${proj} employee names:`, Array.from(projEmployeeNames));
+      
       // Create mapping from externalName → display name
       const employeeNameMap = new Map<string, string>();
       employees.forEach(emp => {
@@ -179,6 +190,9 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       allSales.forEach((sale: any) => {
         const selgerKey = sale.selger?.trim();
         if (!selgerKey) return;
+        
+        // ONLY count sales from employees in THIS project
+        if (!projEmployeeNames.has(selgerKey)) return;
 
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;
@@ -223,6 +237,9 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       allSales.forEach((sale: any) => {
         const selgerKey = sale.selger?.trim();
         if (!selgerKey) return;
+        
+        // ONLY count sales from employees in THIS project
+        if (!projEmployeeNames.has(selgerKey)) return;
 
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;
