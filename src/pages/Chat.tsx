@@ -1945,6 +1945,72 @@ export default function Chat() {
               )}
 
               {/* Input */}
+              {/* Top row: Quick emojis (only in Allente) */}
+              {selectedChannel === 'allente' && (
+                <div style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  paddingLeft: '1.5rem',
+                  paddingRight: '1.5rem',
+                  paddingTop: '0.75rem',
+                  paddingBottom: '0.25rem',
+                  justifyContent: 'center'
+                }}>
+                  <button
+                    onClick={() => setNewMessage(newMessage + '🔔')}
+                    title="🔔 = BTV"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      opacity: 0.6,
+                      transition: 'opacity 0.2s',
+                      padding: '0.3rem'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                  >
+                    🔔
+                  </button>
+                  <button
+                    onClick={() => setNewMessage(newMessage + '💎')}
+                    title="💎 = DTH"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      opacity: 0.6,
+                      transition: 'opacity 0.2s',
+                      padding: '0.3rem'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                  >
+                    💎
+                  </button>
+                  <button
+                    onClick={() => setNewMessage(newMessage + '🎁')}
+                    title="🎁 = GRATIS DEKODER"
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '1.2rem',
+                      cursor: 'pointer',
+                      opacity: 0.6,
+                      transition: 'opacity 0.2s',
+                      padding: '0.3rem'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                  >
+                    🎁
+                  </button>
+                </div>
+              )}
+
+              {/* Input area */}
               <div className="message-input-area">
                 <input
                   type="file"
@@ -1953,20 +2019,8 @@ export default function Chat() {
                   style={{ display: 'none' }}
                 />
                 
-                {/* Emoji Action Buttons */}
+                {/* Emoji Action Buttons - File & GIF (shown in all chats) */}
                 <div className="emoji-action-buttons">
-                  {/* Quick Emojis: Bell, Gem, Gift */}
-                  {['🔔', '💎', '🎁'].map(emoji => (
-                    <button
-                      key={emoji}
-                      className="emoji-action-btn"
-                      onClick={() => setNewMessage(newMessage + emoji)}
-                      title={`Insert ${emoji}`}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                  
                   {/* File Upload */}
                   <button
                     onClick={() => fileInputRef.current?.click()}

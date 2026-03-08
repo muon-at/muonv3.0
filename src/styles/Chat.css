@@ -362,7 +362,6 @@
   display: flex;
   gap: 0.75rem;
   background: #1e1e1e;
-  flex-wrap: wrap;
   align-items: flex-end;
 }
 
