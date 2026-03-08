@@ -826,7 +826,6 @@ export default function MinSide() {
                 {/* UKE */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">UKE</div>
-                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
@@ -840,7 +839,6 @@ export default function MinSide() {
                 {/* MÅNED */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">MÅNED</div>
-                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
