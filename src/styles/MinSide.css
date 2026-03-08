@@ -222,8 +222,8 @@
 /* EARNINGS & STATS CONTAINER */
 .stats-and-earnings-container {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.2rem;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 0.8rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
@@ -475,7 +475,7 @@
 
   .stats-and-earnings-container {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0.8rem;
     padding: 0 0.5rem;
     padding-right: 0;
   }
