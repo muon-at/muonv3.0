@@ -75,10 +75,10 @@ export const RightNavBar: React.FC = () => {
     <>
       {/* Desktop NavBar (hidden on mobile) */}
       <div 
-        className={`right-nav-bar right-nav-bar-desktop ${isAllenteChat ? 'allente-nav' : ''}`}
+        className="right-nav-bar right-nav-bar-desktop"
         style={{
           background: isAllenteChat 
-            ? 'linear-gradient(135deg, #FFB366 0%, #FFA64D 100%)'
+            ? 'linear-gradient(135deg, #D4944D 0%, #C0823F 100%)'
             : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
         }}
       >
@@ -322,7 +322,7 @@ export const RightNavBar: React.FC = () => {
           title="Menu"
           style={{
             background: isAllenteChat
-              ? 'linear-gradient(135deg, #FFB366 0%, #FFA64D 100%)'
+              ? 'linear-gradient(135deg, #D4944D 0%, #C0823F 100%)'
               : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
           }}
         >

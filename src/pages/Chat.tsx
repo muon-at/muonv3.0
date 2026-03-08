@@ -1436,7 +1436,7 @@ export default function Chat() {
               {selectedChannel && channels.find(c => c.id === selectedChannel) && (
                 <div style={{
                   padding: '1rem 1.5rem',
-                  background: selectedChannel === 'allente' ? '#FF8C00' : '#667eea',
+                  background: selectedChannel === 'allente' ? '#D4944D' : '#667eea',
                   color: 'white',
                   borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
@@ -1454,7 +1454,9 @@ export default function Chat() {
                   }}>
                     {(() => {
                       if (selectedChannel === 'allente') return '🎯 Allente';
-                      return 'muon';
+                      if (selectedChannel === 'global') return 'muon';
+                      const channel = channels.find(c => c.id === selectedChannel);
+                      return channel?.emoji || '💬';
                     })()}
                   </h2>
                 </div>
