@@ -152,8 +152,6 @@ export default function Chat() {
     command: cmd
   }));
 
-  const quickEmojis = ['🔔', '💎', '🎁']; // Quick emoji buttons for chat
-
   // Function to expand emoji commands in message
   const expandEmojiCommands = (text: string): string => {
     let result = text;
@@ -1867,11 +1865,18 @@ export default function Chat() {
                     )}
                     {msg.reactions && (
                       <div className="message-reactions">
-                        {Object.entries(msg.reactions).map(([emoji, users]) => (
+                        {Object.entries(msg.reactions).slice(0, 4).map(([emoji, users]) => (
                           <button key={emoji} className="reaction-count">
                             {emoji} {users.length}
                           </button>
                         ))}
+                        {Object.entries(msg.reactions).length > 4 && (
+                          <button className="reaction-count" onClick={() => {
+                            console.log('Show more reactions');
+                          }}>
+                            + {Object.entries(msg.reactions).length - 4}
+                          </button>
+                        )}
                       </div>
                     )}
                           </div>
@@ -1947,42 +1952,38 @@ export default function Chat() {
                   onChange={handleFileUpload}
                   style={{ display: 'none' }}
                 />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="input-action-btn"
-                  title="Upload file"
-                >
-                  📎
-                </button>
-                <button
-                  onClick={() => setIsPickingGif(!isPickingGif)}
-                  className="input-action-btn"
-                  title="Pick GIF"
-                >
-                  🎬
-                </button>
-                {/* Quick Emoji Buttons */}
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  {quickEmojis.map(emoji => (
+                
+                {/* Emoji Action Buttons */}
+                <div className="emoji-action-buttons">
+                  {/* Quick Emojis: Bell, Gem, Gift */}
+                  {['🔔', '💎', '🎁'].map(emoji => (
                     <button
                       key={emoji}
+                      className="emoji-action-btn"
                       onClick={() => setNewMessage(newMessage + emoji)}
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        fontSize: '1.2rem',
-                        background: '#f0f0f0',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s',
-                      }}
-                      onMouseOver={(e) => (e.currentTarget.style.background = '#e0e0e0')}
-                      onMouseOut={(e) => (e.currentTarget.style.background = '#f0f0f0')}
                       title={`Insert ${emoji}`}
                     >
                       {emoji}
                     </button>
                   ))}
+                  
+                  {/* File Upload */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="emoji-action-btn"
+                    title="Upload file"
+                  >
+                    📎
+                  </button>
+                  
+                  {/* GIF Picker */}
+                  <button
+                    onClick={() => setIsPickingGif(!isPickingGif)}
+                    className="emoji-action-btn"
+                    title="Pick GIF"
+                  >
+                    🎬
+                  </button>
                 </div>
 
                 <textarea
