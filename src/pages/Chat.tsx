@@ -688,9 +688,9 @@ export default function Chat() {
           match: userProject === channelProject || (channelProject === 'Allente' && (userProject === 'MUON' || userProject === 'Allente')) || user?.role === 'owner'
         });
         
-        // Allente channel is shared: BOTH MUON (owner) and Allente (employees) can access
+        // Allente channel is OPEN TO ALL EMPLOYEES - everyone can see and write
         if (channelProject === 'Allente') {
-          return userProject === 'MUON' || userProject === 'Allente' || user?.role === 'owner';
+          return true; // All employees can access Allente channel
         }
         
         // Other projects: match user project
