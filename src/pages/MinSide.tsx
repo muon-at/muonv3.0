@@ -521,51 +521,65 @@ export default function MinSide() {
       };
 
       // Get provisjon per product from contracts
-      const contractEarnings = employeeContracts.reduce((sum, c) => {
+      console.log('🔍 EARNINGS MATCHING DEBUG - FULL BREAKDOWN');
+      console.log('Available admin products:', Object.keys(produktProvisjon));
+      console.log('Total contracts to process:', employeeContracts.length);
+      
+      const contractEarnings = employeeContracts.reduce((sum, c, idx) => {
         let produktName = (c.produkt || '')
           .replace(/\\/g, '')  // Remove backslashes
           .trim();
         
+        console.log(`\n[${idx}] Contract product RAW: "${c.produkt}"`);
+        console.log(`    Cleaned: "${produktName}"`);
+        
         // 1. Try exact match
         let provisjon = produktProvisjon[produktName] || 0;
+        if (provisjon > 0) {
+          console.log(`    ✅ EXACT MATCH: ${provisjon} kr`);
+          return sum + provisjon;
+        }
+        console.log(`    ❌ No exact match`);
         
         // 2. If no match, try base name match (before " - ")
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0].trim();
+        const productBase = produktName.split(' - ')[0].trim();
+        console.log(`    Base name: "${productBase}"`);
+        
+        for (const key in produktProvisjon) {
+          const adminBase = key.split(' - ')[0].trim();
+          if (adminBase === productBase) {
+            provisjon = produktProvisjon[key];
+            console.log(`    ✅ BASE MATCH with "${key}": ${provisjon} kr`);
+            return sum + provisjon;
+          }
+        }
+        console.log(`    ❌ No base match found`);
+        
+        // 3. If still no match, find closest match by similarity
+        let bestMatch = '';
+        let bestScore = 0.7; // 70% similarity threshold
+        
+        for (const key in produktProvisjon) {
+          const adminBase = key.split(' - ')[0].trim();
+          const score = stringSimilarity(productBase, adminBase);
           
-          for (const key in produktProvisjon) {
-            const adminBase = key.split(' - ')[0].trim();
-            if (adminBase === productBase) {
-              provisjon = produktProvisjon[key];
-              break;
-            }
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = key;
           }
         }
         
-        // 3. If still no match, find closest match by similarity
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0].trim();
-          let bestMatch = '';
-          let bestScore = 0.7; // 70% similarity threshold
-          
-          for (const key in produktProvisjon) {
-            const adminBase = key.split(' - ')[0].trim();
-            const score = stringSimilarity(productBase, adminBase);
-            
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = key;
-            }
-          }
-          
-          if (bestMatch) {
-            provisjon = produktProvisjon[bestMatch];
-            console.log(`✅ Fuzzy match: "${produktName}" → "${bestMatch}" (${(bestScore * 100).toFixed(0)}%)`);
-          }
+        if (bestMatch) {
+          provisjon = produktProvisjon[bestMatch];
+          console.log(`    ✅ FUZZY MATCH (${(bestScore * 100).toFixed(0)}%): "${bestMatch}" → ${provisjon} kr`);
+        } else {
+          console.log(`    ❌ NO FUZZY MATCH (best was ${(bestScore * 100).toFixed(0)}%)`);
         }
         
         return sum + provisjon;
       }, 0);
+      
+      console.log(`\n✅ TOTAL CONTRACT EARNINGS: ${contractEarnings} kr`);
       console.log('💼 Contract earnings:', { contractEarnings, contractCount: employeeContracts.length });
 
       // Emoji values: 🔔=800, 💎=1000, 🎁=-200
