@@ -41,6 +41,7 @@ interface KontraktsarkivFilters {
   platform: string;
   datoFrom: string;
   datoTo: string;
+  kundenummer: string;
 }
 
 export default function AdminDashboard() {
@@ -165,6 +166,7 @@ export default function AdminDashboard() {
     platform: '',
     datoFrom: '',
     datoTo: '',
+    kundenummer: '',
   });
   const [activeFilters, setActiveFilters] = useState<KontraktsarkivFilters>({
     selger: '',
@@ -173,6 +175,7 @@ export default function AdminDashboard() {
     platform: '',
     datoFrom: '',
     datoTo: '',
+    kundenummer: '',
   });
 
   // Fetch employees when Organisasjon tab is opened
@@ -1329,6 +1332,11 @@ export default function AdminDashboard() {
         return false;
       }
 
+      // Kundenummer filter
+      if (activeFilters.kundenummer && !record.kundenummer?.toLowerCase().includes(activeFilters.kundenummer.toLowerCase())) {
+        return false;
+      }
+
       return true;
     });
   };
@@ -1346,6 +1354,7 @@ export default function AdminDashboard() {
       platform: '',
       datoFrom: '',
       datoTo: '',
+      kundenummer: '',
     };
     setFilters(emptyFilters);
     setActiveFilters(emptyFilters);
@@ -1496,21 +1505,22 @@ export default function AdminDashboard() {
                         </select>
                       </div>
 
-                      <button
-                        onClick={() => setFilters({ ...filters, avdeling: 'Annet' })}
-                        style={{
-                          padding: '0.5rem 1rem',
-                          background: filters.avdeling === 'Annet' ? '#667eea' : '#f0f0f0',
-                          color: filters.avdeling === 'Annet' ? 'white' : '#333',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontWeight: '600',
-                          fontSize: '0.9rem',
-                        }}
-                      >
-                        ⚠️ Vis Annet
-                      </button>
+                      <div className="filter-group">
+                        <label>Kundenummer:</label>
+                        <input
+                          type="text"
+                          placeholder="Søk kundenummer..."
+                          value={filters.kundenummer}
+                          onChange={(e) => setFilters({ ...filters, kundenummer: e.target.value })}
+                          className="filter-select"
+                          style={{
+                            padding: '0.5rem 1rem',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                          }}
+                        />
+                      </div>
 
                       <div className="filter-group">
                         <label>Produkt:</label>
