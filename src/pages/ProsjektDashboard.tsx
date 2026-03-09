@@ -199,11 +199,26 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         })
         .map(s => ({ selger: s.selger, dato: s.dato })));
 
-      // NOTE: For DAG, we ONLY count emojis (not contracts)
-      // Contracts are only for UKE and MÅNED
-      // This section removed - contracts won't be counted for DAG
+      // ✅ FETCH EMOJIS - Sum all emojis from today for DAG calculation
+      const todayDateKey = today.toISOString().split('T')[0];
+      let totalTodayEmojis = 0;
+      try {
+        const emojiCountsRef = doc(db, 'emoji_counts_daily', todayDateKey);
+        const emojiDoc = await getDoc(emojiCountsRef);
+        if (emojiDoc.exists()) {
+          const data = emojiDoc.data();
+          const counts = data.counts || {};
+          // Sum all emojis (🔔 + 💎) for all employees
+          Object.values(counts).forEach((emojiSet: any) => {
+            totalTodayEmojis += (emojiSet['🔔'] || 0) + (emojiSet['💎'] || 0);
+          });
+          console.log('🔔 Total emojis today:', totalTodayEmojis);
+        }
+      } catch (err) {
+        console.error('Error fetching emojis:', err);
+      }
       
-      console.log(`✅ SALES BY EMPLOYEE (after today count):`, Array.from(salesByEmployee.entries()).slice(0, 10));
+      console.log(`✅ SALES BY EMPLOYEE (after emoji fetch):`, Array.from(salesByEmployee.entries()).slice(0, 10));
 
       // Then ADD emoji counts for today
       // Create mapping from name (display name) → externalName for emoji lookup
