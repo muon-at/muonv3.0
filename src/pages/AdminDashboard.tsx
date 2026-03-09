@@ -375,6 +375,14 @@ export default function AdminDashboard() {
       setLoadingProgresjon(true);
       const loadProgresjonData = async () => {
         try {
+          // Normalize function - remove diakritikks (Å→A, ø→o, é→e, etc)
+          const normalize = (str: string): string => {
+            return str
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '')  // Remove diakritikks
+              .trim();
+          };
+          
           const salgRef = collection(db, 'allente_kontraktsarkiv');
           const snapshot = await getDocs(salgRef);
           
@@ -392,11 +400,11 @@ export default function AdminDashboard() {
             contracts.push(doc.data());
           });
           
-          // Parse contracts and group by seller
+          // Parse contracts and group by NORMALIZED seller name
           const sellerStats: { [key: string]: { month: number; week: number; total: number; today: number; todayGem: number; todayGift: number; weeks: { [key: string]: number }; months: { [key: string]: number } } } = {};
           
           contracts.forEach((data) => {
-            const selger = data.selger || 'Ukjent';
+            const selger = normalize(data.selger || 'Ukjent');  // Normalize seller name
             const orderedateStr = data.dato || data.orderdato || '';
             
             // Initialize seller if not exists
