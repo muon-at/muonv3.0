@@ -100,6 +100,14 @@ export default function MinSide() {
       const goalKey = user?.id || '';
       if (!goalKey) {
         console.warn('⚠️ No user ID found for goals');
+        // Try localStorage as fallback
+        const stored = localStorage.getItem(`goals_${user?.name}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setWeeklyGoal(parsed.weeklyGoal || 0);
+          setMonthlyGoal(parsed.monthlyGoal || 0);
+          console.log('💾 Goals loaded from localStorage:', parsed);
+        }
         return;
       }
       
@@ -112,9 +120,19 @@ export default function MinSide() {
         const data = goalsDoc.data();
         setWeeklyGoal(data.weeklyGoal || 0);
         setMonthlyGoal(data.monthlyGoal || 0);
+        // Also cache in localStorage as backup
+        localStorage.setItem(`goals_${user?.name}`, JSON.stringify(data));
         console.log('✅ Goals loaded from Firestore:', { goalKey, data });
       } else {
-        console.log('ℹ️ No goals found yet for:', goalKey);
+        console.log('ℹ️ No goals found in Firestore for:', goalKey);
+        // Try localStorage as fallback
+        const stored = localStorage.getItem(`goals_${user?.name}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          setWeeklyGoal(parsed.weeklyGoal || 0);
+          setMonthlyGoal(parsed.monthlyGoal || 0);
+          console.log('💾 Goals loaded from localStorage backup:', parsed);
+        }
       }
     } catch (err) {
       console.error('❌ Error loading goals:', err);
@@ -936,19 +954,28 @@ export default function MinSide() {
               try {
                 // ✅ USE USER ID as document ID (always unique and consistent)
                 const goalKey = user?.id || '';
+                console.log('💾 Saving goals - user ID:', goalKey, 'Weekly:', weeklyGoal, 'Monthly:', monthlyGoal);
+                
                 if (!goalKey) {
                   alert('❌ Kunne ikke lagre: Bruker ikke identifisert');
+                  console.error('❌ No user ID found!');
                   return;
                 }
                 
                 const goalsRef = doc(db, 'employee_goals', goalKey);
-                await setDoc(goalsRef, {
+                const saveData = {
                   weeklyGoal: weeklyGoal || 0,
                   monthlyGoal: monthlyGoal || 0,
                   updatedAt: new Date().toISOString(),
                   userId: user?.id || 'unknown',
-                }, { merge: true });
-                console.log('✅ Goals saved to Firestore:', { goalKey, weeklyGoal, monthlyGoal });
+                };
+                
+                await setDoc(goalsRef, saveData, { merge: true });
+                
+                // Also backup to localStorage
+                localStorage.setItem(`goals_${user?.name}`, JSON.stringify(saveData));
+                
+                console.log('✅ Goals saved to Firestore + localStorage:', { goalKey, ...saveData });
                 alert('✅ Mål lagret!');
               } catch (err) {
                 console.error('❌ Error saving goals:', err);
