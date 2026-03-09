@@ -120,8 +120,8 @@
 }
 
 .progress-bar {
-  height: 5px;
-  border-radius: 2px;
+  height: 14px;
+  border-radius: 3px;
   overflow: hidden;
   background: #e2e8f0;
 }
@@ -140,12 +140,13 @@
 .progress-bar.orange .progress-fill { background: #E8956E; }
 
 .progress-text {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #d0d0d0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: 600;
+  margin-top: 0.5rem;
 }
 
 .checkmark {
@@ -207,13 +208,13 @@
 }
 
 .runrate-time {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #808080;
   font-weight: 500;
 }
 
 .runrate-value {
-  font-size: 1.25rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #d0d0d0;
 }
@@ -407,7 +408,7 @@
 }
 
 .earnings-period-runrate-value {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #16a34a;
 }
