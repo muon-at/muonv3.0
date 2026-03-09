@@ -226,20 +226,7 @@
 }
 
 /* Demo Info */
-.demo-info {
-  background: #f0f4f8;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-top: 1.5rem;
-  text-align: center;
-}
 
-.demo-info p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
-}
 
 /* Responsive */
 @media (max-width: 480px) {

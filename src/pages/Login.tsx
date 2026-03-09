@@ -160,96 +160,6 @@ export default function Login() {
           {/* Rolle og prosjekt hentes fra Firestore */}
         </form>
 
-        {/* Demo Test Mode */}
-        <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff8dc', borderRadius: '6px', textAlign: 'center' }}>
-          <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.8rem', color: '#999' }}>🧪 Testing/Development:</p>
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              onClick={() => {
-                const demoUser = {
-                  id: 'demo-owner',
-                  name: 'Stian Abrahamsen',
-                  role: 'owner',
-                  department: 'MUON',
-                  project: 'Muon',
-                  email: 'stian@muonas.no',
-                  externalName: 'Stian Abrahamsen',
-                };
-                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
-                navigate('/min-side');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#667eea',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                fontSize: '0.9rem',
-                padding: 0,
-              }}
-            >
-              👑 Owner (Stian)
-            </button>
-            <span style={{ color: '#999' }}>·</span>
-            <button
-              type="button"
-              onClick={() => {
-                const demoUser = {
-                  id: 'demo-employee',
-                  name: 'Oliver T Jenssen',
-                  role: 'employee',
-                  department: 'KRS',
-                  project: 'Allente',
-                  email: 'oliver@muonas.no',
-                  externalName: 'Oliver T Jenssen',
-                };
-                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
-                navigate('/min-side');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#10b981',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                fontSize: '0.9rem',
-                padding: 0,
-              }}
-            >
-              👤 Employee (Oliver)
-            </button>
-            <span style={{ color: '#999' }}>·</span>
-            <button
-              type="button"
-              onClick={() => {
-                const demoUser = {
-                  id: 'demo-teamleder-ajay',
-                  name: 'Ajay Sureshkumar',
-                  role: 'teamleder',
-                  department: 'OSL',
-                  project: 'Allente',
-                  email: 'ajaykeeper@hotmail.com',
-                  externalName: 'Ajay Sureshkumar / Selger',
-                };
-                login(demoUser.name, demoUser.id, demoUser.role, demoUser);
-                navigate('/min-side');
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#f59e0b',
-                cursor: 'pointer',
-                textDecoration: 'underline',
-                fontSize: '0.9rem',
-                padding: 0,
-              }}
-            >
-              👥 Teamleder (Ajay)
-            </button>
-          </div>
-        </div>
-
         {/* Footer */}
         <div className="login-footer">
           <p className="forgot-password">
@@ -258,11 +168,6 @@ export default function Login() {
           <p className="signup">
             Ingen konto? <a href="#">Kontakt administrator</a>
           </p>
-        </div>
-
-        {/* Demo Info */}
-        <div className="demo-info">
-          <p>Demo: Bruk hvilken som helst e-post og passord</p>
         </div>
       </div>
 
