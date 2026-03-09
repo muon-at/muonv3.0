@@ -338,6 +338,10 @@
   color: #d0d0d0;
   font-size: 0.9rem;
   border-bottom: 2px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .table-row {
@@ -1148,6 +1152,8 @@
   border-bottom: 2px solid #e2e8f0;
   position: sticky;
   top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .progresjon-table .table-row {
