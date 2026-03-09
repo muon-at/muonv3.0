@@ -650,3 +650,119 @@
     height: 75px !important;
   }
 }
+
+/* GOALS SECTION - MINE MÅL */
+.goals-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  color: #ffffff !important;
+}
+
+.goals-header h3 {
+  color: #ffffff !important;
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+}
+
+.goals-header p {
+  color: #a0a0a0 !important;
+  font-size: 0.9rem !important;
+  margin: 0 !important;
+}
+
+.goals-stats {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 2rem !important;
+  margin-bottom: 2rem !important;
+}
+
+.goal-stat {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.75rem !important;
+  padding: 1.5rem !important;
+  background: #242424 !important;
+  border-radius: 8px !important;
+  border: 1px solid #333333 !important;
+  transition: all 0.2s ease !important;
+}
+
+.goal-stat:hover {
+  background: #2a2a2a !important;
+  border-color: #444444 !important;
+}
+
+.goal-label {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #909090 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+.goal-value {
+  font-size: 3rem !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  line-height: 1 !important;
+}
+
+.goal-unit {
+  font-size: 0.9rem !important;
+  color: #a0a0a0 !important;
+}
+
+.edit-goals-btn {
+  padding: 0.75rem 1.5rem !important;
+  background: #667eea !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s ease !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.edit-goals-btn:hover {
+  background: #5568d3 !important;
+  transform: translateY(-1px) !important;
+}
+
+.goal-edit-form {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1.5rem !important;
+  margin-top: 1rem !important;
+  padding: 1.5rem !important;
+  background: #242424 !important;
+  border-radius: 8px !important;
+  border: 1px solid #333333 !important;
+}
+
+.goal-edit-form input {
+  padding: 0.75rem 1rem !important;
+  background: #1a1a1a !important;
+  border: 1px solid #333333 !important;
+  border-radius: 6px !important;
+  color: #ffffff !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+}
+
+.goal-edit-form input::placeholder {
+  color: #666666 !important;
+}
+
+.goal-edit-form input:focus {
+  outline: none !important;
+  border-color: #667eea !important;
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+}
