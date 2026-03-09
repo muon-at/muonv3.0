@@ -94,7 +94,9 @@ export default function Login() {
       <div className="login-box">
         {/* Logo */}
         <div className="login-header">
-          <div className="logo">muon</div>
+          <div className="logo">
+            <span className="logo-part-1">Muo</span><span className="logo-connector">N</span><span className="logo-part-2">exus</span>
+          </div>
         </div>
 
         {/* Form */}
