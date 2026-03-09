@@ -480,7 +480,8 @@ export default function MinSide() {
       // Get emoji counts for today with breakdown
       let bellCountToday = 0, gemCountToday = 0, giftCountTodayEarnings = 0;
       try {
-        const today_str = today.toISOString().split('T')[0];
+        // Use PROPER local date string, not UTC ISO!
+        const today_str = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
         const emojiDoc = await getDoc(emojiCountsRef);
         console.log(`🔍 Earnings emoji load - date: ${today_str}, doc exists: ${emojiDoc.exists()}`);
