@@ -159,7 +159,7 @@ export default function MinSide() {
     }
     loadEmployeeData();
     loadCachedBadges();
-  }, [user?.id]);  // ✅ Changed: Trigger when user.id changes (not whole user object)
+  }, [user?.id, activeTab]);  // Trigger on user.id change OR when switching tabs (to reload earnings)
 
   // Sync goals to sessionStorage whenever they change
   useEffect(() => {
