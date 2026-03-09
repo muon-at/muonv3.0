@@ -839,6 +839,42 @@ export default function Chat() {
         }
         await addDoc(messagesRef, msgData);
         console.log('✅ Message sent successfully! Will auto-delete on:', deleteAtDate.toLocaleDateString());
+        
+        // Log emojis to emoji_counts_daily if in Allente channel
+        if (selectedChannel === 'project-allente') {
+          const today = new Date().toISOString().split('T')[0];
+          const emojiDocRef = doc(db, 'emoji_counts_daily', today);
+          
+          // Count emojis in message
+          const bellCount = (messageContent.match(/🔔/g) || []).length;
+          const gemCount = (messageContent.match(/💎/g) || []).length;
+          const giftCount = (messageContent.match(/🎁/g) || []).length;
+          
+          if (bellCount > 0 || gemCount > 0 || giftCount > 0) {
+            const senderName = user?.name || 'Unknown';
+            
+            try {
+              const emojiSnap = await getDoc(emojiDocRef);
+              let counts = emojiSnap.data()?.counts || {};
+              
+              // Initialize sender if not exists
+              if (!counts[senderName]) {
+                counts[senderName] = { '🔔': 0, '💎': 0, '🎁': 0 };
+              }
+              
+              // Add counts
+              counts[senderName]['🔔'] = (counts[senderName]['🔔'] || 0) + bellCount;
+              counts[senderName]['💎'] = (counts[senderName]['💎'] || 0) + gemCount;
+              counts[senderName]['🎁'] = (counts[senderName]['🎁'] || 0) + giftCount;
+              
+              // Save to Firestore
+              await setDoc(emojiDocRef, { counts }, { merge: true });
+              console.log(`✅ Logged emojis for ${senderName}:`, { bellCount, gemCount, giftCount });
+            } catch (err) {
+              console.error('Error logging emojis:', err);
+            }
+          }
+        }
       } else if (selectedDM) {
         console.log('📝 Sending to DM:', selectedDM);
         const messagesRef = collection(db, 'chat_dms', selectedDM, 'messages');
