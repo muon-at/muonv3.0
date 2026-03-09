@@ -894,7 +894,7 @@
   font-size: 0.9rem;
   font-family: inherit;
   background: #121212;
-  color: #1f2937 !important;
+  color: #ffffff !important;
 }
 
 .form-group input:focus,
@@ -903,7 +903,7 @@
   border-color: #667eea;
   background: #1a1a1a;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  color: #1f2937 !important;
+  color: #ffffff !important;
 }
 
 .form-group input::placeholder {
@@ -914,8 +914,8 @@
 .form-group input:-webkit-autofill,
 .form-group input:-webkit-autofill:hover,
 .form-group input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
+  -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
   color: #1f2937 !important;
 }
 
@@ -924,21 +924,21 @@
 .login-form input {
   color: #ffffff;
   background-color: #2a2a2a;
-  color: #1f2937 !important;
+  color: #ffffff !important;
 }
 
 .edit-form input:-webkit-autofill,
 .edit-form input:-webkit-autofill:hover,
 .edit-form input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
+  -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 .login-form input:-webkit-autofill,
 .login-form input:-webkit-autofill:hover,
 .login-form input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Dropdown option styling */
