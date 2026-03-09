@@ -187,6 +187,8 @@
   font-size: 0.95rem;
   font-family: inherit;
   transition: all 0.2s ease;
+  color: #000000 !important;
+  background: white !important;
 }
 
 .form-group input:focus {
