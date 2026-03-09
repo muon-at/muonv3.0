@@ -146,13 +146,14 @@ export default function MinSide() {
 
   useEffect(() => {
     loadEmployeeData();
+    loadSavedGoals();  // ✅ RESTORED: Load goals on initial mount
     loadCachedBadges();
   }, [user]);
 
-  // Reload goals when activeTab changes to 'target' (Mål tab)
+  // Also reload goals when activeTab changes to 'target' (Mål tab)
   useEffect(() => {
     if (activeTab === 'target') {
-      loadSavedGoals();
+      loadSavedGoals();  // ✅ Reload when switching to Mål tab
       console.log('📊 Reloading goals when opening Mål tab');
     }
   }, [activeTab]);
