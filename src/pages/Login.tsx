@@ -109,7 +109,7 @@ export default function Login() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="f.eks stian@muonas.no"
+              placeholder="Skriv e-post"
               disabled={loading}
               autoFocus
             />
