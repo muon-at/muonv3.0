@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc, addDoc, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import FileUploadModal from '../components/FileUploadModal';
+import { FixProductsButton } from '../components/FixProductsButton';
 import '../styles/AdminDashboard.css';
 
 interface Employee {
@@ -2129,6 +2130,10 @@ export default function AdminDashboard() {
                     >
                       💾 Lagre CPO og Provisjon
                     </button>
+
+                    <div style={{ marginTop: '1.5rem' }}>
+                      <FixProductsButton />
+                    </div>
 
                     <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
                       Viser {produkterData.length} unike Produkt + Plattform kombinasjoner
