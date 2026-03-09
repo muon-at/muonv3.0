@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Background gradient circle -->
+  <defs>
+    <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#667eea;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Circle background -->
+  <circle cx="96" cy="96" r="90" fill="url(#circleGradient)" filter="url(#shadow)"/>
+  
+  <!-- N text -->
+  <text x="96" y="125" font-size="120" font-weight="900" font-family="Arial, sans-serif" fill="white" text-anchor="middle" dominant-baseline="middle">N</text>
+</svg>
