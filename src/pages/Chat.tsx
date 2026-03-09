@@ -840,18 +840,22 @@ export default function Chat() {
         await addDoc(messagesRef, msgData);
         console.log('✅ Message sent successfully! Will auto-delete on:', deleteAtDate.toLocaleDateString());
         
-        // Log emojis to emoji_counts_daily if in Allente channel
-        if (selectedChannel === 'project-allente') {
-          const today = new Date().toISOString().split('T')[0];
-          const emojiDocRef = doc(db, 'emoji_counts_daily', today);
-          
-          // Count emojis in message
-          const bellCount = (messageContent.match(/🔔/g) || []).length;
-          const gemCount = (messageContent.match(/💎/g) || []).length;
-          const giftCount = (messageContent.match(/🎁/g) || []).length;
-          
-          if (bellCount > 0 || gemCount > 0 || giftCount > 0) {
+        // Log emojis to emoji_counts_daily - ALL channels check!
+        const today = new Date().toISOString().split('T')[0];
+        console.log(`🔍 Emoji check - selectedChannel: "${selectedChannel}", message: "${messageContent}"`);
+        
+        // Count emojis in message
+        const bellCount = (messageContent.match(/🔔/g) || []).length;
+        const gemCount = (messageContent.match(/💎/g) || []).length;
+        const giftCount = (messageContent.match(/🎁/g) || []).length;
+        
+        console.log(`Emoji counts: 🔔=${bellCount}, 💎=${gemCount}, 🎁=${giftCount}`);
+        
+        if (bellCount > 0 || gemCount > 0 || giftCount > 0) {
+          // Only log if in a channel (not DM)
+          if (selectedChannel) {
             const senderName = user?.name || 'Unknown';
+            const emojiDocRef = doc(db, 'emoji_counts_daily', today);
             
             try {
               const emojiSnap = await getDoc(emojiDocRef);
