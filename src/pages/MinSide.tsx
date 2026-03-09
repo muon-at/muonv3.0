@@ -496,20 +496,25 @@ export default function MinSide() {
         // Try exact match first
         let provisjon = produktProvisjon[produktName] || 0;
         
-        // If no exact match, try partial match with normalized keys
+        // If no exact match, try substring match (contract contains key substring)
         if (provisjon === 0) {
           for (const key in produktProvisjon) {
-            // Normalize key: remove escape quotes and whitespace, lowercase
+            // Normalize key: remove escape quotes, lowercase
             const cleanKey = key
-              .replace(/\\"/g, '')  // Remove backslashes
-              .replace(/^["']|["']$/g, '')  // Remove quotes
+              .replace(/\\"/g, '')
+              .replace(/^["']|["']$/g, '')
               .toLowerCase()
               .trim();
             
-            // Check if contract name starts with this product key
-            if (produktName.startsWith(cleanKey)) {
+            // Get first 30 chars of contract name (before version/months)
+            const productBase = produktName.substring(0, 30);
+            
+            // Check if key contains product base OR product contains key
+            // This handles both "Flex 2 with ads" matching to various versions
+            if (cleanKey.includes(productBase.substring(0, 20)) || 
+                produktName.includes(cleanKey.substring(0, 20))) {
               provisjon = produktProvisjon[key];
-              console.log(`✅ Match: "${cleanKey}" → ${provisjon} kr`);
+              console.log(`✅ Match: "${cleanKey.substring(0, 30)}..." → ${provisjon} kr`);
               break;
             }
           }
@@ -535,7 +540,7 @@ export default function MinSide() {
         // Try exact match first
         let provisjon = produktProvisjon[produktName] || 0;
         
-        // If no exact match, try partial match
+        // If no exact match, try substring match
         if (provisjon === 0) {
           for (const key in produktProvisjon) {
             const cleanKey = key
@@ -543,7 +548,10 @@ export default function MinSide() {
               .replace(/^["']|["']$/g, '')
               .toLowerCase()
               .trim();
-            if (produktName.startsWith(cleanKey)) {
+            
+            const productBase = produktName.substring(0, 30);
+            if (cleanKey.includes(productBase.substring(0, 20)) || 
+                produktName.includes(cleanKey.substring(0, 20))) {
               provisjon = produktProvisjon[key];
               break;
             }
@@ -565,7 +573,7 @@ export default function MinSide() {
         // Try exact match first
         let provisjon = produktProvisjon[produktName] || 0;
         
-        // If no exact match, try partial match
+        // If no exact match, try substring match
         if (provisjon === 0) {
           for (const key in produktProvisjon) {
             const cleanKey = key
@@ -573,7 +581,10 @@ export default function MinSide() {
               .replace(/^["']|["']$/g, '')
               .toLowerCase()
               .trim();
-            if (produktName.startsWith(cleanKey)) {
+            
+            const productBase = produktName.substring(0, 30);
+            if (cleanKey.includes(productBase.substring(0, 20)) || 
+                produktName.includes(cleanKey.substring(0, 20))) {
               provisjon = produktProvisjon[key];
               break;
             }
