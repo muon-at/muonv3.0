@@ -460,17 +460,10 @@ export default function MinSide() {
             .trim();
           produktProvisjon[cleanKey] = provisjon;
         });
-        console.log('💼 Products loaded (cleaned):', Object.keys(produktProvisjon).length, 'produkter');
-        console.log('🔑 ALL ADMIN PRODUCT KEYS:');
-        console.table(Object.keys(produktProvisjon).sort());
+        console.log('💼 Products loaded:', Object.keys(produktProvisjon).length, 'produkter');
       } catch (err) {
         console.error('Error loading products:', err);
       }
-
-      // Extract all unique product names from contracts
-      const uniqueContractProducts = [...new Set(employeeContracts.map(c => (c.produkt || '').trim()))].sort();
-      console.log('📋 ALL UNIQUE CONTRACT PRODUCTS:');
-      console.table(uniqueContractProducts);
 
       // Get emoji counts for today with breakdown
       let bellCountToday = 0, gemCountToday = 0, giftCountTodayEarnings = 0;
@@ -494,7 +487,7 @@ export default function MinSide() {
       }
 
       // Calculate earnings
-      // Get provisjon per product from contracts - SUBSTRING MATCH (first 20 chars ignores discount/rabatt)
+      // Get provisjon per product from contracts - MATCH ON PRODUCT BASE (before " - ")
       const contractEarnings = employeeContracts.reduce((sum, c) => {
         // Clean contract product name: remove backslashes, trim
         let produktName = (c.produkt || '')
@@ -504,15 +497,16 @@ export default function MinSide() {
         // Try exact match first
         let provisjon = produktProvisjon[produktName] || 0;
         
-        // If no exact match, try substring match on first 20 chars
+        // If no exact match, try matching on product base (before " - " separator)
         // This handles "Flex 2 with ads - 50% discount..." vs "Flex 2 with ads - 50,- rabatt..."
+        // Both split to "Flex 2 with ads"
         if (provisjon === 0) {
-          const productBase = produktName.substring(0, 20);  // First 20 chars
+          const productBase = produktName.split(' - ')[0];  // Get part before " - "
           
           for (const key in produktProvisjon) {
-            const adminBase = key.substring(0, 20);  // First 20 chars of admin product
+            const adminBase = key.split(' - ')[0];  // Get part before " - "
             
-            // Match if both start with same 20 chars
+            // Match if product bases are same
             if (adminBase === productBase) {
               provisjon = produktProvisjon[key];
               break;
@@ -542,9 +536,9 @@ export default function MinSide() {
         let provisjon = produktProvisjon[produktName] || 0;
         
         if (provisjon === 0) {
-          const productBase = produktName.substring(0, 20);
+          const productBase = produktName.split(' - ')[0];
           for (const key in produktProvisjon) {
-            if (key.substring(0, 20) === productBase) {
+            if (key.split(' - ')[0] === productBase) {
               provisjon = produktProvisjon[key];
               break;
             }
@@ -568,9 +562,9 @@ export default function MinSide() {
         let provisjon = produktProvisjon[produktName] || 0;
         
         if (provisjon === 0) {
-          const productBase = produktName.substring(0, 20);
+          const productBase = produktName.split(' - ')[0];
           for (const key in produktProvisjon) {
-            if (key.substring(0, 20) === productBase) {
+            if (key.split(' - ')[0] === productBase) {
               provisjon = produktProvisjon[key];
               break;
             }
