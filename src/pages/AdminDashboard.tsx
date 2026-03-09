@@ -2528,7 +2528,7 @@ export default function AdminDashboard() {
                 >
                   <option value="">Velg rolle</option>
                   <option value="owner">Owner</option>
-                  <option value="teamlead">Teamlead</option>
+                  <option value="teamleder">Teamleder</option>
                   <option value="employee">Employee</option>
                 </select>
               </div>
@@ -2657,7 +2657,7 @@ export default function AdminDashboard() {
                 >
                   <option value="">Velg rolle</option>
                   <option value="owner">Owner</option>
-                  <option value="teamlead">Teamlead</option>
+                  <option value="teamleder">Teamleder</option>
                   <option value="employee">Employee</option>
                 </select>
               </div>

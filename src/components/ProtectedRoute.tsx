@@ -20,7 +20,7 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
 
   const roleHierarchy: { [key: string]: number } = {
     owner: 3,
-    teamlead: 2,
+    teamleder: 2,
     employee: 1,
   };
 

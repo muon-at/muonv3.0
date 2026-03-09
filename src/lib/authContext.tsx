@@ -83,7 +83,7 @@ export function useHasAccess(requiredRole: 'owner' | 'teamleder' | 'employee') {
 
   const roleHierarchy: { [key: string]: number } = {
     owner: 3,
-    teamlead: 2,
+    teamleder: 2,
     employee: 1,
   };
 
