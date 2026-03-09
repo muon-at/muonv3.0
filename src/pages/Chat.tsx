@@ -461,21 +461,14 @@ export default function Chat() {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    // Method 1: Scroll the messages area container to bottom
-    if (messagesAreaRef.current) {
-      const timer = setTimeout(() => {
-        if (messagesAreaRef.current) {
-          messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
-        }
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-    
-    // Method 2: Fallback to scrollIntoView on ref
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+    // Scroll to bottom when messages change OR channel changes
+    const timer = setTimeout(() => {
+      if (messagesAreaRef.current) {
+        messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages, selectedChannel, selectedDM]);
 
   const loadChannels = async () => {
     try {
