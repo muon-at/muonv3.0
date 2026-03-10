@@ -187,27 +187,21 @@
   font-size: 0.95rem;
   font-family: inherit;
   transition: all 0.2s ease;
-  color: #000000 !important;
-  background: white !important;
-  -webkit-text-fill-color: #000000 !important;
-  caret-color: #000000 !important;
-}
-
-.form-group input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
   color: #1f2937 !important;
+  background-color: white !important;
   caret-color: #667eea !important;
 }
 
-.form-group input:-webkit-autofill:hover {
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
   -webkit-text-fill-color: #1f2937 !important;
+  color: #1f2937 !important;
 }
 
-.form-group input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1), 0 0 0 1000px white inset !important;
-  -webkit-text-fill-color: #1f2937 !important;
+.form-group input:-webkit-autofill::first-line {
+  color: #1f2937 !important;
 }
 
 .form-group input:focus {

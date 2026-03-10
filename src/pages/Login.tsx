@@ -21,6 +21,45 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Fix autofilled input text color
+  useEffect(() => {
+    const inputs = document.querySelectorAll('.form-group input');
+    
+    inputs.forEach((input) => {
+      const el = input as HTMLInputElement;
+      
+      // Listen for autofill changes
+      const checkAndFixAutofill = () => {
+        // If it has a value (likely autofilled), fix the text color
+        if (el.value) {
+          el.style.color = '#1f2937 !important';
+          (el.style as any).webkitTextFillColor = '#1f2937 !important';
+        }
+      };
+      
+      // Check on focus (common autofill trigger)
+      el.addEventListener('focus', checkAndFixAutofill);
+      el.addEventListener('change', checkAndFixAutofill);
+      el.addEventListener('input', checkAndFixAutofill);
+      
+      // Initial check
+      checkAndFixAutofill();
+    });
+
+    // Also check after delay for async autofill
+    const timer = setTimeout(() => {
+      inputs.forEach((input) => {
+        const el = input as HTMLInputElement;
+        if (el.value) {
+          el.style.color = '#1f2937 !important';
+          (el.style as any).webkitTextFillColor = '#1f2937 !important';
+        }
+      });
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
