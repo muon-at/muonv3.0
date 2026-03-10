@@ -180,9 +180,11 @@ export default function MinSide() {
   const countWorkingDaysThisWeek = (date: Date) => {
     const weekStart = new Date(date);
     weekStart.setDate(date.getDate() - date.getDay() + (date.getDay() === 0 ? -6 : 1));
+    const yesterday = new Date(date);
+    yesterday.setDate(date.getDate() - 1);
     
     let count = 0;
-    for (let d = new Date(weekStart); d <= date; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(weekStart); d <= yesterday; d.setDate(d.getDate() + 1)) {
       const day = d.getDay();
       if (day !== 0 && day !== 6) count++;
     }
@@ -204,12 +206,14 @@ export default function MinSide() {
     return count;
   };
 
-  // Count working days from start of month to today
+  // Count working days from start of month to yesterday (excluding today since it's not finished)
   const countWorkingDaysThisMonth = (date: Date) => {
     const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+    const yesterday = new Date(date);
+    yesterday.setDate(date.getDate() - 1);
     
     let count = 0;
-    for (let d = new Date(monthStart); d <= date; d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(monthStart); d <= yesterday; d.setDate(d.getDate() + 1)) {
       const day = d.getDay();
       if (day !== 0 && day !== 6) count++;
     }
