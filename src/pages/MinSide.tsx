@@ -97,7 +97,9 @@ export default function MinSide() {
     dailyTo16: 0,
     dailyTo21: 0,
     weekly: 0,
+    weeklyRunrate: 0,
     monthly: 0,
+    monthlyRunrate: 0,
   });
 
   // Load saved goals from Firestore
@@ -704,8 +706,10 @@ export default function MinSide() {
         daily: Math.round(emojiEarningsToday),
         dailyTo16: Math.round(dailyEarningsTo16 * 100) / 100,
         dailyTo21: Math.round(dailyEarningsTo21 * 100) / 100,
-        weekly: Math.round(weeklyEarningsRunrate),
-        monthly: Math.round(monthlyEarningsRunrate),
+        weekly: Math.round(weekEarnings),
+        weeklyRunrate: Math.round(weeklyEarningsRunrate),
+        monthly: Math.round(monthEarnings),
+        monthlyRunrate: Math.round(monthlyEarningsRunrate),
       };
       
       console.log('✅ FINAL EARNINGS OBJECT:', earningsObj);
@@ -1090,7 +1094,7 @@ export default function MinSide() {
                   </div>
                   <div className="earnings-period-runrate">
                     <div className="earnings-period-runrate-label">Runrate</div>
-                    <span className="earnings-period-runrate-value">{earnings.weekly.toLocaleString('no-NO')} kr</span>
+                    <span className="earnings-period-runrate-value">{earnings.weeklyRunrate.toLocaleString('no-NO')} kr</span>
                   </div>
                 </div>
 
@@ -1103,7 +1107,7 @@ export default function MinSide() {
                   </div>
                   <div className="earnings-period-runrate">
                     <div className="earnings-period-runrate-label">Runrate</div>
-                    <span className="earnings-period-runrate-value">{earnings.monthly.toLocaleString('no-NO')} kr</span>
+                    <span className="earnings-period-runrate-value">{earnings.monthlyRunrate.toLocaleString('no-NO')} kr</span>
                   </div>
                 </div>
               </div>
