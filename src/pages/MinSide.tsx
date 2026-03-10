@@ -488,15 +488,34 @@ export default function MinSide() {
 
       // HARDCODED products - bypass Firestore issues! (without outer quotes)
       let produktProvisjon: { [key: string]: number } = {
+        // FLEX PRODUCTS (English + Norwegian variants)
         'Flex 2 with ads - 50,- rabatt i 6 mneder (6)': 600,
+        'Flex 2 with ads - 50% discount 6 months (6)': 600,
         'Flex 2 without ads - 50,- rabatt i 6 mneder (6)': 600,
+        'Flex 2 without ads - 50% discount 6 months (6)': 600,
         'Flex Basic - 50,- rabatt i 6 mneder (6)': 500,
+        'Flex Basic - 150 nok discount 6 months (6)': 500,
+        
+        // BASIC PRODUCTS
         'Basic - 4 frimmneder (12)': 500,
+        'Basic - 1 frimåned (12)': 500,
+        'Basic - 50% rabatt i 6 mäneder (12)': 500,
+        'Basic - 50% discount 6 months (12)': 500,
+        
+        // STANDARD PRODUCTS (Multiple variants)
         'Standard - 50% rabatt i 6 mneder (12)': 800,
+        'Standard - 50% rabatt i 6 mäneder (12)': 800,
+        'Standard - 50% discount 6 months (12)': 800,
         'Standard - 1 frimned (12)': 800,
+        'Standard - 1 frimåned (12)': 800,
         'Standard - 2 frimmneder (12)': 800,
+        'Standard - 2 frimåneder (12)': 800,
         'Standard - 4 frimmneder (12)': 800,
-        'Large - 100% Discount 1 month + 200 nok discount 11 months (12)': 1000
+        'Standard - 4 frimåneder (12)': 800,
+        
+        // LARGE PRODUCTS
+        'Large - 100% Discount 1 month + 200 nok discount 11 months (12)': 1000,
+        'Large - 100% discount 1 month then 290,- discount 11 months (12)': 1000
       };
       console.log('💼 Products hardcoded:', Object.keys(produktProvisjon).length, 'produkter');
 
