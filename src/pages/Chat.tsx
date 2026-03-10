@@ -2189,49 +2189,7 @@ export default function Chat() {
                   )}
                 </div>
 
-                {/* DM Upload + GIF Buttons */}
-                {selectedDM && (
-                  <div style={{ display: 'flex', gap: '0.5rem', padding: '0.5rem', borderTop: '1px solid #e2e8f0' }}>
-                    {/* File Upload Button */}
-                    <label style={{ cursor: 'pointer', fontSize: '1.2rem' }} title="Upload file">
-                      📎
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onload = (event) => {
-                              setImagePreview(event.target?.result as string);
-                              setPreviewFileName(file.name);
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
 
-                    {/* GIF Picker Button */}
-                    <button
-                      onClick={() => setIsPickingGif(true)}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        fontSize: '1.2rem',
-                        cursor: 'pointer',
-                        opacity: 0.6,
-                        transition: 'opacity 0.2s',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
-                      title="Search GIF"
-                    >
-                      🎬
-                    </button>
-                  </div>
-                )}
 
                 {/* Image/GIF Preview Area */}
                 {(imagePreview || gifPreview) && (
@@ -2273,56 +2231,106 @@ export default function Chat() {
                   </div>
                 )}
 
-                <textarea
-                  value={newMessage}
-                  onChange={(e) => {
-                    setNewMessage(e.target.value);
-                    handleTyping();
-                  }}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  onPaste={(e) => {
-                    const items = e.clipboardData?.items;
-                    if (items) {
-                      for (let i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf('image') !== -1) {
-                          e.preventDefault();
-                          const file = items[i].getAsFile();
+                {/* Input Row with DM Buttons */}
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                  {/* DM Upload Button */}
+                  {selectedDM && (
+                    <label style={{ cursor: 'pointer', fontSize: '1.5rem', display: 'flex', alignItems: 'center', padding: '0.5rem' }} title="Upload file">
+                      📎
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
                           if (file) {
                             const reader = new FileReader();
                             reader.onload = (event) => {
-                              const imageData = event.target?.result as string;
-                              
-                              if (selectedDM) {
-                                // DM: Show preview, require SEND button
-                                setImagePreview(imageData);
-                                setPreviewFileName(file.name);
-                              } else if (selectedChannel) {
-                                // Channel: Auto-send (old behavior)
-                                handleSendImage(imageData, file.name);
-                              }
+                              setImagePreview(event.target?.result as string);
+                              setPreviewFileName(file.name);
                             };
                             reader.readAsDataURL(file);
                           }
-                          break;
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                  )}
+
+                  {/* DM GIF Picker Button */}
+                  {selectedDM && (
+                    <button
+                      onClick={() => setIsPickingGif(true)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        fontSize: '1.5rem',
+                        cursor: 'pointer',
+                        opacity: 0.6,
+                        transition: 'opacity 0.2s',
+                        padding: '0.5rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                      title="Search GIF"
+                    >
+                      🎬
+                    </button>
+                  )}
+
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      handleTyping();
+                    }}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const items = e.clipboardData?.items;
+                      if (items) {
+                        for (let i = 0; i < items.length; i++) {
+                          if (items[i].type.indexOf('image') !== -1) {
+                            e.preventDefault();
+                            const file = items[i].getAsFile();
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const imageData = event.target?.result as string;
+                                
+                                if (selectedDM) {
+                                  // DM: Show preview, require SEND button
+                                  setImagePreview(imageData);
+                                  setPreviewFileName(file.name);
+                                } else if (selectedChannel) {
+                                  // Channel: Auto-send (old behavior)
+                                  handleSendImage(imageData, file.name);
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                            break;
+                          }
                         }
                       }
-                    }
-                  }}
-                  placeholder="Skriv melding... (Shift+Enter for ny linje, eller paste bilde)"
-                  className="message-input"
-                />
-                <button
-                  onClick={() => sendMessage()}
-                  className="send-button"
-                  disabled={!newMessage.trim()}
-                >
-                  📤 Send
-                </button>
+                    }}
+                    placeholder="Skriv melding... (Shift+Enter for ny linje, eller paste bilde)"
+                    className="message-input"
+                    style={{ flex: 1 }}
+                  />
+                  <button
+                    onClick={() => sendMessage()}
+                    className="send-button"
+                    disabled={!newMessage.trim()}
+                  >
+                    📤 Send
+                  </button>
+                </div>
               </div>
             </>
           ) : (
