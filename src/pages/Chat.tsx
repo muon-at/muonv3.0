@@ -1745,7 +1745,9 @@ export default function Chat() {
                                 alignItems: 'center'
                               }}>
                                 <strong style={{ fontSize: '0.95rem', color: '#fff' }}>
+                                  {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? '👑 ' : ''}
                                   {msg.sender}
+                                  {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? ' 👑' : ''}
                                 </strong>
                                 <span style={{ fontSize: '0.8rem', color: '#999' }}>
                                   {new Date(msg.timestamp).toLocaleTimeString('en-US', {
@@ -1827,9 +1829,7 @@ export default function Chat() {
                           fontStyle: msg.isDeleted ? 'italic' : 'normal',
                           opacity: msg.isDeleted ? 0.7 : 1,
                         }}>
-                          {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? '👑 ' : ''}
                           {msg.content}
-                          {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? ' 👑' : ''}
                           {msg.editedAt && (
                             <span style={{ fontSize: '0.7rem', color: '#999', marginLeft: '0.5rem' }}>
                               (edited)
