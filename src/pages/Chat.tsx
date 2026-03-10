@@ -2231,10 +2231,59 @@ export default function Chat() {
                   </div>
                 )}
 
-                {/* Input Row with DM Buttons */}
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
-                  {/* DM Upload Button */}
-                  {selectedDM && (
+                {/* CHANNELS: Original layout (Emoji buttons + Textarea + Send) */}
+                {selectedChannel && (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => {
+                        setNewMessage(e.target.value);
+                        handleTyping();
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const items = e.clipboardData?.items;
+                        if (items) {
+                          for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                              e.preventDefault();
+                              const file = items[i].getAsFile();
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const imageData = event.target?.result as string;
+                                  handleSendImage(imageData, file.name);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                              break;
+                            }
+                          }
+                        }
+                      }}
+                      placeholder="Skriv melding... (Shift+Enter for ny linje, eller paste bilde)"
+                      className="message-input"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      onClick={() => sendMessage()}
+                      className="send-button"
+                      disabled={!newMessage.trim()}
+                    >
+                      📤 Send
+                    </button>
+                  </div>
+                )}
+
+                {/* DMs: Layout with Upload + GIF buttons */}
+                {selectedDM && (
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+                    {/* DM Upload Button */}
                     <label style={{ cursor: 'pointer', fontSize: '1.5rem', display: 'flex', alignItems: 'center', padding: '0.5rem' }} title="Upload file">
                       📎
                       <input
@@ -2254,10 +2303,8 @@ export default function Chat() {
                         style={{ display: 'none' }}
                       />
                     </label>
-                  )}
 
-                  {/* DM GIF Picker Button */}
-                  {selectedDM && (
+                    {/* DM GIF Picker Button */}
                     <button
                       onClick={() => setIsPickingGif(true)}
                       style={{
@@ -2277,60 +2324,53 @@ export default function Chat() {
                     >
                       🎬
                     </button>
-                  )}
 
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => {
-                      setNewMessage(e.target.value);
-                      handleTyping();
-                    }}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                    onPaste={(e) => {
-                      const items = e.clipboardData?.items;
-                      if (items) {
-                        for (let i = 0; i < items.length; i++) {
-                          if (items[i].type.indexOf('image') !== -1) {
-                            e.preventDefault();
-                            const file = items[i].getAsFile();
-                            if (file) {
-                              const reader = new FileReader();
-                              reader.onload = (event) => {
-                                const imageData = event.target?.result as string;
-                                
-                                if (selectedDM) {
-                                  // DM: Show preview, require SEND button
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => {
+                        setNewMessage(e.target.value);
+                        handleTyping();
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const items = e.clipboardData?.items;
+                        if (items) {
+                          for (let i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf('image') !== -1) {
+                              e.preventDefault();
+                              const file = items[i].getAsFile();
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (event) => {
+                                  const imageData = event.target?.result as string;
                                   setImagePreview(imageData);
                                   setPreviewFileName(file.name);
-                                } else if (selectedChannel) {
-                                  // Channel: Auto-send (old behavior)
-                                  handleSendImage(imageData, file.name);
-                                }
-                              };
-                              reader.readAsDataURL(file);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                              break;
                             }
-                            break;
                           }
                         }
-                      }
-                    }}
-                    placeholder="Skriv melding... (Shift+Enter for ny linje, eller paste bilde)"
-                    className="message-input"
-                    style={{ flex: 1 }}
-                  />
-                  <button
-                    onClick={() => sendMessage()}
-                    className="send-button"
-                    disabled={!newMessage.trim()}
-                  >
-                    📤 Send
-                  </button>
-                </div>
+                      }}
+                      placeholder="Skriv melding... (Shift+Enter for ny linje, eller paste bilde)"
+                      className="message-input"
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      onClick={() => sendMessage()}
+                      className="send-button"
+                      disabled={!newMessage.trim()}
+                    >
+                      📤 Send
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           ) : (
