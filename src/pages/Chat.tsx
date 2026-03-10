@@ -604,6 +604,7 @@ export default function Chat() {
       
       if (existingDMId) {
         // Open existing DM
+        console.log('📞 OPENING EXISTING DM:', existingDMId, 'User:', otherUser?.name);
         setSelectedDM(existingDMId);
         setSelectedDMUser(otherUser);
         setSelectedChannel(null);
@@ -625,6 +626,7 @@ export default function Chat() {
           lastMessageTime: Date.now(),
           createdAt: new Date(),
         });
+        console.log('📞 CREATING NEW DM:', newDMRef.id, 'User:', otherUser?.name);
         setSelectedDM(newDMRef.id);
         setSelectedDMUser(otherUser);
         setSelectedChannel(null);
