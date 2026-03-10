@@ -4,13 +4,13 @@ import { useAuth } from '../lib/authContext';
 import '../styles/RightNavBar.css';
 
 interface RightNavBarProps {
+  isChatOpen?: boolean;
   onChatToggle?: (isOpen: boolean) => void;
 }
 
-export const RightNavBar: React.FC<RightNavBarProps> = ({ onChatToggle }) => {
+export const RightNavBar: React.FC<RightNavBarProps> = ({ isChatOpen = false, onChatToggle }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -19,10 +19,8 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ onChatToggle }) => {
   };
 
   const handleChatToggle = () => {
-    const newState = !isChatOpen;
-    setIsChatOpen(newState);
     if (onChatToggle) {
-      onChatToggle(newState);
+      onChatToggle(!isChatOpen);
     }
   };
 
@@ -31,20 +29,6 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ onChatToggle }) => {
       {/* Desktop NavBar */}
       <div className="right-nav-bar right-nav-bar-desktop">
         <div className="nav-items">
-          {/* CHAT - Speech bubble icon */}
-          <button 
-            className={`nav-button ${isChatOpen ? 'active' : ''}`}
-            onClick={handleChatToggle}
-            title="Chat"
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Chat</div>
-          </button>
-
           {/* LOGOUT - Door icon */}
           <button 
             className="nav-button"
@@ -117,6 +101,20 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ onChatToggle }) => {
               </svg>
             </div>
             <div className="nav-tooltip">Min Side</div>
+          </button>
+
+          {/* CHAT - Speech bubble icon (BOTTOM) */}
+          <button 
+            className={`nav-button ${isChatOpen ? 'active' : ''}`}
+            onClick={handleChatToggle}
+            title="Chat"
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+            </div>
+            <div className="nav-tooltip">Chat</div>
           </button>
         </div>
       </div>

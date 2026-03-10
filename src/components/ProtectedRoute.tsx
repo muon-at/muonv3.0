@@ -35,7 +35,10 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
   return (
     <>
       {cloneElement(children as React.ReactElement, { isChatSidebarOpen, setIsChatSidebarOpen } as any)}
-      <RightNavBar onChatToggle={(isOpen) => setIsChatSidebarOpen(isOpen)} />
+      <RightNavBar 
+        isChatOpen={isChatSidebarOpen}
+        onChatToggle={(isOpen) => setIsChatSidebarOpen(isOpen)} 
+      />
     </>
   );
 }
