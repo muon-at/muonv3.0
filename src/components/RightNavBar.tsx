@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import { useChatSidebar } from '../lib/ChatSidebarContext';
 import '../styles/RightNavBar.css';
 
-interface RightNavBarProps {
-  isChatOpen?: boolean;
-  onChatToggle?: (isOpen: boolean) => void;
-}
-
-export const RightNavBar: React.FC<RightNavBarProps> = ({ isChatOpen = false, onChatToggle }) => {
+export const RightNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -19,19 +16,9 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ isChatOpen = false, on
   };
 
   const handleChatToggle = () => {
-    console.log('🔵 Chat button clicked!');
-    // Call the toggle function exposed by Chat.tsx
-    const toggleFn = (window as any).toggleChatSidebar;
-    if (toggleFn) {
-      console.log('✅ Calling toggleChatSidebar');
-      toggleFn(!isChatOpen);
-    } else {
-      console.log('❌ toggleChatSidebar not found on window!');
-      // Fallback: try onChatToggle prop
-      if (onChatToggle) {
-        onChatToggle(!isChatOpen);
-      }
-    }
+    console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);
+    setIsChatSidebarOpen(!isChatSidebarOpen);
+    console.log('✅ Sidebar state toggled to:', !isChatSidebarOpen);
   };
 
   return (
@@ -115,7 +102,7 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ isChatOpen = false, on
 
           {/* CHAT - Speech bubble icon (BOTTOM) */}
           <button 
-            className={`nav-button ${isChatOpen ? 'active' : ''}`}
+            className={`nav-button ${isChatSidebarOpen ? 'active' : ''}`}
             onClick={handleChatToggle}
             title="Chat"
           >

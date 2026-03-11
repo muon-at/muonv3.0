@@ -12,10 +12,6 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  React.useEffect(() => {
-    console.log('🟦 LeftChatSidebar isOpen changed:', isOpen);
-  }, [isOpen]);
-
   const handleChannelClick = (channelId: string) => {
     navigate('/chat', { state: { selectedChannel: channelId } });
     if (onClose) onClose();

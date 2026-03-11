@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
+import { useChatSidebar } from '../lib/ChatSidebarContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
@@ -51,28 +52,7 @@ interface Message {
 export default function Chat() {
   const location = useLocation();
   const { user } = useAuth();
-  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false); // Local sidebar state
-
-  // Expose toggle function to window so RightNavBar can call it
-  useEffect(() => {
-    console.log('🎯 Chat.tsx useEffect - Setting window.toggleChatSidebar');
-    (window as any).toggleChatSidebar = (isOpen?: boolean) => {
-      console.log('🔄 toggleChatSidebar called with:', isOpen, 'Current state:', isChatSidebarOpen);
-      if (typeof isOpen === 'boolean') {
-        setIsChatSidebarOpen(isOpen);
-      } else {
-        setIsChatSidebarOpen(prev => {
-          console.log('🔄 Toggling from', prev, 'to', !prev);
-          return !prev;
-        });
-      }
-    };
-    console.log('✅ window.toggleChatSidebar is now:', typeof (window as any).toggleChatSidebar);
-    return () => {
-      console.log('🧹 Cleaning up window.toggleChatSidebar');
-      delete (window as any).toggleChatSidebar;
-    };
-  }, [isChatSidebarOpen]);
+  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar(); // Use Context
 
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [selectedDM, setSelectedDM] = useState<string | null>(null);
@@ -1389,18 +1369,9 @@ export default function Chat() {
     <div className="chat-container">
       {/* Left Chat Sidebar */}
       <LeftChatSidebar 
-        isOpen={isChatSidebarOpen || false}
-        onClose={() => {
-          console.log('🟦 LeftChatSidebar onClose called');
-          setIsChatSidebarOpen && setIsChatSidebarOpen(false);
-        }}
+        isOpen={isChatSidebarOpen}
+        onClose={() => setIsChatSidebarOpen(false)}
       />
-      {/* DEBUG: Show sidebar state */}
-      {typeof isChatSidebarOpen !== 'undefined' && (
-        <div style={{ position: 'fixed', top: 0, right: 0, background: 'red', color: 'white', padding: '10px', zIndex: 999 }}>
-          Sidebar Open: {String(isChatSidebarOpen)}
-        </div>
-      )}
 
       {/* Channel Creation Modal */}
       <ChannelModal 
