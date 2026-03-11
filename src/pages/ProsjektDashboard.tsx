@@ -330,15 +330,26 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         }
       });
       
-      // Sum salg from ALL employees in each department
-      salesByEmployee.forEach((counts, externalName) => {
-        const displayName = employeeNameMap.get(externalName) || externalName;
-        const empObj = employees.find(e => e.name === displayName);
+      // Sum salg from ALL employees in each department (using ukeList which has correct totals)
+      ukeList.forEach((emp) => {
+        const empObj = employees.find(e => e.name === emp.displayName);
         if (empObj && avdelingMap.has(empObj.department)) {
           const entry = avdelingMap.get(empObj.department)!;
-          entry.dag += counts.dag;
-          entry.uke += counts.uke;
-          entry.maned += counts.maned;
+          entry.uke += emp.salg;
+        }
+      });
+      dagList.forEach((emp) => {
+        const empObj = employees.find(e => e.name === emp.displayName);
+        if (empObj && avdelingMap.has(empObj.department)) {
+          const entry = avdelingMap.get(empObj.department)!;
+          entry.dag += emp.salg;
+        }
+      });
+      maanedList.forEach((emp) => {
+        const empObj = employees.find(e => e.name === emp.displayName);
+        if (empObj && avdelingMap.has(empObj.department)) {
+          const entry = avdelingMap.get(empObj.department)!;
+          entry.maned += emp.salg;
         }
       });
 
