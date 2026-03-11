@@ -19,8 +19,12 @@ export const RightNavBar: React.FC<RightNavBarProps> = ({ isChatOpen = false, on
   };
 
   const handleChatToggle = () => {
+    console.log('🔵 Chat button clicked!', { isChatOpen, onChatToggle: !!onChatToggle });
     if (onChatToggle) {
+      console.log('✅ Calling onChatToggle with:', !isChatOpen);
       onChatToggle(!isChatOpen);
+    } else {
+      console.log('❌ onChatToggle is undefined!');
     }
   };
 
