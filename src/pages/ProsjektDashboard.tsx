@@ -339,9 +339,21 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         }
       });
 
-      const dagAvdeling = Array.from(avdelingMap.entries()).map(([dept, data]) => ({ avdeling: dept, salg: data.dag })).sort((a, b) => b.salg - a.salg).slice(0, 3);
-      const ukeAvdeling = Array.from(avdelingMap.entries()).map(([dept, data]) => ({ avdeling: dept, salg: data.uke })).sort((a, b) => b.salg - a.salg).slice(0, 3);
-      const maanedAvdeling = Array.from(avdelingMap.entries()).map(([dept, data]) => ({ avdeling: dept, salg: data.maned })).sort((a, b) => b.salg - a.salg).slice(0, 3);
+      const dagAvdeling = Array.from(avdelingMap.entries())
+        .map(([dept, data]) => ({ avdeling: dept, salg: data.dag }))
+        .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
+        .sort((a, b) => b.salg - a.salg)
+        .slice(0, 3);
+      const ukeAvdeling = Array.from(avdelingMap.entries())
+        .map(([dept, data]) => ({ avdeling: dept, salg: data.uke }))
+        .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
+        .sort((a, b) => b.salg - a.salg)
+        .slice(0, 3);
+      const maanedAvdeling = Array.from(avdelingMap.entries())
+        .map(([dept, data]) => ({ avdeling: dept, salg: data.maned }))
+        .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
+        .sort((a, b) => b.salg - a.salg)
+        .slice(0, 3);
 
       console.log(`📈 FINAL STATS for ${proj}:`, { dag: totalDag, uke: totalUke, maned: totalManed });
       console.log(`🏆 TOP 3 DAG:`, dagList.slice(0, 3).map(e => ({ name: e.displayName, salg: e.salg })));
