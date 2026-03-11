@@ -109,12 +109,25 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
       weekStart.setDate(today.getDate() - daysToMonday);
 
-      // 1. FETCH CONTRACTS
+      // 1. FETCH EMPLOYEES & CONTRACTS
+      const employeesRef = collection(db, 'employees');
+      const employeesSnap = await getDocs(employeesRef);
+      const employees = employeesSnap.docs.map(doc => doc.data());
+      
+      // Create mapping from externalName → department
+      const nameToDepart = new Map<string, string>();
+      employees.forEach(emp => {
+        const extName = emp.externalName?.trim();
+        if (extName) {
+          nameToDepart.set(extName, emp.department || 'Ukjent');
+        }
+      });
+
       const salesRef = collection(db, 'allente_kontraktsarkiv');
       const salesSnap = await getDocs(salesRef);
       const allSales = salesSnap.docs.map(doc => doc.data());
 
-      // 2. GROUP BY AVDELING DIRECTLY
+      // 2. GROUP BY DEPARTMENT (via employee lookup)
       const avdelingStats = new Map<string, { dag: number; uke: number; maned: number }>();
       const sellerStats = new Map<string, { displayName: string; avdeling: string; dag: number; uke: number; maned: number }>();
 
@@ -122,8 +135,8 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         const saleDate = parseDate(sale.dato);
         if (!saleDate || saleDate.getTime() === 0) return;
 
-        const avdeling = sale.avdeling || 'Ukjent';
         const selger = sale.selger?.trim() || 'Ukjent';
+        const avdeling = nameToDepart.get(selger) || 'Ukjent';
         
         if (!avdelingStats.has(avdeling)) {
           avdelingStats.set(avdeling, { dag: 0, uke: 0, maned: 0 });
