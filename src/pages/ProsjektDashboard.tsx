@@ -7,11 +7,13 @@ interface TopFiveItem {
   externalName: string;
   displayName: string;
   salg: number;
+  emojis?: string;
 }
 
 interface TopAvdelingItem {
   avdeling: string;
   salg: number;
+  emojis?: string;
 }
 
 interface Stats {
@@ -232,6 +234,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
       });
       
       const emojiCountsToday = await getEmojiCountsForDate(today);
+      const emojiStringsToday = new Map<string, string>(); // Store emoji strings like "🎁🎁"
       emojiCountsToday.forEach((count, employeeName) => {
         // employeeName is the display name (e.g., "Oliver T Jenssen")
         // We need to find the corresponding externalName in our sales data
@@ -240,6 +243,9 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
           const current = salesByEmployee.get(externalName) || { dag: 0, uke: 0, maned: 0 };
           current.dag += count;  // ADD emojis to existing contract count
           salesByEmployee.set(externalName, current);
+          
+          // Build emoji string for display
+          emojiStringsToday.set(employeeName, '🎁'.repeat(count)); // Use 🎁 as placeholder
         }
       });
 
@@ -304,9 +310,10 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         totalUke += ukeTotal;
         totalManed += maanedTotal;
 
-        dagList.push({ externalName, displayName, salg: dagTotal });
-        ukeList.push({ externalName, displayName, salg: ukeTotal });
-        maanedList.push({ externalName, displayName, salg: maanedTotal });
+        const emojiStr = emojiStringsToday.get(displayName) || ''; // Get today's emojis
+        dagList.push({ externalName, displayName, salg: dagTotal, emojis: emojiStr });
+        ukeList.push({ externalName, displayName, salg: ukeTotal, emojis: emojiStr });
+        maanedList.push({ externalName, displayName, salg: maanedTotal, emojis: emojiStr });
       });
 
       dagList.sort((a, b) => b.salg - a.salg);
@@ -339,16 +346,25 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         }
       });
 
-      const dagAvdeling = Array.from(avdelingMap.entries())
-        .map(([dept, data]) => ({ avdeling: dept, salg: data.dag }))
+      // TOP 3 for UKE display with DAG emojis
+      const ukeAvdelingWithEmojis = Array.from(avdelingMap.entries())
+        .map(([dept, data]) => {
+          // Find emojis for this department employees TODAY
+          const deptEmployees = employees.filter(e => e.department === dept);
+          let deptEmojis = '';
+          deptEmployees.forEach(emp => {
+            const empDayData = dagList.find(d => d.displayName === emp.name);
+            if (empDayData && empDayData.emojis) {
+              deptEmojis += empDayData.emojis;
+            }
+          });
+          return { avdeling: dept, salg: data.uke, emojis: deptEmojis };
+        })
         .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
         .sort((a, b) => b.salg - a.salg)
         .slice(0, 3);
-      const ukeAvdeling = Array.from(avdelingMap.entries())
-        .map(([dept, data]) => ({ avdeling: dept, salg: data.uke }))
-        .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
-        .sort((a, b) => b.salg - a.salg)
-        .slice(0, 3);
+
+      // TOP 3 for MÅNED
       const maanedAvdeling = Array.from(avdelingMap.entries())
         .map(([dept, data]) => ({ avdeling: dept, salg: data.maned }))
         .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon') // Filter out MUON
@@ -366,9 +382,16 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
         uke: ukeList.slice(0, 3),
         maned: maanedList.slice(0, 3),
       });
+      // TOP 3 for DAG (not used in current UI, but keep for consistency)
+      const dagAvdeling = Array.from(avdelingMap.entries())
+        .map(([dept, data]) => ({ avdeling: dept, salg: data.dag }))
+        .filter((item) => item.avdeling && item.avdeling.toLowerCase() !== 'muon')
+        .sort((a, b) => b.salg - a.salg)
+        .slice(0, 3);
+
       setTopAvdeling({
         dag: dagAvdeling,
-        uke: ukeAvdeling,
+        uke: ukeAvdelingWithEmojis,
         maned: maanedAvdeling,
       });
 
@@ -481,7 +504,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
                 const medals = ['🥇', '🥈', '🥉'];
                 return (
                   <div key={idx} className="top-five-item">
-                    <span className="rank">{medals[idx]}</span>
+                    <span className="rank">{medals[idx]} {dept.emojis || ''}</span>
                     <span className="name">{dept.avdeling}</span>
                     <span className="count">{dept.salg}</span>
                   </div>
@@ -497,7 +520,7 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
                   const medals = ['🥇', '🥈', '🥉'];
                   return (
                     <div key={idx} className="top-five-item">
-                      <span className="rank">{medals[idx]}</span>
+                      <span className="rank">{medals[idx]} {emp.emojis || ''}</span>
                       <span className="name">{emp.displayName}</span>
                       <span className="count">{emp.salg}</span>
                     </div>
