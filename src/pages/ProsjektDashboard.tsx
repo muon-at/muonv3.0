@@ -277,31 +277,18 @@ const ProsjektDashboard = ({ userProject }: { userProject?: string } = {}) => {
 
       const emojiStringsToday = new Map<string, string>(); // Store emoji strings like "🎁🎁"
       emojiCountsToday.forEach((count, employeeName) => {
-        // employeeName is the display name (e.g., "Oliver T Jenssen")
-        // Try to find in nameToExternalName first
-        let externalName = nameToExternalName.get(employeeName);
-        
-        // If not found, try to match by partial name (e.g., "Brandon" might be "Brandon Kanyange / selger")
-        if (!externalName) {
-          // Search for partial match in employeeNameMap
-          for (const [extName, dispName] of employeeNameMap.entries()) {
-            if (dispName === employeeName || dispName.includes(employeeName) || employeeName.includes(dispName.split(' /')[0])) {
-              externalName = extName;
-              break;
-            }
-          }
-        }
+        // Direct lookup in nameToExternalName (no fuzzy matching)
+        const externalName = nameToExternalName.get(employeeName);
         
         if (externalName) {
-          // ✅ Create entry even if no contracts exist!
           const current = salesByEmployee.get(externalName) || { dag: 0, uke: 0, maned: 0 };
-          current.dag += count;  // ADD emojis to DAG
-          current.uke += count;  // ADD emojis to UKE (today's emojis on week total)
-          current.maned += count;  // ADD emojis to MANED (today's emojis on month total)
-          salesByEmployee.set(externalName, current);  // ← Will create entry if missing!
+          current.dag += count;
+          current.uke += count;
+          current.maned += count;
+          salesByEmployee.set(externalName, current);
           
           // Build emoji string for display
-          emojiStringsToday.set(employeeName, '🎁'.repeat(count)); // Use 🎁 as placeholder
+          emojiStringsToday.set(employeeName, '🎁'.repeat(count));
         }
       });
 
