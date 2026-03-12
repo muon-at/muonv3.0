@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
-import { useDMUnread } from '../lib/DMUnreadContext';
+
 import '../styles/RightNavBar.css';
 
 export const RightNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
-  const { totalDMUnread } = useDMUnread(); // Get total DM unread from global context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
@@ -19,27 +18,31 @@ export const RightNavBar: React.FC = () => {
   };
 
   // Update unread count from DMs ONLY
-  // Channels have their own badges on sidebar - navbar just shows DM count!
+  // Sum all chat_unread_dm_* keys from localStorage
   useEffect(() => {
-    // Get DM unread from context
-    let dmUnread = totalDMUnread;
-    
-    // Fallback: if context is empty, read from storage
-    if (dmUnread === 0) {
-      const allKeys = new Set([...Object.keys(localStorage), ...Object.keys(sessionStorage)]);
-      allKeys.forEach(key => {
+    const calculateDMUnread = () => {
+      let dmUnread = 0;
+      
+      // Count all DM unread from localStorage
+      Object.keys(localStorage).forEach(key => {
         if (key.startsWith('chat_unread_dm_')) {
-          const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
+          const count = parseInt(localStorage.getItem(key) || '0', 10);
           dmUnread += count;
         }
       });
-    }
+      
+      // Navbar shows ONLY DM count (channels shown in sidebar badges)
+      setUnreadCount(dmUnread);
+      
+      console.log('📊 Navbar DM unread total:', dmUnread, '(keys:', Object.keys(localStorage).filter(k => k.startsWith('chat_unread_dm_')).length, ')');
+    };
     
-    // Navbar shows ONLY DM count (channels shown in sidebar badges)
-    setUnreadCount(dmUnread);
+    calculateDMUnread();
     
-    console.log('📊 Navbar badge (DM only):', dmUnread);
-  }, [totalDMUnread]);
+    // Poll every 500ms to catch updates from sidebar
+    const interval = setInterval(calculateDMUnread, 500);
+    return () => clearInterval(interval);
+  }, []);
   
   // Poll storage periodically as safety net
   useEffect(() => {
