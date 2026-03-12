@@ -204,10 +204,11 @@
 /* MOBILE HAMBURGER MENU */
 .mobile-nav-menu {
   position: fixed;
-  top: 0;
+  top: max(0px, env(safe-area-inset-top));
   right: 0;
   z-index: 999;
   padding: 1rem;
+  padding-top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
 }
 
 .mobile-hamburger {
@@ -242,7 +243,7 @@
   transition: transform 0.3s ease;
   z-index: 998;
   overflow-y: auto;
-  padding-top: 1rem;
+  padding-top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
 }
 
 .mobile-drawer.open {
