@@ -17,7 +17,9 @@ webpush.setVapidDetails(
 );
 
 /**
- * Cloud Function: Send push notification when new message arrives
+ * Cloud Function: Handle new chat message
+ * 1. Increment channel unread count
+ * 2. Send push notification to all users
  * Triggered by: Firestore write to chat_channels/{channelId}/messages/{messageId}
  */
 exports.sendChatNotification = functions.firestore
@@ -29,7 +31,14 @@ exports.sendChatNotification = functions.firestore
       
       console.log(`📨 New message in ${channelId} from ${message.sender}`);
 
-      // Get channel info to find receivers
+      // Step 1: Increment channel unread count
+      await admin.firestore().collection('chat_channels').doc(channelId).update({
+        unread: admin.firestore.FieldValue.increment(1),
+        lastMessageTime: admin.firestore.Timestamp.now(),
+      });
+      console.log(`📈 Incremented unread count for ${channelId}`);
+
+      // Step 2: Get channel info to find receivers
       const channelDoc = await admin.firestore().collection('chat_channels').doc(channelId).get();
       const channelData = channelDoc.data();
       
@@ -98,7 +107,9 @@ exports.sendChatNotification = functions.firestore
   });
 
 /**
- * Cloud Function: Send push notification for direct messages
+ * Cloud Function: Handle new DM message
+ * 1. Increment DM unread count for receiver
+ * 2. Send push notification
  * Triggered by: Firestore write to chat_dms/{dmId}/messages/{messageId}
  */
 exports.sendDMNotification = functions.firestore
@@ -110,7 +121,7 @@ exports.sendDMNotification = functions.firestore
 
       console.log(`💬 New DM from ${message.sender}`);
 
-      // Get DM thread to find receiver
+      // Step 1: Get DM thread to find receiver
       const dmDoc = await admin.firestore().collection('chat_dms').doc(dmId).get();
       const dmData = dmDoc.data();
 
@@ -125,6 +136,14 @@ exports.sendDMNotification = functions.firestore
         console.log('❌ Receiver not found in DM');
         return;
       }
+
+      // Step 2: Increment DM unread count for receiver
+      const unreadKey = `unread.${receiver}`;
+      await admin.firestore().collection('chat_dms').doc(dmId).update({
+        [unreadKey]: admin.firestore.FieldValue.increment(1),
+        lastMessageTime: admin.firestore.Timestamp.now(),
+      });
+      console.log(`📈 Incremented DM unread count for ${receiver}`);
 
       // Get receiver's push subscription
       const subscriptionDoc = await admin.firestore().collection('push_subscriptions').doc(receiver).get();

@@ -255,7 +255,114 @@ export default function Chat() {
   // Sidebar/localStorage is source of truth for DM unread
   // Context should only be used for channels
 
-  // Sync channel unread to global context
+  // Mark channel as read when opened
+  useEffect(() => {
+    if (selectedChannel && user?.id) {
+      const markAsRead = async () => {
+        try {
+          await updateDoc(doc(db, 'chat_channels', selectedChannel), {
+            unread: 0,
+          });
+          console.log(`✅ Marked ${selectedChannel} as read`);
+        } catch (error) {
+          console.error('Error marking channel as read:', error);
+        }
+      };
+      
+      markAsRead();
+    }
+  }, [selectedChannel, user?.id]);
+
+  // Mark DM as read when opened
+  useEffect(() => {
+    if (selectedDM && user?.name) {
+      const markAsRead = async () => {
+        try {
+          await updateDoc(doc(db, 'chat_dms', selectedDM), {
+            [`unread.${user.name}`]: 0,
+          });
+          console.log(`✅ Marked DM as read`);
+        } catch (error) {
+          console.error('Error marking DM as read:', error);
+        }
+      };
+      
+      markAsRead();
+    }
+  }, [selectedDM, user?.name]);
+
+  // REAL-TIME listener for channel unread count changes
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channelsRef = collection(db, 'chat_channels');
+    const unsubscribe = onSnapshot(channelsRef, (snapshot) => {
+      const updates: Record<string, number> = {};
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const unreadCount = data.unread || 0;
+        
+        if (unreadCount > 0) {
+          updates[doc.id] = unreadCount;
+        }
+      });
+      
+      // Update context with latest unread counts
+      setChannelUnreadCounts(updates);
+      
+      // Also update localStorage for sidebar fallback
+      Object.keys(updates).forEach(channelId => {
+        localStorage.setItem(`chat_unread_${channelId}`, updates[channelId].toString());
+      });
+      
+      console.log('🔔 Channel unread counts updated (real-time):', updates);
+    });
+
+    return () => unsubscribe();
+  }, [user?.id, setChannelUnreadCounts]);
+
+  // REAL-TIME listener for DM unread count changes
+  useEffect(() => {
+    if (!user?.name) return;
+
+    const dmsRef = collection(db, 'chat_dms');
+    const unsubscribe = onSnapshot(dmsRef, (snapshot) => {
+      const dmUnread: Record<string, number> = {};
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        
+        // Check if current user is participant
+        if (!data.participants || !data.participants.includes(user.name)) {
+          return;
+        }
+
+        // Get unread count for this user
+        const unreadCount = (data.unread && data.unread[user.name]) || 0;
+        
+        if (unreadCount > 0) {
+          // Use other participant's name as key
+          const otherParticipant = data.participants.find((p: string) => p !== user.name);
+          if (otherParticipant) {
+            dmUnread[otherParticipant] = unreadCount;
+            
+            // Also update localStorage for sidebar
+            localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
+          }
+        }
+      });
+      
+      // Update local state
+      setDmUnreadCounts(dmUnread);
+      
+      console.log('💬 DM unread counts updated (real-time):', dmUnread);
+    });
+
+    return () => unsubscribe();
+  }, [user?.name]);
+
+  // Sync channel unread to global context (from channels state)
   useEffect(() => {
     const channelCounts: Record<string, number> = {};
     channels.forEach(ch => {
