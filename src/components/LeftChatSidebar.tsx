@@ -86,18 +86,20 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
         const channelSnap = await getDocs(channelsRef);
         console.log('📋 Found', channelSnap.size, 'total channels in Firestore');
         
-        let totalUnread = 0;
+        let channelUnreadTotal = 0;
         let channelCount = 0;
         
         channelSnap.forEach(doc => {
           const ch = doc.data();
           const unreadCount = ch.unread || 0;
           localStorage.setItem(`chat_unread_${doc.id}`, unreadCount.toString());
-          totalUnread += unreadCount;
+          channelUnreadTotal += unreadCount;
           channelCount++;
-          console.log(`  - ${doc.id}: unread=${unreadCount}`);
+          if (unreadCount > 0) {
+            console.log(`  - ${doc.id}: unread=${unreadCount} ⚠️`);
+          }
         });
-        console.log('✅ Wrote', channelCount, 'channels to localStorage');
+        console.log('✅ Wrote', channelCount, 'channels, channel unread total:', channelUnreadTotal);
         
         // Load DMs
         console.log('📞 Loading DMs from Firestore...');
@@ -105,6 +107,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
         const dmSnap = await getDocs(dmsRef);
         console.log('📋 Found', dmSnap.size, 'total DMs in Firestore');
         
+        let dmUnreadTotal = 0;
         let dmCount = 0;
         dmSnap.forEach(doc => {
           const dm = doc.data();
@@ -112,15 +115,21 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             const otherParticipant = dm.participants.find((p: string) => p !== user?.name);
             const unreadCount = (user?.name && dm.unread?.[user.name]) || 0;
             localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
-            totalUnread += unreadCount;
+            dmUnreadTotal += unreadCount;
             dmCount++;
-            console.log(`  - ${otherParticipant}: unread=${unreadCount}`);
+            if (unreadCount > 0) {
+              console.log(`  - ${otherParticipant}: unread=${unreadCount}`);
+            }
           }
         });
-        console.log('✅ Wrote', dmCount, 'DMs to localStorage');
+        console.log('✅ Wrote', dmCount, 'DMs, DM unread total:', dmUnreadTotal);
         
+        const totalUnread = channelUnreadTotal + dmUnreadTotal;
         localStorage.setItem('chat_unread_count', totalUnread.toString());
-        console.log('🎉 Direct load complete! Total unread:', totalUnread, 'Channels:', channelCount, 'DMs:', dmCount);
+        console.log('🎉 Direct load complete!');
+        console.log('   Channels:', channelCount, '| Unread:', channelUnreadTotal);
+        console.log('   DMs:', dmCount, '| Unread:', dmUnreadTotal);
+        console.log('   TOTAL UNREAD:', totalUnread);
       } catch (err) {
         console.error('❌ Error loading chat data:', err);
       }
