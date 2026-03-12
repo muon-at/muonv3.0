@@ -4,6 +4,8 @@ import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
+import { requestNotificationPermission } from '../lib/push-notification-handler';
+// TODO: Use showNotification, playNotificationSound, vibrateDevice when Firestore listener is integrated
 import '../styles/Chat.css';
 
 interface Channel {
@@ -222,6 +224,33 @@ export default function Chat() {
     };
     load();
   }, [user]);
+
+  // Request notification permission when chat opens
+  useEffect(() => {
+    if (user?.id) {
+      console.log('🔔 Requesting notification permission for user:', user.name);
+      requestNotificationPermission().then((granted) => {
+        if (granted) {
+          console.log('✅ Notifications enabled!');
+          // TODO: Subscribe to Firestore messages when Valg A is integrated
+        }
+      });
+    }
+  }, [user?.id]);
+
+  // Calculate total unread count from channels + DMs for badge
+  useEffect(() => {
+    const channelUnread = channels.reduce((sum, ch) => sum + (ch.unread || 0), 0);
+    const dmUnread = Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0);
+    const total = channelUnread + dmUnread;
+    
+    // Store in sessionStorage so RightNavBar can read it
+    sessionStorage.setItem('chat_unread_count', total.toString());
+    
+    if (total > 0) {
+      console.log('🔴 Total unread:', total, '(Channels:', channelUnread, '+ DMs:', dmUnread, ')');
+    }
+  }, [channels, dmUnreadCounts]);
 
   // Recalculate top department when messages change (live updates with emojis)
   useEffect(() => {

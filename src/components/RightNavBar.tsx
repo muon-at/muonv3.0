@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
@@ -9,11 +9,28 @@ export const RightNavBar: React.FC = () => {
   const { user, logout } = useAuth();
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  // Read unread count from sessionStorage (updated by Chat.tsx)
+  useEffect(() => {
+    const readUnreadCount = () => {
+      const stored = sessionStorage.getItem('chat_unread_count');
+      if (stored) {
+        setUnreadCount(parseInt(stored, 10));
+      }
+    };
+
+    readUnreadCount();
+    
+    // Poll every 500ms to check for updates (Chat.tsx updates sessionStorage)
+    const interval = setInterval(readUnreadCount, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChatToggle = () => {
     console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);
@@ -106,12 +123,33 @@ export const RightNavBar: React.FC = () => {
             onClick={handleChatToggle}
             title="Chat"
           >
-            <div className="icon-circle">
+            <div className="icon-circle" style={{ position: 'relative' }}>
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
+              {/* Unread badge */}
+              {unreadCount > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  background: '#ef4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  border: '2px solid white',
+                }}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </div>
+              )}
             </div>
-            <div className="nav-tooltip">Chat</div>
+            <div className="nav-tooltip">Chat {unreadCount > 0 ? `(${unreadCount})` : ''}</div>
           </button>
         </div>
       </div>

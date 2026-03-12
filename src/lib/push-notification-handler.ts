@@ -3,7 +3,7 @@
 // TODO: Valg B upgrade - add backend Web Push API integration here
 
 import { db } from './firebase';
-import { collection, onSnapshot, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 
 /**
  * Request notification permission from user
@@ -177,7 +177,7 @@ export const vibrateDevice = () => {
  *    });
  */
 
-export const setupValg_B_WebPush = async (serviceWorkerRegistration: ServiceWorkerRegistration) => {
+export const setupValg_B_WebPush = async () => {
   console.log('TODO: Setup Valg B Web Push when backend is ready');
   
   // Placeholder for future implementation
