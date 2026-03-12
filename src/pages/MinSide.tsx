@@ -938,11 +938,7 @@ export default function MinSide() {
     }
   };
 
-  if (loading) return <div className="minside-container"><div style={{ padding: '2rem', textAlign: 'center' }}>Laster...</div></div>;
-
-  console.log('🏅 Rendering MinSide with earnedBadges:', earnedBadges);
-
-  // Preview mode: show STATIC snapshot of Min Side (read-only, no tabs)
+  // Preview mode: show STATIC snapshot of Min Side (read-only, no tabs) - CHECK THIS FIRST!
   // Show immediately if in preview mode, even while data is loading
   if (isPreviewMode) {
     console.log('📸 PREVIEW MODE ACTIVE! previewUserId:', previewUserId, 'previewEmployee:', previewEmployee?.name || 'loading...');
@@ -1080,6 +1076,11 @@ export default function MinSide() {
       </div>
     );
   }
+
+  // After preview check, check if still loading
+  if (loading) return <div className="minside-container"><div style={{ padding: '2rem', textAlign: 'center' }}>Laster...</div></div>;
+
+  console.log('🏅 Rendering MinSide with earnedBadges:', earnedBadges);
 
   return (
     <div className="minside-container">
