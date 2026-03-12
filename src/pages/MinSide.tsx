@@ -66,6 +66,9 @@ export default function MinSide() {
   const urlParams = new URLSearchParams(window.location.search);
   const previewUserId = urlParams.get('user');
   const isPreviewMode = !!previewUserId;
+  
+  // Debug logging
+  console.log('🎯 MinSide.tsx rendered. URL params:', window.location.search, 'previewUserId:', previewUserId, 'isPreviewMode:', isPreviewMode);
   const [previewEmployee, setPreviewEmployee] = useState<any>(null);
   const [stats, setStats] = useState<any[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
@@ -162,15 +165,19 @@ export default function MinSide() {
   // Load preview employee data if in preview mode
   useEffect(() => {
     if (isPreviewMode && previewUserId) {
+      console.log('🔄 Loading preview employee:', previewUserId);
       const loadPreviewEmployee = async () => {
         try {
           const employeeRef = doc(db, 'employees', previewUserId);
           const employeeSnap = await getDoc(employeeRef);
           if (employeeSnap.exists()) {
+            console.log('✅ Preview employee loaded:', employeeSnap.data().name);
             setPreviewEmployee(employeeSnap.data());
+          } else {
+            console.warn('⚠️ Preview employee not found:', previewUserId);
           }
         } catch (err) {
-          console.error('Error loading preview employee:', err);
+          console.error('❌ Error loading preview employee:', err);
         }
       };
       loadPreviewEmployee();
@@ -936,7 +943,9 @@ export default function MinSide() {
   console.log('🏅 Rendering MinSide with earnedBadges:', earnedBadges);
 
   // Preview mode: show STATIC snapshot of Min Side (read-only, no tabs)
-  if (isPreviewMode && previewEmployee) {
+  // Show immediately if in preview mode, even while data is loading
+  if (isPreviewMode) {
+    console.log('📸 PREVIEW MODE ACTIVE! previewUserId:', previewUserId, 'previewEmployee:', previewEmployee?.name || 'loading...');
     return (
       <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: '2rem' }}>
         {/* Preview Header */}
@@ -952,10 +961,10 @@ export default function MinSide() {
         }}>
           <div>
             <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: '700', color: '#1f2937' }}>
-              {previewEmployee.name} (Min Side Snapshot)
+              {previewEmployee?.name || 'Laster...'} (Min Side Snapshot)
             </h2>
             <p style={{ margin: 0, color: '#666', fontSize: '0.95rem' }}>
-              {previewEmployee.department || 'Ukjent avdeling'} • {previewEmployee.role || 'selger'}
+              {previewEmployee?.department || 'Ukjent avdeling'} • {previewEmployee?.role || 'selger'}
             </p>
           </div>
           <a 
