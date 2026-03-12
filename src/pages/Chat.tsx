@@ -1621,25 +1621,61 @@ export default function Chat() {
                   </div>
                 </div>
 
-                {/* Messages */}
+                {/* Messages - Grouped by date */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 1.5rem', paddingBottom: '100px' }}>
-                  {filteredMessages.map((msg, idx) => (
-                    <div key={idx} style={{
-                      marginBottom: '1rem',
-                      display: 'flex',
-                      justifyContent: msg.sender === user?.name ? 'flex-end' : 'flex-start',
-                    }}>
+                  {getMessagesGroupedByDate(filteredMessages).map((group, groupIdx) => (
+                    <div key={groupIdx}>
+                      {/* Date separator */}
                       <div style={{
-                        maxWidth: '70%',
-                        padding: '0.75rem 1rem',
-                        background: msg.sender === user?.name ? '#667eea' : '#f0f0f0',
-                        color: msg.sender === user?.name ? '#fff' : '#333',
-                        borderRadius: '8px',
-                        wordBreak: 'break-word',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        margin: '1rem 0',
                       }}>
-                        <strong style={{ fontSize: '0.9rem' }}>{msg.sender}</strong>
-                        <div style={{ marginTop: '0.25rem' }}>{msg.content}</div>
+                        <span style={{
+                          padding: '0.4rem 0.8rem',
+                          background: '#f0f0f0',
+                          color: '#666',
+                          fontSize: '0.85rem',
+                          borderRadius: '12px',
+                          fontWeight: 500,
+                        }}>
+                          {group.date}
+                        </span>
                       </div>
+
+                      {/* Messages for this date */}
+                      {group.messages.map((msg, idx) => (
+                        <div key={idx} style={{
+                          marginBottom: '1rem',
+                          display: 'flex',
+                          justifyContent: msg.sender === user?.name ? 'flex-end' : 'flex-start',
+                          alignItems: 'flex-end',
+                          gap: '0.5rem',
+                        }}>
+                          <div style={{
+                            maxWidth: '70%',
+                            padding: '0.75rem 1rem',
+                            background: msg.sender === user?.name ? '#667eea' : '#f0f0f0',
+                            color: msg.sender === user?.name ? '#fff' : '#333',
+                            borderRadius: '8px',
+                            wordBreak: 'break-word',
+                          }}>
+                            <strong style={{ fontSize: '0.9rem' }}>{msg.sender}</strong>
+                            <div style={{ marginTop: '0.25rem' }}>{msg.content}</div>
+                            {/* Timestamp */}
+                            <div style={{ 
+                              marginTop: '0.4rem',
+                              fontSize: '0.75rem', 
+                              opacity: msg.sender === user?.name ? 0.8 : 0.7,
+                            }}>
+                              {new Date(msg.timestamp).toLocaleTimeString('no-NO', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>
