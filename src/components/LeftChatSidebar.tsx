@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
@@ -13,6 +13,45 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const navigate = useNavigate();
   const { user } = useAuth();
   const { setIsChatSidebarOpen } = useChatSidebar();
+  const [channelUnreadCounts, setChannelUnreadCounts] = useState<Record<string, number>>({});
+  const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); 
+  
+  // Read unread counts from sessionStorage
+  useEffect(() => {
+    const readUnreadCounts = () => {
+      const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
+      const newChannelCounts: Record<string, number> = {};
+      
+      channelIds.forEach(channelId => {
+        const stored = sessionStorage.getItem(`chat_unread_${channelId}`);
+        if (stored) {
+          newChannelCounts[channelId] = parseInt(stored, 10);
+        }
+      });
+      
+      setChannelUnreadCounts(newChannelCounts);
+      
+      // Also read all DM unread counts (prefix chat_unread_dm_)
+      const allKeys = Object.keys(sessionStorage);
+      const dmCounts: Record<string, number> = {};
+      allKeys.forEach(key => {
+        if (key.startsWith('chat_unread_dm_')) {
+          const dmUser = key.replace('chat_unread_dm_', '');
+          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+          if (count > 0) {
+            dmCounts[dmUser] = count;
+          }
+        }
+      });
+      setDmUnreadCounts(dmCounts);
+    };
+
+    readUnreadCounts();
+    
+    // Poll every 500ms to get updates
+    const interval = setInterval(readUnreadCounts, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChannelClick = (channelId: string) => {
     navigate('/chat', { state: { selectedChannel: channelId } });
@@ -42,12 +81,33 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
           className="channel-button"
           onClick={() => handleChannelClick('global')}
           title="Global"
+          style={{ position: 'relative' }}
         >
           <div className="icon-circle">
             <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
+          {channelUnreadCounts['global'] > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '-4px',
+              right: '-4px',
+              background: '#ef4444',
+              color: 'white',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              border: '2px solid #667eea',
+            }}>
+              {channelUnreadCounts['global']}
+            </div>
+          )}
         </button>
       </div>
 
@@ -58,22 +118,82 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             className="channel-circle"
             onClick={() => handleChannelClick('dept-krs')}
             title="KRS"
+            style={{ position: 'relative' }}
           >
             KRS
+            {channelUnreadCounts['dept-krs'] > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+              }}>
+                {channelUnreadCounts['dept-krs']}
+              </div>
+            )}
           </button>
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('dept-osl')}
             title="OSL"
+            style={{ position: 'relative' }}
           >
             OSL
+            {channelUnreadCounts['dept-osl'] > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+              }}>
+                {channelUnreadCounts['dept-osl']}
+              </div>
+            )}
           </button>
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('dept-skien')}
             title="SKN"
+            style={{ position: 'relative' }}
           >
             SKN
+            {channelUnreadCounts['dept-skien'] > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+              }}>
+                {channelUnreadCounts['dept-skien']}
+              </div>
+            )}
           </button>
         </div>
       )}
@@ -97,12 +217,33 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
           className="channel-button"
           onClick={handleDMClick}
           title="Direct Messages"
+          style={{ position: 'relative' }}
         >
           <div className="icon-circle">
             <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
+          {Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0) > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '-4px',
+              right: '-4px',
+              background: '#ef4444',
+              color: 'white',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              border: '2px solid #667eea',
+            }}>
+              {Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0)}
+            </div>
+          )}
         </button>
       </div>
 

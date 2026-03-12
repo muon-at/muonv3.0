@@ -247,6 +247,16 @@ export default function Chat() {
     // Store in sessionStorage so RightNavBar can read it
     sessionStorage.setItem('chat_unread_count', total.toString());
     
+    // Store per-channel unread counts for LeftChatSidebar
+    channels.forEach(ch => {
+      sessionStorage.setItem(`chat_unread_${ch.id}`, (ch.unread || 0).toString());
+    });
+    
+    // Store per-DM unread counts for LeftChatSidebar
+    Object.entries(dmUnreadCounts).forEach(([dmUser, count]) => {
+      sessionStorage.setItem(`chat_unread_dm_${dmUser}`, count.toString());
+    });
+    
     if (total > 0) {
       console.log('🔴 Total unread:', total, '(Channels:', channelUnread, '+ DMs:', dmUnread, ')');
     }
