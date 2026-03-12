@@ -225,6 +225,20 @@ export default function Chat() {
       await loadDMs();
       await loadAllUsers();
       await calculateTopDepartment();
+      
+      // After all data loaded, write total unread to localStorage
+      setTimeout(() => {
+        const allKeys = Object.keys(localStorage);
+        let totalUnread = 0;
+        allKeys.forEach(key => {
+          if (key.startsWith('chat_unread_') && key !== 'chat_unread_count') {
+            const count = parseInt(localStorage.getItem(key) || '0', 10);
+            totalUnread += count;
+          }
+        });
+        localStorage.setItem('chat_unread_count', totalUnread.toString());
+        console.log('✅ Chat data loaded + localStorage synced, total unread:', totalUnread);
+      }, 100);
     };
     load();
   }, [user]);
@@ -476,6 +490,11 @@ export default function Chat() {
       
       setDmUnreadCounts(dmUnread);
       
+      // Write DM unread to localStorage IMMEDIATELY so sidebar can read it
+      Object.entries(dmUnread).forEach(([dmUser, count]) => {
+        localStorage.setItem(`chat_unread_dm_${dmUser}`, count.toString());
+      });
+      
       // Sort by lastMessageTime (newest first), then alphabetically
       const users = Object.values(userMap).sort((a, b) => {
         if (b.lastMessageTime !== a.lastMessageTime) {
@@ -485,6 +504,7 @@ export default function Chat() {
       });
       
       setAllUsers(users);
+      console.log('🔴 DM unread counts loaded + localStorage updated:', dmUnread);
     } catch (err) {
       console.error('Error loading users:', err);
     }
@@ -648,7 +668,13 @@ export default function Chat() {
       allowedChannels.sort((a, b) => (typeOrder[a.type as keyof typeof typeOrder] || 5) - (typeOrder[b.type as keyof typeof typeOrder] || 5));
       
       setChannels(allowedChannels);
-      console.log('📋 Channels loaded:', allowedChannels.length, 'channels');
+      
+      // Write to localStorage IMMEDIATELY so sidebar can read it
+      allowedChannels.forEach(ch => {
+        localStorage.setItem(`chat_unread_${ch.id}`, (ch.unread || 0).toString());
+      });
+      
+      console.log('📋 Channels loaded:', allowedChannels.length, 'channels, localStorage updated');
     } catch (err) {
       console.error('Error loading channels:', err);
     }
