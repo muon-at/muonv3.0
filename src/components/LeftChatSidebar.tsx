@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
@@ -15,8 +15,55 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const navigate = useNavigate();
   const { user } = useAuth();
   const { setIsChatSidebarOpen } = useChatSidebar();
-  const { totalDMUnread } = useDMUnread(); // Get total DM unread from global context
-  const { channelUnreadCounts } = useChannelUnread(); // Get channel unread counts from global context
+  const { totalDMUnread: contextDMUnread } = useDMUnread(); // Get DM unread from context
+  const { channelUnreadCounts: contextChannelUnread } = useChannelUnread(); // Get channel unread from context
+
+  // Fallback to sessionStorage if contexts are empty
+  const [fallbackChannelUnread, setFallbackChannelUnread] = useState<Record<string, number>>({});
+  const [fallbackDMUnread, setFallbackDMUnread] = useState<number>(0);
+
+  // Load from sessionStorage as fallback
+  useEffect(() => {
+    const loadFromSessionStorage = () => {
+      const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
+      const channelCounts: Record<string, number> = {};
+
+      channelIds.forEach(channelId => {
+        const stored = sessionStorage.getItem(`chat_unread_${channelId}`);
+        if (stored) {
+          const count = parseInt(stored, 10);
+          if (count > 0) {
+            channelCounts[channelId] = count;
+          }
+        }
+      });
+
+      setFallbackChannelUnread(channelCounts);
+
+      // Also load total DM unread
+      const allKeys = Object.keys(sessionStorage);
+      let totalDM = 0;
+      allKeys.forEach(key => {
+        if (key.startsWith('chat_unread_dm_')) {
+          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+          totalDM += count;
+        }
+      });
+      setFallbackDMUnread(totalDM);
+    };
+
+    loadFromSessionStorage();
+
+    // Poll every 500ms
+    const interval = setInterval(loadFromSessionStorage, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Use Context data if available, otherwise fallback to sessionStorage
+  const dmUnreadCount = contextDMUnread > 0 ? contextDMUnread : fallbackDMUnread;
+  const channelUnread = Object.keys(contextChannelUnread).length > 0 ? contextChannelUnread : fallbackChannelUnread;
+
+  console.log('📊 Sidebar unread state:', { contextDMUnread, contextChannelUnread, fallbackChannelUnread, fallbackDMUnread, final: { dmUnreadCount, channelUnread } });
 
   const handleChannelClick = (channelId: string) => {
     navigate('/chat', { state: { selectedChannel: channelId } });
@@ -53,7 +100,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               <circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
             </svg>
           </div>
-          {channelUnreadCounts['global'] > 0 && (
+          {channelUnread['global'] > 0 && (
             <div style={{
               position: 'absolute',
               top: '-4px',
@@ -70,7 +117,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               fontWeight: 'bold',
               border: '2px solid #667eea',
             }}>
-              {channelUnreadCounts['global']}
+              {channelUnread['global']}
             </div>
           )}
         </button>
@@ -86,7 +133,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             style={{ position: 'relative' }}
           >
             KRS
-            {channelUnreadCounts['dept-krs'] > 0 && (
+            {channelUnread['dept-krs'] > 0 && (
               <div style={{
                 position: 'absolute',
                 top: '-4px',
@@ -102,7 +149,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
                 fontSize: '0.65rem',
                 fontWeight: 'bold',
               }}>
-                {channelUnreadCounts['dept-krs']}
+                {channelUnread['dept-krs']}
               </div>
             )}
           </button>
@@ -113,7 +160,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             style={{ position: 'relative' }}
           >
             OSL
-            {channelUnreadCounts['dept-osl'] > 0 && (
+            {channelUnread['dept-osl'] > 0 && (
               <div style={{
                 position: 'absolute',
                 top: '-4px',
@@ -129,7 +176,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
                 fontSize: '0.65rem',
                 fontWeight: 'bold',
               }}>
-                {channelUnreadCounts['dept-osl']}
+                {channelUnread['dept-osl']}
               </div>
             )}
           </button>
@@ -140,7 +187,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             style={{ position: 'relative' }}
           >
             SKN
-            {channelUnreadCounts['dept-skien'] > 0 && (
+            {channelUnread['dept-skien'] > 0 && (
               <div style={{
                 position: 'absolute',
                 top: '-4px',
@@ -156,7 +203,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
                 fontSize: '0.65rem',
                 fontWeight: 'bold',
               }}>
-                {channelUnreadCounts['dept-skien']}
+                {channelUnread['dept-skien']}
               </div>
             )}
           </button>
@@ -166,7 +213,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* USER'S DEPARTMENT (non-owner) */}
       {user?.department && user.department !== 'MUON' && user?.role !== 'owner' && (
         <div className="channel-section">
-          <button
+          <button 
             className="channel-circle"
             onClick={() => handleChannelClick(`dept-${(user.department || '').toLowerCase()}`)}
             title={user.department}
@@ -178,7 +225,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
 
       {/* DM */}
       <div className="channel-section">
-        <button
+        <button 
           className="channel-button"
           onClick={handleDMClick}
           title="Direct Messages"
@@ -189,7 +236,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          {totalDMUnread > 0 && (
+          {dmUnreadCount > 0 && (
             <div style={{
               position: 'absolute',
               top: '-4px',
@@ -206,7 +253,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               fontWeight: 'bold',
               border: '2px solid #667eea',
             }}>
-              {totalDMUnread}
+              {dmUnreadCount}
             </div>
           )}
         </button>
