@@ -76,25 +76,36 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
     
     const loadChatDataDirectly = async () => {
       try {
+        console.log('🔄 Starting direct Firestore load...');
         const { collection, getDocs } = await import('firebase/firestore');
         const { db } = await import('../lib/firebase');
         
         // Load channels
+        console.log('📊 Loading channels from Firestore...');
         const channelsRef = collection(db, 'chat_channels');
         const channelSnap = await getDocs(channelsRef);
+        console.log('📋 Found', channelSnap.size, 'total channels in Firestore');
+        
         let totalUnread = 0;
+        let channelCount = 0;
         
         channelSnap.forEach(doc => {
           const ch = doc.data();
           const unreadCount = ch.unread || 0;
           localStorage.setItem(`chat_unread_${doc.id}`, unreadCount.toString());
           totalUnread += unreadCount;
+          channelCount++;
+          console.log(`  - ${doc.id}: unread=${unreadCount}`);
         });
+        console.log('✅ Wrote', channelCount, 'channels to localStorage');
         
         // Load DMs
+        console.log('📞 Loading DMs from Firestore...');
         const dmsRef = collection(db, 'chat_dms');
         const dmSnap = await getDocs(dmsRef);
+        console.log('📋 Found', dmSnap.size, 'total DMs in Firestore');
         
+        let dmCount = 0;
         dmSnap.forEach(doc => {
           const dm = doc.data();
           if (dm.participants && dm.participants.includes(user?.name)) {
@@ -102,13 +113,16 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             const unreadCount = (user?.name && dm.unread?.[user.name]) || 0;
             localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
             totalUnread += unreadCount;
+            dmCount++;
+            console.log(`  - ${otherParticipant}: unread=${unreadCount}`);
           }
         });
+        console.log('✅ Wrote', dmCount, 'DMs to localStorage');
         
         localStorage.setItem('chat_unread_count', totalUnread.toString());
-        console.log('✅ Chat data loaded directly into localStorage, total unread:', totalUnread);
+        console.log('🎉 Direct load complete! Total unread:', totalUnread, 'Channels:', channelCount, 'DMs:', dmCount);
       } catch (err) {
-        console.error('Error loading chat data:', err);
+        console.error('❌ Error loading chat data:', err);
       }
     };
     
