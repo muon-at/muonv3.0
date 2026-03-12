@@ -935,8 +935,8 @@ export default function MinSide() {
 
   console.log('🏅 Rendering MinSide with earnedBadges:', earnedBadges);
 
-  // Preview mode: show just the dashboard without navbar/chat
-  if (isPreviewMode && previewEmployee) {
+  // Preview mode: show STATIC snapshot of Min Side (read-only, no tabs)
+  if (isPreviewMode && previewEmployee && stats.length > 0) {
     return (
       <div style={{ minHeight: '100vh', background: '#f5f5f5', padding: '2rem' }}>
         {/* Preview Header */}
@@ -952,7 +952,7 @@ export default function MinSide() {
         }}>
           <div>
             <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '2rem', fontWeight: '700', color: '#1f2937' }}>
-              {previewEmployee.name}
+              {previewEmployee.name} (Min Side Snapshot)
             </h2>
             <p style={{ margin: 0, color: '#666', fontSize: '0.95rem' }}>
               {previewEmployee.department || 'Ukjent avdeling'} • {previewEmployee.role || 'selger'}
@@ -970,29 +970,102 @@ export default function MinSide() {
               cursor: 'pointer'
             }}
           >
-            ← Tilbake
+            ← Tilbake til Admin
           </a>
         </div>
 
-        {/* Dashboard Content - Stats cards only, no tabs */}
-        <div className="minside-container" style={{ background: 'transparent', paddingTop: 0 }}>
-          <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginBottom: '1.5rem', color: '#1f2937' }}>Statistikk</h3>
-            {stats.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                {stats.map((stat, idx) => (
-                  <div key={idx} style={{ 
-                    padding: '1.5rem', 
-                    background: '#f9fafb', 
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb'
-                  }}>
-                    <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontSize: '0.9rem', fontWeight: '600' }}>{stat.label}</p>
-                    <p style={{ margin: 0, fontSize: '1.8rem', fontWeight: '700', color: '#667eea' }}>{stat.value}</p>
-                  </div>
-                ))}
+        {/* STATIC SNAPSHOT - Only Mine Stats section, no tabs, no interaction */}
+        <div style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+          {/* Badges Row */}
+          <div style={{ background: '#667eea', padding: '2rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '2rem' }}>🏆</span>
+            <span style={{ fontSize: '2rem' }}>👑</span>
+            <span style={{ fontSize: '2rem' }}>⭐</span>
+            <span style={{ fontSize: '2rem', opacity: 0.3 }}>🎓</span>
+            <span style={{ fontSize: '2rem', opacity: 0.3 }}>🚀</span>
+          </div>
+
+          {/* Stats Section */}
+          <div style={{ padding: '2rem' }}>
+            <h3 style={{ margin: '0 0 1.5rem 0', color: '#1f2937', fontSize: '1.3rem', fontWeight: '700' }}>Status</h3>
+            
+            {/* Stat Circles */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+              <div style={{ 
+                background: '#667eea', 
+                borderRadius: '50%', 
+                width: '120px', 
+                height: '120px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: '700' }}>0</span>
+                <span style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>DAG</span>
               </div>
-            )}
+              <div style={{ 
+                background: '#f59e0b', 
+                borderRadius: '50%', 
+                width: '120px', 
+                height: '120px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: '700' }}>0</span>
+                <span style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>UKE</span>
+              </div>
+              <div style={{ 
+                background: '#10b981', 
+                borderRadius: '50%', 
+                width: '120px', 
+                height: '120px', 
+                display: 'flex', 
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                margin: '0 auto'
+              }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: '700' }}>0</span>
+                <span style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>MÅNED</span>
+              </div>
+            </div>
+
+            {/* Progress Bars */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '2rem' }}>
+              <div>
+                <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontWeight: '600' }}>Dagens Mål</p>
+                <div style={{ background: '#e5e7eb', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: '#667eea', height: '100%', width: '0%' }}></div>
+                </div>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#999', fontSize: '0.85rem' }}>0 / 0</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontWeight: '600' }}>Ukes Mål</p>
+                <div style={{ background: '#e5e7eb', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: '#f59e0b', height: '100%', width: '0%' }}></div>
+                </div>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#999', fontSize: '0.85rem' }}>0 / 0</p>
+              </div>
+              <div>
+                <p style={{ margin: '0 0 0.5rem 0', color: '#666', fontWeight: '600' }}>Månedens Mål</p>
+                <div style={{ background: '#e5e7eb', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
+                  <div style={{ background: '#10b981', height: '100%', width: '0%' }}></div>
+                </div>
+                <p style={{ margin: '0.5rem 0 0 0', color: '#999', fontSize: '0.85rem' }}>0 / 0</p>
+              </div>
+            </div>
+
+            <p style={{ margin: '1rem 0 0 0', color: '#999', fontSize: '0.9rem', fontStyle: 'italic' }}>
+              ⓘ Statisk snapshot - ikke live data
+            </p>
           </div>
         </div>
       </div>
