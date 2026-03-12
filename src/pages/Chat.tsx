@@ -436,11 +436,10 @@ export default function Chat() {
         }
       });
       
-      setDmUnreadCounts(dmUnread);
-      
-      // NOTE: Do NOT write to localStorage here!
-      // Sidebar may have already loaded correct data from Firestore.
-      // Let the normal useEffect handle localStorage sync (will use dmUnreadCounts state)
+      // NOTE: Do NOT set dmUnreadCounts - Firestore data is STALE!
+      // Sidebar already loaded correct data from localStorage
+      // Chat.tsx should NOT overwrite it
+      // Only load user list and lastMessageTime, ignore unread counts
       
       // Sort by lastMessageTime (newest first), then alphabetically
       const users = Object.values(userMap).sort((a, b) => {
@@ -451,7 +450,7 @@ export default function Chat() {
       });
       
       setAllUsers(users);
-      console.log('🔴 DM unread counts loaded (localStorage will sync via useEffect):', dmUnread);
+      console.log('✅ DM user list loaded (NOT updating unread - sidebar is source of truth)');
     } catch (err) {
       console.error('Error loading users:', err);
     }
