@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
 import { useDMUnread } from '../lib/DMUnreadContext';
+import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/LeftChatSidebar.css';
 
 interface LeftChatSidebarProps {
@@ -15,30 +16,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const { user } = useAuth();
   const { setIsChatSidebarOpen } = useChatSidebar();
   const { totalDMUnread } = useDMUnread(); // Get total DM unread from global context
-  const [channelUnreadCounts, setChannelUnreadCounts] = useState<Record<string, number>>({});
-  
-  // Read channel unread counts from sessionStorage + get DMs from global context
-  useEffect(() => {
-    const readChannelUnreadCounts = () => {
-      const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
-      const newChannelCounts: Record<string, number> = {};
-      
-      channelIds.forEach(channelId => {
-        const stored = sessionStorage.getItem(`chat_unread_${channelId}`);
-        if (stored) {
-          newChannelCounts[channelId] = parseInt(stored, 10);
-        }
-      });
-      
-      setChannelUnreadCounts(newChannelCounts);
-    };
-
-    readChannelUnreadCounts();
-    
-    // Poll every 500ms to get channel updates
-    const interval = setInterval(readChannelUnreadCounts, 500);
-    return () => clearInterval(interval);
-  }, []);
+  const { channelUnreadCounts } = useChannelUnread(); // Get channel unread counts from global context
 
   const handleChannelClick = (channelId: string) => {
     navigate('/chat', { state: { selectedChannel: channelId } });
@@ -64,7 +42,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
 
       {/* GLOBAL */}
       <div className="channel-section">
-        <button 
+        <button
           className="channel-button"
           onClick={() => handleChannelClick('global')}
           title="Global"
@@ -101,7 +79,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* DEPARTMENTS (Owner only) */}
       {user?.role === 'owner' && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-circle"
             onClick={() => handleChannelClick('dept-krs')}
             title="KRS"
@@ -128,7 +106,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               </div>
             )}
           </button>
-          <button 
+          <button
             className="channel-circle"
             onClick={() => handleChannelClick('dept-osl')}
             title="OSL"
@@ -155,7 +133,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               </div>
             )}
           </button>
-          <button 
+          <button
             className="channel-circle"
             onClick={() => handleChannelClick('dept-skien')}
             title="SKN"
@@ -188,7 +166,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* USER'S DEPARTMENT (non-owner) */}
       {user?.department && user.department !== 'MUON' && user?.role !== 'owner' && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-circle"
             onClick={() => handleChannelClick(`dept-${(user.department || '').toLowerCase()}`)}
             title={user.department}
@@ -200,7 +178,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
 
       {/* DM */}
       <div className="channel-section">
-        <button 
+        <button
           className="channel-button"
           onClick={handleDMClick}
           title="Direct Messages"
@@ -237,7 +215,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* PROJECTS */}
       {user?.project && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-button"
             onClick={() => handleChannelClick('project-allente')}
             title="Allente"
@@ -254,7 +232,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* TEAMS */}
       {(user?.role === 'owner' || user?.role === 'teamleder') && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-button"
             onClick={() => handleChannelClick('team')}
             title="Teamledere"
@@ -271,7 +249,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* ADMIN */}
       {user?.role === 'owner' && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-button"
             onClick={() => handleChannelClick('admin')}
             title="Admin"
@@ -287,7 +265,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
 
       {/* Overlay (mobile) */}
       {isOpen && (
-        <div 
+        <div
           className="sidebar-overlay"
           onClick={onClose}
         />

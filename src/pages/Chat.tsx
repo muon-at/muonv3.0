@@ -6,6 +6,7 @@ import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc
 import ChannelModal from '../components/ChannelModal';
 import { requestNotificationPermission, showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
 import { useDMUnread } from '../lib/DMUnreadContext';
+import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/Chat.css';
 
 interface Channel {
@@ -69,6 +70,7 @@ export default function Chat() {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); // Track unread messages per DM
   const { setDmUnreadCounts: setContextDmUnreadCounts } = useDMUnread(); // Global DM unread sync
+  const { setChannelUnreadCounts } = useChannelUnread(); // Global channel unread sync
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -244,6 +246,17 @@ export default function Chat() {
   useEffect(() => {
     setContextDmUnreadCounts(dmUnreadCounts);
   }, [dmUnreadCounts, setContextDmUnreadCounts]);
+
+  // Sync channel unread to global context
+  useEffect(() => {
+    const channelCounts: Record<string, number> = {};
+    channels.forEach(ch => {
+      if ((ch.unread || 0) > 0) {
+        channelCounts[ch.id] = ch.unread || 0;
+      }
+    });
+    setChannelUnreadCounts(channelCounts);
+  }, [channels, setChannelUnreadCounts]);
 
   // Calculate total unread count from channels + DMs for badge
   useEffect(() => {
