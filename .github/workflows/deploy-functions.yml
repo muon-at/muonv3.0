@@ -13,12 +13,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
@@ -36,7 +36,7 @@ jobs:
       - name: Deploy sendChatNotification function
         run: |
           gcloud functions deploy sendChatNotification \
-            --runtime nodejs20 \
+            --runtime nodejs22 \
             --trigger-resource chat_channels \
             --trigger-event providers/cloud.firestore/eventTypes/document.onCreate \
             --source functions \
@@ -48,7 +48,7 @@ jobs:
       - name: Deploy sendDMNotification function
         run: |
           gcloud functions deploy sendDMNotification \
-            --runtime nodejs20 \
+            --runtime nodejs22 \
             --trigger-resource chat_dms \
             --trigger-event providers/cloud.firestore/eventTypes/document.onCreate \
             --source functions \
