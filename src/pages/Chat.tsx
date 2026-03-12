@@ -219,54 +219,20 @@ export default function Chat() {
   
 
   // Load channels on mount + calculate top department this week
+  // NOTE: Do NOT sync to localStorage - sidebar is source of truth
   useEffect(() => {
     const load = async () => {
       await loadChannels();
       await loadDMs();
       await loadAllUsers();
       await calculateTopDepartment();
-      
-      // After all data loaded, write total unread to localStorage
-      setTimeout(() => {
-        const allKeys = Object.keys(localStorage);
-        let totalUnread = 0;
-        allKeys.forEach(key => {
-          if (key.startsWith('chat_unread_') && key !== 'chat_unread_count') {
-            const count = parseInt(localStorage.getItem(key) || '0', 10);
-            totalUnread += count;
-          }
-        });
-        localStorage.setItem('chat_unread_count', totalUnread.toString());
-        console.log('✅ Chat data loaded + localStorage synced, total unread:', totalUnread);
-      }, 100);
+      console.log('✅ Chat data loaded (localStorage sync disabled - sidebar is source of truth)');
     };
     load();
   }, [user]);
 
-  // Initialize localStorage with current unread state on mount
-  useEffect(() => {
-    console.log('⚡ Chat.tsx mounted - initializing localStorage');
-    
-    // Immediately write current state to localStorage for sidebar to read
-    const initializeStorage = () => {
-      const total = channels.reduce((sum, ch) => sum + (ch.unread || 0), 0) + 
-                   Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0);
-      
-      localStorage.setItem('chat_unread_count', total.toString());
-      
-      channels.forEach(ch => {
-        localStorage.setItem(`chat_unread_${ch.id}`, (ch.unread || 0).toString());
-      });
-      
-      Object.entries(dmUnreadCounts).forEach(([dmUser, count]) => {
-        localStorage.setItem(`chat_unread_dm_${dmUser}`, count.toString());
-      });
-      
-      console.log('💾 localStorage initialized:', { total, channels: channels.length, dms: Object.keys(dmUnreadCounts).length });
-    };
-    
-    initializeStorage();
-  }, [channels, dmUnreadCounts]);
+  // NOTE: Do NOT initialize localStorage - sidebar is the source of truth
+  // Chat.tsx syncs to context only, not to storage
 
   // Request notification permission when chat opens
   useEffect(() => {
@@ -297,34 +263,16 @@ export default function Chat() {
     setChannelUnreadCounts(channelCounts);
   }, [channels, setChannelUnreadCounts]);
 
-  // Calculate total unread count from channels + DMs for badge
+  // Sync unread counts to context ONLY (not to localStorage - sidebar is source of truth!)
   useEffect(() => {
+    // Just sync to context, don't touch localStorage
+    // Sidebar loads data first and localStorage should not be overwritten
     const channelUnread = channels.reduce((sum, ch) => sum + (ch.unread || 0), 0);
     const dmUnread = Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0);
     const total = channelUnread + dmUnread;
     
-    // Store in BOTH sessionStorage + localStorage so sidebar can read even if Chat not loaded
-    const storageKey = 'chat_unread_count';
-    sessionStorage.setItem(storageKey, total.toString());
-    localStorage.setItem(storageKey, total.toString());
-    
-    // Store per-channel unread counts for LeftChatSidebar
-    channels.forEach(ch => {
-      const key = `chat_unread_${ch.id}`;
-      const value = (ch.unread || 0).toString();
-      sessionStorage.setItem(key, value);
-      localStorage.setItem(key, value); // Persist across sessions
-    });
-    
-    // Store per-DM unread counts for LeftChatSidebar
-    Object.entries(dmUnreadCounts).forEach(([dmUser, count]) => {
-      const key = `chat_unread_dm_${dmUser}`;
-      sessionStorage.setItem(key, count.toString());
-      localStorage.setItem(key, count.toString()); // Persist across sessions
-    });
-    
     if (total > 0) {
-      console.log('🔴 Total unread:', total, '(Channels:', channelUnread, '+ DMs:', dmUnread, ')');
+      console.log('✅ Unread data loaded (NOT syncing to localStorage):', { channelUnread, dmUnread, total });
     }
   }, [channels, dmUnreadCounts]);
 
@@ -668,12 +616,8 @@ export default function Chat() {
       
       setChannels(allowedChannels);
       
-      // Write to localStorage IMMEDIATELY so sidebar can read it
-      allowedChannels.forEach(ch => {
-        localStorage.setItem(`chat_unread_${ch.id}`, (ch.unread || 0).toString());
-      });
-      
-      console.log('📋 Channels loaded:', allowedChannels.length, 'channels, localStorage updated');
+      // NOTE: Do NOT write to localStorage - sidebar loads data first
+      console.log('📋 Channels loaded:', allowedChannels.length, 'channels (NOT writing to localStorage)');
     } catch (err) {
       console.error('Error loading channels:', err);
     }
