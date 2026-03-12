@@ -1,22 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
+import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/RightNavBar.css';
 
 export const RightNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
+  const { channelUnreadCounts } = useChannelUnread();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [totalUnread, setTotalUnread] = useState(0);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  // TODO: Navbar badge disabled for now - will setup from scratch later
-  // Sidebar DM badges work correctly (shows 2)
+  // Calculate total unread: all channels + all DMs
+  useEffect(() => {
+    // Sum all channel unread from Context
+    const channelTotal = Object.values(channelUnreadCounts).reduce((sum, count) => sum + count, 0);
+    
+    // Sum all DM unread from localStorage
+    let dmTotal = 0;
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('chat_unread_dm_')) {
+        dmTotal += parseInt(localStorage.getItem(key) || '0', 10);
+      }
+    });
+    
+    // Total = channels + DMs
+    const total = channelTotal + dmTotal;
+    setTotalUnread(total);
+    
+    console.log('📊 Chat button badge:', { channels: channelTotal, dms: dmTotal, total });
+  }, [channelUnreadCounts]);
 
   const handleChatToggle = () => {
     console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);
@@ -109,12 +129,33 @@ export const RightNavBar: React.FC = () => {
             onClick={handleChatToggle}
             title="Chat"
           >
-            <div className="icon-circle">
+            <div className="icon-circle" style={{ position: 'relative' }}>
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
+              {/* Unread badge */}
+              {totalUnread > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  background: '#ef4444',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '20px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  border: '2px solid white',
+                }}>
+                  {totalUnread > 99 ? '99+' : totalUnread}
+                </div>
+              )}
             </div>
-            <div className="nav-tooltip">Chat</div>
+            <div className="nav-tooltip">Chat {totalUnread > 0 ? `(${totalUnread})` : ''}</div>
           </button>
         </div>
       </div>
