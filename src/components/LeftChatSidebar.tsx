@@ -86,20 +86,14 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
         const channelSnap = await getDocs(channelsRef);
         console.log('📋 Found', channelSnap.size, 'total channels in Firestore');
         
-        let channelUnreadTotal = 0;
         let channelCount = 0;
         
-        channelSnap.forEach(doc => {
-          const ch = doc.data();
-          const unreadCount = ch.unread || 0;
-          localStorage.setItem(`chat_unread_${doc.id}`, unreadCount.toString());
-          channelUnreadTotal += unreadCount;
+        channelSnap.forEach(() => {
+          // Don't write channels to localStorage - they have stale unread data
+          // Only DMs are accurate
           channelCount++;
-          if (unreadCount > 0) {
-            console.log(`  - ${doc.id}: unread=${unreadCount} ⚠️`);
-          }
         });
-        console.log('✅ Wrote', channelCount, 'channels, channel unread total:', channelUnreadTotal);
+        console.log('✅ Loaded', channelCount, 'channels (NOT writing - data may be stale)');
         
         // Load DMs
         console.log('📞 Loading DMs from Firestore...');
@@ -122,14 +116,11 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
             }
           }
         });
-        console.log('✅ Wrote', dmCount, 'DMs, DM unread total:', dmUnreadTotal);
-        
-        const totalUnread = channelUnreadTotal + dmUnreadTotal;
-        localStorage.setItem('chat_unread_count', totalUnread.toString());
+        // Only use DM unread (channels have stale data!)
+        localStorage.setItem('chat_unread_count', dmUnreadTotal.toString());
         console.log('🎉 Direct load complete!');
-        console.log('   Channels:', channelCount, '| Unread:', channelUnreadTotal);
-        console.log('   DMs:', dmCount, '| Unread:', dmUnreadTotal);
-        console.log('   TOTAL UNREAD:', totalUnread);
+        console.log('   Channels:', channelCount, '| Skipped (stale data)');
+        console.log('   DMs:', dmCount, '| Total DM unread:', dmUnreadTotal);
       } catch (err) {
         console.error('❌ Error loading chat data:', err);
       }
