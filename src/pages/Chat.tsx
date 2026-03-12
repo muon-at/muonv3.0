@@ -490,10 +490,9 @@ export default function Chat() {
       
       setDmUnreadCounts(dmUnread);
       
-      // Write DM unread to localStorage IMMEDIATELY so sidebar can read it
-      Object.entries(dmUnread).forEach(([dmUser, count]) => {
-        localStorage.setItem(`chat_unread_dm_${dmUser}`, count.toString());
-      });
+      // NOTE: Do NOT write to localStorage here!
+      // Sidebar may have already loaded correct data from Firestore.
+      // Let the normal useEffect handle localStorage sync (will use dmUnreadCounts state)
       
       // Sort by lastMessageTime (newest first), then alphabetically
       const users = Object.values(userMap).sort((a, b) => {
@@ -504,7 +503,7 @@ export default function Chat() {
       });
       
       setAllUsers(users);
-      console.log('🔴 DM unread counts loaded + localStorage updated:', dmUnread);
+      console.log('🔴 DM unread counts loaded (localStorage will sync via useEffect):', dmUnread);
     } catch (err) {
       console.error('Error loading users:', err);
     }
