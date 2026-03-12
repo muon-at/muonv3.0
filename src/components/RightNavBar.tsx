@@ -18,9 +18,36 @@ export const RightNavBar: React.FC = () => {
     navigate('/login');
   };
 
-  // Update unread count when DM unread changes (via global context)
+  // Update unread count from BOTH DMs (context) + channels (sessionStorage)
   useEffect(() => {
-    setUnreadCount(totalDMUnread);
+    // Get channel unread from sessionStorage
+    const stored = sessionStorage.getItem('chat_unread_count');
+    const channelUnread = stored ? parseInt(stored, 10) : 0;
+    
+    // Get DM unread from context
+    const dmUnread = totalDMUnread;
+    
+    // Total = channels + DMs
+    const total = channelUnread + dmUnread;
+    setUnreadCount(total);
+    
+    console.log('📊 Badge update:', { channelUnread, dmUnread, total });
+  }, [totalDMUnread]);
+  
+  // Also poll sessionStorage periodically to catch channel unread updates
+  useEffect(() => {
+    const readUnreadCount = () => {
+      const stored = sessionStorage.getItem('chat_unread_count');
+      if (stored) {
+        const channelUnread = parseInt(stored, 10);
+        const total = channelUnread + totalDMUnread;
+        setUnreadCount(total);
+      }
+    };
+
+    // Poll every 1000ms 
+    const interval = setInterval(readUnreadCount, 1000);
+    return () => clearInterval(interval);
   }, [totalDMUnread]);
 
   const handleChatToggle = () => {
