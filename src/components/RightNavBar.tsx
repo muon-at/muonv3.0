@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
+import { useDMUnread } from '../lib/DMUnreadContext';
 import '../styles/RightNavBar.css';
 
 export const RightNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
+  const { totalDMUnread } = useDMUnread(); // Get total DM unread from global context
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
 
@@ -16,21 +18,10 @@ export const RightNavBar: React.FC = () => {
     navigate('/login');
   };
 
-  // Read unread count from sessionStorage (updated by Chat.tsx)
+  // Update unread count when DM unread changes (via global context)
   useEffect(() => {
-    const readUnreadCount = () => {
-      const stored = sessionStorage.getItem('chat_unread_count');
-      if (stored) {
-        setUnreadCount(parseInt(stored, 10));
-      }
-    };
-
-    readUnreadCount();
-    
-    // Poll every 500ms to check for updates (Chat.tsx updates sessionStorage)
-    const interval = setInterval(readUnreadCount, 500);
-    return () => clearInterval(interval);
-  }, []);
+    setUnreadCount(totalDMUnread);
+  }, [totalDMUnread]);
 
   const handleChatToggle = () => {
     console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);

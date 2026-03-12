@@ -5,6 +5,7 @@ import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
 import { requestNotificationPermission, showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
+import { useDMUnread } from '../lib/DMUnreadContext';
 import '../styles/Chat.css';
 
 interface Channel {
@@ -67,6 +68,7 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); // Track unread messages per DM
+  const { setDmUnreadCounts: setContextDmUnreadCounts } = useDMUnread(); // Global DM unread sync
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -237,6 +239,11 @@ export default function Chat() {
       });
     }
   }, [user?.id]);
+
+  // Sync DM unread to global context
+  useEffect(() => {
+    setContextDmUnreadCounts(dmUnreadCounts);
+  }, [dmUnreadCounts, setContextDmUnreadCounts]);
 
   // Calculate total unread count from channels + DMs for badge
   useEffect(() => {
@@ -504,12 +511,17 @@ export default function Chat() {
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
-    // Scroll to bottom when messages change OR channel changes
+    // Scroll to bottom immediately + after render completes
+    if (messagesAreaRef.current) {
+      messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
+    }
+    
+    // Also scroll after a short delay to ensure DOM has updated
     const timer = setTimeout(() => {
       if (messagesAreaRef.current) {
         messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
       }
-    }, 100);
+    }, 50);
     return () => clearTimeout(timer);
   }, [messages, selectedChannel, selectedDM]);
 
