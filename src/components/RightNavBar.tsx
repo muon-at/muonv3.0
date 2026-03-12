@@ -18,21 +18,24 @@ export const RightNavBar: React.FC = () => {
     navigate('/login');
   };
 
-  // Update unread count from BOTH DMs (context + sessionStorage fallback) + channels (sessionStorage)
+  // Update unread count from BOTH DMs (context + localStorage fallback) + channels (localStorage/sessionStorage)
   useEffect(() => {
-    // Get channel unread from sessionStorage
-    const stored = sessionStorage.getItem('chat_unread_count');
+    // Get channel unread from localStorage (persistent) or sessionStorage (session-only)
+    const stored = localStorage.getItem('chat_unread_count') || sessionStorage.getItem('chat_unread_count');
     const channelUnread = stored ? parseInt(stored, 10) : 0;
     
     // Get DM unread from context
     let dmUnread = totalDMUnread;
     
-    // Fallback: if context is empty, read from sessionStorage
+    // Fallback: if context is empty, read from storage (localStorage first, then sessionStorage)
     if (dmUnread === 0) {
-      const allKeys = Object.keys(sessionStorage);
+      const allLocalKeys = Object.keys(localStorage);
+      const allSessionKeys = Object.keys(sessionStorage);
+      const allKeys = new Set([...allLocalKeys, ...allSessionKeys]);
+      
       allKeys.forEach(key => {
         if (key.startsWith('chat_unread_dm_')) {
-          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+          const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
           dmUnread += count;
         }
       });
@@ -42,21 +45,24 @@ export const RightNavBar: React.FC = () => {
     const total = channelUnread + dmUnread;
     setUnreadCount(total);
     
-    console.log('📊 Navbar badge:', { channelUnread, contextDM: totalDMUnread, fallbackDM: dmUnread, total });
+    console.log('📊 Navbar badge:', { channelUnread, contextDM: totalDMUnread, total });
   }, [totalDMUnread]);
   
-  // Poll sessionStorage periodically as safety net
+  // Poll storage periodically as safety net
   useEffect(() => {
     const readUnreadCount = () => {
-      const stored = sessionStorage.getItem('chat_unread_count');
+      const stored = localStorage.getItem('chat_unread_count') || sessionStorage.getItem('chat_unread_count');
       const channelUnread = stored ? parseInt(stored, 10) : 0;
       
-      // Also check DM counts in sessionStorage
-      const allKeys = Object.keys(sessionStorage);
+      // Check DM counts in both storages
+      const allLocalKeys = Object.keys(localStorage);
+      const allSessionKeys = Object.keys(sessionStorage);
+      const allKeys = new Set([...allLocalKeys, ...allSessionKeys]);
+      
       let dmUnread = 0;
       allKeys.forEach(key => {
         if (key.startsWith('chat_unread_dm_')) {
-          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+          const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
           dmUnread += count;
         }
       });

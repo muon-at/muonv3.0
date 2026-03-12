@@ -22,14 +22,15 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const [fallbackChannelUnread, setFallbackChannelUnread] = useState<Record<string, number>>({});
   const [fallbackDMUnread, setFallbackDMUnread] = useState<number>(0);
 
-  // Load from sessionStorage as fallback
+  // Load from localStorage (persists across sessions) + sessionStorage as fallback
   useEffect(() => {
-    const loadFromSessionStorage = () => {
+    const loadFromStorage = () => {
       const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
       const channelCounts: Record<string, number> = {};
-
+      
       channelIds.forEach(channelId => {
-        const stored = sessionStorage.getItem(`chat_unread_${channelId}`);
+        // Try localStorage first (persists across sessions), then sessionStorage
+        const stored = localStorage.getItem(`chat_unread_${channelId}`) || sessionStorage.getItem(`chat_unread_${channelId}`);
         if (stored) {
           const count = parseInt(stored, 10);
           if (count > 0) {
@@ -37,25 +38,30 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
           }
         }
       });
-
+      
       setFallbackChannelUnread(channelCounts);
-
-      // Also load total DM unread
-      const allKeys = Object.keys(sessionStorage);
+      
+      // Also load total DM unread from both storages
+      const allLocalKeys = Object.keys(localStorage);
+      const allSessionKeys = Object.keys(sessionStorage);
+      const allKeys = new Set([...allLocalKeys, ...allSessionKeys]);
+      
       let totalDM = 0;
       allKeys.forEach(key => {
         if (key.startsWith('chat_unread_dm_')) {
-          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
+          const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
           totalDM += count;
         }
       });
       setFallbackDMUnread(totalDM);
+      
+      console.log('📚 Sidebar loaded from storage:', { channelCounts, totalDM });
     };
 
-    loadFromSessionStorage();
-
-    // Poll every 500ms
-    const interval = setInterval(loadFromSessionStorage, 500);
+    loadFromStorage();
+    
+    // Poll every 500ms to catch updates
+    const interval = setInterval(loadFromStorage, 500);
     return () => clearInterval(interval);
   }, []);
 
@@ -213,7 +219,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       {/* USER'S DEPARTMENT (non-owner) */}
       {user?.department && user.department !== 'MUON' && user?.role !== 'owner' && (
         <div className="channel-section">
-          <button 
+          <button
             className="channel-circle"
             onClick={() => handleChannelClick(`dept-${(user.department || '').toLowerCase()}`)}
             title={user.department}
@@ -225,7 +231,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
 
       {/* DM */}
       <div className="channel-section">
-        <button 
+        <button
           className="channel-button"
           onClick={handleDMClick}
           title="Direct Messages"

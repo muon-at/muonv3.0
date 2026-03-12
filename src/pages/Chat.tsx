@@ -264,17 +264,24 @@ export default function Chat() {
     const dmUnread = Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0);
     const total = channelUnread + dmUnread;
     
-    // Store in sessionStorage so RightNavBar can read it
-    sessionStorage.setItem('chat_unread_count', total.toString());
+    // Store in BOTH sessionStorage + localStorage so sidebar can read even if Chat not loaded
+    const storageKey = 'chat_unread_count';
+    sessionStorage.setItem(storageKey, total.toString());
+    localStorage.setItem(storageKey, total.toString());
     
     // Store per-channel unread counts for LeftChatSidebar
     channels.forEach(ch => {
-      sessionStorage.setItem(`chat_unread_${ch.id}`, (ch.unread || 0).toString());
+      const key = `chat_unread_${ch.id}`;
+      const value = (ch.unread || 0).toString();
+      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value); // Persist across sessions
     });
     
     // Store per-DM unread counts for LeftChatSidebar
     Object.entries(dmUnreadCounts).forEach(([dmUser, count]) => {
-      sessionStorage.setItem(`chat_unread_dm_${dmUser}`, count.toString());
+      const key = `chat_unread_dm_${dmUser}`;
+      sessionStorage.setItem(key, count.toString());
+      localStorage.setItem(key, count.toString()); // Persist across sessions
     });
     
     if (total > 0) {
