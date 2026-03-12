@@ -1863,14 +1863,20 @@ export default function Chat() {
                                   {msg.sender}
                                   {topDepartment && employeeMapByName[msg.sender]?.department === topDepartment ? ' 👑' : ''}
                                 </strong>
-                                <span style={{ fontSize: '0.8rem', color: '#999' }}>
-                                  {new Date(msg.timestamp).toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
-                                </span>
                               </div>
                             )}
+                            
+                            {/* Timestamp - show on ALL messages */}
+                            <span style={{ 
+                              fontSize: '0.75rem', 
+                              color: '#666',
+                              marginRight: '0.5rem'
+                            }}>
+                              {new Date(msg.timestamp).toLocaleTimeString('no-NO', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </span>
 
                             {/* Reply context */}
                             {msg.replyTo && (
