@@ -5,7 +5,6 @@ import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
 import { requestNotificationPermission, showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
-import { useDMUnread } from '../lib/DMUnreadContext';
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/Chat.css';
 
@@ -68,8 +67,7 @@ export default function Chat() {
   const [gifs, setGifs] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [allUsers, setAllUsers] = useState<any[]>([]);
-  const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); // Track unread messages per DM
-  const { setDmUnreadCounts: setContextDmUnreadCounts } = useDMUnread(); // Global DM unread sync
+  const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); // Track unread messages per DM (NOT synced to context)
   const { setChannelUnreadCounts } = useChannelUnread(); // Global channel unread sync
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null);
@@ -247,10 +245,9 @@ export default function Chat() {
     }
   }, [user?.id]);
 
-  // Sync DM unread to global context
-  useEffect(() => {
-    setContextDmUnreadCounts(dmUnreadCounts);
-  }, [dmUnreadCounts, setContextDmUnreadCounts]);
+  // NOTE: Do NOT sync dmUnreadCounts to context!
+  // Sidebar/localStorage is source of truth for DM unread
+  // Context should only be used for channels
 
   // Sync channel unread to global context
   useEffect(() => {
