@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { useChatSidebar } from '../lib/ChatSidebarContext';
+import { useDMUnread } from '../lib/DMUnreadContext';
 import '../styles/LeftChatSidebar.css';
 
 interface LeftChatSidebarProps {
@@ -13,12 +14,12 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
   const navigate = useNavigate();
   const { user } = useAuth();
   const { setIsChatSidebarOpen } = useChatSidebar();
+  const { totalDMUnread } = useDMUnread(); // Get total DM unread from global context
   const [channelUnreadCounts, setChannelUnreadCounts] = useState<Record<string, number>>({});
-  const [dmUnreadCounts, setDmUnreadCounts] = useState<Record<string, number>>({}); 
   
-  // Read unread counts from sessionStorage
+  // Read channel unread counts from sessionStorage + get DMs from global context
   useEffect(() => {
-    const readUnreadCounts = () => {
+    const readChannelUnreadCounts = () => {
       const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
       const newChannelCounts: Record<string, number> = {};
       
@@ -30,26 +31,12 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
       });
       
       setChannelUnreadCounts(newChannelCounts);
-      
-      // Also read all DM unread counts (prefix chat_unread_dm_)
-      const allKeys = Object.keys(sessionStorage);
-      const dmCounts: Record<string, number> = {};
-      allKeys.forEach(key => {
-        if (key.startsWith('chat_unread_dm_')) {
-          const dmUser = key.replace('chat_unread_dm_', '');
-          const count = parseInt(sessionStorage.getItem(key) || '0', 10);
-          if (count > 0) {
-            dmCounts[dmUser] = count;
-          }
-        }
-      });
-      setDmUnreadCounts(dmCounts);
     };
 
-    readUnreadCounts();
+    readChannelUnreadCounts();
     
-    // Poll every 500ms to get updates
-    const interval = setInterval(readUnreadCounts, 500);
+    // Poll every 500ms to get channel updates
+    const interval = setInterval(readChannelUnreadCounts, 500);
     return () => clearInterval(interval);
   }, []);
 
@@ -224,7 +211,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          {Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0) > 0 && (
+          {totalDMUnread > 0 && (
             <div style={{
               position: 'absolute',
               top: '-4px',
@@ -241,7 +228,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen, onClos
               fontWeight: 'bold',
               border: '2px solid #667eea',
             }}>
-              {Object.values(dmUnreadCounts).reduce((sum, count) => sum + count, 0)}
+              {totalDMUnread}
             </div>
           )}
         </button>
