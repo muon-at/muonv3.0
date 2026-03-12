@@ -18,21 +18,26 @@ export const RightNavBar: React.FC = () => {
     navigate('/login');
   };
 
-  // Update unread count from BOTH DMs (context + localStorage fallback) + channels (localStorage/sessionStorage)
+  // Update unread count from channels + DMs (separate counts)
   useEffect(() => {
-    // Get channel unread from localStorage (persistent) or sessionStorage (session-only)
-    const stored = localStorage.getItem('chat_unread_count') || sessionStorage.getItem('chat_unread_count');
-    const channelUnread = stored ? parseInt(stored, 10) : 0;
+    // Get CHANNEL unread (sum of all channel-specific keys, NOT total)
+    const allLocalKeys = Object.keys(localStorage);
+    const allSessionKeys = Object.keys(sessionStorage);
+    const allKeys = new Set([...allLocalKeys, ...allSessionKeys]);
+    
+    let channelUnread = 0;
+    allKeys.forEach(key => {
+      if (key.startsWith('chat_unread_') && key !== 'chat_unread_count' && !key.startsWith('chat_unread_dm_')) {
+        const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
+        channelUnread += count;
+      }
+    });
     
     // Get DM unread from context
     let dmUnread = totalDMUnread;
     
-    // Fallback: if context is empty, read from storage (localStorage first, then sessionStorage)
+    // Fallback: if context is empty, read from storage
     if (dmUnread === 0) {
-      const allLocalKeys = Object.keys(localStorage);
-      const allSessionKeys = Object.keys(sessionStorage);
-      const allKeys = new Set([...allLocalKeys, ...allSessionKeys]);
-      
       allKeys.forEach(key => {
         if (key.startsWith('chat_unread_dm_')) {
           const count = parseInt(localStorage.getItem(key) || sessionStorage.getItem(key) || '0', 10);
@@ -41,11 +46,11 @@ export const RightNavBar: React.FC = () => {
       });
     }
     
-    // Total = channels + DMs
+    // Total = channels + DMs (NOT using chat_unread_count total!)
     const total = channelUnread + dmUnread;
     setUnreadCount(total);
     
-    console.log('📊 Navbar badge:', { channelUnread, contextDM: totalDMUnread, total });
+    console.log('📊 Navbar badge calculated:', { channelUnread, dmUnread, total, contextDM: totalDMUnread });
   }, [totalDMUnread]);
   
   // Poll storage periodically as safety net
