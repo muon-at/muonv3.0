@@ -179,13 +179,18 @@ export default function MinSide() {
 
   // Load data on mount and when user ID changes
   useEffect(() => {
-    if (user?.id) {
-      console.log('👤 User loaded, loading goals...');
-      loadSavedGoals();  // Load goals as soon as user.id is available
+    // In preview mode, use preview user's ID instead
+    const activeUserId = isPreviewMode ? previewUserId : user?.id;
+    
+    if (activeUserId) {
+      console.log('👤 Loading for user:', activeUserId, 'Preview:', isPreviewMode);
+      if (!isPreviewMode && user?.id) {
+        loadSavedGoals();  // Load goals only for authenticated users
+      }
     }
     loadEmployeeData();
     loadCachedBadges();
-  }, [user?.id, activeTab]);  // Trigger on user.id change OR when switching tabs (to reload earnings)
+  }, [isPreviewMode, previewUserId, user?.id, activeTab]);  // Trigger on user.id OR preview mode change
 
   // Sync goals to sessionStorage whenever they change
   useEffect(() => {
@@ -411,11 +416,15 @@ export default function MinSide() {
       };
 
       // Filter for this employee - normalize both seller and external name
-      const normalizedExternalName = normalize(user?.externalName || '');
+      // In preview mode, use preview employee's externalName; otherwise use current user's
+      const activeEmployee = isPreviewMode ? previewEmployee : user;
+      const normalizedExternalName = normalize(activeEmployee?.externalName || '');
       const employeeContracts = contracts.filter(c => {
         const selger = normalize(c.selger || '');
         return selger === normalizedExternalName || selger.startsWith(normalizedExternalName + ' /');
       });
+      
+      console.log('🔍 Loading data for:', activeEmployee?.name, 'externalName:', activeEmployee?.externalName, 'Found contracts:', employeeContracts.length);
 
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
