@@ -42,19 +42,30 @@ export const RightNavBar: React.FC = () => {
     calculateUnread();
   }, [channelUnreadCounts]);
   
-  // Listen for custom chat unread updates (from Chat.tsx real-time listeners)
+  // Listen for custom chat unread updates (from Sidebar real-time listeners)
   useEffect(() => {
-    const handleChatUnreadUpdate = () => {
-      console.log('💌 Custom event detected - recalculating unread...');
+    const handleChatUnreadUpdate = (event: Event) => {
+      console.log('💌 Custom event detected - updating unread...');
       
-      // Recalculate directly here (not via stale function)
-      const channelTotal = Object.values(channelUnreadCounts).reduce((sum, count) => sum + count, 0);
+      const customEvent = event as CustomEvent;
+      const detail = customEvent.detail || {};
+      
+      // Use event detail data if available (fresh from Sidebar)
       let dmTotal = 0;
-      Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('chat_unread_dm_')) {
-          dmTotal += parseInt(localStorage.getItem(key) || '0', 10);
-        }
-      });
+      if (detail.dmUnread) {
+        dmTotal = Object.values(detail.dmUnread).reduce((sum: number, count: number) => sum + count, 0);
+        console.log('📦 Using dmUnread from event detail:', detail.dmUnread, '→ total:', dmTotal);
+      } else {
+        // Fallback to localStorage if no event detail
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('chat_unread_dm_')) {
+            dmTotal += parseInt(localStorage.getItem(key) || '0', 10);
+          }
+        });
+        console.log('📦 Using localStorage fallback for DMs → total:', dmTotal);
+      }
+      
+      const channelTotal = Object.values(channelUnreadCounts).reduce((sum, count) => sum + count, 0);
       const total = channelTotal + dmTotal;
       setTotalUnread(total);
       console.log('✅ Navbar badge updated:', { channels: channelTotal, dms: dmTotal, total });
