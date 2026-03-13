@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import MobileHome from './pages/MobileHome';
 import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
+import MobileMinSide from './pages/MobileMinSide';
 import './App.css';
 
 function App() {
@@ -45,6 +46,15 @@ function App() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <MobileChatConversation />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Mobile min side screen */}
+          <Route 
+            path="/home/min-side" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileMinSide />
               </ProtectedRoute>
             } 
           />

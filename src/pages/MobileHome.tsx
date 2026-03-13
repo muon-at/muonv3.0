@@ -64,7 +64,7 @@ export default function MobileHome() {
         {/* MIN SIDE Card */}
         <button
           className="mobile-home-card"
-          onClick={() => navigate('/min-side')}
+          onClick={() => navigate('/home/min-side')}
         >
           <div className="card-icon">👤</div>
           <div className="card-label">MIN SIDE</div>
