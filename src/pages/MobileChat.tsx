@@ -16,7 +16,6 @@ interface DM {
 
 export default function MobileChat() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [dms, setDMs] = useState<DM[]>([]);
   const [activeTab, setActiveTab] = useState<'dms' | 'channels'>('dms');
