@@ -8,6 +8,8 @@ import Chat from './pages/Chat';
 import Teamleder from './pages/Teamleder';
 import AdminDashboard from './pages/AdminDashboard';
 import MobileHome from './pages/MobileHome';
+import MobileChat from './pages/MobileChat';
+import MobileChatConversation from './pages/MobileChatConversation';
 import './App.css';
 
 function App() {
@@ -26,6 +28,23 @@ function App() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <MobileHome />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Mobile chat screens */}
+          <Route 
+            path="/home/chat" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileChat />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/home/chat/:type/:id" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileChatConversation />
               </ProtectedRoute>
             } 
           />
