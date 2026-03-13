@@ -85,6 +85,8 @@ export default function MobileChatConversation() {
       let unsubscribe: (() => void) | undefined;
 
       // Initialize channel async
+      console.log('🚀 Initializing channel:', { chatName, title });
+      
       setDoc(doc(db, 'chat_channels', chatName), {
         id: chatName,
         name: title,
@@ -97,8 +99,10 @@ export default function MobileChatConversation() {
         const messagesRef = collection(db, 'chat_channels', chatName, 'messages');
         const messagesQ = query(messagesRef, orderBy('timestamp', 'asc'));
         
+        console.log('🔍 Setting up listener for:', { messagesRef: `chat_channels/${chatName}/messages` });
+        
         unsubscribe = onSnapshot(messagesQ, (snapshot) => {
-          console.log('💬 Messages loaded:', snapshot.size);
+          console.log('💬 Messages snapshot:', { count: snapshot.size, channelId: chatName });
           const msgs: Message[] = [];
           snapshot.forEach(doc => {
             const data = doc.data();
@@ -111,12 +115,14 @@ export default function MobileChatConversation() {
               type: data.type || 'text'
             });
           });
+          console.log('✅ Setting messages:', msgs.length, 'items');
           setMessages(msgs);
           if (msgs.length > 0) {
             setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
           }
         }, (error) => {
           console.error('❌ Listener error:', error);
+          console.log('⏱️ Setting empty state due to error');
           setMessages([]);
         });
       }).catch((error) => {
@@ -215,8 +221,8 @@ export default function MobileChatConversation() {
   return (
     <div className="mobile-chat-conversation">
       <div className="mobile-chat-header">
-        <button className="back-button" onClick={() => navigate('/home/chat')}>
-          ← {isDM ? 'DM' : 'Channels'}
+        <button className="back-button" onClick={() => navigate(-1)}>
+          ← Tilbake
         </button>
         <h1>{chatTitle || 'Laster...'}</h1>
         <div style={{ width: '40px' }} />
