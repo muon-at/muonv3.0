@@ -91,7 +91,7 @@ export default function MobileHome() {
         {/* TEAM/AVDELING Card */}
         <button
           className="mobile-home-card"
-          onClick={() => navigate('/teamleder')}
+          onClick={() => navigate('/home/team')}
         >
           <div className="card-icon">👥</div>
           <div className="card-label">TEAM</div>
