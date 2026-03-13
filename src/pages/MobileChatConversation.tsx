@@ -12,6 +12,7 @@ interface Message {
   content: string;
   timestamp: any;
   type: 'text' | 'image' | 'file';
+  fileName?: string;
 }
 
 export default function MobileChatConversation() {
@@ -61,7 +62,8 @@ export default function MobileChatConversation() {
             senderId: msgData.senderId,
             content: msgData.content,
             timestamp: msgData.timestamp,
-            type: msgData.type || 'text'
+            type: msgData.type || 'text',
+            fileName: msgData.fileName
           });
         });
         setMessages(msgs);
@@ -134,7 +136,8 @@ export default function MobileChatConversation() {
               senderId: data.senderId || '',
               content: data.content || '',
               timestamp: data.timestamp,
-              type: data.type || 'text'
+              type: data.type || 'text',
+              fileName: data.fileName
             });
           });
           console.log('✅ Setting messages:', msgs.length, 'items');
@@ -239,14 +242,69 @@ export default function MobileChatConversation() {
     const files = e.target.files;
     if (files && files[0]) {
       const file = files[0];
-      console.log('File selected:', file.name);
-      // TODO: Implement file upload
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const dataUrl = event.target?.result as string;
+          const msgType = file.type.startsWith('image/') ? 'image' : 'file';
+          
+          if (isDM) {
+            const participants = [user!.name, chatName].sort();
+            const dmId = participants.join('_').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+            await addDoc(collection(db, 'chat_dms', dmId, 'messages'), {
+              sender: user!.name,
+              senderId: user!.id,
+              content: dataUrl,
+              fileName: file.name,
+              timestamp: serverTimestamp(),
+              type: msgType
+            });
+          } else {
+            await addDoc(collection(db, 'chat_channels', chatName, 'messages'), {
+              sender: user!.name,
+              senderId: user!.id,
+              content: dataUrl,
+              fileName: file.name,
+              timestamp: serverTimestamp(),
+              type: msgType
+            });
+          }
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        } catch (error) {
+          console.error('File upload error:', error);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleGifClick = () => {
-    console.log('GIF picker clicked');
-    // TODO: Implement GIF picker
+  const handleGifClick = async () => {
+    const gifUrl = prompt('Paste GIF URL:');
+    if (gifUrl) {
+      try {
+        if (isDM) {
+          const participants = [user!.name, chatName].sort();
+          const dmId = participants.join('_').toLowerCase().replace(/[^a-z0-9_]/g, '_');
+          await addDoc(collection(db, 'chat_dms', dmId, 'messages'), {
+            sender: user!.name,
+            senderId: user!.id,
+            content: gifUrl,
+            timestamp: serverTimestamp(),
+            type: 'image'
+          });
+        } else {
+          await addDoc(collection(db, 'chat_channels', chatName, 'messages'), {
+            sender: user!.name,
+            senderId: user!.id,
+            content: gifUrl,
+            timestamp: serverTimestamp(),
+            type: 'image'
+          });
+        }
+      } catch (error) {
+        console.error('GIF send error:', error);
+      }
+    }
   };
 
   // Safety check
@@ -292,8 +350,10 @@ export default function MobileChatConversation() {
             <div className="message-bubble">
               {msg.type === 'text' ? (
                 msg.content
+              ) : msg.type === 'image' ? (
+                <img src={msg.content} alt="Melding" style={{ maxWidth: '200px', borderRadius: '8px' }} />
               ) : (
-                <div className="message-media">[{msg.type}]</div>
+                <div className="message-media">📄 {(msg as any).fileName || msg.type}</div>
               )}
             </div>
             {msg.timestamp && (
