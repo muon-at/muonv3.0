@@ -109,6 +109,29 @@ exports.sendChatNotification = onDocumentCreated(
   });
 
 /**
+ * Helper: Convert user name to user.id by looking up in employees collection
+ */
+async function getUserIdByName(name) {
+  try {
+    const employeesSnap = await admin.firestore().collection('employees').where('externalName', '==', name).limit(1).get();
+    
+    if (employeesSnap.empty) {
+      console.log(`⚠️ Employee not found for name: ${name}`);
+      return null;
+    }
+
+    const employeeDoc = employeesSnap.docs[0];
+    const employeeData = employeeDoc.data();
+    
+    console.log(`✅ Found user.id for ${name}: ${employeeDoc.id}`);
+    return employeeDoc.id; // This is the Firebase user.id
+  } catch (error) {
+    console.error(`❌ Error looking up user.id for ${name}:`, error);
+    return null;
+  }
+}
+
+/**
  * Cloud Function: Handle new DM message
  * 1. Increment DM unread count for receiver
  * 2. Send push notification
@@ -134,25 +157,32 @@ exports.sendDMNotification = onDocumentCreated(
       }
 
       // Find receiver (the other participant)
-      const receiver = dmData.participants.find((p) => p !== message.sender);
-      if (!receiver) {
+      const receiverName = dmData.participants.find((p) => p !== message.sender);
+      if (!receiverName) {
         console.log('❌ Receiver not found in DM');
         return;
       }
 
-      // Step 2: Increment DM unread count for receiver
-      const unreadKey = `unread.${receiver}`;
+      // Convert receiver name to user.id
+      const receiverId = await getUserIdByName(receiverName);
+      if (!receiverId) {
+        console.log(`❌ Could not convert receiver name ${receiverName} to user.id`);
+        return;
+      }
+
+      // Step 2: Increment DM unread count for receiver (use name as key in unread object)
+      const unreadKey = `unread.${receiverName}`;
       await admin.firestore().collection('chat_dms').doc(dmId).update({
         [unreadKey]: admin.firestore.FieldValue.increment(1),
         lastMessageTime: admin.firestore.Timestamp.now(),
       });
-      console.log(`📈 Incremented DM unread count for ${receiver}`);
+      console.log(`📈 Incremented DM unread count for ${receiverName}`);
 
-      // Get receiver's push subscription
-      const subscriptionDoc = await admin.firestore().collection('push_subscriptions').doc(receiver).get();
+      // Get receiver's push subscription using user.id
+      const subscriptionDoc = await admin.firestore().collection('push_subscriptions').doc(receiverId).get();
       
       if (!subscriptionDoc.exists) {
-        console.log(`⚠️ No subscription found for ${receiver}`);
+        console.log(`⚠️ No subscription found for ${receiverName} (user.id: ${receiverId})`);
         return;
       }
 
@@ -169,7 +199,7 @@ exports.sendDMNotification = onDocumentCreated(
 
       // Send push notification
       await webpush.sendNotification(subscriptionData.subscription, JSON.stringify(notificationPayload));
-      console.log(`✅ DM notification sent to ${receiver}`);
+      console.log(`✅ DM notification sent to ${receiverName} (user.id: ${receiverId})`);
 
     } catch (error) {
       if (error.statusCode === 410) {
