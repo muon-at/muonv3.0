@@ -1,6 +1,7 @@
-const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const webpush = require('web-push');
+const { onDocumentCreated } = require('firebase-functions/v2/firestore');
+const { onRequest } = require('firebase-functions/v2/https');
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -22,12 +23,13 @@ webpush.setVapidDetails(
  * 2. Send push notification to all users
  * Triggered by: Firestore write to chat_channels/{channelId}/messages/{messageId}
  */
-exports.sendChatNotification = functions.firestore
-  .document('chat_channels/{channelId}/messages/{messageId}')
-  .onCreate(async (snap, context) => {
+exports.sendChatNotification = onDocumentCreated(
+  'chat_channels/{channelId}/messages/{messageId}',
+  async (event) => {
     try {
+      const snap = event.data;
+      const { channelId } = event.params;
       const message = snap.data();
-      const { channelId } = context.params;
       
       console.log(`📨 New message in ${channelId} from ${message.sender}`);
 
@@ -112,12 +114,13 @@ exports.sendChatNotification = functions.firestore
  * 2. Send push notification
  * Triggered by: Firestore write to chat_dms/{dmId}/messages/{messageId}
  */
-exports.sendDMNotification = functions.firestore
-  .document('chat_dms/{dmId}/messages/{messageId}')
-  .onCreate(async (snap, context) => {
+exports.sendDMNotification = onDocumentCreated(
+  'chat_dms/{dmId}/messages/{messageId}',
+  async (event) => {
     try {
+      const snap = event.data;
+      const { dmId } = event.params;
       const message = snap.data();
-      const { dmId } = context.params;
 
       console.log(`💬 New DM from ${message.sender}`);
 
@@ -182,6 +185,6 @@ exports.sendDMNotification = functions.firestore
 /**
  * HTTP Function: Get VAPID public key (for frontend)
  */
-exports.getVapidKey = functions.https.onRequest((req, res) => {
+exports.getVapidKey = onRequest((req, res) => {
   res.json({ vapidPublicKey: VAPID_PUBLIC });
 });
