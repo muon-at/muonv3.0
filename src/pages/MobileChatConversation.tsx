@@ -91,33 +91,54 @@ export default function MobileChatConversation() {
         createdAt: serverTimestamp()
       }, { merge: true }).catch(err => console.error('Channel creation note:', err));
 
-      const messagesRef = collection(db, 'chat_channels', chatName, 'messages');
-      const messagesQ = query(messagesRef, orderBy('timestamp', 'asc'));
-      const unsubscribe = onSnapshot(messagesQ, (snapshot) => {
-        console.log('💬 Channel messages:', snapshot.size, 'docs');
-        const msgs: Message[] = [];
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          console.log('📄 Message:', { sender: data.sender, content: data.content?.substring(0, 30) });
-          msgs.push({
-            id: doc.id,
-            sender: data.sender,
-            senderId: data.senderId,
-            content: data.content,
-            timestamp: data.timestamp,
-            type: data.type || 'text'
+      try {
+        const messagesRef = collection(db, 'chat_channels', chatName, 'messages');
+        const messagesQ = query(messagesRef, orderBy('timestamp', 'asc'));
+        
+        let hasData = false;
+        const unsubscribe = onSnapshot(messagesQ, (snapshot) => {
+          console.log('💬 Channel messages loaded:', snapshot.size, 'docs');
+          hasData = true;
+          const msgs: Message[] = [];
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            msgs.push({
+              id: doc.id,
+              sender: data.sender || 'Unknown',
+              senderId: data.senderId || '',
+              content: data.content || '',
+              timestamp: data.timestamp,
+              type: data.type || 'text'
+            });
           });
+          setMessages(msgs);
+          if (msgs.length > 0) {
+            setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+          }
+        }, (error) => {
+          console.error('❌ Channel listener error:', error);
+          // Fallback: show empty state
+          if (!hasData) {
+            setMessages([]);
+          }
         });
-        setMessages(msgs);
-        if (msgs.length > 0) {
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-        }
-      }, (error) => {
-        console.error('❌ Channel listener error:', error);
-        // Fallback: show empty state
+        
+        // Timeout: if no data after 3 seconds, assume empty channel
+        const timeout = setTimeout(() => {
+          if (!hasData) {
+            console.log('⏱️ No data received after 3s, showing empty state');
+            setMessages([]);
+          }
+        }, 3000);
+        
+        return () => {
+          clearTimeout(timeout);
+          unsubscribe();
+        };
+      } catch (error) {
+        console.error('❌ Error setting up channel listener:', error);
         setMessages([]);
-      });
-      return unsubscribe;
+      }
     }
   }, [chatName, isDM, user]);
 
