@@ -3,8 +3,6 @@ import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MinSide.css';
-import AvdelingDashboard from './AvdelingDashboard';
-import ProsjektDashboard from './ProsjektDashboard';
 
 interface SalesRecord {
   dato?: string;
@@ -64,15 +62,8 @@ export default function MinSide() {
   const [stats, setStats] = useState<any[]>([]);
   const [earnedBadges, setEarnedBadges] = useState<string[]>([]);
   const [badgeStatus, setBadgeStatus] = useState<{ [key: string]: boolean }>({});
-  // Try to restore from sessionStorage on mount
-  const [weeklyGoal, setWeeklyGoal] = useState<number>(() => {
-    const stored = sessionStorage.getItem('maal_weekly');
-    return stored ? parseInt(stored) : 0;
-  });
-  const [monthlyGoal, setMonthlyGoal] = useState<number>(() => {
-    const stored = sessionStorage.getItem('maal_monthly');
-    return stored ? parseInt(stored) : 0;
-  });
+  const [weeklyGoal, setWeeklyGoal] = useState<number>(0);
+  const [monthlyGoal, setMonthlyGoal] = useState<number>(0);
   const [showGoalEdit, setShowGoalEdit] = useState(false);
   const [activeTab, setActiveTab] = useState('stats');
   const [progressData, setProgressData] = useState({
@@ -102,79 +93,30 @@ export default function MinSide() {
 
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
-    console.log('🎯 loadSavedGoals() called! User:', user);
-    
     try {
-      // ✅ USE USER ID as document ID (always unique and consistent)
-      const goalKey = user?.id || '';
-      console.log('🔑 Goal key (user.id):', goalKey);
+      const externalName = user?.externalName || user?.name || '';
+      if (!externalName) return;
       
-      if (!goalKey) {
-        console.warn('⚠️ No user ID found for goals');
-        // Try localStorage as fallback
-        const stored = localStorage.getItem(`goals_${user?.name}`);
-        console.log('💾 Trying localStorage for:', user?.name, '→', stored);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setWeeklyGoal(parsed.weeklyGoal || 0);
-          setMonthlyGoal(parsed.monthlyGoal || 0);
-          console.log('✅ Goals loaded from localStorage:', parsed);
-        }
-        return;
-      }
-      
-      console.log('🔍 Loading goals for user ID:', goalKey);
-      
-      const goalsRef = doc(db, 'employee_goals', goalKey);
+      const goalsRef = doc(db, 'employee_goals', externalName);
       const goalsDoc = await getDoc(goalsRef);
       
       if (goalsDoc.exists()) {
         const data = goalsDoc.data();
-        setWeeklyGoal(data.weeklyGoal || 0);
-        setMonthlyGoal(data.monthlyGoal || 0);
-        // Also cache in localStorage as backup
-        localStorage.setItem(`goals_${user?.name}`, JSON.stringify(data));
-        console.log('✅ Goals loaded from Firestore:', { goalKey, data });
-      } else {
-        console.log('ℹ️ No goals found in Firestore for:', goalKey);
-        // Try localStorage as fallback
-        const stored = localStorage.getItem(`goals_${user?.name}`);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setWeeklyGoal(parsed.weeklyGoal || 0);
-          setMonthlyGoal(parsed.monthlyGoal || 0);
-          console.log('💾 Goals loaded from localStorage backup:', parsed);
-        }
+        if (data.weeklyGoal) setWeeklyGoal(data.weeklyGoal);
+        if (data.monthlyGoal) setMonthlyGoal(data.monthlyGoal);
+        console.log('✅ Goals loaded from Firestore:', data);
       }
     } catch (err) {
-      console.error('❌ Error loading goals:', err);
+      console.error('Error loading goals:', err);
     }
   };
 
-  // Load data on mount and when user ID changes
   useEffect(() => {
-    if (user?.id) {
-      console.log('👤 User loaded, loading goals...');
-      loadSavedGoals();  // Load goals as soon as user.id is available
-    }
     loadEmployeeData();
+    loadSavedGoals();
+    // Load cached badges from Firestore
     loadCachedBadges();
-  }, [user?.id, activeTab]);  // Trigger on user.id change OR when switching tabs (to reload earnings)
-
-  // Sync goals to sessionStorage whenever they change
-  useEffect(() => {
-    console.log('💾 Syncing goals to sessionStorage:', { weeklyGoal, monthlyGoal });
-    sessionStorage.setItem('maal_weekly', weeklyGoal.toString());
-    sessionStorage.setItem('maal_monthly', monthlyGoal.toString());
-  }, [weeklyGoal, monthlyGoal]);
-
-  // Also reload goals when activeTab changes to 'target' (Mål tab)
-  useEffect(() => {
-    if (activeTab === 'target') {
-      loadSavedGoals();  // ✅ Reload when switching to Mål tab
-      console.log('📊 Reloading goals when opening Mål tab');
-    }
-  }, [activeTab]);
+  }, [user]);
 
   // Count working days this week (Monday to today)
   const countWorkingDaysThisWeek = (date: Date) => {
@@ -379,53 +321,15 @@ export default function MinSide() {
       // Load emoji counts for today (🔔 + 💎)
       const emojiCountToday = await loadEmojiCountsForToday();
 
-      // Count contracts this week
-      const contractsThisWeek = employeeContracts.filter(c => {
+      const salesThisWeek = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
         return date && date >= weekStart && date <= today;
       }).length;
-      
-      // Add emojis from today to weekly progress
-      const salesThisWeek = contractsThisWeek + emojiCountToday;
-      console.log('📊 Weekly Progress:', { contractsThisWeek, emojiCountToday, total: salesThisWeek });
 
-      // Count contracts this month
-      const contractsThisMonth = employeeContracts.filter(c => {
+      const salesThisMonth = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
         return date && date >= monthStart && date <= today;
       }).length;
-      
-      // Add emojis from today to monthly progress
-      const salesThisMonth = contractsThisMonth + emojiCountToday;
-      console.log('📈 Monthly Progress:', { contractsThisMonth, emojiCountToday, total: salesThisMonth });
-
-      // Calculate BEST WEEK HISTORICALLY (any Monday-Sunday period)
-      const weekMap: { [key: string]: number } = {};
-      employeeContracts.forEach(c => {
-        const date = parseDate(c.dato || '');
-        if (date) {
-          // Find Monday of this week
-          const dayOfWeek = date.getDay();
-          const mondayDate = new Date(date);
-          mondayDate.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-          const weekKey = mondayDate.toISOString().split('T')[0];
-          weekMap[weekKey] = (weekMap[weekKey] || 0) + 1;
-        }
-      });
-      const bestWeek = Math.max(0, ...Object.values(weekMap));
-      console.log('📊 Best week for', user?.name, ':', bestWeek, 'contracts');
-
-      // Calculate BEST MONTH HISTORICALLY (any calendar month)
-      const monthMap: { [key: string]: number } = {};
-      employeeContracts.forEach(c => {
-        const date = parseDate(c.dato || '');
-        if (date) {
-          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          monthMap[monthKey] = (monthMap[monthKey] || 0) + 1;
-        }
-      });
-      const bestMonth = Math.max(0, ...Object.values(monthMap));
-      console.log('📈 Best month for', user?.name, ':', bestMonth, 'contracts');
 
       const salesThisYear = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
@@ -445,7 +349,7 @@ export default function MinSide() {
       const bestDay = Math.max(0, ...Object.values(dayMap));
       console.log('📅 Best day for', user?.name, ':', bestDay, 'contracts');
 
-      // Load products with provisjon - strip ALL escape characters
+      // Load products with provisjon
       let produktProvisjon: { [key: string]: number } = {};
       try {
         const produktRef = collection(db, 'allente_products');
@@ -453,20 +357,15 @@ export default function MinSide() {
         produktSnapshot.forEach((doc) => {
           const data = doc.data();
           const provisjon = parseFloat(data.provisjon || 0);
-          // Clean key: remove ALL backslashes and outer quotes
-          let cleanKey = doc.id
-            .replace(/\\/g, '')  // Remove ALL backslashes
-            .replace(/^"|"$/g, '')  // Remove outer quotes only
-            .trim();
-          produktProvisjon[cleanKey] = provisjon;
+          produktProvisjon[doc.id] = provisjon;
         });
-        console.log('💼 Products loaded:', Object.keys(produktProvisjon).length, 'produkter');
+        console.log('💼 Products loaded:', produktProvisjon);
       } catch (err) {
         console.error('Error loading products:', err);
       }
 
-      // Get emoji counts for today with breakdown
-      let bellCountToday = 0, gemCountToday = 0, giftCountTodayEarnings = 0;
+      // Load gift count (🎁) for today
+      let giftCountToday = 0;
       try {
         const today_str = today.toISOString().split('T')[0];
         const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
@@ -475,103 +374,42 @@ export default function MinSide() {
           const data = emojiDoc.data();
           const counts = data.counts || {};
           const userName = user?.name || '';
-          const userEmojis = counts[userName] || { '🔔': 0, '💎': 0, '🎁': 0 };
+          const userEmojis = counts[userName] || { '🎁': 0 };
+          giftCountToday = userEmojis['🎁'] || 0;
+        }
+      } catch (err) {
+        console.error('Error loading gift count:', err);
+      }
+
+      // Get emoji counts for today with breakdown
+      let bellCountToday = 0, gemCountToday = 0;
+      try {
+        const today_str = today.toISOString().split('T')[0];
+        const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
+        const emojiDoc = await getDoc(emojiCountsRef);
+        if (emojiDoc.exists()) {
+          const data = emojiDoc.data();
+          const counts = data.counts || {};
+          const userName = user?.name || '';
+          const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
           bellCountToday = userEmojis['🔔'] || 0;
           gemCountToday = userEmojis['💎'] || 0;
-          const giftCount = userEmojis['🎁'] || 0;
-          giftCountTodayEarnings = giftCount;
-          console.log('🎊 Emoji counts for today:', { bellCountToday, gemCountToday, giftCount, userName });
         }
       } catch (err) {
         console.error('Error loading emoji counts:', err);
       }
 
       // Calculate earnings
-      // String similarity function - find closest match
-      const stringSimilarity = (str1: string, str2: string): number => {
-        const s1 = str1.toLowerCase();
-        const s2 = str2.toLowerCase();
-        const longer = s1.length > s2.length ? s1 : s2;
-        const shorter = s1.length > s2.length ? s2 : s1;
-        
-        if (longer.length === 0) return 1.0;
-        const editDistance = getEditDistance(longer, shorter);
-        return (longer.length - editDistance) / longer.length;
-      };
-
-      const getEditDistance = (s1: string, s2: string): number => {
-        const costs = [];
-        for (let i = 0; i <= s1.length; i++) {
-          let lastValue = i;
-          for (let j = 0; j <= s2.length; j++) {
-            if (i === 0) {
-              costs[j] = j;
-            } else if (j > 0) {
-              let newValue = costs[j - 1];
-              if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
-                newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
-              }
-              costs[j - 1] = lastValue;
-              lastValue = newValue;
-            }
-          }
-          if (i > 0) costs[s2.length] = lastValue;
-        }
-        return costs[s2.length];
-      };
-
       // Get provisjon per product from contracts
       const contractEarnings = employeeContracts.reduce((sum, c) => {
-        let produktName = (c.produkt || '')
-          .replace(/\\/g, '')  // Remove backslashes
-          .trim();
-        
-        // 1. Try exact match
-        let provisjon = produktProvisjon[produktName] || 0;
-        
-        // 2. If no match, try base name match (before " - ")
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0].trim();
-          
-          for (const key in produktProvisjon) {
-            const adminBase = key.split(' - ')[0].trim();
-            if (adminBase === productBase) {
-              provisjon = produktProvisjon[key];
-              break;
-            }
-          }
-        }
-        
-        // 3. If still no match, find closest match by similarity
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0].trim();
-          let bestMatch = '';
-          let bestScore = 0.7; // 70% similarity threshold
-          
-          for (const key in produktProvisjon) {
-            const adminBase = key.split(' - ')[0].trim();
-            const score = stringSimilarity(productBase, adminBase);
-            
-            if (score > bestScore) {
-              bestScore = score;
-              bestMatch = key;
-            }
-          }
-          
-          if (bestMatch) {
-            provisjon = produktProvisjon[bestMatch];
-            console.log(`✅ Fuzzy match: "${produktName}" → "${bestMatch}" (${(bestScore * 100).toFixed(0)}%)`);
-          }
-        }
-        
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
         return sum + provisjon;
       }, 0);
-      console.log('💼 Contract earnings:', { contractEarnings, contractCount: employeeContracts.length });
 
       // Emoji values: 🔔=800, 💎=1000, 🎁=-200
-      const emojiEarningsToday = (bellCountToday * 800) + (gemCountToday * 1000) - (giftCountTodayEarnings * 200);
+      const emojiEarningsToday = (bellCountToday * 800) + (gemCountToday * 1000) - (giftCountToday * 200);
       const totalEarnings = contractEarnings + emojiEarningsToday;
-      console.log('💰 Daily earnings breakdown:', { bellCountToday, gemCountToday, giftCountTodayEarnings, emojiEarningsToday, totalEarnings });
 
       // Week earnings
       const contractsWeek = employeeContracts.filter(c => {
@@ -579,25 +417,10 @@ export default function MinSide() {
         return date && date >= weekStart && date <= today;
       });
       const weekEarnings = contractsWeek.reduce((sum, c) => {
-        let produktName = (c.produkt || '')
-          .replace(/\\/g, '')
-          .trim();
-        
-        let provisjon = produktProvisjon[produktName] || 0;
-        
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0];
-          for (const key in produktProvisjon) {
-            if (key.split(' - ')[0] === productBase) {
-              provisjon = produktProvisjon[key];
-              break;
-            }
-          }
-        }
-        
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
         return sum + provisjon;
       }, 0) + emojiEarningsToday; // Add today's emoji earnings
-      console.log('📊 Weekly earnings:', { contractsWeek: contractsWeek.length, weekEarnings, emojiEarningsToday });
 
       // Month earnings
       const contractsMonth = employeeContracts.filter(c => {
@@ -605,25 +428,10 @@ export default function MinSide() {
         return date && date >= monthStart && date <= today;
       });
       const monthEarnings = contractsMonth.reduce((sum, c) => {
-        let produktName = (c.produkt || '')
-          .replace(/\\/g, '')
-          .trim();
-        
-        let provisjon = produktProvisjon[produktName] || 0;
-        
-        if (provisjon === 0) {
-          const productBase = produktName.split(' - ')[0];
-          for (const key in produktProvisjon) {
-            if (key.split(' - ')[0] === productBase) {
-              provisjon = produktProvisjon[key];
-              break;
-            }
-          }
-        }
-        
+        const produktName = c.produkt || '';
+        const provisjon = produktProvisjon[produktName] || 0;
         return sum + provisjon;
       }, 0) + emojiEarningsToday; // Add today's emoji earnings
-      console.log('📈 Monthly earnings:', { contractsMonth: contractsMonth.length, monthEarnings, emojiEarningsToday });
 
       // Calculate hours worked today
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0);
@@ -642,25 +450,14 @@ export default function MinSide() {
       const totalWorkingDaysInMonth = countWorkingDaysInMonth(now);
       const monthlyEarningsRunrate = workingDaysMonth > 0 ? (monthEarnings / workingDaysMonth) * totalWorkingDaysInMonth : 0;
 
-      const earningsObj = {
+      setEarnings({
         total: Math.round(totalEarnings),
         daily: Math.round(emojiEarningsToday),
         dailyTo16: Math.round(dailyEarningsTo16 * 100) / 100,
         dailyTo21: Math.round(dailyEarningsTo21 * 100) / 100,
         weekly: Math.round(weeklyEarningsRunrate),
         monthly: Math.round(monthlyEarningsRunrate),
-      };
-      
-      console.log('✅ FINAL EARNINGS OBJECT:', earningsObj);
-      console.log('📊 Runrate calculation:', {
-        weeklyEarningsRunrate,
-        monthlyEarningsRunrate,
-        workingDaysWeek,
-        workingDaysMonth,
-        totalWorkingDaysInMonth,
       });
-      
-      setEarnings(earningsObj);
 
       console.log('💰 Earnings calculated:', {
         contractEarnings,
@@ -684,8 +481,8 @@ export default function MinSide() {
 
       setStats([
         { value: bestDay, label: 'Dag', color: '#E8956E', icon: '📊' },
-        { value: bestWeek, label: 'Uke', color: '#E8956E', icon: '📈' },
-        { value: bestMonth, label: 'Måned', color: '#E8956E', icon: '🎯' },
+        { value: salesThisWeek, label: 'Uke', color: '#E8956E', icon: '📈' },
+        { value: salesThisMonth, label: 'Måned', color: '#E8956E', icon: '🎯' },
         { value: salesThisYear, label: 'År', color: '#5B7FFF', icon: '📅' },
         { value: total, label: 'Allente', color: '#A855C9', icon: '⭐' },
       ]);
@@ -1027,6 +824,7 @@ export default function MinSide() {
                 {/* UKE */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">UKE</div>
+                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
@@ -1040,6 +838,7 @@ export default function MinSide() {
                 {/* MÅNED */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">MÅNED</div>
+                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
@@ -1057,11 +856,23 @@ export default function MinSide() {
       )}
 
       {activeTab === 'avd' && (
-        <AvdelingDashboard userDepartment={user?.department || 'KRS'} />
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Avdeling: {user?.department}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra {user?.department}</p>
+        </div>
+        <p>Innhold for avdeling kommer snart...</p>
+      </div>
       )}
 
       {activeTab === 'project' && (
-        <ProsjektDashboard userProject={user?.project || 'Allente'} />
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Prosjekt: {user?.project}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra prosjektet ditt</p>
+        </div>
+        <p>Innhold for prosjekt kommer snart...</p>
+      </div>
       )}
 
       {activeTab === 'target' && (
@@ -1093,38 +904,18 @@ export default function MinSide() {
             if (showGoalEdit) {
               // Save mode: save and close
               try {
-                // ✅ USE USER ID as document ID (always unique and consistent)
-                const goalKey = user?.id || '';
-                console.log('💾 Saving goals - user ID:', goalKey, 'Weekly:', weeklyGoal, 'Monthly:', monthlyGoal);
-                
-                if (!goalKey) {
-                  alert('❌ Kunne ikke lagre: Bruker ikke identifisert');
-                  console.error('❌ No user ID found!');
-                  return;
+                const externalName = user?.externalName || user?.name || '';
+                if (externalName) {
+                  const goalsRef = doc(db, 'employee_goals', externalName);
+                  await setDoc(goalsRef, {
+                    weeklyGoal,
+                    monthlyGoal,
+                    updatedAt: new Date(),
+                  }, { merge: true });
+                  console.log('✅ Goals saved:', { weeklyGoal, monthlyGoal });
                 }
-                
-                const goalsRef = doc(db, 'employee_goals', goalKey);
-                const saveData = {
-                  weeklyGoal: weeklyGoal || 0,
-                  monthlyGoal: monthlyGoal || 0,
-                  updatedAt: new Date().toISOString(),
-                  userId: user?.id || 'unknown',
-                };
-                
-                // ✅ IMMEDIATELY save to sessionStorage (instant backup)
-                sessionStorage.setItem('maal_weekly', (weeklyGoal || 0).toString());
-                sessionStorage.setItem('maal_monthly', (monthlyGoal || 0).toString());
-                
-                await setDoc(goalsRef, saveData, { merge: true });
-                
-                // Also backup to localStorage
-                localStorage.setItem(`goals_${user?.name}`, JSON.stringify(saveData));
-                
-                console.log('✅ Goals saved to sessionStorage + Firestore + localStorage:', { goalKey, ...saveData });
-                alert('✅ Mål lagret!');
               } catch (err) {
                 console.error('❌ Error saving goals:', err);
-                alert('❌ Feil ved lagring av mål: ' + (err as any).message);
               }
               setShowGoalEdit(false);
             } else {
