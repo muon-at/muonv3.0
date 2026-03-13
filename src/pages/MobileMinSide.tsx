@@ -197,7 +197,6 @@ export default function MobileMinSide() {
         };
 
         const countWorkingDaysThisMonth = () => {
-          const ms = new Date(monthStart);
           let count = 0;
           for (let d = new Date(monthStart); d < today; d.setDate(d.getDate() + 1)) {
             const day = d.getDay();
