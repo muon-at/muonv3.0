@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/authContext';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChat.css';
@@ -18,28 +19,49 @@ interface DM {
 
 export default function MobileChat() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [dms, setDMs] = useState<DM[]>([]);
   const [activeTab, setActiveTab] = useState<'dms' | 'channels'>('dms');
 
-  // Load channels from Firestore
+  // Check if user can access a channel (same logic as desktop Chat)
+  const checkChannelAccess = (type: string, avdeling?: string, allowedUsers?: string[], project?: string): boolean => {
+    if (type === 'global') return true;
+    if (type === 'project' && project === 'Allente') return user?.project === 'Allente' || user?.role === 'owner';
+    if (type === 'avdeling' && avdeling) return user?.avdeling === avdeling || user?.role === 'owner' || user?.role === 'teamleder';
+    if (type === 'team') return user?.role === 'owner' || user?.role === 'teamleder';
+    if (type === 'admin') return user?.role === 'owner';
+    if (allowedUsers) return allowedUsers.includes(user?.name || '');
+    return false;
+  };
+
+  // Load channels from Firestore with access control
   useEffect(() => {
+    if (!user) return;
+
     const loadChannels = async () => {
       try {
-        console.log('📡 Loading channels from Firestore...');
+        console.log('📡 Loading channels for user:', user.name, 'role:', user.role);
         const channelsRef = collection(db, 'chat_channels');
         const snapshot = await getDocs(channelsRef);
         
         const channelList: Channel[] = [];
         snapshot.forEach(doc => {
           const data = doc.data();
-          console.log('📦 Found channel:', { id: doc.id, name: data.name });
-          channelList.push({
-            id: doc.id,
-            name: data.name || doc.id,
-            emoji: data.emoji || '💬',
-            unreadCount: 0
-          });
+          // Check if user has access to this channel
+          const canAccess = checkChannelAccess(data.type, data.avdeling, data.allowedUsers, data.project);
+          
+          if (canAccess) {
+            console.log('✅ User can access:', { id: doc.id, name: data.name, type: data.type });
+            channelList.push({
+              id: doc.id,
+              name: data.name || doc.id,
+              emoji: data.emoji || '💬',
+              unreadCount: 0
+            });
+          } else {
+            console.log('❌ User cannot access:', { id: doc.id, name: data.name, type: data.type });
+          }
         });
 
         // Update unread counts from localStorage
@@ -54,20 +76,12 @@ export default function MobileChat() {
         setChannels(channelList);
       } catch (error) {
         console.error('❌ Error loading channels:', error);
-        // Fallback to hardcoded list
-        const defaultChannels: Channel[] = [
-          { id: 'global', name: 'Global', emoji: '🌍', unreadCount: 0 },
-          { id: 'project-allente', name: 'Allente Chat', emoji: '🏢', unreadCount: 0 },
-          { id: 'dept-krs', name: 'KRS', emoji: '🏢', unreadCount: 0 },
-          { id: 'dept-osl', name: 'OSL', emoji: '🏢', unreadCount: 0 },
-          { id: 'dept-skien', name: 'Skien', emoji: '🏢', unreadCount: 0 },
-        ];
-        setChannels(defaultChannels);
+        setChannels([]);
       }
     };
 
     loadChannels();
-  }, []);
+  }, [user]);
 
   // Load DMs
   useEffect(() => {
