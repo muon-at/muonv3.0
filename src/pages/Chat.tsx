@@ -290,15 +290,16 @@ export default function Chat() {
         if (unreadCount > 0) {
           updates[doc.id] = unreadCount;
         }
+        
+        // Always update localStorage (even if 0!) - so navbar knows it's been cleared
+        localStorage.setItem(`chat_unread_${doc.id}`, unreadCount.toString());
       });
       
       // Update context with latest unread counts
       setChannelUnreadCounts(updates);
       
-      // Also update localStorage for sidebar fallback
-      Object.keys(updates).forEach(channelId => {
-        localStorage.setItem(`chat_unread_${channelId}`, updates[channelId].toString());
-      });
+      // Trigger storage event so navbar can update INSTANTLY
+      window.dispatchEvent(new Event('storage'));
       
       console.log('🔔 Channel unread counts updated (real-time):', updates);
     });
@@ -325,15 +326,18 @@ export default function Chat() {
         // Get unread count for this user
         const unreadCount = (data.unread && data.unread[user.name]) || 0;
         
-        if (unreadCount > 0) {
-          // Use other participant's name as key
-          const otherParticipant = data.participants.find((p: string) => p !== user.name);
-          if (otherParticipant) {
+        // Use other participant's name as key
+        const otherParticipant = data.participants.find((p: string) => p !== user.name);
+        if (otherParticipant) {
+          if (unreadCount > 0) {
             dmUnread[otherParticipant] = unreadCount;
-            
-            // Also update localStorage for sidebar
-            localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
           }
+          
+          // Always update localStorage (even if 0!) - so navbar knows it's been cleared
+          localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
+          
+          // Trigger storage event so navbar can update INSTANTLY
+          window.dispatchEvent(new Event('storage'));
         }
       });
       

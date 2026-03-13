@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { subscribeToWebPush, requestNotificationPermission } from '../lib/push-notification-handler';
 import '../styles/MinSide.css';
 import AvdelingDashboard from './AvdelingDashboard';
 import ProsjektDashboard from './ProsjektDashboard';
@@ -206,6 +207,32 @@ export default function MinSide() {
     
     return () => clearTimeout(badgeTimer);
   }, [isPreviewMode, previewUserId, user?.id, activeTab]);  // Trigger on user.id OR preview mode change
+
+  // Subscribe to Web Push when user is on Min Side (handles both fresh login AND localStorage recovery)
+  useEffect(() => {
+    if (!isPreviewMode && user?.id) {
+      console.log('🔔 MinSide mounted - subscribing to Web Push for user:', user.id);
+      
+      requestNotificationPermission().then((granted) => {
+        if (granted) {
+          console.log('✅ Notification permission granted!');
+          subscribeToWebPush(user.id).then((subscription) => {
+            if (subscription) {
+              console.log('✅ Web Push subscribed - will notify even when app closed!');
+            } else {
+              console.warn('⚠️ Web Push subscription failed!');
+            }
+          }).catch((error) => {
+            console.error('❌ Error in subscribeToWebPush:', error);
+          });
+        } else {
+          console.warn('⚠️ Notification permission not granted!');
+        }
+      }).catch((error) => {
+        console.error('❌ Error requesting notification permission:', error);
+      });
+    }
+  }, [user?.id, isPreviewMode]);
 
   // Sync goals to sessionStorage whenever they change
   useEffect(() => {

@@ -19,7 +19,7 @@ export const RightNavBar: React.FC = () => {
   };
 
   // Calculate total unread: all channels + all DMs
-  useEffect(() => {
+  const calculateUnread = () => {
     // Sum all channel unread from Context
     const channelTotal = Object.values(channelUnreadCounts).reduce((sum, count) => sum + count, 0);
     
@@ -36,7 +36,22 @@ export const RightNavBar: React.FC = () => {
     setTotalUnread(total);
     
     console.log('📊 Chat button badge:', { channels: channelTotal, dms: dmTotal, total });
+  };
+  
+  useEffect(() => {
+    calculateUnread();
   }, [channelUnreadCounts]);
+  
+  // Listen for localStorage changes (from Chat.tsx real-time updates)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log('💾 Storage event detected - recalculating unread...');
+      calculateUnread();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleChatToggle = () => {
     console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);
