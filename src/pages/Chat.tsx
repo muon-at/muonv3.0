@@ -298,8 +298,8 @@ export default function Chat() {
       // Update context with latest unread counts
       setChannelUnreadCounts(updates);
       
-      // Trigger storage event so navbar can update INSTANTLY
-      window.dispatchEvent(new Event('storage'));
+      // Trigger custom event so navbar can update INSTANTLY
+      window.dispatchEvent(new CustomEvent('chatUnreadUpdated', { detail: { updates } }));
       
       console.log('🔔 Channel unread counts updated (real-time):', updates);
     });
@@ -335,14 +335,14 @@ export default function Chat() {
           
           // Always update localStorage (even if 0!) - so navbar knows it's been cleared
           localStorage.setItem(`chat_unread_dm_${otherParticipant}`, unreadCount.toString());
-          
-          // Trigger storage event so navbar can update INSTANTLY
-          window.dispatchEvent(new Event('storage'));
         }
       });
       
       // Update local state
       setDmUnreadCounts(dmUnread);
+      
+      // Trigger custom event so navbar can update INSTANTLY
+      window.dispatchEvent(new CustomEvent('chatUnreadUpdated', { detail: { dmUnread } }));
       
       console.log('💬 DM unread counts updated (real-time):', dmUnread);
     });

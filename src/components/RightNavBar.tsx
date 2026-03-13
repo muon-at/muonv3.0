@@ -42,15 +42,15 @@ export const RightNavBar: React.FC = () => {
     calculateUnread();
   }, [channelUnreadCounts]);
   
-  // Listen for localStorage changes (from Chat.tsx real-time updates)
+  // Listen for custom chat unread updates (from Chat.tsx real-time listeners)
   useEffect(() => {
-    const handleStorageChange = () => {
-      console.log('💾 Storage event detected - recalculating unread...');
+    const handleChatUnreadUpdate = (event: Event) => {
+      console.log('💌 Custom event detected - recalculating unread...');
       calculateUnread();
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('chatUnreadUpdated', handleChatUnreadUpdate);
+    return () => window.removeEventListener('chatUnreadUpdated', handleChatUnreadUpdate);
   }, []);
 
   const handleChatToggle = () => {
