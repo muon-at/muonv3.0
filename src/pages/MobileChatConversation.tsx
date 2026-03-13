@@ -24,8 +24,13 @@ export default function MobileChatConversation() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log('📱 MobileChatConversation mounted with params:', { type, id });
+  
   const isDM = type === 'dm';
-  const chatName = isDM ? (id ? decodeURIComponent(id) : '') : id;
+  // For DM: decode, for channel: use as-is
+  const chatName = isDM ? (id ? decodeURIComponent(id) : '') : (id || '');
+  
+  console.log('📱 Resolved chatName:', { chatName, isDM, type, id });
 
   // Load conversation
   useEffect(() => {
@@ -232,6 +237,24 @@ export default function MobileChatConversation() {
     console.log('GIF picker clicked');
     // TODO: Implement GIF picker
   };
+
+  // Safety check
+  if (!chatName) {
+    return (
+      <div className="mobile-chat-conversation">
+        <div className="mobile-chat-header">
+          <button className="back-button" onClick={() => navigate('/home/chat')}>
+            ← Tilbake
+          </button>
+          <h1>Feil</h1>
+          <div style={{ width: '40px' }} />
+        </div>
+        <div className="messages-container">
+          <div style={{ padding: '1rem', color: '#999' }}>Kunne ikke laste chat</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mobile-chat-conversation">
