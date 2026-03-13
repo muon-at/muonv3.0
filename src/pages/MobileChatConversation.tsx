@@ -221,7 +221,7 @@ export default function MobileChatConversation() {
   return (
     <div className="mobile-chat-conversation">
       <div className="mobile-chat-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
+        <button className="back-button" onClick={() => navigate('/home/chat')}>
           ← Tilbake
         </button>
         <h1>{chatTitle || 'Laster...'}</h1>
