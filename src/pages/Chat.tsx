@@ -4,7 +4,7 @@ import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
-import { requestNotificationPermission, showNotification, playNotificationSound, vibrateDevice, subscribeToWebPush } from '../lib/push-notification-handler';
+import { showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/Chat.css';
 
@@ -232,39 +232,8 @@ export default function Chat() {
   // NOTE: Do NOT initialize localStorage - sidebar is the source of truth
   // Chat.tsx syncs to context only, not to storage
 
-  // Request notification permission and subscribe to Web Push when chat opens
-  useEffect(() => {
-    console.log('🎯 Chat.tsx useEffect for notifications - user?.id:', user?.id);
-    
-    if (user?.id) {
-      console.log('🔔 Requesting notification permission for user:', user.name);
-      requestNotificationPermission().then((granted) => {
-        console.log('📋 Notification permission granted?', granted);
-        
-        if (granted) {
-          console.log('✅ Notifications enabled!');
-          
-          // Subscribe to Web Push for guaranteed notifications
-          subscribeToWebPush(user.id).then((subscription) => {
-            console.log('📡 subscribeToWebPush result:', subscription ? 'subscribed ✅' : 'failed ❌');
-            if (subscription) {
-              console.log('✅ Web Push subscribed - will notify even when app closed!');
-            } else {
-              console.warn('⚠️ Web Push subscription failed!');
-            }
-          }).catch((error) => {
-            console.error('❌ Error in subscribeToWebPush:', error);
-          });
-        } else {
-          console.warn('⚠️ Notification permission not granted!');
-        }
-      }).catch((error) => {
-        console.error('❌ Error requesting notification permission:', error);
-      });
-    } else {
-      console.log('⚠️ No user.id yet - skipping Web Push subscription');
-    }
-  }, [user?.id]);
+  // Web Push subscription is now handled in AuthContext on login
+  // This component just receives real-time message updates
 
   // NOTE: Do NOT sync dmUnreadCounts to context!
   // Sidebar/localStorage is source of truth for DM unread
