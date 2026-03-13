@@ -11,6 +11,7 @@ import MobileHome from './pages/MobileHome';
 import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
 import MobileMinSide from './pages/MobileMinSide';
+import MobileGoals from './pages/MobileGoals';
 import './App.css';
 
 function App() {
@@ -55,6 +56,15 @@ function App() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <MobileMinSide />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Mobile goals editor screen */}
+          <Route 
+            path="/home/mine-mal" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileGoals />
               </ProtectedRoute>
             } 
           />

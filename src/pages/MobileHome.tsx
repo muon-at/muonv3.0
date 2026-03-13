@@ -70,6 +70,15 @@ export default function MobileHome() {
           <div className="card-label">MIN SIDE</div>
         </button>
 
+        {/* MINE MÅL Card */}
+        <button
+          className="mobile-home-card"
+          onClick={() => navigate('/home/mine-mal')}
+        >
+          <div className="card-icon">🎯</div>
+          <div className="card-label">MINE MÅL</div>
+        </button>
+
         {/* LØNN Card */}
         <button
           className="mobile-home-card"

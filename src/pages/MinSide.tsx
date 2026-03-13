@@ -1269,7 +1269,9 @@ export default function MinSide() {
                 }
                 
                 const goalsRef = doc(db, 'employee_goals', goalKey);
+                const dailyGoal = (weeklyGoal || 0) / 5; // Daily goal = weekly / 5
                 const saveData = {
+                  dailyGoal: dailyGoal,
                   weeklyGoal: weeklyGoal || 0,
                   monthlyGoal: monthlyGoal || 0,
                   updatedAt: new Date().toISOString(),

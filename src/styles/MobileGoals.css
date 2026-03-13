@@ -1,0 +1,199 @@
+.mobile-goals {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: #f5f5f5;
+}
+
+.mobile-goals .mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.mobile-goals .mobile-header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+  color: #1f2937;
+  flex: 1;
+  text-align: center;
+}
+
+.mobile-goals .back-button {
+  background: none;
+  border: none;
+  color: #ff6b35;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-weight: 600;
+  min-width: 40px;
+}
+
+.mobile-goals-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* GOALS FORM */
+.goals-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.goal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.goal-input-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-transform: uppercase;
+}
+
+.goal-input-group input {
+  padding: 0.75rem;
+  font-size: 1.1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+  text-align: center;
+}
+
+.goal-input-group input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.goal-display {
+  padding: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ff6b35;
+  text-align: center;
+  background: #fff5f0;
+  border-radius: 6px;
+}
+
+.goal-hint {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0;
+  margin-top: -0.3rem;
+}
+
+.save-button {
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.save-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.save-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* SUMMARY */
+.goals-summary {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.goals-summary h3 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1f2937;
+  text-transform: uppercase;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item span {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.summary-item strong {
+  font-size: 1.1rem;
+  color: #ff6b35;
+  font-weight: 700;
+}
+
+/* Desktop: Hide on desktop */
+@media (min-width: 769px) {
+  .mobile-goals {
+    display: none;
+  }
+}
+
+/* Mobile optimization */
+@media (max-width: 480px) {
+  .mobile-goals-content {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+
+  .goals-form {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .goal-display {
+    font-size: 1.8rem;
+  }
+
+  .goal-input-group input {
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
+}

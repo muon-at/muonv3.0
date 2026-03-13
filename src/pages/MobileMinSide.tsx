@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileMinSide.css';
 
@@ -22,10 +22,24 @@ export default function MobileMinSide() {
         const q = query(employeesRef, where('userId', '==', user.id));
         const snapshot = await getDocs(q);
         
+        let empData: any = {};
         if (snapshot.size > 0) {
-          const empData = snapshot.docs[0].data();
-          setData(empData);
+          empData = snapshot.docs[0].data();
         }
+
+        // Load goals from Firestore (employee_goals collection)
+        try {
+          const goalsRef = doc(db, 'employee_goals', user.id);
+          const goalsDoc = await getDoc(goalsRef);
+          if (goalsDoc.exists()) {
+            const goals = goalsDoc.data();
+            empData = { ...empData, ...goals };
+          }
+        } catch (err) {
+          console.log('No goals found in Firestore');
+        }
+
+        setData(empData);
 
         // Load badges
         const badgesRef = collection(db, 'user_earned_badges');
@@ -71,10 +85,10 @@ export default function MobileMinSide() {
   const besteÅr = data?.besteÅr || 0;
   const totaltEarnings = data?.totalEarnings || 0;
 
-  // Progress: Sales vs Goals (synced from PC)
+  // Progress: Sales vs Goals (synced from PC via Firestore)
   const weeklyGoal = data?.weeklyGoal || 1;
   const monthlyGoal = data?.monthlyGoal || 1;
-  const dagGoal = data?.dailyGoal || (weeklyGoal / 5);
+  const dagGoal = data?.dailyGoal || Math.round((weeklyGoal || 1) / 5);
 
   const dagSalg = Math.round(data?.status || 0);
   const ukeSalg = Math.round(data?.weeklyStatus || 0);
