@@ -52,7 +52,7 @@ export default function MobileHome() {
         {/* CHAT Card */}
         <button
           className="mobile-home-card"
-          onClick={() => navigate('/chat')}
+          onClick={() => navigate('/home/chat')}
         >
           <div className="card-icon">💬</div>
           <div className="card-label">CHAT</div>
