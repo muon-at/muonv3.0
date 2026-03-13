@@ -78,8 +78,8 @@ export default function MobileChatConversation() {
       if (!chatName) return;
       const channelNames: { [key: string]: string } = {
         'global': 'Global',
-        'project-allente': 'Allente Chat',
-        'dept-krs': 'KRS',
+        'allente-chat': 'Allente Chat',
+        'krs-channel': 'KRS',
         'dept-osl': 'OSL',
         'dept-skien': 'Skien',
         'admin-channel': 'Admin',
@@ -205,8 +205,8 @@ export default function MobileChatConversation() {
         const channelRef = doc(db, 'chat_channels', chatName);
         const channelNames: { [key: string]: string } = {
           'global': 'Global',
-          'project-allente': 'Allente Chat',
-          'dept-krs': 'KRS',
+          'allente-chat': 'Allente Chat',
+          'krs-channel': 'KRS',
           'dept-osl': 'OSL',
           'dept-skien': 'Skien',
           'admin-channel': 'Admin',
