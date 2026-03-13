@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { subscribeToWebPush, requestNotificationPermission } from './push-notification-handler';
 
 export interface AuthUser {
   id: string;
@@ -69,32 +68,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('user');
     localStorage.removeItem('auth');
   };
-
-  // Subscribe to Web Push notifications when user logs in
-  useEffect(() => {
-    if (user?.id) {
-      console.log('🔔 User logged in - subscribing to Web Push:', user.name);
-      
-      requestNotificationPermission().then((granted) => {
-        if (granted) {
-          console.log('✅ Notification permission granted!');
-          subscribeToWebPush(user.id).then((subscription) => {
-            if (subscription) {
-              console.log('✅ Web Push subscribed - will notify even when app closed!');
-            } else {
-              console.warn('⚠️ Web Push subscription failed!');
-            }
-          }).catch((error) => {
-            console.error('❌ Error in subscribeToWebPush:', error);
-          });
-        } else {
-          console.warn('⚠️ Notification permission not granted!');
-        }
-      }).catch((error) => {
-        console.error('❌ Error requesting notification permission:', error);
-      });
-    }
-  }, [user?.id]);
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>

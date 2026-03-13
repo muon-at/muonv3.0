@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { subscribeToWebPush, requestNotificationPermission } from '../lib/push-notification-handler';
 import '../styles/Login.css';
 
 export default function Login() {
@@ -123,6 +124,28 @@ export default function Login() {
             allData: foundEmployee
           });
           login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
+          
+          // Subscribe to Web Push immediately after login
+          console.log('🔔 Subscribing to Web Push for user:', foundEmployee.id);
+          requestNotificationPermission().then((granted) => {
+            if (granted) {
+              console.log('✅ Notification permission granted!');
+              subscribeToWebPush(foundEmployee.id).then((subscription) => {
+                if (subscription) {
+                  console.log('✅ Web Push subscribed - will notify even when app closed!');
+                } else {
+                  console.warn('⚠️ Web Push subscription failed!');
+                }
+              }).catch((error) => {
+                console.error('❌ Error in subscribeToWebPush:', error);
+              });
+            } else {
+              console.warn('⚠️ Notification permission not granted!');
+            }
+          }).catch((error) => {
+            console.error('❌ Error requesting notification permission:', error);
+          });
+          
           navigate('/min-side');
         }
       } else {
