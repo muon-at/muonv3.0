@@ -3,8 +3,6 @@ import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MinSide.css';
-import AvdelingDashboard from './AvdelingDashboard';
-import ProsjektDashboard from './ProsjektDashboard';
 
 interface SalesRecord {
   dato?: string;
@@ -333,34 +331,6 @@ export default function MinSide() {
         return date && date >= monthStart && date <= today;
       }).length;
 
-      // Calculate BEST WEEK HISTORICALLY (any Monday-Sunday period)
-      const weekMap: { [key: string]: number } = {};
-      employeeContracts.forEach(c => {
-        const date = parseDate(c.dato || '');
-        if (date) {
-          // Find Monday of this week
-          const dayOfWeek = date.getDay();
-          const mondayDate = new Date(date);
-          mondayDate.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-          const weekKey = mondayDate.toISOString().split('T')[0];
-          weekMap[weekKey] = (weekMap[weekKey] || 0) + 1;
-        }
-      });
-      const bestWeek = Math.max(0, ...Object.values(weekMap));
-      console.log('📊 Best week for', user?.name, ':', bestWeek, 'contracts');
-
-      // Calculate BEST MONTH HISTORICALLY (any calendar month)
-      const monthMap: { [key: string]: number } = {};
-      employeeContracts.forEach(c => {
-        const date = parseDate(c.dato || '');
-        if (date) {
-          const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-          monthMap[monthKey] = (monthMap[monthKey] || 0) + 1;
-        }
-      });
-      const bestMonth = Math.max(0, ...Object.values(monthMap));
-      console.log('📈 Best month for', user?.name, ':', bestMonth, 'contracts');
-
       const salesThisYear = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
         return date && date >= yearStart && date <= today;
@@ -511,8 +481,8 @@ export default function MinSide() {
 
       setStats([
         { value: bestDay, label: 'Dag', color: '#E8956E', icon: '📊' },
-        { value: bestWeek, label: 'Uke', color: '#E8956E', icon: '📈' },
-        { value: bestMonth, label: 'Måned', color: '#E8956E', icon: '🎯' },
+        { value: salesThisWeek, label: 'Uke', color: '#E8956E', icon: '📈' },
+        { value: salesThisMonth, label: 'Måned', color: '#E8956E', icon: '🎯' },
         { value: salesThisYear, label: 'År', color: '#5B7FFF', icon: '📅' },
         { value: total, label: 'Allente', color: '#A855C9', icon: '⭐' },
       ]);
@@ -854,6 +824,7 @@ export default function MinSide() {
                 {/* UKE */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">UKE</div>
+                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
@@ -867,6 +838,7 @@ export default function MinSide() {
                 {/* MÅNED */}
                 <div className="earnings-period">
                   <div className="earnings-period-label">MÅNED</div>
+                  <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
                     <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
@@ -884,11 +856,23 @@ export default function MinSide() {
       )}
 
       {activeTab === 'avd' && (
-        <AvdelingDashboard userDepartment={user?.department || 'KRS'} />
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Avdeling: {user?.department}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra {user?.department}</p>
+        </div>
+        <p>Innhold for avdeling kommer snart...</p>
+      </div>
       )}
 
       {activeTab === 'project' && (
-        <ProsjektDashboard userProject={user?.project || 'Allente'} />
+      <div className="tab-content">
+        <div className="content-title">
+          <h3>Prosjekt: {user?.project}</h3>
+          <p className="content-subtitle">Se alle kontrakter fra prosjektet ditt</p>
+        </div>
+        <p>Innhold for prosjekt kommer snart...</p>
+      </div>
       )}
 
       {activeTab === 'target' && (
