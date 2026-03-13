@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { RightNavBar } from './RightNavBar';
 import { LeftChatSidebar } from './LeftChatSidebar';
@@ -11,6 +11,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, requiredRole = 'employee' }: ProtectedRouteProps) {
   const { user, isAuthenticated } = useAuth();
+  const location = useLocation();
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -30,6 +31,11 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
   const userRoleLevel = user.role ? roleHierarchy[user.role] : 0;
   if (userRoleLevel < roleHierarchy[requiredRole]) {
     return <Navigate to="/min-side" replace />;
+  }
+
+  // MobileHome should NOT have navbar/sidebar - render it standalone
+  if (location.pathname === '/home') {
+    return children;
   }
 
   return (

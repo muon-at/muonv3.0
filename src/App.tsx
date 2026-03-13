@@ -7,6 +7,7 @@ import MinSide from './pages/MinSide';
 import Chat from './pages/Chat';
 import Teamleder from './pages/Teamleder';
 import AdminDashboard from './pages/AdminDashboard';
+import MobileHome from './pages/MobileHome';
 import './App.css';
 
 function App() {
@@ -19,6 +20,15 @@ function App() {
           <Route path="/change-password-first-login" element={<ResetPassword />} />
           {/* Public preview route - no auth required */}
           <Route path="/min-side-preview" element={<MinSide />} />
+          {/* Mobile home screen */}
+          <Route 
+            path="/home" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileHome />
+              </ProtectedRoute>
+            } 
+          />
           {/* Protected route for normal use */}
           <Route 
             path="/min-side" 

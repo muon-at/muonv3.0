@@ -18,7 +18,8 @@ export default function Login() {
   // Auto-redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/min-side');
+      const isMobile = window.innerWidth < 769;
+      navigate(isMobile ? '/home' : '/min-side');
     }
   }, [isAuthenticated, navigate]);
 
@@ -146,7 +147,9 @@ export default function Login() {
             console.error('❌ Error requesting notification permission:', error);
           });
           
-          navigate('/min-side');
+          // On mobile: show home screen. On desktop: go to min-side
+          const isMobile = window.innerWidth < 769;
+          navigate(isMobile ? '/home' : '/min-side');
         }
       } else {
         setError('Feil e-post eller passord');
