@@ -27,8 +27,8 @@ export default function MobileChat() {
   // Check if user can access a channel (same logic as desktop Chat)
   const checkChannelAccess = (type: string, avdeling?: string, allowedUsers?: string[], project?: string): boolean => {
     if (type === 'global') return true;
-    if (type === 'project' && project === 'Allente') return user?.project === 'Allente' || user?.role === 'owner';
-    if (type === 'avdeling' && avdeling) return user?.avdeling === avdeling || user?.role === 'owner' || user?.role === 'teamleder';
+    if (type === 'project' && project === 'Allente') return (user as any)?.project === 'Allente' || user?.role === 'owner';
+    if (type === 'avdeling' && avdeling) return (user as any)?.avdeling === avdeling || user?.role === 'owner' || user?.role === 'teamleder';
     if (type === 'team') return user?.role === 'owner' || user?.role === 'teamleder';
     if (type === 'admin') return user?.role === 'owner';
     if (allowedUsers) return allowedUsers.includes(user?.name || '');
