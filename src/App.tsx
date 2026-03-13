@@ -12,6 +12,7 @@ import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
 import MobileMinSide from './pages/MobileMinSide';
 import MobileGoals from './pages/MobileGoals';
+import MobileLonn from './pages/MobileLonn';
 import './App.css';
 
 function App() {
@@ -65,6 +66,15 @@ function App() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <MobileGoals />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Mobile lønn screen */}
+          <Route 
+            path="/home/lonn" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileLonn />
               </ProtectedRoute>
             } 
           />

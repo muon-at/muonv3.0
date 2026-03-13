@@ -82,7 +82,7 @@ export default function MobileHome() {
         {/* LØNN Card */}
         <button
           className="mobile-home-card"
-          onClick={() => navigate('/chat', { state: { selectedChannel: 'project-allente' } })}
+          onClick={() => navigate('/home/lonn')}
         >
           <div className="card-icon">💰</div>
           <div className="card-label">LØNN</div>
