@@ -96,7 +96,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  background: transparent;
+  background: #1a1a1a;
   padding: 0.9rem;
   border-radius: 6px;
   border: none;
