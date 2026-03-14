@@ -40,20 +40,20 @@
 .mobile-min-side-content {
   flex: 1;
   overflow-y: auto;
-  padding: 1rem 0.75rem;
-  padding-bottom: 1.5rem;
+  padding: 1.25rem 0.75rem;
+  padding-bottom: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
   background: #1a1a1a;
 }
 
 /* REKORDER - Circles (like desktop Min Side) */
 .rekorder-row {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.6rem;
   background: transparent;
-  padding: 0.75rem;
+  padding: 1rem;
   border-radius: 0;
   box-shadow: none;
   overflow-x: auto;
@@ -64,39 +64,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  min-width: 56px;
+  gap: 0.6rem;
+  min-width: 72px;
 }
 
 .circle-number {
-  width: 50px;
-  height: 50px;
+  width: 65px;
+  height: 65px;
   border-radius: 50%;
   background: linear-gradient(135deg, #ff6b35 0%, #ff8c5a 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
 }
 
 .circle-label {
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: #999;
   text-transform: uppercase;
   text-align: center;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 /* PROGRESS BARS */
 .progress-section {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.1rem;
   background: #2a2a2a;
-  padding: 0.9rem;
+  padding: 1.2rem;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -104,11 +105,11 @@
 .progress-item {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
 .progress-item label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #ffffff;
   text-transform: uppercase;
@@ -117,9 +118,9 @@
 
 .progress-bar-container {
   width: 100%;
-  height: 20px;
+  height: 24px;
   background: #444;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
 }
@@ -127,40 +128,40 @@
 .progress-bar {
   height: 100%;
   background: linear-gradient(90deg, #ff6b35 0%, #ff8c5a 100%);
-  border-radius: 10px;
+  border-radius: 12px;
   transition: width 0.3s ease;
   box-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
 }
 
 .progress-text {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #999;
   text-align: right;
   font-weight: 600;
-  margin-top: 0.2rem;
+  margin-top: 0.3rem;
 }
 
 /* RUNRATE */
 .runrate-section {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .runrate-box {
   background: #2a2a2a;
-  padding: 0.85rem;
+  padding: 1.2rem;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
   text-align: center;
 }
 
 .runrate-label {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #888;
   text-transform: uppercase;
@@ -168,7 +169,7 @@
 }
 
 .runrate-value {
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #ff6b35;
 }
@@ -176,14 +177,14 @@
 /* BADGES */
 .badges-section {
   background: #2a2a2a;
-  padding: 0.9rem;
+  padding: 1.2rem;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .badges-section h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 0.75rem;
+  margin: 0 0 1rem 0;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #ffffff;
   text-transform: uppercase;
@@ -228,62 +229,62 @@
 /* Mobile optimization */
 @media (max-width: 480px) {
   .mobile-min-side-content {
-    padding: 0.75rem 0.6rem;
-    gap: 0.8rem;
+    padding: 1rem 0.6rem;
+    gap: 1.2rem;
   }
 
   .rekorder-row {
-    padding: 0.6rem;
-    gap: 0.35rem;
-  }
-
-  .rekord-circle {
-    min-width: 50px;
-  }
-
-  .circle-number {
-    width: 46px;
-    height: 46px;
-    font-size: 1rem;
-  }
-
-  .circle-label {
-    font-size: 0.5rem;
-  }
-
-  .progress-section {
     padding: 0.8rem;
-    gap: 0.6rem;
-  }
-
-  .progress-bar-container {
-    height: 18px;
-  }
-
-  .progress-item label {
-    font-size: 0.7rem;
-  }
-
-  .runrate-box {
-    padding: 0.75rem;
-  }
-
-  .runrate-value {
-    font-size: 1.2rem;
-  }
-
-  .badges-section {
-    padding: 0.8rem;
-  }
-
-  .badges-grid {
-    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
     gap: 0.5rem;
   }
 
+  .rekord-circle {
+    min-width: 65px;
+  }
+
+  .circle-number {
+    width: 58px;
+    height: 58px;
+    font-size: 1.2rem;
+  }
+
+  .circle-label {
+    font-size: 0.6rem;
+  }
+
+  .progress-section {
+    padding: 1rem;
+    gap: 0.9rem;
+  }
+
+  .progress-bar-container {
+    height: 22px;
+  }
+
+  .progress-item label {
+    font-size: 0.75rem;
+  }
+
+  .runrate-box {
+    padding: 1rem;
+  }
+
+  .runrate-value {
+    font-size: 1.4rem;
+  }
+
+  .badges-section {
+    padding: 1rem;
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 0.6rem;
+  }
+
   .badge-item {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
   }
 }
