@@ -72,13 +72,27 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Listen for update check messages from client
+// Store version hash
+let versionHash = null;
+
+// Listen for messages from client
 self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] SKIP_WAITING received - activating...');
+    self.skipWaiting();
+  }
+  
   if (event.data && event.data.type === 'CHECK_FOR_UPDATES') {
     console.log('[SW] Checking for updates...');
     
-    // Fetch index.html to detect version change
-    fetch('/index.html', { cache: 'no-store' })
+    // Fetch index.html with timestamp to bypass cache
+    const timestamp = new Date().getTime();
+    fetch(`/index.html?t=${timestamp}`, { 
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
+    })
       .then((response) => {
         if (response.status === 200) {
           return response.text();
@@ -86,17 +100,38 @@ self.addEventListener('message', (event) => {
         throw new Error('Failed to fetch index.html');
       })
       .then((html) => {
-        // Notify client to reload
-        self.clients.matchAll().then((clients) => {
-          clients.forEach((client) => {
-            client.postMessage({
-              type: 'UPDATE_AVAILABLE'
+        // Simple hash of HTML to detect changes
+        const hash = simpleHash(html);
+        console.log('[SW] Current hash:', hash, 'Stored hash:', versionHash);
+        
+        if (versionHash && versionHash !== hash) {
+          console.log('[SW] UPDATE DETECTED - notifying clients');
+          // Notify all clients to reload
+          self.clients.matchAll().then((clients) => {
+            clients.forEach((client) => {
+              client.postMessage({
+                type: 'UPDATE_AVAILABLE'
+              });
             });
           });
-        });
+        } else {
+          versionHash = hash;
+          console.log('[SW] No update detected, version unchanged');
+        }
       })
       .catch((error) => {
-        console.log('[SW] Update check failed:', error);
+        console.error('[SW] Update check failed:', error);
       });
   }
 });
+
+// Simple hash function
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString(36);
+}
