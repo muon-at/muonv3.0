@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -39,6 +40,7 @@ const getStatusLabel = (status: string): string => {
 };
 
 export default function MobileCalendar() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [statuses, setStatuses] = useState<Record<string, string>>({});
@@ -137,6 +139,11 @@ export default function MobileCalendar() {
 
   return (
     <div className="mobile-calendar">
+      <div className="calendar-header-top">
+        <button className="back-btn" onClick={() => navigate('/home')}>
+          ← Tilbake
+        </button>
+      </div>
       <div className="calendar-header">
         <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}>
           ←
