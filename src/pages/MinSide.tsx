@@ -273,34 +273,6 @@ export default function MinSide() {
   };
 
   // Load emoji counts for today
-  const loadEmojiCountsForToday = async () => {
-    try {
-      const today = new Date();
-      const dateKey = today.toISOString().split('T')[0]; // YYYY-MM-DD
-      
-      const emojiCountsRef = doc(db, 'emoji_counts_daily', dateKey);
-      const emojiDoc = await getDoc(emojiCountsRef);
-      
-      if (emojiDoc.exists()) {
-        const data = emojiDoc.data();
-        const counts = data.counts || {};
-        
-        // Get current user's name (try both externalName and full name)
-        const userName = user?.name || '';
-        const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
-        
-        console.log('📊 Emoji counts for', userName, ':', userEmojis);
-        
-        // Return sum of 🔔 (1 pt) + 💎 (1 pt)
-        return (userEmojis['🔔'] || 0) + (userEmojis['💎'] || 0);
-      }
-      return 0;
-    } catch (err) {
-      console.error('Error loading emoji counts:', err);
-      return 0;
-    }
-  };
-
   const loadEmployeeData = async () => {
     try {
       const salesRef = collection(db, 'allente_kontraktsarkiv');
@@ -325,9 +297,6 @@ export default function MinSide() {
       weekStart.setDate(today.getDate() - today.getDay());
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const yearStart = new Date(now.getFullYear(), 0, 1); // Jan 1 of current year
-
-      // Load emoji counts for today (🔔 + 💎)
-      const emojiCountToday = await loadEmojiCountsForToday();
 
       const salesThisWeek = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
@@ -391,14 +360,46 @@ export default function MinSide() {
 
       // Get emoji counts for today with breakdown
       let bellCountToday = 0, gemCountToday = 0;
+      let bellCountWeek = 0, gemCountWeek = 0;
+      let bellCountMonth = 0, gemCountMonth = 0;
       try {
+        const userName = user?.name || '';
+        
+        // Load emojis for ALL days in the week
+        for (let d = new Date(weekStart); d <= today; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const emojiCountsRef = doc(db, 'emoji_counts_daily', dateStr);
+          const emojiDoc = await getDoc(emojiCountsRef);
+          if (emojiDoc.exists()) {
+            const data = emojiDoc.data();
+            const counts = data.counts || {};
+            const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
+            bellCountWeek += userEmojis['🔔'] || 0;
+            gemCountWeek += userEmojis['💎'] || 0;
+          }
+        }
+        
+        // Load emojis for ALL days in the month
+        for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const emojiCountsRef = doc(db, 'emoji_counts_daily', dateStr);
+          const emojiDoc = await getDoc(emojiCountsRef);
+          if (emojiDoc.exists()) {
+            const data = emojiDoc.data();
+            const counts = data.counts || {};
+            const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
+            bellCountMonth += userEmojis['🔔'] || 0;
+            gemCountMonth += userEmojis['💎'] || 0;
+          }
+        }
+        
+        // Today's emojis
         const today_str = today.toISOString().split('T')[0];
         const emojiCountsRef = doc(db, 'emoji_counts_daily', today_str);
         const emojiDoc = await getDoc(emojiCountsRef);
         if (emojiDoc.exists()) {
           const data = emojiDoc.data();
           const counts = data.counts || {};
-          const userName = user?.name || '';
           const userEmojis = counts[userName] || { '🔔': 0, '💎': 0 };
           bellCountToday = userEmojis['🔔'] || 0;
           gemCountToday = userEmojis['💎'] || 0;
@@ -475,15 +476,18 @@ export default function MinSide() {
         monthEarnings,
       });
 
-      // Calculate progress data for bars
+      // Calculate progress data for bars (status = emojis + contracts)
       const dailyGoalCalc = weeklyGoal > 0 ? Math.ceil(weeklyGoal / 5) : 0;
+      const emojiCountToday = bellCountToday + gemCountToday;
+      const emojiCountWeek = bellCountWeek + gemCountWeek;
+      const emojiCountMonth = bellCountMonth + gemCountMonth;
       
       setProgressData({
         dailyProgress: emojiCountToday,
         dailyGoal: dailyGoalCalc,
-        weeklyProgress: salesThisWeek,
+        weeklyProgress: emojiCountWeek + salesThisWeek,
         weeklyGoalValue: weeklyGoal,
-        monthlyProgress: salesThisMonth,
+        monthlyProgress: emojiCountMonth + salesThisMonth,
         monthlyGoalValue: monthlyGoal,
       });
 
