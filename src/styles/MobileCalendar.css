@@ -209,6 +209,50 @@
   border-radius: 3px;
 }
 
+/* MONTH HOLIDAYS */
+.month-holidays {
+  background: #2a2a2a;
+  border-radius: 6px;
+  padding: 0.75rem;
+  flex-shrink: 0;
+}
+
+.month-holidays h3 {
+  margin: 0 0 0.6rem 0;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.holidays-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.holiday-item {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border-radius: 4px;
+  border-left: 3px solid #ef4444;
+}
+
+.holiday-date {
+  color: #ff6b35;
+  font-weight: 700;
+  font-size: 0.75rem;
+  min-width: 24px;
+}
+
+.holiday-name {
+  color: #ccc;
+  font-size: 0.75rem;
+}
+
 /* Desktop: Hide */
 @media (min-width: 769px) {
   .mobile-calendar {

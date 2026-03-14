@@ -5,20 +5,22 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileCalendar.css';
 
-const HOLIDAYS = [
-  '2026-01-01', // Nyttårsdag
-  '2026-04-02', // Skjærtorsdag
-  '2026-04-03', // Langfredag
-  '2026-04-05', // 1. påskedag
-  '2026-04-06', // 2. påskedag
-  '2026-05-01', // Arbeidsdagen
-  '2026-05-17', // Grunnlovsdag
-  '2026-05-14', // Ascension Day (39 days after Easter Sunday)
-  '2026-05-24', // Whit Sunday (49 days after Easter Sunday)
-  '2026-05-25', // Whit Monday (50 days after Easter Sunday)
-  '2026-12-25', // Julaften (observance)
-  '2026-12-26'  // 2. juledag
-];
+const HOLIDAY_MAP: Record<string, string> = {
+  '2026-01-01': 'Nyttårsdag',
+  '2026-04-02': 'Skjærtorsdag',
+  '2026-04-03': 'Langfredag',
+  '2026-04-05': '1. påskedag',
+  '2026-04-06': '2. påskedag',
+  '2026-05-01': 'Arbeidernes dag',
+  '2026-05-14': 'Kristi himmelfartsdag',
+  '2026-05-17': 'Grunnlovsdag',
+  '2026-05-24': 'Første pinsedag',
+  '2026-05-25': 'Andre pinsedag',
+  '2026-12-25': 'Julaften',
+  '2026-12-26': 'Andre juledag'
+};
+
+const HOLIDAYS = Object.keys(HOLIDAY_MAP);
 
 const normalize = (str: string): string => {
   return str
@@ -150,6 +152,28 @@ export default function MobileCalendar() {
     days.push(i);
   }
 
+  // Get holidays for current month
+  const getHolidaysThisMonth = () => {
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+    const monthPrefix = `${year}-${month}`;
+    
+    const monthHolidays: Array<{ date: string; day: string; name: string }> = [];
+    Object.entries(HOLIDAY_MAP).forEach(([dateStr, name]) => {
+      if (dateStr.startsWith(monthPrefix)) {
+        const day = dateStr.split('-')[2];
+        monthHolidays.push({
+          date: dateStr,
+          day: day.replace(/^0/, ''),
+          name
+        });
+      }
+    });
+    return monthHolidays.sort((a, b) => parseInt(a.day) - parseInt(b.day));
+  };
+
+  const monthHolidays = getHolidaysThisMonth();
+
   const monthName = currentMonth.toLocaleDateString('no-NO', { month: 'long', year: 'numeric' });
 
   return (
@@ -230,6 +254,20 @@ export default function MobileCalendar() {
         <div><span style={{ backgroundColor: '#eab308' }}></span> Fri</div>
         <div><span style={{ backgroundColor: '#ef4444' }}></span> Helligdag</div>
       </div>
+
+      {monthHolidays.length > 0 && (
+        <div className="month-holidays">
+          <h3>Helligdager denne måneden</h3>
+          <div className="holidays-list">
+            {monthHolidays.map((holiday) => (
+              <div key={holiday.date} className="holiday-item">
+                <span className="holiday-date">{holiday.day}.</span>
+                <span className="holiday-name">{holiday.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
