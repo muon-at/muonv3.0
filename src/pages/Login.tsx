@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { subscribeToWebPush, requestNotificationPermission } from '../lib/push-notification-handler';
+
 import '../styles/Login.css';
 
 export default function Login() {
