@@ -122,6 +122,8 @@
 }
 
 .progress-bar {
+  display: block;
+  width: 100%;
   height: 18px;
   border-radius: 6px;
   overflow: hidden;
