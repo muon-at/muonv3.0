@@ -20,7 +20,7 @@ export const useServiceWorkerUpdate = () => {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'waiting' && navigator.serviceWorker.controller) {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('🔄 New SW ready - reloading...');
                   newWorker.postMessage({ type: 'SKIP_WAITING' });
                   window.location.reload();
