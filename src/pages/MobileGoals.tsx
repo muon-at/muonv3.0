@@ -179,7 +179,7 @@ export default function MobileGoals() {
           <h3>BADGES</h3>
           <div className="badges-grid">
             {badgeDefinitions.map((badge) => {
-              const isEarned = badgeStatus[badge.emoji] !== false;
+              const isEarned = badgeStatus[badge.emoji] === true;
               return (
                 <button
                   key={badge.emoji}
