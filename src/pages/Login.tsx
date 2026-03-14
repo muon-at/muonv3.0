@@ -65,16 +65,15 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     if (!email || !password) {
       setError('Vennligst fyll inn både e-post og passord');
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    
     try {
-      // Lookup employee by email in Firestore
       const employeesRef = collection(db, 'employees');
       const snapshot = await getDocs(employeesRef);
       
@@ -82,74 +81,35 @@ export default function Login() {
       const normalizedEmail = email.trim().toLowerCase();
       const trimmedPassword = password.trim();
       
-      console.log('🔍 Login attempt:', { email: normalizedEmail, passwordLength: trimmedPassword.length });
-      
       snapshot.forEach((doc) => {
         const data = doc.data();
-        const dbEmail = (data.email || '').trim().toLowerCase();
-        const dbPassword = (data.password || '').trim();
-        
-        console.log('🔄 Checking:', { 
-          name: data.name, 
-          dbEmail, 
-          inputEmail: normalizedEmail,
-          emailMatch: dbEmail === normalizedEmail,
-          passwordMatch: dbPassword === trimmedPassword,
-          archived: data.archived
-        });
-        
-        // Check if email matches and password is correct (case-insensitive email)
-        if (dbEmail === normalizedEmail && dbPassword === trimmedPassword && !data.archived) {
-          console.log('✅ LOGIN SUCCESS:', data.name);
+        if ((data.email || '').trim().toLowerCase() === normalizedEmail && 
+            (data.password || '').trim() === trimmedPassword && 
+            !data.archived) {
           foundEmployee = { id: doc.id, ...data };
         }
       });
 
-      if (foundEmployee) {
-        // Check if requiresPasswordChange flag is set by admin
-        if (foundEmployee.requiresPasswordChange) {
-          console.log('🔄 Admin-generated password - must create new password');
-          localStorage.setItem('tempEmployee', JSON.stringify(foundEmployee));
-          navigate('/change-password-first-login');
-        } else if (foundEmployee.password === '1234' || !foundEmployee.passwordChanged) {
-          // Legacy default password check
-          console.log('🔄 First login (legacy) - redirecting to password reset');
-          localStorage.setItem('tempEmployee', JSON.stringify(foundEmployee));
-          navigate('/reset-password');
-        } else {
-          // Normal login
-          console.log('✅ Logging in:', {
-            name: foundEmployee.name,
-            id: foundEmployee.id,
-            role: foundEmployee.role,
-          });
-          
-          try {
-            login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
-            console.log('✅ Auth context updated');
-          } catch (loginErr) {
-            console.error('❌ Auth context error:', loginErr);
-          }
-          
-          // On mobile: show home screen. On desktop: go to min-side
-          try {
-            const isMobile = window.innerWidth < 769;
-            console.log('🚀 Navigating to:', isMobile ? '/home' : '/min-side');
-            navigate(isMobile ? '/home' : '/min-side');
-          } catch (navErr) {
-            console.error('❌ Navigation error:', navErr);
-            window.location.href = '/home';
-          }
-        }
-      } else {
+      if (!foundEmployee) {
         setError('Feil e-post eller passord');
-        console.log('❌ Login failed for:', normalizedEmail);
-        console.log('💾 Available employees:', snapshot.size);
+        setLoading(false);
+        return;
+      }
+
+      if (foundEmployee.requiresPasswordChange) {
+        localStorage.setItem('tempEmployee', JSON.stringify(foundEmployee));
+        navigate('/change-password-first-login');
+      } else if (foundEmployee.password === '1234' || !foundEmployee.passwordChanged) {
+        localStorage.setItem('tempEmployee', JSON.stringify(foundEmployee));
+        navigate('/reset-password');
+      } else {
+        login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
+        const isMobile = window.innerWidth < 769;
+        navigate(isMobile ? '/home' : '/min-side');
       }
     } catch (err) {
       console.error('Login error:', err);
       setError('Feil ved innlogging. Prøv igjen.');
-    } finally {
       setLoading(false);
     }
   };
