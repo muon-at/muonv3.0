@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChat.css';
 
@@ -49,11 +49,48 @@ export default function MobileChat() {
     return (saved as 'dms' | 'channels') || 'channels';
   });
 
+  // Ensure all 7 channels exist in Firestore
+  const ensureChannels = async () => {
+    const channelDefinitions = [
+      { id: 'global', name: 'Global', type: 'global' },
+      { id: 'project-allente', name: 'Allente Chat', type: 'project', project: 'Allente' },
+      { id: 'dept-krs', name: 'KRS', type: 'department', department: 'KRS' },
+      { id: 'dept-osl', name: 'OSL', type: 'department', department: 'OSL' },
+      { id: 'dept-skien', name: 'Skien', type: 'department', department: 'Skien' },
+      { id: 'admin-channel', name: 'Admin', type: 'admin' },
+      { id: 'teamleder-channel', name: 'Teamleder', type: 'team' },
+    ];
+
+    try {
+      for (const ch of channelDefinitions) {
+        const channelRef = doc(db, 'chat_channels', ch.id);
+        await setDoc(channelRef, {
+          id: ch.id,
+          name: ch.name,
+          type: ch.type,
+          ...(ch.project && { project: ch.project }),
+          ...(ch.department && { department: ch.department }),
+          createdAt: serverTimestamp(),
+          lastMessage: '',
+          lastMessageTime: serverTimestamp(),
+        }, { merge: true });
+      }
+      console.log('✅ Ensured all 7 channels exist');
+    } catch (error) {
+      console.error('❌ Error ensuring channels:', error);
+    }
+  };
+
   // Load channels from Firestore (same as PC Chat)
   useEffect(() => {
     const loadChannels = async () => {
       try {
         setLoading(true);
+        
+        // First ensure all channels exist
+        await ensureChannels();
+        
+        // Then load them
         const channelsRef = collection(db, 'chat_channels');
         const snapshot = await getDocs(channelsRef);
         
