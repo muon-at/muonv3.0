@@ -183,12 +183,14 @@
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .sales-box:first-child .sales-box-header {
   font-size: 0.9rem;
   margin-bottom: 0.7rem;
   letter-spacing: 1px;
+  text-align: center;
 }
 
 .sales-box-content {
@@ -220,13 +222,15 @@
   margin-bottom: 0.2rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-align: center;
 }
 
 .sales-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 0.2rem 0;
+  gap: 0.5rem;
 }
 
 .sales-row.small {
@@ -246,6 +250,7 @@
 
 .sales-label {
   color: #aaa;
+  text-align: center;
 }
 
 .sales-value {
