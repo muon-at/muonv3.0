@@ -89,6 +89,7 @@
   max-width: none;
   width: calc(100vw - 97px);
   margin: 0 auto;
+  margin-left: 5px;
   padding: 0;
   background: transparent;
 }
