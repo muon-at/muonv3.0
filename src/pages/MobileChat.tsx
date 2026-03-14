@@ -27,13 +27,13 @@ const ALLOWED_CHANNELS = [
   'teamleder-channel',
 ];
 
-// Default emoji mapping for channels
+// Default emoji mapping for channels (matches PC spec)
 const CHANNEL_EMOJIS: { [key: string]: string } = {
   'global': '🌍',
   'project-allente': '🏢',
-  'dept-krs': '🏢',
+  'dept-krs': '🏝️',
   'dept-osl': '🏢',
-  'dept-skien': '🏢',
+  'dept-skien': '🏭',
   'admin-channel': '⚙️',
   'teamleder-channel': '👥',
 };
@@ -49,16 +49,16 @@ export default function MobileChat() {
     return (saved as 'dms' | 'channels') || 'channels';
   });
 
-  // Ensure all 7 channels exist in Firestore
+  // Ensure all 7 channels exist in Firestore (matching PC specification)
   const ensureChannels = async () => {
     const channelDefinitions = [
-      { id: 'global', name: 'Global', type: 'global' },
-      { id: 'project-allente', name: 'Allente Chat', type: 'project', project: 'Allente' },
-      { id: 'dept-krs', name: 'KRS', type: 'department', department: 'KRS' },
-      { id: 'dept-osl', name: 'OSL', type: 'department', department: 'OSL' },
-      { id: 'dept-skien', name: 'Skien', type: 'department', department: 'Skien' },
-      { id: 'admin-channel', name: 'Admin', type: 'admin' },
-      { id: 'teamleder-channel', name: 'Teamleder', type: 'team' },
+      { id: 'global', name: 'Global', type: 'global', emoji: '🌍' },
+      { id: 'project-allente', name: 'Allente Chat', type: 'project', project: 'Allente', emoji: '🏢' },
+      { id: 'dept-krs', name: 'KRS', type: 'avdeling', avdeling: 'KRS', emoji: '🏝️' },
+      { id: 'dept-osl', name: 'OSL', type: 'avdeling', avdeling: 'OSL', emoji: '🏢' },
+      { id: 'dept-skien', name: 'Skien', type: 'avdeling', avdeling: 'Skien', emoji: '🏭' },
+      { id: 'admin-channel', name: 'Admin', type: 'admin', emoji: '⚙️' },
+      { id: 'teamleder-channel', name: 'Teamleder', type: 'team', emoji: '👥' },
     ];
 
     try {
@@ -68,14 +68,15 @@ export default function MobileChat() {
           id: ch.id,
           name: ch.name,
           type: ch.type,
+          emoji: ch.emoji,
           ...(ch.project && { project: ch.project }),
-          ...(ch.department && { department: ch.department }),
+          ...(ch.avdeling && { avdeling: ch.avdeling }),
           createdAt: serverTimestamp(),
           lastMessage: '',
           lastMessageTime: serverTimestamp(),
         }, { merge: true });
       }
-      console.log('✅ Ensured all 7 channels exist');
+      console.log('✅ Ensured all 7 channels exist (matching PC spec)');
     } catch (error) {
       console.error('❌ Error ensuring channels:', error);
     }

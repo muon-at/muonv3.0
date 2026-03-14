@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
-import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
 import { showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
@@ -597,44 +597,35 @@ export default function Chat() {
   const loadChannels = async () => {
     try {
       // Ensure department channels exist
-      const departments = ['KRS', 'OSL', 'Skien'];
       const channelsRef = collection(db, 'chat_channels');
-      const existingSnap = await getDocs(channelsRef);
-      const existingIds = new Set(existingSnap.docs.map(d => d.id));
       
-      // Create department channels if they don't exist
-      for (const dept of departments) {
-        const deptId = `dept-${dept.toLowerCase()}`;
-        if (!existingIds.has(deptId)) {
-          const deptEmoji = dept === 'KRS' ? '🏝️' : dept === 'OSL' ? '🏢' : '🏭';
-          await setDoc(doc(db, 'chat_channels', deptId), {
-            name: dept,
-            type: 'avdeling',
-            avdeling: dept,
-            emoji: deptEmoji,
-            createdAt: new Date().toISOString(),
-            messages: [],
-          });
-        }
-      }
-
-      // Create project channel for user's project if it exists and doesn't have a channel yet
-      if (user?.project) {
-        // BOTH MUON and Allente users share the same project-allente channel
-        // This allows MUON (owner) and Allente (employees) to chat together
-        const projectName = 'Allente'; // Always use Allente channel name
-        const projectId = 'project-allente'; // Always use project-allente channel ID
-        
-        if (!existingIds.has(projectId)) {
-          await setDoc(doc(db, 'chat_channels', projectId), {
-            name: projectName,
-            type: 'project',
-            project: projectName,
-            emoji: '📊',
-            createdAt: new Date().toISOString(),
-            messages: [],
-          });
-          existingIds.add(projectId);
+      // Define all 7 channels with spec from Stian
+      const channelDefinitions = [
+        { id: 'global', name: 'Global', type: 'global', emoji: '🌍' },
+        { id: 'project-allente', name: 'Allente Chat', type: 'project', project: 'Allente', emoji: '🏢' },
+        { id: 'dept-krs', name: 'KRS', type: 'avdeling', avdeling: 'KRS', emoji: '🏝️' },
+        { id: 'dept-osl', name: 'OSL', type: 'avdeling', avdeling: 'OSL', emoji: '🏢' },
+        { id: 'dept-skien', name: 'Skien', type: 'avdeling', avdeling: 'Skien', emoji: '🏭' },
+        { id: 'teamleder-channel', name: 'Teamleder', type: 'team', emoji: '👥' },
+        { id: 'admin-channel', name: 'Admin', type: 'admin', emoji: '⚙️' },
+      ];
+      
+      // Create/ensure all 7 channels exist
+      for (const chDef of channelDefinitions) {
+        try {
+          await setDoc(doc(db, 'chat_channels', chDef.id), {
+            id: chDef.id,
+            name: chDef.name,
+            type: chDef.type,
+            emoji: chDef.emoji,
+            ...(chDef.project && { project: chDef.project }),
+            ...(chDef.avdeling && { avdeling: chDef.avdeling }),
+            createdAt: serverTimestamp(),
+            lastMessage: '',
+            lastMessageTime: serverTimestamp(),
+          }, { merge: true });
+        } catch (error) {
+          console.error(`Error creating channel ${chDef.id}:`, error);
         }
       }
 
@@ -821,7 +812,9 @@ export default function Chat() {
       case 'admin':
         return user?.role === 'owner';
       case 'avdeling':
-        return (user as any)?.department === avdeling || user?.role === 'owner';
+        // User can access if: their department matches OR they are in Muon/owner
+        const userDept = (user as any)?.department;
+        return userDept === avdeling || userDept === 'Muon' || user?.role === 'owner';
       case 'global':
         return true;
       default:
