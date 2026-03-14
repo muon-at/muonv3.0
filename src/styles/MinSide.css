@@ -156,7 +156,7 @@
 /* SALES & EARNINGS BOXES - COMPACT (3 BOXES) */
 .sales-earnings-section {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr 1fr;
   gap: 0.9rem;
   width: calc(100vw - 142px);
   margin: 0 auto;
@@ -171,6 +171,11 @@
   font-size: 0.7rem;
 }
 
+.sales-box:first-child {
+  padding: 1rem;
+  font-size: 0.75rem;
+}
+
 .sales-box-header {
   font-weight: 700;
   color: #ff9d66;
@@ -180,10 +185,20 @@
   letter-spacing: 0.5px;
 }
 
+.sales-box:first-child .sales-box-header {
+  font-size: 0.9rem;
+  margin-bottom: 0.7rem;
+  letter-spacing: 1px;
+}
+
 .sales-box-content {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+.sales-box:first-child .sales-box-content {
+  gap: 0.4rem;
 }
 
 .sales-row {
@@ -198,6 +213,16 @@
   opacity: 0.9;
 }
 
+.sales-box:first-child .sales-row {
+  padding: 0.35rem 0;
+  font-size: 0.8rem;
+}
+
+.sales-box:first-child .sales-row.small {
+  font-size: 0.7rem;
+  padding: 0.3rem 0;
+}
+
 .sales-label {
   color: #aaa;
 }
@@ -209,8 +234,14 @@
 
 .sales-divider {
   height: 1px;
-  background: #555;
-  margin: 0.3rem 0;
+  background: #666;
+  margin: 0.5rem 0;
+}
+
+.sales-box:first-child .sales-divider {
+  height: 2px;
+  background: #ff9d66;
+  margin: 0.6rem 0;
 }
 
 /* RUNRATE BOXES - COMPACT (OLD) */
