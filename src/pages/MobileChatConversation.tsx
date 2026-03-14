@@ -43,6 +43,8 @@ export default function MobileChatConversation() {
 
     console.log('🔍 Loading conversation:', { isDM, chatName, userId: user?.id, userName: user?.name });
 
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     if (isDM) {
       setChatTitle(chatName);
       
@@ -106,6 +108,7 @@ export default function MobileChatConversation() {
       
       // Load current document to see structure
       const channelDocRef = doc(db, 'chat_channels', chatName);
+      
       setDoc(channelDocRef, {
         id: chatName,
         name: title,
@@ -146,7 +149,17 @@ export default function MobileChatConversation() {
         });
         
         let snapshotCount = 0;
+        let hasData = false;
+        timeoutId = setTimeout(() => {
+          if (!hasData && snapshotCount === 0) {
+            console.warn('⚠️ Listener timeout - no data received:', chatName);
+            setMessages([]);
+          }
+        }, 3000);
+        
         unsubscribe = onSnapshot(messagesQ, (snapshot) => {
+          hasData = true;
+          if (timeoutId) clearTimeout(timeoutId);
           snapshotCount++;
           console.log('💬 Messages snapshot #' + snapshotCount + ':', { 
             count: snapshot.size, 
@@ -173,18 +186,13 @@ export default function MobileChatConversation() {
             setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
           }
         }, (error) => {
-          console.error('❌ Listener error for channel:', chatName, error);
-          console.error('❌ Error code:', (error as any)?.code);
-          console.error('❌ Error message:', (error as any)?.message);
-          console.log('⏱️ Setting empty state due to error for channel:', chatName);
-          setMessages([]);
-          
-          // Log channel structure info for debugging
-          console.warn('⚠️ CHANNEL LOAD FAILED:', {
-            channelId: chatName,
-            path: `chat_channels/${chatName}/messages`,
-            suggestion: 'Channel doc may not exist or messages subcollection missing'
+          if (timeoutId) clearTimeout(timeoutId);
+          console.error('❌ Listener error for channel:', chatName);
+          console.error('Error:', {
+            code: (error as any)?.code,
+            message: (error as any)?.message
           });
+          setMessages([]);
         });
       }).catch((error) => {
         console.error('❌ Channel init error:', error);
@@ -193,6 +201,7 @@ export default function MobileChatConversation() {
       });
 
       return () => {
+        if (timeoutId) clearTimeout(timeoutId);
         if (unsubscribe) unsubscribe();
       };
     }
