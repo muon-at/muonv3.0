@@ -122,29 +122,19 @@ export default function Login() {
             name: foundEmployee.name,
             id: foundEmployee.id,
             role: foundEmployee.role,
-            allData: foundEmployee
           });
           login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
           
-          // Subscribe to Web Push immediately after login
-          console.log('🔔 Subscribing to Web Push for user:', foundEmployee.id);
+          // Subscribe to Web Push in BACKGROUND (don't wait for it)
+          console.log('🔔 Starting Web Push subscription in background...');
           requestNotificationPermission().then((granted) => {
             if (granted) {
-              console.log('✅ Notification permission granted!');
-              subscribeToWebPush(foundEmployee.id).then((subscription) => {
-                if (subscription) {
-                  console.log('✅ Web Push subscribed - will notify even when app closed!');
-                } else {
-                  console.warn('⚠️ Web Push subscription failed!');
-                }
-              }).catch((error) => {
-                console.error('❌ Error in subscribeToWebPush:', error);
+              subscribeToWebPush(foundEmployee.id).catch((err) => {
+                console.warn('⚠️ Web Push subscription failed:', err);
               });
-            } else {
-              console.warn('⚠️ Notification permission not granted!');
             }
-          }).catch((error) => {
-            console.error('❌ Error requesting notification permission:', error);
+          }).catch(() => {
+            // Silent fail - don't block login
           });
           
           // On mobile: show home screen. On desktop: go to min-side
