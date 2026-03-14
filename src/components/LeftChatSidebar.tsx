@@ -33,7 +33,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
 
   const channelUnread = Object.keys(contextChannelUnread).length > 0 ? contextChannelUnread : (() => {
     const counts: Record<string, number> = {};
-    const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien'];
+    const channelIds = ['global', 'project-allente', 'dept-krs', 'dept-osl', 'dept-skien', 'teamleder-channel', 'admin-channel'];
     channelIds.forEach(id => {
       const stored = localStorage.getItem(`chat_unread_${id}`);
       if (stored) {
@@ -303,7 +303,73 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
             onClick={() => handleChannelClick('project-allente')}
             title="Allente"
           >
-            📊
+            🏢
+          </button>
+        </div>
+      )}
+
+      {/* TEAMLEDER CHANNEL */}
+      {(user?.role === 'teamleder' || user?.role === 'owner') && (
+        <div className="channel-section">
+          <button 
+            className="channel-circle"
+            onClick={() => handleChannelClick('teamleder-channel')}
+            title="Teamleder"
+            style={{ position: 'relative' }}
+          >
+            👥
+            {channelUnread['teamleder-channel'] > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+              }}>
+                {channelUnread['teamleder-channel']}
+              </div>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* ADMIN CHANNEL */}
+      {user?.role === 'owner' && (
+        <div className="channel-section">
+          <button 
+            className="channel-circle"
+            onClick={() => handleChannelClick('admin-channel')}
+            title="Admin"
+            style={{ position: 'relative' }}
+          >
+            ⚙️
+            {channelUnread['admin-channel'] > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 'bold',
+              }}>
+                {channelUnread['admin-channel']}
+              </div>
+            )}
           </button>
         </div>
       )}
