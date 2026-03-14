@@ -96,6 +96,15 @@ export default function MobileHome() {
           <div className="card-icon">👥</div>
           <div className="card-label">TEAM</div>
         </button>
+
+        {/* KALENDER Card */}
+        <button
+          className="mobile-home-card"
+          onClick={() => navigate('/home/calendar')}
+        >
+          <div className="card-icon">📅</div>
+          <div className="card-label">KALENDER</div>
+        </button>
       </div>
 
       <div className="mobile-home-footer">

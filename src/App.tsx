@@ -14,6 +14,7 @@ import MobileMinSide from './pages/MobileMinSide';
 import MobileGoals from './pages/MobileGoals';
 import MobileLonn from './pages/MobileLonn';
 import MobileTeam from './pages/MobileTeam';
+import MobileCalendar from './pages/MobileCalendar';
 import './App.css';
 
 function App() {
@@ -85,6 +86,15 @@ function App() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <MobileTeam />
+              </ProtectedRoute>
+            } 
+          />
+          {/* Mobile calendar screen */}
+          <Route 
+            path="/home/calendar" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MobileCalendar />
               </ProtectedRoute>
             } 
           />

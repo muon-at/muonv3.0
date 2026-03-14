@@ -1,0 +1,187 @@
+.mobile-calendar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: #1a1a1a;
+  padding: 1rem;
+  padding-top: max(1rem, env(safe-area-inset-top));
+  overflow-y: auto;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.calendar-header h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.5rem;
+  flex: 1;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.calendar-header button {
+  background: #2a2a2a;
+  border: none;
+  color: #ffffff;
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.calendar-header button:active {
+  background: #333;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.calendar-weekdays div {
+  color: #aaa;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex: 1;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  background: #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  min-height: 50px;
+  position: relative;
+  transition: transform 0.2s;
+}
+
+.calendar-day.empty {
+  background: transparent;
+  cursor: default;
+}
+
+.calendar-day.editable:not(.empty) {
+  cursor: pointer;
+  transform: scale(0.95);
+}
+
+.calendar-day.editable:not(.empty):active {
+  transform: scale(0.9);
+}
+
+.day-number {
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.day-status {
+  font-size: 0.6rem;
+  color: #1a1a1a;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+.calendar-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.calendar-controls button {
+  flex: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.edit-btn {
+  background: #667eea;
+  color: white;
+}
+
+.edit-btn:active {
+  background: #5568d3;
+}
+
+.save-btn {
+  background: #22c55e;
+  color: white;
+  flex: 1.5;
+}
+
+.save-btn:active:not(:disabled) {
+  background: #16a34a;
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: #666;
+  color: white;
+}
+
+.cancel-btn:active {
+  background: #555;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background: #2a2a2a;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.calendar-legend div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.calendar-legend span {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+/* Desktop: Hide */
+@media (min-width: 769px) {
+  .mobile-calendar {
+    display: none;
+  }
+}
