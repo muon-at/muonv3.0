@@ -86,8 +86,8 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.9rem;
-  max-width: 1200px;
-  width: 100%;
+  max-width: none;
+  width: calc(100vw - 97px);
   margin: 0 auto;
   padding: 0;
   background: transparent;
