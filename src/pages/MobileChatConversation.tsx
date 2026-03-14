@@ -370,9 +370,10 @@ export default function MobileChatConversation() {
       </div>
 
       <div className="messages-container">
-        {messages.length === 0 ? (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '1rem' }}>
-            Ingen meldinger ennå 💬
+        {messages.length === 0 && chatName ? (
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '1rem', flexDirection: 'column', gap: '1rem', padding: '2rem', textAlign: 'center' }}>
+            <div>Ingen meldinger ennå 💬</div>
+            <div style={{ fontSize: '0.85rem', color: '#555' }}>Channel: {chatName}</div>
           </div>
         ) : null}
         {messages.map(msg => (

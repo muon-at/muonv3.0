@@ -39,23 +39,37 @@ export default function MobileChat() {
         { id: 'teamleder-channel', name: 'Teamleder', emoji: '👥' },
       ];
 
-      // Create all channel documents with EXACT same structure as Global
+      // Create all channel documents with proper structure
       for (const ch of channelDefs) {
         try {
           const channelDoc = doc(db, 'chat_channels', ch.id);
-          await setDoc(channelDoc, {
-            // Exact fields that Global should have
+          
+          let channelData: any = {
             id: ch.id,
             name: ch.name,
             emoji: ch.emoji,
-            type: 'global', // Same as Global
-            unread: 0,
             createdAt: serverTimestamp(),
             lastMessage: '',
-            lastMessageTime: serverTimestamp()
-          }, { merge: true });
+            lastMessageTime: serverTimestamp(),
+            messages: []
+          };
           
-          console.log('✅ Channel created with Global structure:', ch.id);
+          // Special handling for different channel types
+          if (ch.id === 'project-allente') {
+            channelData.type = 'project';
+            channelData.project = 'Allente';
+          } else if (ch.id.startsWith('dept-')) {
+            channelData.type = 'department';
+            const dept = ch.id.replace('dept-', '').toUpperCase();
+            channelData.department = dept;
+          } else if (ch.id === 'admin-channel' || ch.id === 'teamleder-channel') {
+            channelData.type = 'restricted';
+          } else {
+            channelData.type = 'global';
+          }
+          
+          await setDoc(channelDoc, channelData, { merge: true });
+          console.log('✅ Channel created:', ch.id, 'Type:', channelData.type);
         } catch (error) {
           console.error('❌ Error creating channel:', ch.id, error);
         }
