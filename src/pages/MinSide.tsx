@@ -124,8 +124,8 @@ export default function MinSide() {
   };
 
   useEffect(() => {
-    // MOCK MODE - COMMENT OUT loadEmployeeData to use mock data
-    // loadEmployeeData();
+    // MOCK MODE - use mock data, skip loading
+    setLoading(false); // Disable loading state for mock mode
     loadSavedGoals();
     // Load cached badges from Firestore
     loadCachedBadges();
