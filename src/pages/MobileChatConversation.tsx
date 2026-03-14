@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChatConversation.css';
 
@@ -370,6 +370,34 @@ export default function MobileChatConversation() {
     if (!showGifPicker) setGifSearch('');
   };
 
+  const deleteMessage = async (messageId: string, senderName: string) => {
+    if (!user) return;
+
+    // Check permissions
+    const canDelete = isDM 
+      ? senderName === user.name // DM: only own messages
+      : user.role === 'owner'; // Channel: only owner
+
+    if (!canDelete) {
+      alert('Du kan ikke slette denne meldingen');
+      return;
+    }
+
+    if (!confirm('Slett melding?')) return;
+
+    try {
+      const path = isDM
+        ? `chat_dms/${[user.name, chatName].sort().join('_').toLowerCase().replace(/[^a-z0-9_]/g, '_')}/messages/${messageId}`
+        : `chat_channels/${chatName}/messages/${messageId}`;
+
+      await deleteDoc(doc(db, path));
+      console.log('✅ Message deleted');
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Kunne ikke slette melding');
+    }
+  };
+
   // Safety check
   if (!chatName) {
     return (
@@ -405,31 +433,64 @@ export default function MobileChatConversation() {
             <div style={{ fontSize: '0.85rem', color: '#555' }}>Channel: {chatName}</div>
           </div>
         ) : null}
-        {messages.map(msg => (
-          <div
-            key={msg.id}
-            className={`message ${msg.senderId === user?.id ? 'sent' : 'received'}`}
-          >
-            {msg.senderId !== user?.id && <div className="message-sender">{msg.sender}</div>}
-            <div className="message-bubble">
-              {msg.type === 'text' ? (
-                msg.content
-              ) : msg.type === 'image' ? (
-                <img src={msg.content} alt="Melding" style={{ maxWidth: '200px', borderRadius: '8px' }} />
-              ) : (
-                <div className="message-media">📄 {(msg as any).fileName || msg.type}</div>
+        {messages.map(msg => {
+          const canDelete = isDM 
+            ? msg.senderId === user?.id
+            : user?.role === 'owner';
+          
+          return (
+            <div
+              key={msg.id}
+              className={`message ${msg.senderId === user?.id ? 'sent' : 'received'}`}
+              style={{ position: 'relative' }}
+              onMouseEnter={(e) => {
+                const deleteBtn = e.currentTarget.querySelector('.message-delete');
+                if (deleteBtn) (deleteBtn as HTMLElement).style.opacity = '1';
+              }}
+              onMouseLeave={(e) => {
+                const deleteBtn = e.currentTarget.querySelector('.message-delete');
+                if (deleteBtn) (deleteBtn as HTMLElement).style.opacity = '0';
+              }}
+            >
+              {msg.senderId !== user?.id && <div className="message-sender">{msg.sender}</div>}
+              <div className="message-bubble">
+                {msg.type === 'text' ? (
+                  msg.content
+                ) : msg.type === 'image' ? (
+                  <img src={msg.content} alt="Melding" style={{ maxWidth: '200px', borderRadius: '8px' }} />
+                ) : (
+                  <div className="message-media">📄 {(msg as any).fileName || msg.type}</div>
+                )}
+              </div>
+              {canDelete && (
+                <button
+                  className="message-delete"
+                  onClick={() => deleteMessage(msg.id, msg.sender)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#999',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                    fontSize: '0.9rem',
+                    opacity: 0,
+                    transition: 'opacity 0.2s'
+                  }}
+                >
+                  🗑️
+                </button>
+              )}
+              {msg.timestamp && (
+                <div className="message-time">
+                  {new Date(msg.timestamp.toDate()).toLocaleTimeString('nb-NO', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </div>
               )}
             </div>
-            {msg.timestamp && (
-              <div className="message-time">
-                {new Date(msg.timestamp.toDate()).toLocaleTimeString('nb-NO', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
         <div ref={messagesEndRef} />
       </div>
 

@@ -1286,10 +1286,24 @@ export default function Chat() {
   };
 
   const deleteMessage = async (messageId: string) => {
-    // Only owner can delete
-    if (user?.role !== 'owner') {
-      alert('Only owners can delete messages');
-      return;
+    // Channel: only owner. DM: only sender or owner
+    if (selectedDM) {
+      // DM: check if user is sender
+      const msgRef = doc(db, 'chat_dms', selectedDM, 'messages', messageId);
+      const msgSnap = await getDoc(msgRef);
+      if (msgSnap.exists()) {
+        const msgData = msgSnap.data();
+        if (msgData.sender !== user?.name && user?.role !== 'owner') {
+          alert('Du kan bare slette dine egne meldinger');
+          return;
+        }
+      }
+    } else if (selectedChannel) {
+      // Channel: only owner
+      if (user?.role !== 'owner') {
+        alert('Only owners can delete messages');
+        return;
+      }
     }
     
     try {
@@ -2211,7 +2225,7 @@ export default function Chat() {
                             ✏️ Edit
                           </button>
                         )}
-                        {user?.role === 'owner' && !msg.isDeleted && (
+                        {(user?.role === 'owner' || (isDMMode && msg.sender === user?.name)) && !msg.isDeleted && (
                           <button
                             onClick={() => {
                               if (confirm('Delete this message?')) {
