@@ -122,24 +122,17 @@
 }
 
 .progress-bar {
-  height: 14px;
-  border-radius: 3px;
+  height: 18px;
+  border-radius: 6px;
   overflow: hidden;
-  background: #e2e8f0;
+  background: #444444;
 }
-
-.progress-bar.blue { background: #dbeafe; }
-.progress-bar.green { background: #dcfce7; }
-.progress-bar.orange { background: #fed7aa; }
 
 .progress-fill {
   height: 100%;
   transition: width 0.3s ease;
+  background: #ff9d66 !important;
 }
-
-.progress-bar.blue .progress-fill { background: #3b82f6; }
-.progress-bar.green .progress-fill { background: #16a34a; }
-.progress-bar.orange .progress-fill { background: #E8956E; }
 
 .progress-text {
   font-size: 0.8rem;
