@@ -5,6 +5,24 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileGoals.css';
 
+interface BadgeDefinition {
+  emoji: string;
+  navn: string;
+  verdi: string;
+  beskrivelse: string;
+}
+
+const badgeDefinitions: BadgeDefinition[] = [
+  { emoji: '🏆', navn: 'BEST', verdi: 'Løpende', beskrivelse: 'Den som har flest salg totalt (kun en)' },
+  { emoji: '👑', navn: 'MVP MÅNED', verdi: 'Historisk', beskrivelse: 'Har vært best i minst en måned' },
+  { emoji: '⭐', navn: 'MVP DAG', verdi: 'Historisk', beskrivelse: 'Har vært best på minst en dag' },
+  { emoji: '🎓', navn: 'FØRSTE SALGET', verdi: '1+', beskrivelse: '1+ salg totalt' },
+  { emoji: '🚀', navn: '5 SALG', verdi: '5+', beskrivelse: '5+ salg på EN dag' },
+  { emoji: '🎯', navn: '10 SALG', verdi: '10+', beskrivelse: '10+ salg på EN dag' },
+  { emoji: '🔥', navn: '15 SALG', verdi: '15+', beskrivelse: '15+ salg på EN dag' },
+  { emoji: '💎', navn: '20 SALG', verdi: '20+', beskrivelse: '20+ salg på EN dag' },
+];
+
 const normalize = (str: string): string => {
   return str
     .normalize('NFD')
@@ -17,32 +35,44 @@ const normalize = (str: string): string => {
 export default function MobileGoals() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [weeklyGoal, setWeeklyGoal] = useState(0);
-  const [monthlyGoal, setMonthlyGoal] = useState(0);
+  const [weeklyGoal, setWeeklyGoal] = useState<number | ''>('');
+  const [monthlyGoal, setMonthlyGoal] = useState<number | ''>('');
+  const [badgeStatus, setBadgeStatus] = useState<{ [key: string]: boolean }>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
 
-    const loadGoals = async () => {
+    const loadData = async () => {
       try {
         const normalizedId = normalize(user.externalName || user.id || '');
+        
+        // Load goals
         const goalsRef = doc(db, 'employee_goals', normalizedId);
         const goalsDoc = await getDoc(goalsRef);
         if (goalsDoc.exists()) {
           const data = goalsDoc.data();
-          setWeeklyGoal(data?.weeklyGoal || 0);
-          setMonthlyGoal(data?.monthlyGoal || 0);
+          setWeeklyGoal(data?.weeklyGoal || '');
+          setMonthlyGoal(data?.monthlyGoal || '');
         }
+
+        // Load badge status
+        const badgesRef = doc(db, 'employee_badges', normalizedId);
+        const badgesDoc = await getDoc(badgesRef);
+        if (badgesDoc.exists()) {
+          const data = badgesDoc.data();
+          setBadgeStatus(data?.badges || {});
+        }
+
         setLoading(false);
       } catch (error) {
-        console.error('Error loading goals:', error);
+        console.error('Error loading data:', error);
         setLoading(false);
       }
     };
 
-    loadGoals();
+    loadData();
   }, [user]);
 
   const handleSave = async () => {
@@ -50,13 +80,13 @@ export default function MobileGoals() {
 
     setSaving(true);
     try {
-      const dailyGoal = Math.round((weeklyGoal || 0) / 5);
+      const dailyGoal = Math.round(((weeklyGoal as number) || 0) / 5);
       const normalizedId = normalize(user.externalName || user.id || '');
       const goalsRef = doc(db, 'employee_goals', normalizedId);
       const saveData = {
         dailyGoal: dailyGoal,
-        weeklyGoal: weeklyGoal || 0,
-        monthlyGoal: monthlyGoal || 0,
+        weeklyGoal: (weeklyGoal as number) || 0,
+        monthlyGoal: (monthlyGoal as number) || 0,
         updatedAt: new Date().toISOString(),
         userId: user.id,
       };
@@ -90,7 +120,7 @@ export default function MobileGoals() {
     );
   }
 
-  const dailyGoal = Math.round((weeklyGoal || 0) / 5);
+  const dailyGoal = Math.round(((weeklyGoal as number) || 0) / 5);
 
   return (
     <div className="mobile-goals">
@@ -115,8 +145,7 @@ export default function MobileGoals() {
             <input
               type="number"
               value={weeklyGoal}
-              onChange={(e) => setWeeklyGoal(parseInt(e.target.value) || 0)}
-              placeholder="0"
+              onChange={(e) => setWeeklyGoal(e.target.value ? parseInt(e.target.value) : '')}
               autoFocus
             />
           </div>
@@ -126,8 +155,7 @@ export default function MobileGoals() {
             <input
               type="number"
               value={monthlyGoal}
-              onChange={(e) => setMonthlyGoal(parseInt(e.target.value) || 0)}
-              placeholder="0"
+              onChange={(e) => setMonthlyGoal(e.target.value ? parseInt(e.target.value) : '')}
             />
           </div>
 
@@ -140,19 +168,22 @@ export default function MobileGoals() {
           </button>
         </div>
 
-        <div className="goals-summary">
-          <h3>OPPSUMMERING</h3>
-          <div className="summary-item">
-            <span>Dagsmål:</span>
-            <strong>{dailyGoal}</strong>
-          </div>
-          <div className="summary-item">
-            <span>Ukesmål:</span>
-            <strong>{weeklyGoal}</strong>
-          </div>
-          <div className="summary-item">
-            <span>Månedsmål:</span>
-            <strong>{monthlyGoal}</strong>
+        {/* BADGES SECTION */}
+        <div className="badges-section">
+          <h3>BADGES</h3>
+          <div className="badges-grid">
+            {badgeDefinitions.map((badge) => {
+              const isEarned = badgeStatus[badge.emoji] !== false;
+              return (
+                <div
+                  key={badge.emoji}
+                  className={`badge-item-goal ${isEarned ? 'earned' : 'locked'}`}
+                  title={`${badge.navn}: ${badge.beskrivelse}`}
+                >
+                  {badge.emoji}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
