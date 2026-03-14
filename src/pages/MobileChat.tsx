@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChat.css';
 
@@ -16,83 +16,86 @@ interface DM {
   unreadCount: number;
 }
 
+// Allowed channel IDs that should display
+const ALLOWED_CHANNELS = [
+  'global',
+  'project-allente',
+  'dept-krs',
+  'dept-osl',
+  'dept-skien',
+  'admin-channel',
+  'teamleder-channel',
+];
+
+// Default emoji mapping for channels
+const CHANNEL_EMOJIS: { [key: string]: string } = {
+  'global': '🌍',
+  'project-allente': '🏢',
+  'dept-krs': '🏢',
+  'dept-osl': '🏢',
+  'dept-skien': '🏢',
+  'admin-channel': '⚙️',
+  'teamleder-channel': '👥',
+};
+
 export default function MobileChat() {
   const navigate = useNavigate();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [dms, setDMs] = useState<DM[]>([]);
+  const [loading, setLoading] = useState(true);
   // Default to channels tab (user came from channel, usually)
   const [activeTab, setActiveTab] = useState<'dms' | 'channels'>(() => {
     const saved = localStorage.getItem('mobile_chat_active_tab');
     return (saved as 'dms' | 'channels') || 'channels';
   });
 
-  // Ensure all channels exist in Firestore (same setup as Global)
+  // Load channels from Firestore (same as PC Chat)
   useEffect(() => {
-    const ensureChannels = async () => {
-      const channelDefs = [
-        { id: 'global', name: 'Global', emoji: '🌍' },
-        { id: 'project-allente', name: 'Allente Chat', emoji: '🏢' },
-        { id: 'dept-krs', name: 'KRS', emoji: '🏢' },
-        { id: 'dept-osl', name: 'OSL', emoji: '🏢' },
-        { id: 'dept-skien', name: 'Skien', emoji: '🏢' },
-        { id: 'admin-channel', name: 'Admin', emoji: '⚙️' },
-        { id: 'teamleder-channel', name: 'Teamleder', emoji: '👥' },
-      ];
-
-      // Create all channel documents with proper structure
-      for (const ch of channelDefs) {
-        try {
-          const channelDoc = doc(db, 'chat_channels', ch.id);
+    const loadChannels = async () => {
+      try {
+        setLoading(true);
+        const channelsRef = collection(db, 'chat_channels');
+        const snapshot = await getDocs(channelsRef);
+        
+        const channelList: Channel[] = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const id = data.id || doc.id;
           
-          let channelData: any = {
-            id: ch.id,
-            name: ch.name,
-            emoji: ch.emoji,
-            createdAt: serverTimestamp(),
-            lastMessage: '',
-            lastMessageTime: serverTimestamp(),
-            messages: []
-          };
-          
-          // Special handling for different channel types
-          if (ch.id === 'project-allente') {
-            channelData.type = 'project';
-            channelData.project = 'Allente';
-          } else if (ch.id.startsWith('dept-')) {
-            channelData.type = 'department';
-            const dept = ch.id.replace('dept-', '').toUpperCase();
-            channelData.department = dept;
-          } else if (ch.id === 'admin-channel' || ch.id === 'teamleder-channel') {
-            channelData.type = 'restricted';
-          } else {
-            channelData.type = 'global';
+          // Only include whitelisted channels
+          if (ALLOWED_CHANNELS.includes(id)) {
+            const unreadKey = `chat_unread_${id}`;
+            const unreadCount = parseInt(localStorage.getItem(unreadKey) || '0', 10);
+            
+            channelList.push({
+              id,
+              name: data.name || id,
+              emoji: CHANNEL_EMOJIS[id] || '📌',
+              unreadCount,
+            });
           }
-          
-          await setDoc(channelDoc, channelData, { merge: true });
-          console.log('✅ Channel created:', ch.id, 'Type:', channelData.type);
-        } catch (error) {
-          console.error('❌ Error creating channel:', ch.id, error);
-        }
+        });
+        
+        // Sort by ALLOWED_CHANNELS order
+        channelList.sort((a, b) => {
+          const indexA = ALLOWED_CHANNELS.indexOf(a.id);
+          const indexB = ALLOWED_CHANNELS.indexOf(b.id);
+          return indexA - indexB;
+        });
+        
+        console.log('✅ Loaded channels from Firestore:', channelList.length, 'channels');
+        setChannels(channelList);
+      } catch (error) {
+        console.error('❌ Error loading channels:', error);
+        // Fallback to empty
+        setChannels([]);
+      } finally {
+        setLoading(false);
       }
-
-      // Now load them
-      const channelList: Channel[] = channelDefs.map(ch => ({
-        ...ch,
-        unreadCount: 0
-      }));
-
-      // Update unread counts from localStorage
-      channelList.forEach(ch => {
-        const stored = localStorage.getItem(`chat_unread_${ch.id}`);
-        if (stored) {
-          ch.unreadCount = parseInt(stored, 10);
-        }
-      });
-
-      setChannels(channelList);
     };
 
-    ensureChannels();
+    loadChannels();
   }, []);
 
   // Load DMs
@@ -195,7 +198,9 @@ export default function MobileChat() {
           ) : (
             <div className="empty-state">Ingen DM-er ennå</div>
           )
-        ) : (
+        ) : loading ? (
+          <div className="empty-state">Laster kanaler...</div>
+        ) : channels.length > 0 ? (
           channels.map(ch => (
             <button
               key={ch.id}
@@ -211,6 +216,8 @@ export default function MobileChat() {
               )}
             </button>
           ))
+        ) : (
+          <div className="empty-state">Ingen kanaler funnet</div>
         )}
       </div>
     </div>
