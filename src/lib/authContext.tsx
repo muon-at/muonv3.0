@@ -28,12 +28,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    // Force logout on mount - must login with credentials every time
-    // (for development/testing with multiple users)
-    localStorage.removeItem('user');
-    localStorage.removeItem('auth');
-    setUser(null);
-    console.log('🔐 Fresh start - login required');
+    // Load auth from localStorage on app startup
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        console.log('✅ Auth restored from localStorage:', parsedUser.name);
+      } catch (error) {
+        console.error('❌ Failed to parse saved auth:', error);
+        localStorage.removeItem('user');
+      }
+    } else {
+      console.log('🔐 No saved auth - login required');
+    }
   }, []);
 
   const login = (name: string, id: string, role: string, fullEmployee?: any) => {
