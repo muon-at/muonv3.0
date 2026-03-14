@@ -37,9 +37,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
   flex: 1;
-  align-content: start;
+  align-content: center;
 }
 
 .mobile-home-card {
