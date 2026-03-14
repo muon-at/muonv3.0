@@ -111,7 +111,6 @@ export const RightNavBar: React.FC = () => {
           <button 
             className="nav-button"
             onClick={handleLogout}
-            title="Logg ut"
           >
             <div className="icon-circle">
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -125,7 +124,7 @@ export const RightNavBar: React.FC = () => {
           <button 
             className="nav-button"
             onClick={() => window.history.back()}
-            title="Tilbake"
+            
           >
             <div className="icon-circle">
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -140,7 +139,7 @@ export const RightNavBar: React.FC = () => {
             <button 
               className="nav-button"
               onClick={() => navigate('/admin-dashboard')}
-              title="Admin"
+              
             >
               <div className="icon-circle">
                 <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -156,7 +155,7 @@ export const RightNavBar: React.FC = () => {
             <button 
               className="nav-button"
               onClick={() => navigate('/teamleder')}
-              title="Teamleder"
+              
             >
               <div className="icon-circle">
                 <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -171,7 +170,7 @@ export const RightNavBar: React.FC = () => {
           <button 
             className="nav-button"
             onClick={() => navigate('/min-side')}
-            title="Min Side"
+            
           >
             <div className="icon-circle">
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -185,7 +184,7 @@ export const RightNavBar: React.FC = () => {
           <button 
             className={`nav-button ${isChatSidebarOpen ? 'active' : ''}`}
             onClick={handleChatToggle}
-            title="Chat"
+            
           >
             <div className="icon-circle" style={{ position: 'relative' }}>
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -223,7 +222,7 @@ export const RightNavBar: React.FC = () => {
         <button
           className="mobile-hamburger"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          title="Menu"
+          
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="24" height="24">
             {isMobileMenuOpen ? (

@@ -132,7 +132,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
         <button
           className="channel-circle"
           onClick={() => handleChannelClick('global')}
-          title="Global"
+          
           style={{ position: 'relative' }}
         >
           🌍
@@ -165,7 +165,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('dept-krs')}
-            title="KRS"
+            
             style={{ position: 'relative' }}
           >
             KRS
@@ -192,7 +192,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('dept-osl')}
-            title="OSL"
+            
             style={{ position: 'relative' }}
           >
             OSL
@@ -219,7 +219,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('dept-skien')}
-            title="SKN"
+            
             style={{ position: 'relative' }}
           >
             SKN
@@ -264,7 +264,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
         <button 
           className="channel-button"
           onClick={handleDMClick}
-          title="Direct Messages"
+          
           style={{ position: 'relative' }}
         >
           <div className="icon-circle">
@@ -301,7 +301,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('project-allente')}
-            title="Allente"
+            
           >
             🏢
           </button>
@@ -314,7 +314,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('teamleder-channel')}
-            title="Teamleder"
+            
             style={{ position: 'relative' }}
           >
             👥
@@ -347,7 +347,7 @@ export const LeftChatSidebar: React.FC<LeftChatSidebarProps> = ({ isOpen }) => {
           <button 
             className="channel-circle"
             onClick={() => handleChannelClick('admin-channel')}
-            title="Admin"
+            
             style={{ position: 'relative' }}
           >
             ⚙️

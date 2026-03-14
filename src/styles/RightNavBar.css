@@ -25,18 +25,20 @@
 }
 
 .nav-button {
-  width: 48px;
-  height: 48px;
+  width: 72px;
+  height: auto;
   border-radius: 8px;
   border: none;
   background: transparent;
   cursor: pointer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   position: relative;
   flex-shrink: 0;
+  padding: 0.4rem 0;
 }
 
 .nav-button:hover {
@@ -124,23 +126,21 @@
 }
 
 .nav-tooltip {
-  position: absolute;
-  right: 75px;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.3rem 0.4rem 0;
+  font-size: 0.6rem;
   font-weight: 600;
   white-space: nowrap;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: color 0.2s ease;
   z-index: 1000;
+  margin-top: 0.2rem;
 }
 
 .nav-button:hover .nav-tooltip {
-  opacity: 1;
+  color: rgba(255, 255, 255, 1);
 }
 
 /* Scrollbar styling for nav items */
