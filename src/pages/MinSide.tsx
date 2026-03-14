@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import NotificationPrompt from '../components/NotificationPrompt';
 import '../styles/MinSide.css';
 
 interface SalesRecord {
@@ -958,8 +957,6 @@ export default function MinSide() {
         )}
       </div>
       )}
-
-      <NotificationPrompt />
     </div>
   );
 }
