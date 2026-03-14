@@ -31,6 +31,11 @@ const badgeDefinitions: BadgeDefinition[] = [
   { emoji: '💎', navn: '20 SALG', verdi: '20+', beskrivelse: '20+ salg på EN dag' },
 ];
 
+// Normalize name for Firestore doc ID (remove slashes and special chars)
+const normalizeName = (name: string): string => {
+  return name.replace(/[\/\\]/g, '_').trim().toLowerCase();
+};
+
 const parseDate = (dateStr: string): Date => {
   if (!dateStr) return new Date(0);
   const trimmed = dateStr.trim();
@@ -97,7 +102,8 @@ export default function MinSide() {
       const externalName = user?.externalName || user?.name || '';
       if (!externalName) return;
       
-      const goalsRef = doc(db, 'employee_goals', externalName);
+      const normalizedName = normalizeName(externalName);
+      const goalsRef = doc(db, 'employee_goals', normalizedName);
       const goalsDoc = await getDoc(goalsRef);
       
       if (goalsDoc.exists()) {
@@ -229,8 +235,9 @@ export default function MinSide() {
       const externalName = user?.externalName || '';
       if (!externalName) return;
       
+      const normalizedName = normalizeName(externalName);
       // Load badges from user_earned_badges collection (cached from last calculation)
-      const badgeDocRef = doc(db, 'user_earned_badges', externalName);
+      const badgeDocRef = doc(db, 'user_earned_badges', normalizedName);
       const badgeSnapshot = await getDoc(badgeDocRef);
       
       if (badgeSnapshot.exists()) {
@@ -251,9 +258,10 @@ export default function MinSide() {
       const externalName = user?.externalName || '';
       if (!externalName) return;
       
+      const normalizedName = normalizeName(externalName);
       // Save earned badges to user_earned_badges collection
       const earnedBadges = Object.keys(badgeMap).filter(emoji => badgeMap[emoji]);
-      const badgesRef = doc(db, 'user_earned_badges', externalName);
+      const badgesRef = doc(db, 'user_earned_badges', normalizedName);
       await setDoc(badgesRef, { 
         badges: earnedBadges, 
         badgeMap: badgeMap,
@@ -906,7 +914,8 @@ export default function MinSide() {
               try {
                 const externalName = user?.externalName || user?.name || '';
                 if (externalName) {
-                  const goalsRef = doc(db, 'employee_goals', externalName);
+                  const normalizedName = normalizeName(externalName);
+                  const goalsRef = doc(db, 'employee_goals', normalizedName);
                   await setDoc(goalsRef, {
                     weeklyGoal,
                     monthlyGoal,

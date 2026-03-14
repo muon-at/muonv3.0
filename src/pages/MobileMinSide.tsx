@@ -42,6 +42,8 @@ const normalize = (str: string): string => {
   return str
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\/\\]/g, '_')
+    .toLowerCase()
     .trim();
 };
 
@@ -81,7 +83,8 @@ export default function MobileMinSide() {
         let dailyGoal = 0;
 
         try {
-          const goalsRef = doc(db, 'employee_goals', user.id);
+          const normalizedId = normalize(user.externalName || user.id || '');
+          const goalsRef = doc(db, 'employee_goals', normalizedId);
           const goalsDoc = await getDoc(goalsRef);
           if (goalsDoc.exists()) {
             const goals = goalsDoc.data();

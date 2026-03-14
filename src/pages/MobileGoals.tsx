@@ -5,6 +5,15 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileGoals.css';
 
+const normalize = (str: string): string => {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\/\\]/g, '_')
+    .toLowerCase()
+    .trim();
+};
+
 export default function MobileGoals() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -18,7 +27,8 @@ export default function MobileGoals() {
 
     const loadGoals = async () => {
       try {
-        const goalsRef = doc(db, 'employee_goals', user.id);
+        const normalizedId = normalize(user.externalName || user.id || '');
+        const goalsRef = doc(db, 'employee_goals', normalizedId);
         const goalsDoc = await getDoc(goalsRef);
         if (goalsDoc.exists()) {
           const data = goalsDoc.data();
@@ -41,7 +51,8 @@ export default function MobileGoals() {
     setSaving(true);
     try {
       const dailyGoal = Math.round((weeklyGoal || 0) / 5);
-      const goalsRef = doc(db, 'employee_goals', user.id);
+      const normalizedId = normalize(user.externalName || user.id || '');
+      const goalsRef = doc(db, 'employee_goals', normalizedId);
       const saveData = {
         dailyGoal: dailyGoal,
         weeklyGoal: weeklyGoal || 0,
