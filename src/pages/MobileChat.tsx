@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChat.css';
@@ -38,10 +39,17 @@ const CHANNEL_EMOJIS: { [key: string]: string } = {
   'teamleder-channel': '👥',
 };
 
+interface Employee {
+  name: string;
+  externalName: string;
+}
+
 export default function MobileChat() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [dms, setDMs] = useState<DM[]>([]);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   // Default to channels tab (user came from channel, usually)
   const [activeTab, setActiveTab] = useState<'dms' | 'channels'>(() => {
@@ -136,6 +144,34 @@ export default function MobileChat() {
     loadChannels();
   }, []);
 
+  // Load all employees
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const employeesRef = collection(db, 'employees');
+        const snapshot = await getDocs(employeesRef);
+        const empList: Employee[] = [];
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.name && data.name !== user?.name) { // Exclude self
+            empList.push({
+              name: data.name,
+              externalName: data.externalName || data.name
+            });
+          }
+        });
+        
+        empList.sort((a, b) => a.name.localeCompare(b.name));
+        setAllEmployees(empList);
+      } catch (error) {
+        console.error('Error loading employees:', error);
+      }
+    };
+
+    loadEmployees();
+  }, [user]);
+
   // Load DMs
   useEffect(() => {
     const loadDMs = () => {
@@ -217,25 +253,52 @@ export default function MobileChat() {
 
       <div className="mobile-chat-list">
         {activeTab === 'dms' ? (
-          dms.length > 0 ? (
-            dms.map(dm => (
-              <button
-                key={dm.name}
-                className="chat-list-item"
-                onClick={() => navigate(`/home/chat/dm/${encodeURIComponent(dm.name)}`)}
-              >
-                <div className="chat-list-avatar">👤</div>
-                <div className="chat-list-info">
-                  <div className="chat-list-name">{dm.name}</div>
+          <>
+            {dms.length > 0 && (
+              <>
+                <div style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', color: '#999', fontWeight: '700', textTransform: 'uppercase' }}>
+                  Aktive Konversasjoner
                 </div>
-                {dm.unreadCount > 0 && (
-                  <div className="chat-list-badge">{dm.unreadCount}</div>
-                )}
-              </button>
-            ))
-          ) : (
-            <div className="empty-state">Ingen DM-er ennå</div>
-          )
+                {dms.map(dm => (
+                  <button
+                    key={dm.name}
+                    className="chat-list-item"
+                    onClick={() => navigate(`/home/chat/dm/${encodeURIComponent(dm.name)}`)}
+                  >
+                    <div className="chat-list-avatar">👤</div>
+                    <div className="chat-list-info">
+                      <div className="chat-list-name">{dm.name}</div>
+                    </div>
+                    {dm.unreadCount > 0 && (
+                      <div className="chat-list-badge">{dm.unreadCount}</div>
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+            <div style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', color: '#999', fontWeight: '700', textTransform: 'uppercase', marginTop: '1rem' }}>
+              Alle Ansatte
+            </div>
+            {allEmployees.length > 0 ? (
+              allEmployees.map(emp => (
+                <button
+                  key={emp.name}
+                  className="chat-list-item"
+                  onClick={() => navigate(`/home/chat/dm/${encodeURIComponent(emp.name)}`)}
+                >
+                  <div className="chat-list-avatar">👤</div>
+                  <div className="chat-list-info">
+                    <div className="chat-list-name">{emp.name}</div>
+                    {emp.externalName && emp.externalName !== emp.name && (
+                      <div style={{ fontSize: '0.75rem', color: '#999' }}>{emp.externalName}</div>
+                    )}
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="empty-state">Ingen ansatte å sende DM til</div>
+            )}
+          </>
         ) : loading ? (
           <div className="empty-state">Laster kanaler...</div>
         ) : channels.length > 0 ? (
