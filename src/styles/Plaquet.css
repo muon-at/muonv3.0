@@ -14,19 +14,20 @@
   width: 100%;
   aspect-ratio: 1;
   background: linear-gradient(135deg, #8B6F47 0%, #A0826D 50%, #8B6F47 100%);
-  border: 5px solid #5C4A3D;
-  border-radius: 8px;
+  border: 6px solid #5C4A3D;
+  border-radius: 10px;
   padding: 0.8rem;
   box-shadow: 
     inset 0 2px 5px rgba(255,255,255,0.3),
     inset 0 -2px 5px rgba(0,0,0,0.4),
-    0 8px 16px rgba(0,0,0,0.3);
+    0 10px 20px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  min-height: 180px;
+  overflow: visible;
+  min-height: 200px;
+  background-clip: padding-box;
 }
 
 /* Gold center background */

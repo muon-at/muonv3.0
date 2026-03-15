@@ -24,13 +24,16 @@ export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
             map[data.externalName] = data.department || 'Allente';
           }
         });
+        console.log('✅ Loaded emp dept map:', map);
+        console.log('✅ Records cache employees:', Object.keys(recordsCache.employees || {}).length);
+        console.log('✅ Records cache departments:', Object.keys(recordsCache.departments || {}).length);
         setEmpDeptMap(map);
       } catch (err) {
         console.error('Error loading employee departments:', err);
       }
     };
     loadEmpDepts();
-  }, []);
+  }, [recordsCache]);
 
   // Get top employee for each department and period
   const getTopForDept = (dept: string, period: 'dayBest' | 'weekBest' | 'monthBest') => {

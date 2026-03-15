@@ -165,8 +165,13 @@ export default function MinSide() {
   useEffect(() => {
     const initRecordsCache = async () => {
       const cache = await buildRecordsCache(db);
+      console.log('📊 Records cache initialized:', {
+        employees: Object.keys(cache.employees || {}).length,
+        departments: Object.keys(cache.departments || {}).length,
+        empNames: Object.keys(cache.employees || {}).slice(0, 3),
+        deptNames: Object.keys(cache.departments || {})
+      });
       setRecordsCache(cache);
-      console.log('📊 Records cache initialized:', Object.keys(cache).length, 'employees');
     };
     initRecordsCache();
   }, []);
