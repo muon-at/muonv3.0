@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MobileChatConversation.css';
 
@@ -99,110 +99,49 @@ export default function MobileChatConversation() {
 
       let unsubscribe: (() => void) | undefined;
 
-      // Initialize channel async
-      console.log('🚀 Initializing channel:', { chatName, title, isDM, type });
+      console.log('🚀 Loading channel:', { chatName, title });
       
-      if (chatName === 'project-allente') {
-        console.log('⚠️ ALLENTE CHAT DETECTED - debugging this one');
-      }
+      // Load messages directly - skip metadata updates that might hang
+      const messagesRef = collection(db, 'chat_channels', chatName, 'messages');
+      const messagesQ = query(messagesRef, orderBy('timestamp', 'asc'));
       
-      // Load current document to see structure
-      const channelDocRef = doc(db, 'chat_channels', chatName);
+      console.log('🔍 Setting up listener:', { path: `chat_channels/${chatName}/messages` });
       
-      // Non-blocking: initialize channel metadata in background
-      setDoc(channelDocRef, {
-        id: chatName,
-        name: title,
-        type: 'channel',
-        unread: 0,
-        createdAt: serverTimestamp(),
-        lastMessage: '',
-        lastMessageTime: serverTimestamp()
-      }, { merge: true }).catch((error) => {
-        console.warn('⚠️ Could not update channel metadata:', error);
-      });
-      
-      // Don't wait for setDoc - load messages immediately
-      (async () => {
-        console.log('✅ Channel doc ready:', chatName);
-        
-        // Log current document structure for debugging
-        try {
-          const docSnap = await getDoc(channelDocRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            console.log('📄 Channel document structure:', {
-              fields: Object.keys(data),
-              hasMessages: 'messages' in data,
-              type: data.type,
-              name: data.name
-            });
-          } else {
-            console.log('⚠️ Channel doc not found:', chatName);
-          }
-        } catch (e) {
-          console.log('⚠️ Could not read channel doc:', (e as any).message);
-        }
-        
-        // Load messages
-        const messagesRef = collection(db, 'chat_channels', chatName, 'messages');
-        const messagesQ = query(messagesRef, orderBy('timestamp', 'asc'));
-        
-        console.log('🔍 Setting up listener for:', { 
-          path: `chat_channels/${chatName}/messages`,
-          chatName,
-          title
-        });
-        
-        let snapshotCount = 0;
-        let hasData = false;
-        timeoutId = setTimeout(() => {
-          if (!hasData && snapshotCount === 0) {
-            console.warn('⚠️ Listener timeout - no data received:', chatName);
-            setMessages([]);
-          }
-        }, 3000);
-        
-        unsubscribe = onSnapshot(messagesQ, (snapshot) => {
-          hasData = true;
-          if (timeoutId) clearTimeout(timeoutId);
-          snapshotCount++;
-          console.log('💬 Messages snapshot #' + snapshotCount + ':', { 
-            count: snapshot.size, 
-            channelId: chatName,
-            empty: snapshot.empty,
-            isDeptChannel: chatName.startsWith('dept-')
-          });
-          const msgs: Message[] = [];
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            msgs.push({
-              id: doc.id,
-              sender: data.sender || 'Unknown',
-              senderId: data.senderId || '',
-              content: data.content || '',
-              timestamp: data.timestamp,
-              type: data.type || 'text',
-              fileName: data.fileName
-            });
-          });
-          console.log('✅ Setting messages:', msgs.length, 'items');
-          setMessages(msgs);
-          if (msgs.length > 0) {
-            setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-          }
-        }, (error) => {
-          if (timeoutId) clearTimeout(timeoutId);
-          console.error('❌ Listener error for channel:', chatName);
-          console.error('Error:', {
-            code: (error as any)?.code,
-            message: (error as any)?.message
-          });
+      let snapshotCount = 0;
+      let hasData = false;
+      timeoutId = setTimeout(() => {
+        if (!hasData && snapshotCount === 0) {
+          console.warn('⚠️ Listener timeout - no data:', chatName);
           setMessages([]);
+        }
+      }, 3000);
+      
+      unsubscribe = onSnapshot(messagesQ, (snapshot) => {
+        hasData = true;
+        if (timeoutId) clearTimeout(timeoutId);
+        snapshotCount++;
+        console.log('💬 Snapshot #' + snapshotCount + ':', snapshot.size, 'msgs from', chatName);
+        const msgs: Message[] = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          msgs.push({
+            id: doc.id,
+            sender: data.sender || 'Unknown',
+            senderId: data.senderId || '',
+            content: data.content || '',
+            timestamp: data.timestamp,
+            type: data.type || 'text',
+            fileName: data.fileName
+          });
         });
-      })().catch((error) => {
-        console.error('❌ Channel init error:', error);
-        console.error('❌ Stack:', error instanceof Error ? error.stack : 'no stack');
+        console.log('✅ Setting', msgs.length, 'messages for', chatName);
+        setMessages(msgs);
+        if (msgs.length > 0) {
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+        }
+      }, (error) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        console.error('❌ Listener error for', chatName, ':', (error as any)?.message);
         setMessages([]);
       });
 
