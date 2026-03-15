@@ -96,8 +96,11 @@ export default function MinSide() {
     daily: 0,
     dailyTo16: 0,
     dailyTo21: 0,
-    weekly: 0,
-    monthly: 0,
+    dailyRunrate: 0,
+    weeklyActual: 0,
+    weeklyRunrate: 0,
+    monthlyActual: 0,
+    monthlyRunrate: 0,
   });
 
   const [departmentStats, setDepartmentStats] = useState({
@@ -773,9 +776,11 @@ export default function MinSide() {
 
       // Emoji values: 🔔=800, 💎=1000, 🎁=-200
       const emojiEarningsToday = (bellCountToday * 800) + (gemCountToday * 1000) - (giftCountToday * 200);
+      const emojiEarningsWeek = (bellCountWeek * 800) + (gemCountWeek * 1000);
+      const emojiEarningsMonth = (bellCountMonth * 800) + (gemCountMonth * 1000);
       const totalEarnings = contractEarnings + emojiEarningsToday;
 
-      // Week earnings
+      // Week earnings (actual, not runrate)
       const contractsWeek = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
         return date && date >= weekStart && date <= today;
@@ -784,9 +789,9 @@ export default function MinSide() {
         const produktName = c.produkt || '';
         const provisjon = produktProvisjon[produktName] || 0;
         return sum + provisjon;
-      }, 0) + emojiEarningsToday; // Add today's emoji earnings
+      }, 0) + emojiEarningsWeek;
 
-      // Month earnings
+      // Month earnings (actual, not runrate)
       const contractsMonth = employeeContracts.filter(c => {
         const date = parseDate(c.dato || '');
         return date && date >= monthStart && date <= today;
@@ -795,7 +800,7 @@ export default function MinSide() {
         const produktName = c.produkt || '';
         const provisjon = produktProvisjon[produktName] || 0;
         return sum + provisjon;
-      }, 0) + emojiEarningsToday; // Add today's emoji earnings
+      }, 0) + emojiEarningsMonth;
 
       // Calculate hours worked today
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0);
@@ -819,8 +824,11 @@ export default function MinSide() {
         daily: Math.round(emojiEarningsToday),
         dailyTo16: Math.round(dailyEarningsTo16 * 100) / 100,
         dailyTo21: Math.round(dailyEarningsTo21 * 100) / 100,
-        weekly: Math.round(weeklyEarningsRunrate),
-        monthly: Math.round(monthlyEarningsRunrate),
+        dailyRunrate: Math.round(dailyEarningsTo21), // Earnings extrapolated to 21:00
+        weeklyActual: Math.round(weekEarnings), // Actual earnings this week
+        weeklyRunrate: Math.round(weeklyEarningsRunrate), // Extrapolated to full 5-day week
+        monthlyActual: Math.round(monthEarnings), // Actual earnings this month so far
+        monthlyRunrate: Math.round(monthlyEarningsRunrate), // Extrapolated to full month
       });
 
       console.log('💰 Earnings calculated:', {
@@ -1163,7 +1171,7 @@ export default function MinSide() {
               </div>
               <div className="sales-row">
                 <span className="sales-label">Lønn til nå:</span>
-                <span className="sales-value">{earnings.weekly.toLocaleString('no-NO')} kr</span>
+                <span className="sales-value">{earnings.weeklyActual?.toLocaleString('no-NO')} kr</span>
               </div>
               <div className="sales-divider"></div>
               <div className="sales-row small">
@@ -1172,7 +1180,7 @@ export default function MinSide() {
               </div>
               <div className="sales-row small">
                 <span className="sales-label">Runrate lønn:</span>
-                <span className="sales-value">{(earnings.weekly).toLocaleString('no-NO')} kr</span>
+                <span className="sales-value">{earnings.weeklyRunrate?.toLocaleString('no-NO')} kr</span>
               </div>
             </div>
           </div>
@@ -1187,7 +1195,7 @@ export default function MinSide() {
               </div>
               <div className="sales-row">
                 <span className="sales-label">Lønn til nå:</span>
-                <span className="sales-value">{earnings.monthly.toLocaleString('no-NO')} kr</span>
+                <span className="sales-value">{earnings.monthlyActual?.toLocaleString('no-NO')} kr</span>
               </div>
               <div className="sales-divider"></div>
               <div className="sales-row small">
@@ -1196,7 +1204,7 @@ export default function MinSide() {
               </div>
               <div className="sales-row small">
                 <span className="sales-label">Runrate lønn:</span>
-                <span className="sales-value">{(earnings.monthly).toLocaleString('no-NO')} kr</span>
+                <span className="sales-value">{earnings.monthlyRunrate?.toLocaleString('no-NO')} kr</span>
               </div>
             </div>
           </div>
@@ -1241,12 +1249,12 @@ export default function MinSide() {
                   <div className="earnings-period-label">UKE</div>
                   <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
-                    <span className="earnings-period-value">{earnings.weekly.toLocaleString('no-NO')}</span>
+                    <span className="earnings-period-value">{earnings.weeklyActual?.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
                   </div>
                   <div className="earnings-period-runrate">
                     <div className="earnings-period-runrate-label">Runrate</div>
-                    <span className="earnings-period-runrate-value">{earnings.weekly.toLocaleString('no-NO')} kr</span>
+                    <span className="earnings-period-runrate-value">{earnings.weeklyRunrate?.toLocaleString('no-NO')} kr</span>
                   </div>
                 </div>
 
@@ -1255,12 +1263,12 @@ export default function MinSide() {
                   <div className="earnings-period-label">MÅNED</div>
                   <div className="earnings-period-header">Til nå</div>
                   <div className="earnings-period-stat">
-                    <span className="earnings-period-value">{earnings.monthly.toLocaleString('no-NO')}</span>
+                    <span className="earnings-period-value">{earnings.monthlyActual?.toLocaleString('no-NO')}</span>
                     <span className="earnings-period-unit">kr</span>
                   </div>
                   <div className="earnings-period-runrate">
                     <div className="earnings-period-runrate-label">Runrate</div>
-                    <span className="earnings-period-runrate-value">{earnings.monthly.toLocaleString('no-NO')} kr</span>
+                    <span className="earnings-period-runrate-value">{earnings.monthlyRunrate?.toLocaleString('no-NO')} kr</span>
                   </div>
                 </div>
               </div>
