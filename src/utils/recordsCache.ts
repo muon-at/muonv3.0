@@ -2,12 +2,29 @@ import { collection, getDocs, Firestore } from 'firebase/firestore';
 
 export interface HistoricalRecord {
   dayBest: number;
+  dayBestEmployee?: string;
   weekBest: number;
+  weekBestEmployee?: string;
   monthBest: number;
+  monthBestEmployee?: string;
+}
+
+export interface DepartmentRecords {
+  dayBest: number;
+  dayBestEmployee?: string;
+  weekBest: number;
+  weekBestEmployee?: string;
+  monthBest: number;
+  monthBestEmployee?: string;
 }
 
 export interface RecordsCache {
-  [employeeName: string]: HistoricalRecord;
+  employees: {
+    [employeeName: string]: HistoricalRecord;
+  };
+  departments: {
+    [deptName: string]: DepartmentRecords;
+  };
 }
 
 export interface BrokenRecord {
@@ -65,7 +82,19 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
       }
     });
 
-    const cache: RecordsCache = {};
+    // Load employees to get department info
+    const empRef = collection(db, 'employees');
+    const empSnapshot = await getDocs(empRef);
+    const empDepartments: { [emp: string]: string } = {};
+    empSnapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.externalName) {
+        empDepartments[data.externalName] = data.department || 'Unknown';
+      }
+    });
+
+    const employeeCache: { [key: string]: HistoricalRecord } = {};
+    const departmentCache: { [key: string]: DepartmentRecords } = {};
     
     // Group contracts by employee
     const employeeContracts: { [key: string]: any[] } = {};
@@ -77,19 +106,8 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
       }
     });
 
-    // For each employee, find best day/week/month
+    // Calculate EMPLOYEE records
     Object.entries(employeeContracts).forEach(([emp, empContracts]) => {
-      const dayBests: number[] = [];
-      const weekBests: number[] = [];
-      const monthBests: number[] = [];
-
-      // Get date range
-      const dates = empContracts
-        .map(c => parseDate(c.dato || ''))
-        .filter((d): d is Date => d !== null);
-      
-      if (dates.length === 0) return;
-
       // Calculate best day
       const dayMap: { [key: string]: number } = {};
       empContracts.forEach(c => {
@@ -97,7 +115,6 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
         dayMap[dateStr] = (dayMap[dateStr] || 0) + 1;
       });
       const dayBest = Math.max(0, ...Object.values(dayMap));
-      dayBests.push(dayBest);
 
       // Calculate best week
       const weekMap: { [key: string]: number } = {};
@@ -109,7 +126,6 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
         }
       });
       const weekBest = Math.max(0, ...Object.values(weekMap));
-      weekBests.push(weekBest);
 
       // Calculate best month
       const monthMap: { [key: string]: number } = {};
@@ -121,20 +137,71 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
         }
       });
       const monthBest = Math.max(0, ...Object.values(monthMap));
-      monthBests.push(monthBest);
 
-      cache[emp] = {
-        dayBest: Math.max(...dayBests),
-        weekBest: Math.max(...weekBests),
-        monthBest: Math.max(...monthBests),
+      employeeCache[emp] = {
+        dayBest,
+        weekBest,
+        monthBest,
       };
     });
 
-    console.log('✅ Records cache built:', Object.keys(cache).length, 'employees');
-    return cache;
+    // Calculate DEPARTMENT records (by totaling all employees in each dept)
+    const deptContracts: { [dept: string]: any[] } = {};
+    contracts.forEach(c => {
+      const emp = c.selger || '';
+      const dept = empDepartments[emp] || 'Unknown';
+      if (!deptContracts[dept]) deptContracts[dept] = [];
+      deptContracts[dept].push(c);
+    });
+
+    Object.entries(deptContracts).forEach(([dept, deptContractList]) => {
+      // Calculate best day (dept total)
+      const dayMap: { [key: string]: number } = {};
+      deptContractList.forEach(c => {
+        const dateStr = c.dato || '';
+        dayMap[dateStr] = (dayMap[dateStr] || 0) + 1;
+      });
+      const dayBest = Math.max(0, ...Object.values(dayMap));
+
+      // Calculate best week (dept total)
+      const weekMap: { [key: string]: number } = {};
+      deptContractList.forEach(c => {
+        const cDate = parseDate(c.dato || '');
+        if (cDate) {
+          const weekKey = getWeekKey(cDate);
+          weekMap[weekKey] = (weekMap[weekKey] || 0) + 1;
+        }
+      });
+      const weekBest = Math.max(0, ...Object.values(weekMap));
+
+      // Calculate best month (dept total)
+      const monthMap: { [key: string]: number } = {};
+      deptContractList.forEach(c => {
+        const cDate = parseDate(c.dato || '');
+        if (cDate) {
+          const monthKey = `${cDate.getFullYear()}-${String(cDate.getMonth() + 1).padStart(2, '0')}`;
+          monthMap[monthKey] = (monthMap[monthKey] || 0) + 1;
+        }
+      });
+      const monthBest = Math.max(0, ...Object.values(monthMap));
+
+      departmentCache[dept] = {
+        dayBest,
+        weekBest,
+        monthBest,
+      };
+    });
+
+    const result: RecordsCache = {
+      employees: employeeCache,
+      departments: departmentCache,
+    };
+
+    console.log('✅ Records cache built:', Object.keys(employeeCache).length, 'employees,', Object.keys(departmentCache).length, 'departments');
+    return result;
   } catch (err) {
     console.error('Error building records cache:', err);
-    return {};
+    return { employees: {}, departments: {} };
   }
 };
 
@@ -146,13 +213,15 @@ export const checkRecordBreak = (
   period: 'day' | 'week' | 'month',
   currentCount: number,
   currentWithEmojis: number,
-  cache: RecordsCache
+  cache: RecordsCache,
+  isDepartment: boolean = false
 ): BrokenRecord | null => {
-  const historicalRecord = cache[employee];
+  const records = isDepartment ? cache.departments : cache.employees;
+  const historicalRecord = records[employee];
   if (!historicalRecord) return null;
 
-  const bestKey = `${period}Best` as keyof HistoricalRecord;
-  const historicalBest = historicalRecord[bestKey];
+  const bestKey = `${period}Best` as keyof (HistoricalRecord | DepartmentRecords);
+  const historicalBest = historicalRecord[bestKey] as number;
 
   // Check if record is broken (with or without emojis)
   if (currentWithEmojis > historicalBest) {

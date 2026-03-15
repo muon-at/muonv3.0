@@ -148,7 +148,7 @@ export default function MinSide() {
     monthTopThree: [] as Array<{ name: string; count: number }>,
   });
 
-  const [recordsCache, setRecordsCache] = useState<RecordsCache>({});
+  const [recordsCache, setRecordsCache] = useState<RecordsCache>({ employees: {}, departments: {} });
 
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
