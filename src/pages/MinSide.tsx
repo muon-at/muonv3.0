@@ -5,7 +5,7 @@ import { db } from '../lib/firebase';
 import '../styles/MinSide.css';
 import { buildRecordsCache, checkRecordBreak, formatRecordMessage } from '../utils/recordsCache';
 import type { RecordsCache, BrokenRecord } from '../utils/recordsCache';
-import { postRecordToDiscord } from '../utils/discordWebhook';
+import { postRecordToChat } from '../utils/discordWebhook';
 
 interface SalesRecord {
   dato?: string;
@@ -482,9 +482,9 @@ export default function MinSide() {
         const broken = checkRecordBreak(dayTop.name, 'day', dayTop.contracts, dayRecordWithEmojis, recordsCache);
         if (broken) {
           newBrokenRecords.push(broken);
-          // Post to Discord
+          // Post to Allente Chat
           const message = formatRecordMessage(broken, department);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
@@ -496,7 +496,7 @@ export default function MinSide() {
         if (broken) {
           newBrokenRecords.push(broken);
           const message = formatRecordMessage(broken, department);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
@@ -508,7 +508,7 @@ export default function MinSide() {
         if (broken) {
           newBrokenRecords.push(broken);
           const message = formatRecordMessage(broken, department);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
@@ -679,7 +679,7 @@ export default function MinSide() {
         if (broken) {
           projectBrokenRecords.push(broken);
           const message = formatRecordMessage(broken, undefined, project);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
@@ -691,7 +691,7 @@ export default function MinSide() {
         if (broken) {
           projectBrokenRecords.push(broken);
           const message = formatRecordMessage(broken, undefined, project);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
@@ -703,7 +703,7 @@ export default function MinSide() {
         if (broken) {
           projectBrokenRecords.push(broken);
           const message = formatRecordMessage(broken, undefined, project);
-          postRecordToDiscord(message);
+          postRecordToChat(db, message);
         }
       }
 
