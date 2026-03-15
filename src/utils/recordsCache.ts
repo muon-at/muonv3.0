@@ -59,8 +59,8 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
       const data = doc.data();
       const cDate = parseDate(data.dato || '');
       
-      // Only include contracts from 2024-2025
-      if (cDate && cDate.getFullYear() >= 2024) {
+      // Include ALL contracts (all years are live and dynamic)
+      if (cDate) {
         contracts.push(data);
       }
     });
