@@ -71,18 +71,18 @@ export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
               <div className="plaquet-records">
                 <div className="plaquet-record">
                   <span className="plaquet-record-label">Day:</span>
-                  <span className="plaquet-record-name">{dept.day ? dept.day[0].split(' ')[0] : '—'}</span>
-                  <span className="plaquet-record-value">{dept.day ? dept.day[1].dayBest : '0'}</span>
+                  <span className="plaquet-record-name">{dept.day ? dept.day.name.split(' ')[0] : '—'}</span>
+                  <span className="plaquet-record-value">{dept.day ? dept.day.count : '0'}</span>
                 </div>
                 <div className="plaquet-record">
                   <span className="plaquet-record-label">Week:</span>
-                  <span className="plaquet-record-name">{dept.week ? dept.week[0].split(' ')[0] : '—'}</span>
-                  <span className="plaquet-record-value">{dept.week ? dept.week[1].weekBest : '0'}</span>
+                  <span className="plaquet-record-name">{dept.week ? dept.week.name.split(' ')[0] : '—'}</span>
+                  <span className="plaquet-record-value">{dept.week ? dept.week.count : '0'}</span>
                 </div>
                 <div className="plaquet-record">
                   <span className="plaquet-record-label">Month:</span>
-                  <span className="plaquet-record-name">{dept.month ? dept.month[0].split(' ')[0] : '—'}</span>
-                  <span className="plaquet-record-value">{dept.month ? dept.month[1].monthBest : '0'}</span>
+                  <span className="plaquet-record-name">{dept.month ? dept.month.name.split(' ')[0] : '—'}</span>
+                  <span className="plaquet-record-value">{dept.month ? dept.month.count : '0'}</span>
                 </div>
               </div>
             </div>
