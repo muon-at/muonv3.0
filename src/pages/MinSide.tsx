@@ -1064,8 +1064,7 @@ export default function MinSide() {
       {activeTab === 'avd' && (
       <div className="tab-content">
         <div className="content-title">
-          <h3>🏢 Avdeling: {user?.department}</h3>
-          <p className="content-subtitle">Samlet resultat for alle i {user?.department}</p>
+          <h3>{user?.department}</h3>
         </div>
 
         {/* DAY / WEEK / MONTH - Compact 3 column layout */}
