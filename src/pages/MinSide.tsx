@@ -1068,73 +1068,67 @@ export default function MinSide() {
           <p className="content-subtitle">Samlet resultat for alle i {user?.department}</p>
         </div>
 
-        {/* DAY */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h4 style={{ marginBottom: '1rem', color: '#666' }}>📅 DAY</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ background: '#f0f0f0', padding: '1.5rem', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Total (Emojis + Kontrakter)</div>
-              <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#333' }}>{departmentStats.dayTotal + departmentStats.dayContracts}</div>
-              <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>{departmentStats.dayTotal} + {departmentStats.dayContracts}</div>
+        {/* DAY / WEEK / MONTH - Compact 3 column layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', marginBottom: '1rem' }}>
+          {/* DAY */}
+          <div>
+            <h4 style={{ marginBottom: '0.75rem', color: '#666', fontSize: '0.95rem' }}>📅 DAY</h4>
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
+              <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.dayTotal + departmentStats.dayContracts}</div>
+              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.dayTotal} + {departmentStats.dayContracts}</div>
             </div>
+            {departmentStats.dayTopThree.length > 0 && (
+              <div>
+                {departmentStats.dayTopThree.map((emp, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.4rem 0', borderBottom: '1px solid #eee' }}>
+                    <span>#{idx + 1} {emp.name.split(' ')[0]}</span>
+                    <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {departmentStats.dayTopThree.length > 0 && (
-            <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#666', marginBottom: '0.75rem' }}>Top 3</div>
-              {departmentStats.dayTopThree.map((emp, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: '#f9f9f9', borderRadius: '6px', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: '500' }}>#{idx + 1} {emp.name}</span>
-                  <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* WEEK */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h4 style={{ marginBottom: '1rem', color: '#666' }}>📊 WEEK</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ background: '#e8f4f8', padding: '1.5rem', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Total (Emojis + Kontrakter)</div>
-              <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#333' }}>{departmentStats.weekTotal + departmentStats.weekContracts}</div>
-              <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>{departmentStats.weekTotal} + {departmentStats.weekContracts}</div>
+          {/* WEEK */}
+          <div>
+            <h4 style={{ marginBottom: '0.75rem', color: '#666', fontSize: '0.95rem' }}>📊 WEEK</h4>
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
+              <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.weekTotal + departmentStats.weekContracts}</div>
+              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.weekTotal} + {departmentStats.weekContracts}</div>
             </div>
+            {departmentStats.weekTopThree.length > 0 && (
+              <div>
+                {departmentStats.weekTopThree.map((emp, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.4rem 0', borderBottom: '1px solid #eee' }}>
+                    <span>#{idx + 1} {emp.name.split(' ')[0]}</span>
+                    <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {departmentStats.weekTopThree.length > 0 && (
-            <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#666', marginBottom: '0.75rem' }}>Top 3</div>
-              {departmentStats.weekTopThree.map((emp, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: '#f9f9f9', borderRadius: '6px', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: '500' }}>#{idx + 1} {emp.name}</span>
-                  <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* MONTH */}
-        <div>
-          <h4 style={{ marginBottom: '1rem', color: '#666' }}>📈 MONTH</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-            <div style={{ background: '#f0e8f8', padding: '1.5rem', borderRadius: '8px', textAlign: 'center' }}>
-              <div style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>Total (Emojis + Kontrakter)</div>
-              <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#333' }}>{departmentStats.monthTotal + departmentStats.monthContracts}</div>
-              <div style={{ fontSize: '0.85rem', color: '#999', marginTop: '0.5rem' }}>{departmentStats.monthTotal} + {departmentStats.monthContracts}</div>
+          {/* MONTH */}
+          <div>
+            <h4 style={{ marginBottom: '0.75rem', color: '#666', fontSize: '0.95rem' }}>📈 MONTH</h4>
+            <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
+              <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
+              <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.monthTotal + departmentStats.monthContracts}</div>
+              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.monthTotal} + {departmentStats.monthContracts}</div>
             </div>
+            {departmentStats.monthTopThree.length > 0 && (
+              <div>
+                {departmentStats.monthTopThree.map((emp, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '0.4rem 0', borderBottom: '1px solid #eee' }}>
+                    <span>#{idx + 1} {emp.name.split(' ')[0]}</span>
+                    <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {departmentStats.monthTopThree.length > 0 && (
-            <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#666', marginBottom: '0.75rem' }}>Top 3</div>
-              {departmentStats.monthTopThree.map((emp, idx) => (
-                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', background: '#f9f9f9', borderRadius: '6px', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: '500' }}>#{idx + 1} {emp.name}</span>
-                  <span style={{ color: '#666' }}>{emp.count} + {emp.contracts}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </div>
       )}
