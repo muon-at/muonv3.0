@@ -118,6 +118,12 @@ export default function MinSide() {
     monthRecord: { name: '', count: 0 },
   });
 
+  const [departmentDeptStats, setDepartmentDeptStats] = useState({
+    dayTopThree: [] as Array<{ name: string; count: number }>,
+    weekTopThree: [] as Array<{ name: string; count: number }>,
+    monthTopThree: [] as Array<{ name: string; count: number }>,
+  });
+
   const [projectStats, setProjectStats] = useState({
     dayTotal: 0,
     dayContracts: 0,
@@ -442,6 +448,58 @@ export default function MinSide() {
       const weekTop3 = getTop3('weekCount', 'weekContracts');
       const monthTop3 = getTop3('monthCount', 'monthContracts');
 
+      // Calculate OTHER departments (KRS, OSL, Skien - no MUON)
+      const otherDepts = ['KRS', 'OSL', 'Skien'].filter(d => d !== department && d !== 'MUON');
+      const deptTotals: { [deptName: string]: { day: number; week: number; month: number } } = {};
+      
+      for (const dept of otherDepts) {
+        const deptEmps = new Set<string>();
+        empSnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.department === dept && data.externalName) {
+            deptEmps.add(data.externalName);
+          }
+        });
+
+        let dayTotal = 0, weekTotal = 0, monthTotal = 0;
+        for (const emp of deptEmps) {
+          const empContracts = contracts.filter(c => (c.selger || '').startsWith(emp));
+          const dayContracts = empContracts.filter(c => parseDate(c.dato || '').getTime() === today.getTime()).length;
+          const weekContracts = empContracts.filter(c => {
+            const cDate = parseDate(c.dato || '');
+            return cDate >= weekStart && cDate <= today;
+          }).length;
+          const monthContracts = empContracts.filter(c => {
+            const cDate = parseDate(c.dato || '');
+            return cDate >= monthStart && cDate <= today;
+          }).length;
+
+          let empDayCount = 0, empWeekCount = 0, empMonthCount = 0;
+          datesToLoad.forEach((dateStr, idx) => {
+            if (emojiMap[dateStr]?.[emp.toLowerCase()]) {
+              const count = emojiMap[dateStr][emp.toLowerCase()];
+              empMonthCount += count;
+              const d = new Date(datesToLoad[idx]);
+              if (d >= weekStart) empWeekCount += count;
+              if (d.getTime() === today.getTime()) empDayCount += count;
+            }
+          });
+
+          dayTotal += empDayCount + dayContracts;
+          weekTotal += empWeekCount + weekContracts;
+          monthTotal += empMonthCount + monthContracts;
+        }
+
+        deptTotals[dept] = { day: dayTotal, week: weekTotal, month: monthTotal };
+      }
+
+      const getTop3Depts = (key: 'day' | 'week' | 'month') => {
+        return otherDepts
+          .map(dept => ({ name: dept, count: deptTotals[dept][key] }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3);
+      };
+
       setDepartmentStats({
         dayTotal,
         dayContracts,
@@ -459,6 +517,12 @@ export default function MinSide() {
         dayRecord: dayTop3.length > 0 ? { name: dayTop3[0].name, count: dayTop3[0].count + dayTop3[0].contracts } : { name: '', count: 0 },
         weekRecord: weekTop3.length > 0 ? { name: weekTop3[0].name, count: weekTop3[0].count + weekTop3[0].contracts } : { name: '', count: 0 },
         monthRecord: monthTop3.length > 0 ? { name: monthTop3[0].name, count: monthTop3[0].count + monthTop3[0].contracts } : { name: '', count: 0 },
+      });
+
+      setDepartmentDeptStats({
+        dayTopThree: getTop3Depts('day'),
+        weekTopThree: getTop3Depts('week'),
+        monthTopThree: getTop3Depts('month'),
       });
     } catch (err) {
       console.error('Error loading department stats:', err);
@@ -584,9 +648,10 @@ export default function MinSide() {
           .slice(0, 3);
       };
 
-      // Build top 3 departments
+      // Build top 3 departments (exclude MUON)
       const getTop3Depts = (key: 'day' | 'week' | 'month') => {
         return Object.entries(deptTotals)
+          .filter(([name]) => name !== 'MUON')
           .map(([name, totals]) => ({
             name,
             count: totals[key],
@@ -1306,6 +1371,19 @@ export default function MinSide() {
                 <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#ff6b35' }}>{departmentRecords.dayRecord.count}</div>
               </div>
             )}
+            {departmentDeptStats.dayTopThree.length > 0 && (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderTop: '2px solid #ddd', textAlign: 'center' }}>
+                {departmentDeptStats.dayTopThree.map((dept, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: '600', padding: '0.3rem 0' }}>
+                      <span>{medals[idx]} {dept.name}</span>
+                      <span style={{ color: '#666' }}>{dept.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* WEEK */}
@@ -1334,6 +1412,19 @@ export default function MinSide() {
                 <div style={{ fontSize: '0.7rem', color: '#999', marginBottom: '0.3rem', textTransform: 'uppercase', fontWeight: '600' }}>Rekord</div>
                 <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#333' }}>👑 {departmentRecords.weekRecord.name.split(' ')[0]}</div>
                 <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#ff6b35' }}>{departmentRecords.weekRecord.count}</div>
+              </div>
+            )}
+            {departmentDeptStats.weekTopThree.length > 0 && (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderTop: '2px solid #ddd', textAlign: 'center' }}>
+                {departmentDeptStats.weekTopThree.map((dept, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: '600', padding: '0.3rem 0' }}>
+                      <span>{medals[idx]} {dept.name}</span>
+                      <span style={{ color: '#666' }}>{dept.count}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1366,6 +1457,19 @@ export default function MinSide() {
                 <div style={{ fontSize: '1.5rem', fontWeight: '900', color: '#ff6b35' }}>{departmentRecords.monthRecord.count}</div>
               </div>
             )}
+            {departmentDeptStats.monthTopThree.length > 0 && (
+              <div style={{ marginTop: '0.75rem', padding: '0.75rem', borderTop: '2px solid #ddd', textAlign: 'center' }}>
+                {departmentDeptStats.monthTopThree.map((dept, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  return (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: '600', padding: '0.3rem 0' }}>
+                      <span>{medals[idx]} {dept.name}</span>
+                      <span style={{ color: '#666' }}>{dept.count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1386,10 +1490,10 @@ export default function MinSide() {
               <div style={{ fontSize: '0.7rem', color: '#999', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: '600' }}>Total</div>
               <div style={{ fontSize: '3.5rem', fontWeight: '900', color: '#333', lineHeight: '1' }}>{projectStats.dayTotal + projectStats.dayContracts}</div>
             </div>
-            {projectStats.dayTopThree.length > 1 && (
+            {projectStats.dayTopThree.length > 0 && (
               <div>
-                {projectStats.dayTopThree.slice(0, 2).map((emp, idx) => {
-                  const medals = ['🥇', '🥈'];
+                {projectStats.dayTopThree.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
                   return (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem', fontWeight: '600', padding: '0.6rem 0', borderBottom: '1px solid #eee' }}>
                       <span style={{ fontSize: '1.4rem', marginRight: '0.5rem' }}>{medals[idx]}</span>
@@ -1423,10 +1527,10 @@ export default function MinSide() {
               <div style={{ fontSize: '0.7rem', color: '#999', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: '600' }}>Total</div>
               <div style={{ fontSize: '3.5rem', fontWeight: '900', color: '#333', lineHeight: '1' }}>{projectStats.weekTotal + projectStats.weekContracts}</div>
             </div>
-            {projectStats.weekTopThree.length > 1 && (
+            {projectStats.weekTopThree.length > 0 && (
               <div>
-                {projectStats.weekTopThree.slice(0, 2).map((emp, idx) => {
-                  const medals = ['🥇', '🥈'];
+                {projectStats.weekTopThree.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
                   return (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem', fontWeight: '600', padding: '0.6rem 0', borderBottom: '1px solid #eee' }}>
                       <span style={{ fontSize: '1.4rem', marginRight: '0.5rem' }}>{medals[idx]}</span>
@@ -1460,10 +1564,10 @@ export default function MinSide() {
               <div style={{ fontSize: '0.7rem', color: '#999', marginBottom: '0.5rem', textTransform: 'uppercase', fontWeight: '600' }}>Total</div>
               <div style={{ fontSize: '3.5rem', fontWeight: '900', color: '#333', lineHeight: '1' }}>{projectStats.monthTotal + projectStats.monthContracts}</div>
             </div>
-            {projectStats.monthTopThree.length > 1 && (
+            {projectStats.monthTopThree.length > 0 && (
               <div>
-                {projectStats.monthTopThree.slice(0, 2).map((emp, idx) => {
-                  const medals = ['🥇', '🥈'];
+                {projectStats.monthTopThree.map((emp, idx) => {
+                  const medals = ['🥇', '🥈', '🥉'];
                   return (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1rem', fontWeight: '600', padding: '0.6rem 0', borderBottom: '1px solid #eee' }}>
                       <span style={{ fontSize: '1.4rem', marginRight: '0.5rem' }}>{medals[idx]}</span>
