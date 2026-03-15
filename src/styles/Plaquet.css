@@ -2,9 +2,11 @@
 
 .plaquet-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  padding: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  padding: 0.75rem;
+  max-height: calc(100vh - 300px);
+  overflow: hidden;
 }
 
 .plaquet {
@@ -12,9 +14,9 @@
   width: 100%;
   aspect-ratio: 1;
   background: linear-gradient(135deg, #8B6F47 0%, #A0826D 50%, #8B6F47 100%);
-  border: 8px solid #5C4A3D;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border: 5px solid #5C4A3D;
+  border-radius: 8px;
+  padding: 0.8rem;
   box-shadow: 
     inset 0 2px 5px rgba(255,255,255,0.3),
     inset 0 -2px 5px rgba(0,0,0,0.4),
@@ -24,15 +26,16 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  min-height: 180px;
 }
 
 /* Gold center background */
 .plaquet::before {
   content: '';
   position: absolute;
-  inset: 16px;
+  inset: 10px;
   background: linear-gradient(135deg, #FFD700 0%, #FFC700 50%, #FFD700 100%);
-  border-radius: 8px;
+  border-radius: 6px;
   z-index: 1;
   box-shadow: 
     inset 0 2px 8px rgba(255,255,255,0.6),
@@ -52,34 +55,47 @@
 }
 
 .plaquet-trophy {
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
+  font-size: 2rem;
+  margin-bottom: 0.15rem;
   filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
 }
 
 .plaquet-title {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: #333;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
   text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.plaquet-title::before {
+  content: '🌿';
+  font-size: 0.9rem;
+}
+
+.plaquet-title::after {
+  content: '🌿';
+  font-size: 0.9rem;
 }
 
 .plaquet-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #666;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.3rem;
 }
 
 .plaquet-records {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
   width: 100%;
 }
 
@@ -87,63 +103,70 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: #333;
-  padding: 0.3rem 0.5rem;
+  padding: 0.25rem 0.4rem;
   background: rgba(255,255,255,0.4);
-  border-radius: 4px;
+  border-radius: 3px;
+  line-height: 1;
 }
 
 .plaquet-record-label {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: #666;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.2px;
+  min-width: 30px;
 }
 
 .plaquet-record-value {
   color: #ff6b35;
   font-weight: 900;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  min-width: 35px;
+  text-align: right;
 }
 
 .plaquet-record-name {
   flex: 1;
-  text-align: left;
-  padding-left: 0.5rem;
-  font-size: 0.8rem;
+  text-align: center;
+  padding: 0 0.3rem;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 /* Laurel wreath effect with borders */
 .plaquet::after {
   content: '';
   position: absolute;
-  inset: 12px;
-  border: 2px dashed rgba(184, 134, 11, 0.3);
-  border-radius: 10px;
+  inset: 8px;
+  border: 1.5px dashed rgba(184, 134, 11, 0.25);
+  border-radius: 6px;
   pointer-events: none;
   z-index: 0;
 }
 
 /* Responsive for smaller screens */
+@media (max-width: 1200px) {
+  .plaquet-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+}
+
 @media (max-width: 768px) {
   .plaquet-container {
     grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 0.75rem;
+    gap: 0.8rem;
   }
 
   .plaquet {
-    aspect-ratio: auto;
-    min-height: 280px;
+    min-height: 200px;
   }
 
   .plaquet-title {
-    font-size: 1rem;
-  }
-
-  .plaquet-record {
-    font-size: 0.8rem;
+    font-size: 1.1rem;
   }
 }
