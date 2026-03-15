@@ -3,6 +3,9 @@ import { useAuth } from '../lib/authContext';
 import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MinSide.css';
+import { buildRecordsCache, checkRecordBreak, formatRecordMessage } from '../utils/recordsCache';
+import type { RecordsCache, BrokenRecord } from '../utils/recordsCache';
+import { postRecordToDiscord } from '../utils/discordWebhook';
 
 interface SalesRecord {
   dato?: string;
@@ -145,6 +148,8 @@ export default function MinSide() {
     monthTopThree: [] as Array<{ name: string; count: number }>,
   });
 
+  const [recordsCache, setRecordsCache] = useState<RecordsCache>({});
+
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
     try {
@@ -165,6 +170,16 @@ export default function MinSide() {
       console.error('Error loading goals:', err);
     }
   };
+
+  // Build historical records cache on mount
+  useEffect(() => {
+    const initRecordsCache = async () => {
+      const cache = await buildRecordsCache(db);
+      setRecordsCache(cache);
+      console.log('📊 Records cache initialized:', Object.keys(cache).length, 'employees');
+    };
+    initRecordsCache();
+  }, []);
 
   useEffect(() => {
     loadEmployeeData();
@@ -457,11 +472,50 @@ export default function MinSide() {
         monthTopThree: monthTop3,
       });
 
-      // Set records (top performer in each period)
+      // Set records and check for broken records
+      const newBrokenRecords: BrokenRecord[] = [];
+
+      const dayTop = dayTop3.length > 0 ? dayTop3[0] : null;
+      const dayRecordCount = dayTop ? dayTop.contracts : 0;
+      const dayRecordWithEmojis = dayTop ? (dayTop.count + dayTop.contracts) : 0;
+      if (dayTop) {
+        const broken = checkRecordBreak(dayTop.name, 'day', dayTop.contracts, dayRecordWithEmojis, recordsCache);
+        if (broken) {
+          newBrokenRecords.push(broken);
+          // Post to Discord
+          const message = formatRecordMessage(broken, department);
+          postRecordToDiscord(message);
+        }
+      }
+
+      const weekTop = weekTop3.length > 0 ? weekTop3[0] : null;
+      const weekRecordCount = weekTop ? weekTop.contracts : 0;
+      const weekRecordWithEmojis = weekTop ? (weekTop.count + weekTop.contracts) : 0;
+      if (weekTop) {
+        const broken = checkRecordBreak(weekTop.name, 'week', weekTop.contracts, weekRecordWithEmojis, recordsCache);
+        if (broken) {
+          newBrokenRecords.push(broken);
+          const message = formatRecordMessage(broken, department);
+          postRecordToDiscord(message);
+        }
+      }
+
+      const monthTop = monthTop3.length > 0 ? monthTop3[0] : null;
+      const monthRecordCount = monthTop ? monthTop.contracts : 0;
+      const monthRecordWithEmojis = monthTop ? (monthTop.count + monthTop.contracts) : 0;
+      if (monthTop) {
+        const broken = checkRecordBreak(monthTop.name, 'month', monthTop.contracts, monthRecordWithEmojis, recordsCache);
+        if (broken) {
+          newBrokenRecords.push(broken);
+          const message = formatRecordMessage(broken, department);
+          postRecordToDiscord(message);
+        }
+      }
+
       setDepartmentRecords({
-        dayRecord: dayTop3.length > 0 ? { name: dayTop3[0].name, count: dayTop3[0].contracts } : { name: '', count: 0 },
-        weekRecord: weekTop3.length > 0 ? { name: weekTop3[0].name, count: weekTop3[0].contracts } : { name: '', count: 0 },
-        monthRecord: monthTop3.length > 0 ? { name: monthTop3[0].name, count: monthTop3[0].contracts } : { name: '', count: 0 },
+        dayRecord: dayTop ? { name: dayTop.name, count: newBrokenRecords.some(r => r.employee === dayTop.name && r.period === 'day') ? dayRecordWithEmojis : dayRecordCount } : { name: '', count: 0 },
+        weekRecord: weekTop ? { name: weekTop.name, count: newBrokenRecords.some(r => r.employee === weekTop.name && r.period === 'week') ? weekRecordWithEmojis : weekRecordCount } : { name: '', count: 0 },
+        monthRecord: monthTop ? { name: monthTop.name, count: newBrokenRecords.some(r => r.employee === monthTop.name && r.period === 'month') ? monthRecordWithEmojis : monthRecordCount } : { name: '', count: 0 },
       });
     } catch (err) {
       console.error('Error loading department stats:', err);
@@ -614,10 +668,49 @@ export default function MinSide() {
         monthTopThree: monthEmpTop3,
       });
 
+      // Check for broken records in project
+      const projectBrokenRecords: BrokenRecord[] = [];
+
+      const dayEmp = dayEmpTop3.length > 0 ? dayEmpTop3[0] : null;
+      const dayEmpCount = dayEmp ? dayEmp.contracts : 0;
+      const dayEmpWithEmojis = dayEmp ? (dayEmp.count + dayEmp.contracts) : 0;
+      if (dayEmp) {
+        const broken = checkRecordBreak(dayEmp.name, 'day', dayEmp.contracts, dayEmpWithEmojis, recordsCache);
+        if (broken) {
+          projectBrokenRecords.push(broken);
+          const message = formatRecordMessage(broken, undefined, project);
+          postRecordToDiscord(message);
+        }
+      }
+
+      const weekEmp = weekEmpTop3.length > 0 ? weekEmpTop3[0] : null;
+      const weekEmpCount = weekEmp ? weekEmp.contracts : 0;
+      const weekEmpWithEmojis = weekEmp ? (weekEmp.count + weekEmp.contracts) : 0;
+      if (weekEmp) {
+        const broken = checkRecordBreak(weekEmp.name, 'week', weekEmp.contracts, weekEmpWithEmojis, recordsCache);
+        if (broken) {
+          projectBrokenRecords.push(broken);
+          const message = formatRecordMessage(broken, undefined, project);
+          postRecordToDiscord(message);
+        }
+      }
+
+      const monthEmp = monthEmpTop3.length > 0 ? monthEmpTop3[0] : null;
+      const monthEmpCount = monthEmp ? monthEmp.contracts : 0;
+      const monthEmpWithEmojis = monthEmp ? (monthEmp.count + monthEmp.contracts) : 0;
+      if (monthEmp) {
+        const broken = checkRecordBreak(monthEmp.name, 'month', monthEmp.contracts, monthEmpWithEmojis, recordsCache);
+        if (broken) {
+          projectBrokenRecords.push(broken);
+          const message = formatRecordMessage(broken, undefined, project);
+          postRecordToDiscord(message);
+        }
+      }
+
       setProjectRecords({
-        dayRecord: dayEmpTop3.length > 0 ? { name: dayEmpTop3[0].name, count: dayEmpTop3[0].contracts } : { name: '', count: 0 },
-        weekRecord: weekEmpTop3.length > 0 ? { name: weekEmpTop3[0].name, count: weekEmpTop3[0].contracts } : { name: '', count: 0 },
-        monthRecord: monthEmpTop3.length > 0 ? { name: monthEmpTop3[0].name, count: monthEmpTop3[0].contracts } : { name: '', count: 0 },
+        dayRecord: dayEmp ? { name: dayEmp.name, count: projectBrokenRecords.some(r => r.employee === dayEmp.name && r.period === 'day') ? dayEmpWithEmojis : dayEmpCount } : { name: '', count: 0 },
+        weekRecord: weekEmp ? { name: weekEmp.name, count: projectBrokenRecords.some(r => r.employee === weekEmp.name && r.period === 'week') ? weekEmpWithEmojis : weekEmpCount } : { name: '', count: 0 },
+        monthRecord: monthEmp ? { name: monthEmp.name, count: projectBrokenRecords.some(r => r.employee === monthEmp.name && r.period === 'month') ? monthEmpWithEmojis : monthEmpCount } : { name: '', count: 0 },
       });
 
       setProjectDeptStats({
