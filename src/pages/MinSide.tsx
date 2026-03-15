@@ -1076,7 +1076,9 @@ export default function MinSide() {
             <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
               <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.dayTotal + departmentStats.dayContracts}</div>
-              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.dayTotal} + {departmentStats.dayContracts}</div>
+              {(departmentStats.dayTotal > 0 || departmentStats.dayContracts > 0) && (
+                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.dayTotal} + {departmentStats.dayContracts}</div>
+              )}
             </div>
             {departmentStats.dayTopThree.length > 0 && (
               <div>
@@ -1096,7 +1098,9 @@ export default function MinSide() {
             <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
               <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.weekTotal + departmentStats.weekContracts}</div>
-              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.weekTotal} + {departmentStats.weekContracts}</div>
+              {(departmentStats.weekTotal > 0 || departmentStats.weekContracts > 0) && (
+                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.weekTotal} + {departmentStats.weekContracts}</div>
+              )}
             </div>
             {departmentStats.weekTopThree.length > 0 && (
               <div>
@@ -1116,7 +1120,9 @@ export default function MinSide() {
             <div style={{ textAlign: 'center', marginBottom: '0.75rem', padding: '0.75rem', borderRadius: '6px' }}>
               <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '0.25rem' }}>Total</div>
               <div style={{ fontSize: '2rem', fontWeight: '700', color: '#333' }}>{departmentStats.monthTotal + departmentStats.monthContracts}</div>
-              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.monthTotal} + {departmentStats.monthContracts}</div>
+              {(departmentStats.monthTotal > 0 || departmentStats.monthContracts > 0) && (
+                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>{departmentStats.monthTotal} + {departmentStats.monthContracts}</div>
+              )}
             </div>
             {departmentStats.monthTopThree.length > 0 && (
               <div>
