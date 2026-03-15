@@ -118,12 +118,6 @@ export default function MinSide() {
     monthRecord: { name: '', count: 0 },
   });
 
-  const [departmentDeptStats, setDepartmentDeptStats] = useState({
-    dayTopThree: [] as Array<{ name: string; count: number }>,
-    weekTopThree: [] as Array<{ name: string; count: number }>,
-    monthTopThree: [] as Array<{ name: string; count: number }>,
-  });
-
   const [projectStats, setProjectStats] = useState({
     dayTotal: 0,
     dayContracts: 0,
@@ -448,58 +442,6 @@ export default function MinSide() {
       const weekTop3 = getTop3('weekCount', 'weekContracts');
       const monthTop3 = getTop3('monthCount', 'monthContracts');
 
-      // Calculate OTHER departments (KRS, OSL, Skien - no MUON)
-      const otherDepts = ['KRS', 'OSL', 'Skien'].filter(d => d !== department && d !== 'MUON');
-      const deptTotals: { [deptName: string]: { day: number; week: number; month: number } } = {};
-      
-      for (const dept of otherDepts) {
-        const deptEmps = new Set<string>();
-        empSnapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.department === dept && data.externalName) {
-            deptEmps.add(data.externalName);
-          }
-        });
-
-        let dayTotal = 0, weekTotal = 0, monthTotal = 0;
-        for (const emp of deptEmps) {
-          const empContracts = contracts.filter(c => (c.selger || '').startsWith(emp));
-          const dayContracts = empContracts.filter(c => parseDate(c.dato || '').getTime() === today.getTime()).length;
-          const weekContracts = empContracts.filter(c => {
-            const cDate = parseDate(c.dato || '');
-            return cDate >= weekStart && cDate <= today;
-          }).length;
-          const monthContracts = empContracts.filter(c => {
-            const cDate = parseDate(c.dato || '');
-            return cDate >= monthStart && cDate <= today;
-          }).length;
-
-          let empDayCount = 0, empWeekCount = 0, empMonthCount = 0;
-          datesToLoad.forEach((dateStr, idx) => {
-            if (emojiMap[dateStr]?.[emp.toLowerCase()]) {
-              const count = emojiMap[dateStr][emp.toLowerCase()];
-              empMonthCount += count;
-              const d = new Date(datesToLoad[idx]);
-              if (d >= weekStart) empWeekCount += count;
-              if (d.getTime() === today.getTime()) empDayCount += count;
-            }
-          });
-
-          dayTotal += empDayCount + dayContracts;
-          weekTotal += empWeekCount + weekContracts;
-          monthTotal += empMonthCount + monthContracts;
-        }
-
-        deptTotals[dept] = { day: dayTotal, week: weekTotal, month: monthTotal };
-      }
-
-      const getTop3Depts = (key: 'day' | 'week' | 'month') => {
-        return otherDepts
-          .map(dept => ({ name: dept, count: deptTotals[dept][key] }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 3);
-      };
-
       setDepartmentStats({
         dayTotal,
         dayContracts,
@@ -517,12 +459,6 @@ export default function MinSide() {
         dayRecord: dayTop3.length > 0 ? { name: dayTop3[0].name, count: dayTop3[0].count + dayTop3[0].contracts } : { name: '', count: 0 },
         weekRecord: weekTop3.length > 0 ? { name: weekTop3[0].name, count: weekTop3[0].count + weekTop3[0].contracts } : { name: '', count: 0 },
         monthRecord: monthTop3.length > 0 ? { name: monthTop3[0].name, count: monthTop3[0].count + monthTop3[0].contracts } : { name: '', count: 0 },
-      });
-
-      setDepartmentDeptStats({
-        dayTopThree: getTop3Depts('day'),
-        weekTopThree: getTop3Depts('week'),
-        monthTopThree: getTop3Depts('month'),
       });
     } catch (err) {
       console.error('Error loading department stats:', err);
