@@ -112,6 +112,12 @@ export default function MinSide() {
     monthTopThree: [] as Array<{ name: string; count: number; contracts: number }>,
   });
 
+  const [officeRecords, setOfficeRecords] = useState({
+    dayRecord: { name: '', count: 0, department: '' },
+    weekRecord: { name: '', count: 0, department: '' },
+    monthRecord: { name: '', count: 0, department: '' },
+  });
+
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
     try {
@@ -137,6 +143,7 @@ export default function MinSide() {
     loadEmployeeData();
     loadSavedGoals();
     loadDepartmentStats();
+    loadOfficeRecords();
     // Load cached badges from Firestore
     loadCachedBadges();
   }, [user]);
@@ -292,6 +299,119 @@ export default function MinSide() {
       });
     } catch (err) {
       console.error('Error saving badges:', err);
+    }
+  };
+
+  // Load office records (top performer across entire company)
+  const loadOfficeRecords = async () => {
+    try {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+      // PARALLEL LOAD: contracts + ALL employees
+      const [contractsSnapshot, empSnapshot] = await Promise.all([
+        getDocs(collection(db, 'allente_kontraktsarkiv')),
+        getDocs(collection(db, 'employees')),
+      ]);
+
+      const contracts: SalesRecord[] = [];
+      contractsSnapshot.forEach((doc) => contracts.push({ id: doc.id, ...doc.data() }));
+
+      const allEmployees: Array<{ name: string; department: string }> = [];
+      empSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.externalName) {
+          allEmployees.push({ name: data.externalName, department: data.department || '' });
+        }
+      });
+
+      // Generate all dates we need
+      const datesToLoad: string[] = [];
+      for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
+        datesToLoad.push(`${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`);
+      }
+
+      // PARALLEL LOAD: all emoji_counts_daily docs
+      const emojiPromises = datesToLoad.map(dateStr => getDoc(doc(db, 'emoji_counts_daily', dateStr)));
+      const emojiSnapshots = await Promise.all(emojiPromises);
+
+      // Build emoji map
+      const emojiMap: { [dateStr: string]: { [empName: string]: number } } = {};
+      emojiSnapshots.forEach((snapshot, idx) => {
+        if (snapshot.exists()) {
+          const data = snapshot.data();
+          const dateStr = datesToLoad[idx];
+          emojiMap[dateStr] = {};
+          
+          if (data.counts) {
+            Object.entries(data.counts).forEach(([empName, counts]: [string, any]) => {
+              const total = (counts['🔔'] || 0) + (counts['💎'] || 0);
+              if (total > 0) {
+                emojiMap[dateStr][empName] = total;
+              }
+            });
+          }
+        }
+      });
+
+      // Calculate totals for each employee
+      const employeeTotals: { [empName: string]: { day: number; week: number; month: number; dayContracts: number; weekContracts: number; monthContracts: number; department: string } } = {};
+
+      for (const emp of allEmployees) {
+        let dayCount = 0, weekCount = 0, monthCount = 0;
+
+        datesToLoad.forEach((dateStr, idx) => {
+          if (emojiMap[dateStr]?.[emp.name.toLowerCase()]) {
+            const count = emojiMap[dateStr][emp.name.toLowerCase()];
+            monthCount += count;
+            
+            const d = new Date(datesToLoad[idx]);
+            if (d >= weekStart) weekCount += count;
+            if (d.getTime() === today.getTime()) dayCount += count;
+          }
+        });
+
+        const empContracts = contracts.filter(c => (c.selger || '').startsWith(emp.name));
+        const dayContracts = empContracts.filter(c => parseDate(c.dato || '').getTime() === today.getTime()).length;
+        const weekContracts = empContracts.filter(c => {
+          const cDate = parseDate(c.dato || '');
+          return cDate >= weekStart && cDate <= today;
+        }).length;
+        const monthContracts = empContracts.filter(c => {
+          const cDate = parseDate(c.dato || '');
+          return cDate >= monthStart && cDate <= today;
+        }).length;
+
+        employeeTotals[emp.name] = {
+          day: dayCount + dayContracts,
+          week: weekCount + weekContracts,
+          month: monthCount + monthContracts,
+          dayContracts,
+          weekContracts,
+          monthContracts,
+          department: emp.department,
+        };
+      }
+
+      // Find records
+      const dayRecord = Object.entries(employeeTotals).reduce((max, [name, totals]) => 
+        totals.day > max.count ? { name, count: totals.day, department: totals.department } : max
+      , { name: '', count: 0, department: '' });
+
+      const weekRecord = Object.entries(employeeTotals).reduce((max, [name, totals]) => 
+        totals.week > max.count ? { name, count: totals.week, department: totals.department } : max
+      , { name: '', count: 0, department: '' });
+
+      const monthRecord = Object.entries(employeeTotals).reduce((max, [name, totals]) => 
+        totals.month > max.count ? { name, count: totals.month, department: totals.department } : max
+      , { name: '', count: 0, department: '' });
+
+      setOfficeRecords({ dayRecord, weekRecord, monthRecord });
+    } catch (err) {
+      console.error('Error loading office records:', err);
     }
   };
 
@@ -1070,6 +1190,57 @@ export default function MinSide() {
       <div className="tab-content">
         <div className="content-title">
           <h3>{user?.department}</h3>
+        </div>
+
+        {/* OFFICE RECORDS - Top performers across entire company */}
+        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: '#f5f5f5', borderRadius: '8px' }}>
+          <h4 style={{ marginBottom: '1rem', color: '#333', fontSize: '1.1rem', fontWeight: '700' }}>🏆 Kontor Rekorder</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+            {/* DAY RECORD */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase' }}>DAY</div>
+              {officeRecords.dayRecord.name ? (
+                <>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#333', lineHeight: '1', marginBottom: '0.5rem' }}>👑</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#333', marginBottom: '0.25rem' }}>{officeRecords.dayRecord.name.split(' ')[0]}</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#ff6b35' }}>{officeRecords.dayRecord.count}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>{officeRecords.dayRecord.department}</div>
+                </>
+              ) : (
+                <div style={{ color: '#999' }}>-</div>
+              )}
+            </div>
+
+            {/* WEEK RECORD */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase' }}>WEEK</div>
+              {officeRecords.weekRecord.name ? (
+                <>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#333', lineHeight: '1', marginBottom: '0.5rem' }}>👑</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#333', marginBottom: '0.25rem' }}>{officeRecords.weekRecord.name.split(' ')[0]}</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#ff6b35' }}>{officeRecords.weekRecord.count}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>{officeRecords.weekRecord.department}</div>
+                </>
+              ) : (
+                <div style={{ color: '#999' }}>-</div>
+              )}
+            </div>
+
+            {/* MONTH RECORD */}
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem', textTransform: 'uppercase' }}>MONTH</div>
+              {officeRecords.monthRecord.name ? (
+                <>
+                  <div style={{ fontSize: '2.5rem', fontWeight: '900', color: '#333', lineHeight: '1', marginBottom: '0.5rem' }}>👑</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#333', marginBottom: '0.25rem' }}>{officeRecords.monthRecord.name.split(' ')[0]}</div>
+                  <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#ff6b35' }}>{officeRecords.monthRecord.count}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#999', marginTop: '0.5rem' }}>{officeRecords.monthRecord.department}</div>
+                </>
+              ) : (
+                <div style={{ color: '#999' }}>-</div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* DAY / WEEK / MONTH - Compact 3 column layout */}
