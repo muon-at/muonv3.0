@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import type { RecordsCache } from '../utils/recordsCache';
 import '../styles/Plaquet.css';
 
@@ -7,19 +9,43 @@ interface WallOfFameProps {
 }
 
 export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
-  const getTopRecordForDept = (_dept: string, period: 'dayBest' | 'weekBest' | 'monthBest') => {
-    const records = Object.entries(recordsCache.employees || {})
-      .filter(() => true) // Show top across all
-      .sort((a, b) => b[1][period] - a[1][period]);
-    return records[0];
+  const [empDeptMap, setEmpDeptMap] = useState<{ [emp: string]: string }>({});
+
+  // Load employee departments on mount
+  useEffect(() => {
+    const loadEmpDepts = async () => {
+      try {
+        const empRef = collection(db, 'employees');
+        const empSnap = await getDocs(empRef);
+        const map: { [emp: string]: string } = {};
+        empSnap.forEach(doc => {
+          const data = doc.data();
+          if (data.externalName) {
+            map[data.externalName] = data.department || 'Allente';
+          }
+        });
+        setEmpDeptMap(map);
+      } catch (err) {
+        console.error('Error loading employee departments:', err);
+      }
+    };
+    loadEmpDepts();
+  }, []);
+
+  // Get top employee for each department and period
+  const getTopForDept = (dept: string, period: 'dayBest' | 'weekBest' | 'monthBest') => {
+    return Object.entries(recordsCache.employees || {})
+      .filter(([emp]) => empDeptMap[emp] === dept)
+      .sort((a, b) => b[1][period] - a[1][period])
+      .map(([name, record]) => ({ name, count: record[period] }))[0];
   };
 
   const depts = ['KRS', 'OSL', 'Skien', 'Allente'];
   const empRecords = depts.map(dept => ({
     name: dept,
-    day: getTopRecordForDept(dept, 'dayBest'),
-    week: getTopRecordForDept(dept, 'weekBest'),
-    month: getTopRecordForDept(dept, 'monthBest'),
+    day: getTopForDept(dept, 'dayBest'),
+    week: getTopForDept(dept, 'weekBest'),
+    month: getTopForDept(dept, 'monthBest'),
   }));
 
   const deptRecords = depts.map(dept => ({
