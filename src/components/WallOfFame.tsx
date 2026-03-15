@@ -8,11 +8,20 @@ interface WallOfFameProps {
   recordsCache: RecordsCache;
 }
 
+interface DeptRecords {
+  day: { name: string; count: number } | null;
+  week: { name: string; count: number } | null;
+  month: { name: string; count: number } | null;
+}
+
 export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
   const [empDeptMap, setEmpDeptMap] = useState<{ [emp: string]: string }>({});
-  const [krsDay, setKrsDay] = useState<{ name: string; count: number } | null>(null);
-  const [krsWeek, setKrsWeek] = useState<{ name: string; count: number } | null>(null);
-  const [krsMonth, setKrsMonth] = useState<{ name: string; count: number } | null>(null);
+  const [deptRecords, setDeptRecords] = useState<{ [dept: string]: DeptRecords }>({
+    KRS: { day: null, week: null, month: null },
+    OSL: { day: null, week: null, month: null },
+    Skien: { day: null, week: null, month: null },
+    Allente: { day: null, week: null, month: null },
+  });
 
   // Load employee departments on mount
   useEffect(() => {
@@ -28,7 +37,6 @@ export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
           }
         });
         console.log('✅ Emp dept map loaded:', Object.keys(map).length, 'employees');
-        console.log('✅ Map:', map);
         setEmpDeptMap(map);
       } catch (err) {
         console.error('Error loading employee departments:', err);
@@ -37,79 +45,100 @@ export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
     loadEmpDepts();
   }, []);
 
-  // Calculate KRS records whenever empDeptMap or recordsCache changes
+  // Calculate records for each department
   useEffect(() => {
     if (Object.keys(empDeptMap).length === 0) {
       console.log('⏳ Waiting for emp dept map...');
       return;
     }
 
-    console.log('🔍 Filtering records for KRS...');
-    console.log('📊 recordsCache.employees:', Object.keys(recordsCache.employees || {}).length);
+    console.log('🔍 Filtering records for all departments...');
+    const depts = ['KRS', 'OSL', 'Skien', 'Allente'];
+    const results: { [dept: string]: DeptRecords } = {};
 
-    // Get KRS employees
-    const krsEmps = Object.entries(recordsCache.employees || {})
-      .filter(([emp]) => empDeptMap[emp] === 'KRS')
-      .map(([name, record]) => ({ name, dayBest: record.dayBest, weekBest: record.weekBest, monthBest: record.monthBest }));
+    depts.forEach(dept => {
+      const deptEmps = Object.entries(recordsCache.employees || {})
+        .filter(([emp]) => empDeptMap[emp] === dept)
+        .map(([name, record]) => ({ 
+          name, 
+          dayBest: record.dayBest, 
+          weekBest: record.weekBest, 
+          monthBest: record.monthBest 
+        }));
 
-    console.log('🏢 KRS employees found:', krsEmps.length, krsEmps);
+      console.log(`🏢 ${dept} employees found:`, deptEmps.length);
 
-    // Get top for each period
-    if (krsEmps.length > 0) {
-      const dayTop = krsEmps.reduce((a, b) => a.dayBest > b.dayBest ? a : b);
-      const weekTop = krsEmps.reduce((a, b) => a.weekBest > b.weekBest ? a : b);
-      const monthTop = krsEmps.reduce((a, b) => a.monthBest > b.monthBest ? a : b);
+      if (deptEmps.length > 0) {
+        const dayTop = deptEmps.reduce((a, b) => a.dayBest > b.dayBest ? a : b);
+        const weekTop = deptEmps.reduce((a, b) => a.weekBest > b.weekBest ? a : b);
+        const monthTop = deptEmps.reduce((a, b) => a.monthBest > b.monthBest ? a : b);
 
-      console.log('🏆 KRS Records:', { day: dayTop, week: weekTop, month: monthTop });
+        results[dept] = {
+          day: { name: dayTop.name, count: dayTop.dayBest },
+          week: { name: weekTop.name, count: weekTop.weekBest },
+          month: { name: monthTop.name, count: monthTop.monthBest },
+        };
+      } else {
+        results[dept] = { day: null, week: null, month: null };
+      }
+    });
 
-      setKrsDay({ name: dayTop.name, count: dayTop.dayBest });
-      setKrsWeek({ name: weekTop.name, count: weekTop.weekBest });
-      setKrsMonth({ name: monthTop.name, count: monthTop.monthBest });
-    }
+    setDeptRecords(results);
   }, [empDeptMap, recordsCache]);
+
+  const depts = ['KRS', 'OSL', 'Skien', 'Allente'];
+
+  const PlaqueCard = ({ dept, records }: { dept: string; records: DeptRecords }) => (
+    <div className="plaquet">
+      <div className="plaquet-content">
+        <div className="plaquet-trophy">🏆</div>
+        <div className="plaquet-title">{dept}</div>
+        <div className="plaquet-subtitle">Rekorder</div>
+        <div className="plaquet-records">
+          <div className="plaquet-record">
+            <span className="plaquet-record-label">Day:</span>
+            <span className="plaquet-record-name">{records.day ? records.day.name.split(' ')[0] : '—'}</span>
+            <span className="plaquet-record-value">{records.day ? records.day.count : '0'}</span>
+          </div>
+          <div className="plaquet-record">
+            <span className="plaquet-record-label">Week:</span>
+            <span className="plaquet-record-name">{records.week ? records.week.name.split(' ')[0] : '—'}</span>
+            <span className="plaquet-record-value">{records.week ? records.week.count : '0'}</span>
+          </div>
+          <div className="plaquet-record">
+            <span className="plaquet-record-label">Month:</span>
+            <span className="plaquet-record-name">{records.month ? records.month.name.split(' ')[0] : '—'}</span>
+            <span className="plaquet-record-value">{records.month ? records.month.count : '0'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="tab-content">
       <div className="content-title">
         <h3>🏆 Wall of Fame</h3>
-        <p>TEST - Only KRS Employee Plaques</p>
+        <p>Rekorder per avdeling</p>
       </div>
 
       <div className="plaquet-container">
-        {/* SINGLE KRS EMPLOYEE PLAQUET */}
-        <div className="plaquet">
-          <div className="plaquet-content">
-            <div className="plaquet-trophy">🏆</div>
-            <div className="plaquet-title">KRS</div>
-            <div className="plaquet-subtitle">Rekorder</div>
-            <div className="plaquet-records">
-              <div className="plaquet-record">
-                <span className="plaquet-record-label">Day:</span>
-                <span className="plaquet-record-name">{krsDay ? krsDay.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{krsDay ? krsDay.count : '0'}</span>
-              </div>
-              <div className="plaquet-record">
-                <span className="plaquet-record-label">Week:</span>
-                <span className="plaquet-record-name">{krsWeek ? krsWeek.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{krsWeek ? krsWeek.count : '0'}</span>
-              </div>
-              <div className="plaquet-record">
-                <span className="plaquet-record-label">Month:</span>
-                <span className="plaquet-record-name">{krsMonth ? krsMonth.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{krsMonth ? krsMonth.count : '0'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {depts.map(dept => (
+          <PlaqueCard key={dept} dept={dept} records={deptRecords[dept]} />
+        ))}
       </div>
 
       {/* DEBUG INFO */}
       <div style={{ marginTop: '2rem', padding: '1rem', background: '#f0f0f0', borderRadius: '8px', fontSize: '0.85rem' }}>
         <div>📊 recordsCache.employees: {Object.keys(recordsCache.employees || {}).length}</div>
         <div>🔗 empDeptMap: {Object.keys(empDeptMap).length}</div>
-        <div>🏢 KRS Day: {krsDay ? `${krsDay.name} ${krsDay.count}` : 'Loading...'}</div>
-        <div>📈 KRS Week: {krsWeek ? `${krsWeek.name} ${krsWeek.count}` : 'Loading...'}</div>
-        <div>📊 KRS Month: {krsMonth ? `${krsMonth.name} ${krsMonth.count}` : 'Loading...'}</div>
+        <div style={{ marginTop: '0.5rem' }}>
+          {depts.map(dept => (
+            <div key={dept}>
+              {dept}: Day={deptRecords[dept].day ? `${deptRecords[dept].day!.name} ${deptRecords[dept].day!.count}` : 'Loading...'} | Week={deptRecords[dept].week ? deptRecords[dept].week!.count : 'Loading...'} | Month={deptRecords[dept].month ? deptRecords[dept].month!.count : 'Loading...'}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
