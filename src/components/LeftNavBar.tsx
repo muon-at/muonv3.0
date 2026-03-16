@@ -133,7 +133,7 @@ export const LeftNavBar: React.FC = () => {
                   <circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4"/>
                 </svg>
               </div>
-              <div className="nav-tooltip">Min Side {expandedItem === 'min-side' ? '▲' : '▼'}</div>
+              <div className="nav-tooltip">Min Side</div>
             </button>
 
             {/* TABS DROPDOWN FOR MIN SIDE */}
@@ -155,13 +155,13 @@ export const LeftNavBar: React.FC = () => {
                   className={`nav-tab ${activeTab === 'lonn' ? 'active' : ''}`}
                   onClick={() => handleTabClick('lonn', '/min-side?tab=lonn')}
                 >
-                  Min Lønn
+                  Lønn
                 </button>
                 <button 
                   className={`nav-tab ${activeTab === 'kalender' ? 'active' : ''}`}
                   onClick={() => handleTabClick('kalender', '/min-side?tab=kalender')}
                 >
-                  Min Kalender
+                  Kalender
                 </button>
               </div>
             )}
