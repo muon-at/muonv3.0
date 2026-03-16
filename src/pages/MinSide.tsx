@@ -1137,12 +1137,13 @@ export default function MinSide() {
         >
           💼 Prosjekt
         </button>
-        <button 
+        {/* 🏆 Wall of Fame - HIDDEN UNTIL FIXED */}
+        {/* <button 
           className={`main-tab ${activeTab === 'fame' ? 'active' : ''}`}
           onClick={() => setActiveTab('fame')}
         >
           🏆 Wall of Fame
-        </button>
+        </button> */}
       </div>
 
 
@@ -1560,7 +1561,8 @@ export default function MinSide() {
       </div>
       )}
 
-      {activeTab === 'fame' && <WallOfFame recordsCache={recordsCache} />}
+      {/* 🏆 Wall of Fame - HIDDEN UNTIL FIXED */}
+      {/* {activeTab === 'fame' && <WallOfFame recordsCache={recordsCache} />} */}
 
       {activeTab === 'target' && (
       <div className="tab-content">
