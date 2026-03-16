@@ -1,0 +1,234 @@
+.navbar-accordion {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 250px;
+  padding: 1rem 0;
+}
+
+.nav-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  position: relative;
+}
+
+.nav-button:hover {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.nav-button.active {
+  background: #333;
+  color: #fff;
+  font-weight: 600;
+  border-left: 3px solid #0066cc;
+  padding-left: calc(1.5rem - 3px);
+}
+
+.nav-button.has-submenu {
+  display: flex;
+  justify-content: space-between;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.nav-chevron {
+  font-size: 0.8rem;
+  color: #888;
+  transition: transform 0.3s ease;
+  display: inline-flex;
+}
+
+.nav-chevron.expanded {
+  transform: rotate(180deg);
+  color: #0066cc;
+}
+
+/* Submenu - slides in vertically */
+.nav-submenu {
+  display: flex;
+  flex-direction: column;
+  background: #0d0d0d;
+  border-left: 3px solid #0066cc;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+.nav-subitem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem 0.75rem 2.5rem;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-subitem:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.nav-subitem.active {
+  background: #1a1a1a;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+.nav-subitem.collapsible {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Nested submenu (Allente sub-items) */
+.nav-nested-submenu {
+  display: flex;
+  flex-direction: column;
+  background: #050505;
+  border-left: 2px solid #0066cc;
+  animation: slideDown 0.3s ease;
+}
+
+.nav-nested-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem 0.6rem 3.5rem;
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-nested-item:hover {
+  background: #0d0d0d;
+  color: #fff;
+}
+
+.nav-nested-item.active {
+  background: #0d0d0d;
+  color: #0066cc;
+  font-weight: 600;
+}
+
+/* Footer */
+.nav-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border-top: 1px solid #333;
+  margin-top: auto;
+}
+
+.nav-logout {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.nav-logout:hover {
+  background: rgba(255, 107, 107, 0.1);
+  color: #ff8787;
+}
+
+/* Scrollbar styling */
+.navbar-accordion::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navbar-accordion::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.navbar-accordion::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.navbar-accordion::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .navbar-accordion {
+    width: 200px;
+  }
+
+  .nav-button {
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-subitem {
+    padding: 0.6rem 1rem 0.6rem 2rem;
+  }
+
+  .nav-nested-item {
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+  }
+}
