@@ -12,6 +12,8 @@ export const LeftNavBar: React.FC = () => {
   const { channelUnreadCounts } = useChannelUnread();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [expandedItem, setExpandedItem] = useState<string | null>('min-side'); // Min Side expanded by default
+  const [activeTab, setActiveTab] = useState<string>('status'); // Default tab
 
   const handleLogout = () => {
     logout();
@@ -102,23 +104,68 @@ export const LeftNavBar: React.FC = () => {
     console.log('✅ Sidebar state toggled to:', !isChatSidebarOpen);
   };
 
+  const toggleExpandItem = (itemId: string) => {
+    if (expandedItem === itemId) {
+      setExpandedItem(null); // Close if already open
+    } else {
+      setExpandedItem(itemId); // Open this item
+    }
+  };
+
+  const handleTabClick = (tabId: string, path: string) => {
+    setActiveTab(tabId);
+    navigate(path);
+  };
+
   return (
     <>
       {/* Desktop NavBar */}
       <div className="left-nav-bar left-nav-bar-desktop">
         <div className="nav-items">
-          {/* 1. MIN SIDE - Person icon */}
-          <button 
-            className="nav-button"
-            onClick={() => navigate('/min-side')}
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Min Side</div>
-          </button>
+          {/* 1. MIN SIDE - Person icon WITH TABS */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            <button 
+              className={`nav-button ${expandedItem === 'min-side' ? 'expanded' : ''}`}
+              onClick={() => toggleExpandItem('min-side')}
+            >
+              <div className="icon-circle">
+                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4"/>
+                </svg>
+              </div>
+              <div className="nav-tooltip">Min Side {expandedItem === 'min-side' ? '▲' : '▼'}</div>
+            </button>
+
+            {/* TABS DROPDOWN FOR MIN SIDE */}
+            {expandedItem === 'min-side' && (
+              <div className="nav-tabs-dropdown">
+                <button 
+                  className={`nav-tab ${activeTab === 'status' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('status', '/min-side?tab=status')}
+                >
+                  Status
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'rekorder' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('rekorder', '/min-side?tab=rekorder')}
+                >
+                  Rekorder
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'lonn' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('lonn', '/min-side?tab=lonn')}
+                >
+                  Min Lønn
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'kalender' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('kalender', '/min-side?tab=kalender')}
+                >
+                  Min Kalender
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* 2. AVDELING - People/Building icon */}
           <button 
