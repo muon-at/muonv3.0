@@ -1,6 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
-import { RightNavBar } from './RightNavBar';
 import { LeftChatSidebar } from './LeftChatSidebar';
 import { ChatSidebarProvider, useChatSidebar } from '../lib/ChatSidebarContext';
 import NavbarAccordion from './NavbarAccordion';
@@ -78,10 +77,10 @@ function ProtectedRouteInner({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        {/* 🔔 Notification Button - Floating */}
+        {/* Kept as floating element from MinSide */}
         {children}
-        {/* Kept RightNavBar for now (notification badge) */}
-        <RightNavBar />
       </div>
     </div>
   );
