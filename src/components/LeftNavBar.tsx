@@ -352,10 +352,10 @@ export const LeftNavBar: React.FC = () => {
                       onClick={() => setActiveTab((activeTab as string).includes('admin-muon-') ? 'admin-muon' : 'admin-muon-dashboard')}
                       style={{ position: 'relative' }}
                     >
-                      Muon ▼
+                      Muon
                     </button>
                     {(activeTab as string).includes('admin-muon-') && (
-                      <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
+                      <div style={{ paddingLeft: '0.5rem' }}>
                         <button 
                           className={`nav-tab ${activeTab === 'admin-muon-dashboard' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-muon-dashboard', '/admin-dashboard?tab=muon&muon=dashboard')}
@@ -385,10 +385,10 @@ export const LeftNavBar: React.FC = () => {
                       onClick={() => setActiveTab((activeTab as string).includes('admin-proj-') ? 'admin-proj' : 'admin-proj-allente')}
                       style={{ position: 'relative' }}
                     >
-                      Prosjekt ▼
+                      Prosjekt
                     </button>
                     {((activeTab as string).includes('admin-proj-') || activeProject !== null) && (
-                      <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
+                      <div style={{ paddingLeft: '0.5rem' }}>
                         {/* SUB-ACCORDION: Show selected project OR all projects */}
                         {activeProject === null && (
                           <>
@@ -398,7 +398,7 @@ export const LeftNavBar: React.FC = () => {
                               onClick={() => setActiveProject('allente')}
                               style={{ fontSize: '0.8rem' }}
                             >
-                              Allente ▼
+                              Allente
                             </button>
                             <button 
                               className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
@@ -428,7 +428,7 @@ export const LeftNavBar: React.FC = () => {
                               ◀ Allente
                             </button>
                             {/* Always show sub-tabs when Allente is open */}
-                            <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
+                            <div style={{ paddingLeft: '0.3rem' }}>
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
                                 onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
