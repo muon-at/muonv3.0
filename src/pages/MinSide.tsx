@@ -139,7 +139,6 @@ export default function MinSide() {
   });
 
   const [recordsCache, setRecordsCache] = useState<RecordsCache>({ employees: {}, departments: {} });
-  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
@@ -1152,35 +1151,6 @@ export default function MinSide() {
       {/* MAIN CONTENT - STATS TAB */}
       {activeTab === 'stats' && (
       <div className="minside-main" style={{ position: 'relative' }}>
-        {/* 🔔 Notification Panel Button (Stian only - floating right side) */}
-        {user?.name === 'Stian Abrahamsen' && (
-          <button
-            onClick={() => setShowNotificationPanel(!showNotificationPanel)}
-            style={{
-              position: 'absolute',
-              top: '0',
-              right: '0',
-              background: 'none',
-              border: 'none',
-              fontSize: '4rem',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100px',
-              height: '100px',
-              transition: 'transform 0.2s',
-              padding: '0',
-              zIndex: '10',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.15)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            title="Nye meldinger"
-          >
-            🔔
-          </button>
-        )}
-
         <div className="stats-and-earnings-container">
           <div className="stats-left-section">
             <div className="stats-circles">
@@ -1389,35 +1359,7 @@ export default function MinSide() {
       </div>
       )}
 
-      {/* 🔔 NOTIFICATION PANEL (Stian only - new message system) */}
-      {user?.name === 'Stian Abrahamsen' && showNotificationPanel && (
-      <div className="notification-panel" style={{
-        background: '#f5f5f5',
-        border: '2px solid #ddd',
-        borderRadius: '8px',
-        padding: '2rem',
-        margin: '2rem auto',
-        maxWidth: '600px',
-        textAlign: 'center'
-      }}>
-        <h2>🔔 Notification Panel</h2>
-        <p style={{ color: '#666', marginBottom: '2rem' }}>Nytt meldings-system under utvikling</p>
-        <button
-          onClick={() => setShowNotificationPanel(false)}
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: '#333',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '1rem'
-          }}
-        >
-          Lukk
-        </button>
-      </div>
-      )}
+
 
       {activeTab === 'avd' && (
       <div className="tab-content">

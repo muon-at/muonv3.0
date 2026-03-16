@@ -15,6 +15,7 @@ export const LeftNavBar: React.FC = () => {
   const [expandedItem, setExpandedItem] = useState<string | null>('min-side'); // Min Side expanded by default
   const [activeTab, setActiveTab] = useState<string>('status'); // Default tab
   const [closingItem, setClosingItem] = useState<string | null>(null); // Track which item is closing
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Notification panel state
 
   const handleLogout = () => {
     logout();
@@ -127,6 +128,47 @@ export const LeftNavBar: React.FC = () => {
       {/* Desktop NavBar */}
       <div className="left-nav-bar left-nav-bar-desktop">
         <div className="nav-items">
+          {/* NOTIFICATION BELL - Top of navbar */}
+          <button 
+            className="nav-button notification-bell"
+            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+            </div>
+            {totalUnread > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                background: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                border: '2px solid white',
+              }}>
+                {totalUnread > 99 ? '99+' : totalUnread}
+              </div>
+            )}
+          </button>
+
+          {/* NOTIFICATION PANEL */}
+          {isNotificationOpen && (
+            <div className="notification-panel">
+              <div style={{ padding: '1rem', color: '#999', fontSize: '0.9rem' }}>
+                Notifikasjoner kommer her
+              </div>
+            </div>
+          )}
+
           {/* 1. MIN SIDE - Person icon WITH TABS */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
             <button 
