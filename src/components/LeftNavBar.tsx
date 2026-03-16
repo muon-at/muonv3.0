@@ -104,17 +104,21 @@ export const LeftNavBar: React.FC = () => {
 
   const toggleExpandItem = (itemId: string) => {
     if (expandedItem === itemId) {
-      // Start closing animation
+      // Close if already open (toggle off)
       setClosingItem(itemId);
-      // After animation completes (3500ms = 3.5s tab closing), actually close
       setTimeout(() => {
         setExpandedItem(null);
         setClosingItem(null);
       }, 3500);
     } else {
-      // Opening new item
-      setClosingItem(null);
-      setExpandedItem(itemId);
+      // ACCORDION: Open new item - auto-close the old one
+      if (expandedItem) {
+        setClosingItem(expandedItem); // Animate old item closing
+      }
+      setExpandedItem(itemId); // Open new item
+      setTimeout(() => {
+        setClosingItem(null); // Clear closing animation
+      }, 3500);
     }
   };
 
