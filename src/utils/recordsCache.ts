@@ -96,7 +96,13 @@ export const buildRecordsCache = async (db: Firestore): Promise<RecordsCache> =>
       
       // Include ALL contracts (all years are live and dynamic)
       if (cDate && !isNaN(cDate.getTime())) {
-        contracts.push({ ...data, selger: selgerName });
+        // Normalize field names for consistent calculation
+        contracts.push({
+          ...data,
+          selger: selgerName,
+          dato: cDate.toISOString().split('T')[0], // Normalize to YYYY-MM-DD
+          Ordredato: ordredato // Keep original too
+        });
       } else {
         console.log('⚠️ Invalid date:', ordredato);
       }
