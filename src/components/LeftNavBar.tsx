@@ -16,6 +16,7 @@ export const LeftNavBar: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('status'); // Default tab
   const [closingItem, setClosingItem] = useState<string | null>(null); // Track which item is closing
   const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Notification panel state
+  const [activeProject, setActiveProject] = useState<string | null>(null); // Sub-accordion for projects
 
   const handleLogout = () => {
     logout();
@@ -106,6 +107,7 @@ export const LeftNavBar: React.FC = () => {
     if (expandedItem === itemId) {
       // Close if already open (toggle off)
       setClosingItem(itemId);
+      setActiveProject(null); // Reset project selection when closing
       setTimeout(() => {
         setExpandedItem(null);
         setClosingItem(null);
@@ -113,6 +115,7 @@ export const LeftNavBar: React.FC = () => {
     } else {
       // Opening new item
       setClosingItem(null);
+      setActiveProject(null); // Reset project selection when opening different item
       setExpandedItem(itemId);
     }
   };
@@ -382,56 +385,93 @@ export const LeftNavBar: React.FC = () => {
                     </button>
                     {(activeTab as string).includes('admin-proj-') && (
                       <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
-                        {/* ALLENTE - EXPANDABLE WITH TABS */}
-                        <div style={{ width: '100%' }}>
-                          <button 
-                            className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
-                            onClick={() => setActiveTab((activeTab as string).includes('admin-allente-') ? 'admin-proj-allente' : 'admin-allente-warroom')}
-                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
-                          >
-                            Allente ▼
-                          </button>
-                          {(activeTab as string).includes('admin-allente-') && (
-                            <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
-                              <button 
-                                className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
-                                onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                              >
-                                War room
-                              </button>
-                              <button 
-                                className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
-                                onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                              >
-                                Produkt
-                              </button>
-                              <button 
-                                className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
-                                onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                              >
-                                Badges
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                        {/* SUB-ACCORDION: Show selected project OR all projects */}
+                        {activeProject === null && (
+                          <>
+                            {/* No project selected - show all 3 */}
+                            <button 
+                              className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
+                              onClick={() => setActiveProject('allente')}
+                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                            >
+                              Allente ▼
+                            </button>
+                            <button 
+                              className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
+                              onClick={() => setActiveProject('surfnet')}
+                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                            >
+                              Surfnet
+                            </button>
+                            <button 
+                              className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
+                              onClick={() => setActiveProject('skandia')}
+                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                            >
+                              Skandia
+                            </button>
+                          </>
+                        )}
 
-                        <button 
-                          className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-proj-surfnet', '/admin-dashboard?tab=prosjekt&prosjekt=surfnet')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
-                        >
-                          Surfnet
-                        </button>
-                        <button 
-                          className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-proj-skandia', '/admin-dashboard?tab=prosjekt&prosjekt=skandia')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
-                        >
-                          Skandia
-                        </button>
+                        {/* ALLENTE SELECTED */}
+                        {activeProject === 'allente' && (
+                          <div style={{ width: '100%' }}>
+                            <button 
+                              className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
+                              onClick={() => setActiveProject(null)}
+                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                            >
+                              ◀ Allente
+                            </button>
+                            {(activeTab as string).includes('admin-allente-') && (
+                              <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
+                                <button 
+                                  className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
+                                  onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
+                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                >
+                                  War room
+                                </button>
+                                <button 
+                                  className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
+                                  onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
+                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                >
+                                  Produkt
+                                </button>
+                                <button 
+                                  className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
+                                  onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
+                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                >
+                                  Badges
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* SURFNET SELECTED */}
+                        {activeProject === 'surfnet' && (
+                          <button 
+                            className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
+                            onClick={() => setActiveProject(null)}
+                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                          >
+                            ◀ Surfnet
+                          </button>
+                        )}
+
+                        {/* SKANDIA SELECTED */}
+                        {activeProject === 'skandia' && (
+                          <button 
+                            className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
+                            onClick={() => setActiveProject(null)}
+                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                          >
+                            ◀ Skandia
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
