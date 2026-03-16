@@ -420,7 +420,7 @@ export const LeftNavBar: React.FC = () => {
                           </>
                         )}
 
-                        {/* ALLENTE SELECTED */}
+                        {/* ALLENTE SELECTED - Auto-select War room if no sub-tab selected */}
                         {activeProject === 'allente' && (
                           <div style={{ width: '100%' }}>
                             <button 
@@ -430,31 +430,30 @@ export const LeftNavBar: React.FC = () => {
                             >
                               ◀ Allente
                             </button>
-                            {(activeTab as string).includes('admin-allente-') && (
-                              <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
-                                <button 
-                                  className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
-                                  onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
-                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                                >
-                                  War room
-                                </button>
-                                <button 
-                                  className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
-                                  onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
-                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                                >
-                                  Produkt
-                                </button>
-                                <button 
-                                  className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
-                                  onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
-                                  style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
-                                >
-                                  Badges
-                                </button>
-                              </div>
-                            )}
+                            {/* Always show sub-tabs when Allente is open */}
+                            <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                War room
+                              </button>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                Produkt
+                              </button>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                Badges
+                              </button>
+                            </div>
                           </div>
                         )}
 
