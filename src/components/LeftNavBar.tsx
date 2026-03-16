@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
-import { useChatSidebar } from '../lib/ChatSidebarContext';
+
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
 import '../styles/LeftNavBar.css';
 
 export const LeftNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
+
   const { channelUnreadCounts } = useChannelUnread();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
@@ -98,11 +98,7 @@ export const LeftNavBar: React.FC = () => {
     }
   }, [totalUnread]);
 
-  const handleChatToggle = () => {
-    console.log('🔵 Chat button clicked!', 'Current state:', isChatSidebarOpen);
-    setIsChatSidebarOpen(!isChatSidebarOpen);
-    console.log('✅ Sidebar state toggled to:', !isChatSidebarOpen);
-  };
+
 
   const toggleExpandItem = (itemId: string) => {
     if (expandedItem === itemId) {
@@ -235,40 +231,6 @@ export const LeftNavBar: React.FC = () => {
             </div>
             <div className="nav-tooltip">Logg ut</div>
           </button>
-
-          {/* CHAT - Speech bubble icon (BOTTOM) */}
-          <button 
-            className={`nav-button ${isChatSidebarOpen ? 'active' : ''}`}
-            onClick={handleChatToggle}
-          >
-            <div className="icon-circle" style={{ position: 'relative' }}>
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              {/* Unread badge */}
-              {totalUnread > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  background: '#ef4444',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.7rem',
-                  fontWeight: 'bold',
-                  border: '2px solid white',
-                }}>
-                  {totalUnread > 99 ? '99+' : totalUnread}
-                </div>
-              )}
-            </div>
-            <div className="nav-tooltip">Chat {totalUnread > 0 ? `(${totalUnread})` : ''}</div>
-          </button>
         </div>
       </div>
 
@@ -298,17 +260,6 @@ export const LeftNavBar: React.FC = () => {
         {/* Mobile Menu Drawer */}
         <div className={`mobile-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
           <div className="mobile-nav-items">
-            {/* CHAT */}
-            <button
-              className="mobile-nav-button"
-              onClick={() => { handleChatToggle(); setIsMobileMenuOpen(false); }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span>Chat</span>
-            </button>
-
             {/* LOGOUT */}
             <button
               className="mobile-nav-button"
