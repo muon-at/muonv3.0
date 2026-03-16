@@ -7,7 +7,7 @@ import '../styles/Plaquet.css';
 import { buildRecordsCache, checkRecordBreak, formatRecordMessage } from '../utils/recordsCache';
 import type { RecordsCache, BrokenRecord } from '../utils/recordsCache';
 import { postRecordToChat } from '../utils/discordWebhook';
-import { WallOfFame } from '../components/WallOfFame';
+// import { WallOfFame } from '../components/WallOfFame';
 
 interface SalesRecord {
   dato?: string;
