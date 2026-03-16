@@ -3,7 +3,7 @@
   left: 0;
   top: 0;
   bottom: 0;
-  width: 135px;
+  width: 130px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   flex-direction: column;
@@ -116,7 +116,7 @@
   border: none;
   border-bottom: none;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 1.02rem;
+  font-size: 0.99rem;
   cursor: pointer;
   text-align: center;
   border-radius: 0;
@@ -147,7 +147,7 @@
 }
 
 .nav-tab-submenu .nav-tab {
-  font-size: 1.02rem;
+  font-size: 0.99rem;
   padding: 0.35rem 0.3rem;
   color: rgba(255, 255, 255, 0.7);
 }
@@ -162,7 +162,7 @@
 }
 
 .nav-emoji {
-  font-size: 2.4rem;
+  font-size: 2.33rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,8 +170,8 @@
 
 /* ICON CIRCLE - Wrapper for SVG icons (clipping container) */
 .icon-circle {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #f0f0f0;
@@ -199,8 +199,8 @@
 
 /* SVG ICONS */
 .nav-icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   stroke: #999;
   color: #999;
   display: flex;
@@ -211,8 +211,8 @@
 
 /* AVDELING CIRCLE */
 .avdeling-circle {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   background: #f0f0f0;
@@ -220,7 +220,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #999;
   flex-shrink: 0;
@@ -328,8 +328,8 @@
 }
 
 .mobile-hamburger {
-  width: 58px;
-  height: 58px;
+  width: 52px;
+  height: 52px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   border-radius: 8px;
