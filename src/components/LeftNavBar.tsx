@@ -107,7 +107,76 @@ export const LeftNavBar: React.FC = () => {
       {/* Desktop NavBar */}
       <div className="left-nav-bar left-nav-bar-desktop">
         <div className="nav-items">
-          {/* LOGOUT - Door icon */}
+          {/* 1. MIN SIDE - Person icon */}
+          <button 
+            className="nav-button"
+            onClick={() => navigate('/min-side')}
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4"/>
+              </svg>
+            </div>
+            <div className="nav-tooltip">Min Side</div>
+          </button>
+
+          {/* 2. AVDELING - People/Building icon */}
+          <button 
+            className="nav-button"
+            onClick={() => navigate('/min-avdeling')}
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div className="nav-tooltip">Min Avdeling</div>
+          </button>
+
+          {/* 3. PROSJEKT - Briefcase icon */}
+          <button 
+            className="nav-button"
+            onClick={() => navigate('/mitt-prosjekt')}
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+              </svg>
+            </div>
+            <div className="nav-tooltip">Mitt Prosjekt</div>
+          </button>
+
+          {/* 4. TEAMLEDER - People icon */}
+          {(user?.role === 'owner' || user?.role === 'teamleder') && (
+            <button 
+              className="nav-button"
+              onClick={() => navigate('/teamleder')}
+            >
+              <div className="icon-circle">
+                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div className="nav-tooltip">Teamleder</div>
+            </button>
+          )}
+
+          {/* 5. ADMIN - Gear icon */}
+          {(user?.role === 'owner') && (
+            <button 
+              className="nav-button"
+              onClick={() => navigate('/admin-dashboard')}
+            >
+              <div className="icon-circle">
+                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
+                </svg>
+              </div>
+              <div className="nav-tooltip">Admin</div>
+            </button>
+          )}
+
+          {/* 6. LOGOUT - Door icon */}
           <button 
             className="nav-button"
             onClick={handleLogout}
@@ -120,71 +189,10 @@ export const LeftNavBar: React.FC = () => {
             <div className="nav-tooltip">Logg ut</div>
           </button>
 
-          {/* BACK - Arrow left */}
-          <button 
-            className="nav-button"
-            onClick={() => window.history.back()}
-            
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Tilbake</div>
-          </button>
-
-          {/* ADMIN - Gear icon */}
-          {(user?.role === 'owner') && (
-            <button 
-              className="nav-button"
-              onClick={() => navigate('/admin-dashboard')}
-              
-            >
-              <div className="icon-circle">
-                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
-                </svg>
-              </div>
-              <div className="nav-tooltip">Admin</div>
-            </button>
-          )}
-
-          {/* TEAMLEDER - People icon */}
-          {(user?.role === 'owner' || user?.role === 'teamleder') && (
-            <button 
-              className="nav-button"
-              onClick={() => navigate('/teamleder')}
-              
-            >
-              <div className="icon-circle">
-                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div className="nav-tooltip">Teamleder</div>
-            </button>
-          )}
-
-          {/* MIN SIDE - Person icon */}
-          <button 
-            className="nav-button"
-            onClick={() => navigate('/min-side')}
-            
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="8" r="4"/><path d="M12 14c-4 0-6 2-6 4v2h12v-2c0-2-2-4-6-4"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Min Side</div>
-          </button>
-
           {/* CHAT - Speech bubble icon (BOTTOM) */}
           <button 
             className={`nav-button ${isChatSidebarOpen ? 'active' : ''}`}
             onClick={handleChatToggle}
-            
           >
             <div className="icon-circle" style={{ position: 'relative' }}>
               <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
