@@ -393,8 +393,8 @@ export const LeftNavBar: React.FC = () => {
                         {/* ALLENTE - EXPANDABLE WITH TABS */}
                         <div style={{ width: '100%' }}>
                           <button 
-                            className={`nav-tab ${(activeTab as string).startsWith('admin-proj-allente') ? 'active' : ''}`}
-                            onClick={() => setActiveTab((activeTab as string).includes('admin-allente-') ? 'admin-proj-allente' : 'admin-allente-progresjon')}
+                            className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
+                            onClick={() => setActiveTab((activeTab as string).includes('admin-allente-') ? 'admin-proj-allente' : 'admin-allente-warroom')}
                             style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
                           >
                             Allente ▼
@@ -402,11 +402,11 @@ export const LeftNavBar: React.FC = () => {
                           {(activeTab as string).includes('admin-allente-') && (
                             <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
                               <button 
-                                className={`nav-tab ${activeTab === 'admin-allente-progresjon' ? 'active' : ''}`}
-                                onClick={() => handleTabClick('admin-allente-progresjon', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=progresjon')}
+                                className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
                                 style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
                               >
-                                Progresjon
+                                War room
                               </button>
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
