@@ -105,10 +105,8 @@ export default function NavbarAccordion({ onNavigate, currentSection, currentTab
       toggleExpand(item.id);
       // Click first sub-item by default
       const firstSubItem = item.subItems[0];
-      const [section, tab] = firstSubItem.id.split('-');
       onNavigate(item.id, firstSubItem.id);
     } else {
-      const [section, tab] = item.id.split('-');
       onNavigate(item.id, item.id);
     }
   };
