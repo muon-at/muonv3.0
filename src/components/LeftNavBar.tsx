@@ -109,16 +109,21 @@ export const LeftNavBar: React.FC = () => {
       setTimeout(() => {
         setExpandedItem(null);
         setClosingItem(null);
-      }, 600); // 0.6s default timing
+      }, 900); // 0.9s smooth timing
     } else {
-      // ACCORDION: Open new item - auto-close the old one
+      // ACCORDION: Open new item FIRST, then close old one after new is fully open
+      setExpandedItem(itemId); // Open new item immediately
+      
+      // Wait for new item to fully open (0.9s), THEN start closing old item
       if (expandedItem) {
-        setClosingItem(expandedItem); // Animate old item closing
+        setTimeout(() => {
+          setClosingItem(expandedItem); // Start closing old item
+          // Wait for old item to fully close (0.9s), then clear state
+          setTimeout(() => {
+            setClosingItem(null);
+          }, 900);
+        }, 900); // Start closing AFTER new is done opening
       }
-      setExpandedItem(itemId); // Open new item
-      setTimeout(() => {
-        setClosingItem(null); // Clear closing animation
-      }, 600); // 0.6s default timing
     }
   };
 
