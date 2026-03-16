@@ -16,8 +16,8 @@
 .nav-items {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.4rem 0.5rem;
+  gap: 0.05rem;
+  padding: 0.3rem 0.5rem;
   align-items: center;
   flex: 1;
   overflow-y: auto;
@@ -49,7 +49,7 @@
   transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   flex-shrink: 0;
-  padding: 0.3rem;
+  padding: 0.15rem;
 }
 
 .nav-button:hover {
@@ -111,7 +111,7 @@
 }
 
 .nav-tab {
-  padding: 0.35rem 0.4rem;
+  padding: 0.25rem 0.4rem;
   background: transparent;
   border: none;
   border-bottom: none;
@@ -148,7 +148,7 @@
 
 .nav-tab-submenu .nav-tab {
   font-size: 0.99rem;
-  padding: 0.35rem 0.3rem;
+  padding: 0.25rem 0.3rem;
   color: rgba(255, 255, 255, 0.7);
 }
 
