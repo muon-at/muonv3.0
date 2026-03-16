@@ -105,11 +105,11 @@ export const LeftNavBar: React.FC = () => {
     if (expandedItem === itemId) {
       // Start closing animation
       setClosingItem(itemId);
-      // After animation completes (600ms), actually close
+      // After animation completes (3500ms = 3.5s tab closing), actually close
       setTimeout(() => {
         setExpandedItem(null);
         setClosingItem(null);
-      }, 600);
+      }, 3500);
     } else {
       // Opening new item
       setClosingItem(null);

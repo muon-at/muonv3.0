@@ -35,7 +35,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 3.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   flex-shrink: 0;
   padding: 0.5rem;
@@ -63,7 +63,7 @@
 
 .nav-button.expanded {
   background: transparent;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 3.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Tabs Dropdown - NO BOX, CLEAN GRADIENT */
@@ -77,13 +77,13 @@
   padding: 0;
   margin-top: 0;
   width: 100%;
-  animation: slideDownSmooth 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  animation: slideDownSmooth 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
   max-height: 500px;
 }
 
 .nav-tabs-dropdown.closing {
-  animation: slideDownSmooth 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse;
+  animation: slideDownSmooth 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) reverse;
 }
 
 @keyframes slideDownSmooth {
@@ -170,7 +170,7 @@
   flex-shrink: 0;
   overflow: visible;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 3.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .nav-button:hover .icon-circle {
@@ -182,7 +182,7 @@
 .nav-button:hover .icon-circle .nav-icon {
   stroke: #666;
   color: #666;
-  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 3.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* SVG ICONS */
