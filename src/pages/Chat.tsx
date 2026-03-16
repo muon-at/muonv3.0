@@ -174,7 +174,31 @@ export default function Chat() {
   const getDateLabel = (timestamp: any): string => {
     if (!timestamp) return '';
     
-    const messageDate = new Date(timestamp.seconds ? timestamp.seconds * 1000 : timestamp);
+    let messageDate: Date;
+    try {
+      // Handle Firestore Timestamp (has .seconds property)
+      if (timestamp.seconds) {
+        messageDate = new Date(timestamp.seconds * 1000);
+      }
+      // Handle number (milliseconds)
+      else if (typeof timestamp === 'number') {
+        messageDate = new Date(timestamp);
+      }
+      // Handle Date string or other
+      else {
+        messageDate = new Date(timestamp);
+      }
+      
+      // Validate the date
+      if (isNaN(messageDate.getTime())) {
+        console.warn('⚠️ Invalid timestamp:', timestamp);
+        return '';
+      }
+    } catch (err) {
+      console.error('❌ Error parsing timestamp:', timestamp, err);
+      return '';
+    }
+    
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -2046,10 +2070,25 @@ export default function Chat() {
                               color: '#666',
                               marginRight: '0.5rem'
                             }}>
-                              {new Date(msg.timestamp).toLocaleTimeString('no-NO', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              {(() => {
+                                let messageDate: Date;
+                                try {
+                                  if (msg.timestamp?.seconds) {
+                                    messageDate = new Date(msg.timestamp.seconds * 1000);
+                                  } else if (typeof msg.timestamp === 'number') {
+                                    messageDate = new Date(msg.timestamp);
+                                  } else {
+                                    messageDate = new Date(msg.timestamp);
+                                  }
+                                  if (isNaN(messageDate.getTime())) return '--:--';
+                                  return messageDate.toLocaleTimeString('no-NO', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  });
+                                } catch (err) {
+                                  return '--:--';
+                                }
+                              })()}
                             </span>
 
                             {/* Reply context */}
