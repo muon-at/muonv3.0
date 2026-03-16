@@ -220,10 +220,9 @@
   display: none;
 }
 
-/* Notification Bell */
-.notification-bell {
-  position: relative;
-  margin-bottom: 1rem;
+/* Notification Bell Button */
+.notification-bell-button {
+  margin-bottom: 1.5rem;
 }
 
 .notification-panel {
