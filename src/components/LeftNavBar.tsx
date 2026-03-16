@@ -251,7 +251,7 @@ export const LeftNavBar: React.FC = () => {
                   className={`nav-tab ${activeTab === 'avd-walloffame' ? 'active' : ''}`}
                   onClick={() => handleTabClick('avd-walloffame', '/min-avdeling?tab=walloffame')}
                 >
-                  Wall of Fame MVP
+                  Wall of Fame
                 </button>
               </div>
             )}
@@ -284,7 +284,7 @@ export const LeftNavBar: React.FC = () => {
                   className={`nav-tab ${activeTab === 'proj-walloffame' ? 'active' : ''}`}
                   onClick={() => handleTabClick('proj-walloffame', '/mitt-prosjekt?tab=walloffame')}
                 >
-                  Wall of Fame MVP
+                  Wall of Fame
                 </button>
               </div>
             )}
@@ -368,16 +368,16 @@ export const LeftNavBar: React.FC = () => {
                         >
                           People
                         </button>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-muon-org' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-muon-org', '/admin-dashboard?tab=muon&muon=organisasjon')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Organisasjon
+                        </button>
                       </div>
                     )}
                   </div>
-
-                  <button 
-                    className={`nav-tab ${activeTab === 'admin-org' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('admin-org', '/admin-dashboard?tab=organisasjon')}
-                  >
-                    Organisasjon
-                  </button>
 
                   {/* PROSJEKT - EXPANDABLE SUBMENU */}
                   <div style={{ width: '100%' }}>
