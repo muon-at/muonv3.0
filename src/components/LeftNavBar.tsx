@@ -264,19 +264,100 @@ export const LeftNavBar: React.FC = () => {
             </div>
           )}
 
-          {/* 5. ADMIN - Gear icon */}
+          {/* 5. ADMIN - Gear icon WITH TABS */}
           {(user?.role === 'owner') && (
-            <button 
-              className="nav-button"
-              onClick={() => navigate('/admin-dashboard')}
-            >
-              <div className="icon-circle">
-                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
-                </svg>
-              </div>
-              <div className="nav-tooltip">Admin</div>
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+              <button 
+                className={`nav-button ${expandedItem === 'admin' ? 'expanded' : ''}`}
+                onClick={() => toggleExpandItem('admin')}
+              >
+                <div className="icon-circle">
+                  <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24"/>
+                  </svg>
+                </div>
+                <div className="nav-tooltip">Admin</div>
+              </button>
+
+              {/* TABS DROPDOWN FOR ADMIN */}
+              {expandedItem === 'admin' && (
+                <div className="nav-tabs-dropdown">
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-dashboard' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-dashboard', '/admin-dashboard?tab=dashboard')}
+                  >
+                    Dashboard
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-org' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-org', '/admin-dashboard?tab=organisasjon')}
+                  >
+                    Organisasjon
+                  </button>
+
+                  {/* PROSJEKT - EXPANDABLE SUBMENU */}
+                  <div style={{ width: '100%' }}>
+                    <button 
+                      className={`nav-tab ${activeTab.startsWith('admin-proj') ? 'active' : ''}`}
+                      onClick={() => setActiveTab(activeTab.startsWith('admin-proj-submenu') ? 'admin-proj' : 'admin-proj-submenu')}
+                      style={{ position: 'relative' }}
+                    >
+                      Prosjekt ▼
+                    </button>
+                    {activeTab === 'admin-proj-submenu' && (
+                      <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-proj-allente' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-proj-allente', '/admin-dashboard?tab=prosjekt&prosjekt=allente')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Allente
+                        </button>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-proj-surfnet', '/admin-dashboard?tab=prosjekt&prosjekt=surfnet')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Surfnet
+                        </button>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-proj-skandia', '/admin-dashboard?tab=prosjekt&prosjekt=skandia')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Skandia
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-progresjon' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-progresjon', '/admin-dashboard?tab=progresjon')}
+                  >
+                    Progresjon
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-produkt' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-produkt', '/admin-dashboard?tab=produkt')}
+                  >
+                    Produkt
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-tema' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-tema', '/admin-dashboard?tab=tema')}
+                  >
+                    Tema
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'admin-badges' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('admin-badges', '/admin-dashboard?tab=badges')}
+                  >
+                    Badges
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {/* 6. LOGOUT - Door icon */}
