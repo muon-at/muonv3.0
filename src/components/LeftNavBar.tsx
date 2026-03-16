@@ -298,13 +298,13 @@ export const LeftNavBar: React.FC = () => {
                   {/* PROSJEKT - EXPANDABLE SUBMENU */}
                   <div style={{ width: '100%' }}>
                     <button 
-                      className={`nav-tab ${activeTab.startsWith('admin-proj') ? 'active' : ''}`}
-                      onClick={() => setActiveTab(activeTab.startsWith('admin-proj-submenu') ? 'admin-proj' : 'admin-proj-submenu')}
+                      className={`nav-tab ${(activeTab as string).startsWith('admin-proj') ? 'active' : ''}`}
+                      onClick={() => setActiveTab((activeTab as string).includes('admin-proj-') ? 'admin-proj' : 'admin-proj-allente')}
                       style={{ position: 'relative' }}
                     >
                       Prosjekt ▼
                     </button>
-                    {activeTab === 'admin-proj-submenu' && (
+                    {(activeTab as string).includes('admin-proj-') && (
                       <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
                         <button 
                           className={`nav-tab ${activeTab === 'admin-proj-allente' ? 'active' : ''}`}
