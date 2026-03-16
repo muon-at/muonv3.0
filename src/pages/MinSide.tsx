@@ -1152,7 +1152,7 @@ export default function MinSide() {
       {/* MAIN CONTENT - STATS TAB */}
       {activeTab === 'stats' && (
       <div className="minside-main">
-        <div className="stats-and-earnings-container" style={{ display: 'flex', gap: '2rem', position: 'relative' }}>
+        <div className="stats-and-earnings-container" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: '2rem', alignItems: 'start' }}>
           <div className="stats-left-section">
             <div className="stats-circles">
           <div className="trophy-placeholder">🏆</div>
@@ -1372,8 +1372,9 @@ export default function MinSide() {
                 width: '95px',
                 height: '95px',
                 transition: 'transform 0.2s',
-                marginLeft: 'auto',
                 padding: '0',
+                gridColumn: '3',
+                justifySelf: 'center',
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
