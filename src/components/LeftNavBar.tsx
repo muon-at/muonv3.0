@@ -350,7 +350,7 @@ export const LeftNavBar: React.FC = () => {
                     <button 
                       className={`nav-tab ${(activeTab as string).startsWith('admin-muon') ? 'active' : ''}`}
                       onClick={() => setActiveTab((activeTab as string).includes('admin-muon-') ? 'admin-muon' : 'admin-muon-dashboard')}
-                      style={{ position: 'relative', fontWeight: '600' }}
+                      style={{ position: 'relative' }}
                     >
                       Muon ▼
                     </button>
@@ -359,21 +359,21 @@ export const LeftNavBar: React.FC = () => {
                         <button 
                           className={`nav-tab ${activeTab === 'admin-muon-dashboard' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-muon-dashboard', '/admin-dashboard?tab=muon&muon=dashboard')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                          style={{ fontSize: '0.8rem' }}
                         >
                           Dashboard
                         </button>
                         <button 
                           className={`nav-tab ${activeTab === 'admin-muon-people' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-muon-people', '/admin-dashboard?tab=muon&muon=people')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                          style={{ fontSize: '0.8rem' }}
                         >
                           People
                         </button>
                         <button 
                           className={`nav-tab ${activeTab === 'admin-muon-tema' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-muon-tema', '/admin-dashboard?tab=muon&muon=tema')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                          style={{ fontSize: '0.8rem' }}
                         >
                           Tema
                         </button>
@@ -399,21 +399,21 @@ export const LeftNavBar: React.FC = () => {
                             <button 
                               className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
                               onClick={() => setActiveProject('allente')}
-                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                              style={{ fontSize: '0.8rem' }}
                             >
                               Allente ▼
                             </button>
                             <button 
                               className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
                               onClick={() => setActiveProject('surfnet')}
-                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                              style={{ fontSize: '0.8rem' }}
                             >
                               Surfnet
                             </button>
                             <button 
                               className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
                               onClick={() => setActiveProject('skandia')}
-                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                              style={{ fontSize: '0.8rem' }}
                             >
                               Skandia
                             </button>
@@ -426,7 +426,7 @@ export const LeftNavBar: React.FC = () => {
                             <button 
                               className={`nav-tab ${(activeTab as string).includes('admin-allente-') ? 'active' : ''}`}
                               onClick={() => setActiveProject(null)}
-                              style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                              style={{ fontSize: '0.8rem' }}
                             >
                               ◀ Allente
                             </button>
@@ -435,21 +435,21 @@ export const LeftNavBar: React.FC = () => {
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
                                 onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                style={{ fontSize: '0.75rem' }}
                               >
                                 War room
                               </button>
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
                                 onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                style={{ fontSize: '0.75rem' }}
                               >
                                 Produkt
                               </button>
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
                                 onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
-                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                                style={{ fontSize: '0.75rem' }}
                               >
                                 Badges
                               </button>
@@ -462,7 +462,7 @@ export const LeftNavBar: React.FC = () => {
                           <button 
                             className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
                             onClick={() => setActiveProject(null)}
-                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                            style={{ fontSize: '0.8rem' }}
                           >
                             ◀ Surfnet
                           </button>
@@ -473,7 +473,7 @@ export const LeftNavBar: React.FC = () => {
                           <button 
                             className={`nav-tab ${activeTab === 'admin-proj-skandia' ? 'active' : ''}`}
                             onClick={() => setActiveProject(null)}
-                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem', fontWeight: '600' }}
+                            style={{ fontSize: '0.8rem' }}
                           >
                             ◀ Skandia
                           </button>
