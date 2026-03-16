@@ -139,6 +139,7 @@ export default function MinSide() {
   });
 
   const [recordsCache, setRecordsCache] = useState<RecordsCache>({ employees: {}, departments: {} });
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   // Load saved goals from Firestore
   const loadSavedGoals = async () => {
@@ -1161,6 +1162,30 @@ export default function MinSide() {
               <div className="stat-label">{stat.label}</div>
             </div>
           ))}
+          {/* 🔔 Notification Panel (Stian only - new message system) */}
+          {user?.name === 'Stian Abrahamsen' && (
+            <button
+              onClick={() => setShowNotificationPanel(!showNotificationPanel)}
+              className="notification-button"
+              style={{
+                background: 'none',
+                border: 'none',
+                fontSize: '3rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '95px',
+                height: '95px',
+                transition: 'transform 0.2s',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Nye meldinger"
+            >
+              🔔
+            </button>
+          )}
           <div className="trophy-placeholder">🏆</div>
         </div>
 
@@ -1356,6 +1381,36 @@ export default function MinSide() {
             </div>
           </div>
         </div>
+      </div>
+      )}
+
+      {/* 🔔 NOTIFICATION PANEL (Stian only - new message system) */}
+      {user?.name === 'Stian Abrahamsen' && showNotificationPanel && (
+      <div className="notification-panel" style={{
+        background: '#f5f5f5',
+        border: '2px solid #ddd',
+        borderRadius: '8px',
+        padding: '2rem',
+        margin: '2rem auto',
+        maxWidth: '600px',
+        textAlign: 'center'
+      }}>
+        <h2>🔔 Notification Panel</h2>
+        <p style={{ color: '#666', marginBottom: '2rem' }}>Nytt meldings-system under utvikling</p>
+        <button
+          onClick={() => setShowNotificationPanel(false)}
+          style={{
+            padding: '0.75rem 1.5rem',
+            background: '#333',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '1rem'
+          }}
+        >
+          Lukk
+        </button>
       </div>
       )}
 
