@@ -292,42 +292,7 @@ export const LeftNavBar: React.FC = () => {
             )}
           </div>
 
-          {/* 4. TEAMLEDER - People icon WITH TABS */}
-          {(user?.role === 'owner' || user?.role === 'teamleder') && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-              <button 
-                className={`nav-button ${expandedItem === 'teamleder' ? 'expanded' : ''}`}
-                onClick={() => toggleExpandItem('teamleder')}
-              >
-                <div className="icon-circle">
-                  <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                  </svg>
-                </div>
-                <div className="nav-tooltip">Teamleder</div>
-              </button>
-
-              {/* TABS DROPDOWN FOR TEAMLEDER */}
-              {(expandedItem === 'teamleder' || closingItem === 'teamleder') && (
-                <div className={`nav-tabs-dropdown ${closingItem === 'teamleder' ? 'closing' : ''}`}>
-                  <button 
-                    className={`nav-tab ${activeTab === 'tl-kalendere' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('tl-kalendere', '/teamleder?tab=kalendere')}
-                  >
-                    Kalendere
-                  </button>
-                  <button 
-                    className={`nav-tab ${activeTab === 'tl-selgere' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('tl-selgere', '/teamleder?tab=selgere')}
-                  >
-                    Mine Selgere
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* 5. ADMIN - Gear icon WITH TABS */}
+          {/* 4. ADMIN - Gear icon WITH TABS */}
           {(user?.role === 'owner') && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
               <button 
@@ -369,6 +334,13 @@ export const LeftNavBar: React.FC = () => {
                           style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
                         >
                           People
+                        </button>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-muon-team' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-muon-team', '/admin-dashboard?tab=muon&muon=team')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Team
                         </button>
                       </div>
                     )}
