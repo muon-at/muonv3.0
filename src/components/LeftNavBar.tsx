@@ -163,45 +163,105 @@ export const LeftNavBar: React.FC = () => {
             )}
           </div>
 
-          {/* 2. AVDELING - People/Building icon */}
-          <button 
-            className="nav-button"
-            onClick={() => navigate('/min-avdeling')}
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Min Avdeling</div>
-          </button>
-
-          {/* 3. PROSJEKT - Briefcase icon */}
-          <button 
-            className="nav-button"
-            onClick={() => navigate('/mitt-prosjekt')}
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Mitt Prosjekt</div>
-          </button>
-
-          {/* 4. TEAMLEDER - People icon */}
-          {(user?.role === 'owner' || user?.role === 'teamleder') && (
+          {/* 2. MIN AVDELING - People icon WITH TABS */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
             <button 
-              className="nav-button"
-              onClick={() => navigate('/teamleder')}
+              className={`nav-button ${expandedItem === 'min-avdeling' ? 'expanded' : ''}`}
+              onClick={() => toggleExpandItem('min-avdeling')}
             >
               <div className="icon-circle">
                 <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
               </div>
-              <div className="nav-tooltip">Teamleder</div>
+              <div className="nav-tooltip">Min Avdeling</div>
             </button>
+
+            {/* TABS DROPDOWN FOR MIN AVDELING */}
+            {expandedItem === 'min-avdeling' && (
+              <div className="nav-tabs-dropdown">
+                <button 
+                  className={`nav-tab ${activeTab === 'avd-status' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('avd-status', '/min-avdeling?tab=status')}
+                >
+                  Status
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'avd-walloffame' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('avd-walloffame', '/min-avdeling?tab=walloffame')}
+                >
+                  Wall of Fame MVP
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 3. MITT PROSJEKT - Briefcase icon WITH TABS */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            <button 
+              className={`nav-button ${expandedItem === 'mitt-prosjekt' ? 'expanded' : ''}`}
+              onClick={() => toggleExpandItem('mitt-prosjekt')}
+            >
+              <div className="icon-circle">
+                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                </svg>
+              </div>
+              <div className="nav-tooltip">Mitt Prosjekt</div>
+            </button>
+
+            {/* TABS DROPDOWN FOR MITT PROSJEKT */}
+            {expandedItem === 'mitt-prosjekt' && (
+              <div className="nav-tabs-dropdown">
+                <button 
+                  className={`nav-tab ${activeTab === 'proj-status' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('proj-status', '/mitt-prosjekt?tab=status')}
+                >
+                  Status
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'proj-walloffame' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('proj-walloffame', '/mitt-prosjekt?tab=walloffame')}
+                >
+                  Wall of Fame MVP
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 4. TEAMLEDER - People icon WITH TABS */}
+          {(user?.role === 'owner' || user?.role === 'teamleder') && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+              <button 
+                className={`nav-button ${expandedItem === 'teamleder' ? 'expanded' : ''}`}
+                onClick={() => toggleExpandItem('teamleder')}
+              >
+                <div className="icon-circle">
+                  <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div className="nav-tooltip">Teamleder</div>
+              </button>
+
+              {/* TABS DROPDOWN FOR TEAMLEDER */}
+              {expandedItem === 'teamleder' && (
+                <div className="nav-tabs-dropdown">
+                  <button 
+                    className={`nav-tab ${activeTab === 'tl-kalendere' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('tl-kalendere', '/teamleder?tab=kalendere')}
+                  >
+                    Kalendere
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'tl-selgere' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('tl-selgere', '/teamleder?tab=selgere')}
+                  >
+                    Mine Selgere
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {/* 5. ADMIN - Gear icon */}
