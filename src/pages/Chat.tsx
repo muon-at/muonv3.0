@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { db } from '../lib/firebase';
-import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, onSnapshot, query, orderBy, updateDoc, doc, arrayUnion, getDoc, setDoc, serverTimestamp, limitToLast } from 'firebase/firestore';
 import ChannelModal from '../components/ChannelModal';
 import { showNotification, playNotificationSound, vibrateDevice } from '../lib/push-notification-handler';
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
@@ -892,13 +892,13 @@ export default function Chat() {
       });
       const messagesRef = collection(db, 'chat_channels', channelId, 'messages');
       
-      // Try orderBy, fallback if mixed timestamp types
+      // Try orderBy with limit (load last 500 messages only), fallback if mixed timestamp types
       let q;
       try {
-        q = query(messagesRef, orderBy('timestamp', 'asc'));
+        q = query(messagesRef, orderBy('timestamp', 'asc'), limitToLast(500));
       } catch (err) {
         console.warn('⚠️ Channel orderBy failed, loading without order:', err);
-        q = query(messagesRef);
+        q = query(messagesRef, limitToLast(500));
       }
       
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -978,7 +978,15 @@ export default function Chat() {
   const loadDMMessages = async (dmId: string) => {
     try {
       const messagesRef = collection(db, 'chat_dms', dmId, 'messages');
-      const q = query(messagesRef, orderBy('timestamp', 'asc'));
+      
+      // Try orderBy with limit (load last 500 messages only), fallback if mixed timestamp types
+      let q;
+      try {
+        q = query(messagesRef, orderBy('timestamp', 'asc'), limitToLast(500));
+      } catch (err) {
+        console.warn('⚠️ DM orderBy failed (mixed timestamp types), loading without order:', err);
+        q = query(messagesRef, limitToLast(500));
+      }
       
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const msgs: Message[] = [];
