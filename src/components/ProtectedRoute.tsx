@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 import { LeftChatSidebar } from './LeftChatSidebar';
+import { LeftNavBar } from './LeftNavBar';
 import { ChatSidebarProvider, useChatSidebar } from '../lib/ChatSidebarContext';
-import NavbarAccordion from './NavbarAccordion';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -48,27 +48,11 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
 // Inner component that uses the ChatSidebar hook
 function ProtectedRouteInner({ children }: { children: React.ReactNode }) {
   const { isChatSidebarOpen, setIsChatSidebarOpen } = useChatSidebar();
-  const { logout } = useAuth();
-
-  const handleNavigation = (section: string, tab: string) => {
-    // Navigation will be handled by the parent routing logic
-    // For now, just console log
-    console.log('Navigate to:', section, tab);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
-      {/* New Vertical Accordion Navbar on left */}
-      <NavbarAccordion 
-        onNavigate={handleNavigation}
-        currentSection="min-side"
-        currentTab="ms-status"
-        onLogout={handleLogout}
-      />
+    <>
+      {/* Left Navbar - OLD DESIGN ON LEFT SIDE */}
+      <LeftNavBar />
 
       {/* Chat Sidebar */}
       <LeftChatSidebar 
@@ -77,11 +61,7 @@ function ProtectedRouteInner({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative' }}>
-        {/* 🔔 Notification Button - Floating */}
-        {/* Kept as floating element from MinSide */}
-        {children}
-      </div>
-    </div>
+      {children}
+    </>
   );
 }

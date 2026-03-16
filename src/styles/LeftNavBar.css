@@ -1,0 +1,318 @@
+.left-nav-bar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 72px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  gap: 0;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+}
+
+.nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 0.5rem;
+  align-items: center;
+  height: 100%;
+  overflow-y: auto;
+  justify-content: space-evenly;
+}
+
+.nav-button {
+  width: 72px;
+  height: auto;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+  flex-shrink: 0;
+  padding: 0.4rem 0;
+}
+
+.nav-button:hover {
+  background: transparent;
+  transform: scale(1.1);
+}
+
+.nav-button:hover .nav-icon {
+  stroke: #666;
+  color: #666;
+}
+
+.nav-button:hover .avdeling-circle {
+  border-color: #666;
+  color: #666;
+  background: #e8e8e8;
+}
+
+.nav-button:active {
+  transform: scale(0.95);
+}
+
+.nav-emoji {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ICON CIRCLE - Wrapper for SVG icons (clipping container) */
+.icon-circle {
+  width: 36px;
+  height: 36px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 2px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: visible;
+  position: relative;
+}
+
+.nav-button:hover .icon-circle {
+  border-color: #666;
+  background: #e8e8e8;
+}
+
+.nav-button:hover .icon-circle .nav-icon {
+  stroke: #666;
+  color: #666;
+}
+
+/* SVG ICONS */
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  stroke: #999;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* AVDELING CIRCLE */
+.avdeling-circle {
+  width: 36px;
+  height: 36px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  background: #f0f0f0;
+  border: 2px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #999;
+  flex-shrink: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.nav-tooltip {
+  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0.3rem 0.4rem 0;
+  font-size: 0.6rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 1;
+  pointer-events: none;
+  transition: color 0.2s ease;
+  z-index: 1000;
+  margin-top: 0.2rem;
+}
+
+.nav-button:hover .nav-tooltip {
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Scrollbar styling for nav items */
+.nav-items::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-items::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+.nav-items::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* UNREAD NOTIFICATION HALO */
+@keyframes pulse-halo {
+  0% {
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.6);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.3);
+    opacity: 0.8;
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0.1);
+    opacity: 0.6;
+  }
+}
+
+.unread-halo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulse-halo 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  /* Hide desktop navbar on mobile */
+  .left-nav-bar-desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  /* Hide mobile menu on desktop */
+  .mobile-nav-menu {
+    display: none;
+  }
+}
+
+/* MOBILE HAMBURGER MENU */
+.mobile-nav-menu {
+  position: fixed;
+  top: max(0px, env(safe-area-inset-top));
+  right: 0;
+  z-index: 999;
+  padding: 1rem;
+  padding-top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
+  /* Hide on all mobile */
+  display: none;
+}
+
+.mobile-hamburger {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mobile-hamburger:active {
+  transform: scale(0.95);
+}
+
+/* MOBILE DRAWER */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 998;
+  overflow-y: auto;
+  padding-top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
+}
+
+.mobile-drawer.open {
+  transform: translateX(0);
+}
+
+.mobile-nav-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+.mobile-nav-button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.mobile-nav-button:hover {
+  background: #e8e8e8;
+  transform: translateX(4px);
+}
+
+.mobile-nav-button:active {
+  transform: translateX(2px);
+}
+
+.mobile-nav-button.unread {
+  background: #fff3cd;
+  border-left: 3px solid #ffc107;
+}
+
+.mobile-nav-button svg {
+  flex-shrink: 0;
+  color: #667eea;
+}
+
+.mobile-nav-button span {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* Mobile drawer overlay (closes menu on click outside) */
+.mobile-drawer.open::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: -1;
+}
+
+/* Allente chat mobile nav icon color */
+.mobile-nav-menu.open + * .mobile-nav-button svg,
+.left-nav-bar.allente-nav ~ .mobile-nav-menu .mobile-nav-button svg {
+  color: #FF8C00 !important;
+}
