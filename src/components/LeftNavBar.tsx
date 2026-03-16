@@ -109,7 +109,7 @@ export const LeftNavBar: React.FC = () => {
       setTimeout(() => {
         setExpandedItem(null);
         setClosingItem(null);
-      }, 3500);
+      }, 600); // 0.6s default timing
     } else {
       // ACCORDION: Open new item - auto-close the old one
       if (expandedItem) {
@@ -118,7 +118,7 @@ export const LeftNavBar: React.FC = () => {
       setExpandedItem(itemId); // Open new item
       setTimeout(() => {
         setClosingItem(null); // Clear closing animation
-      }, 3500);
+      }, 600); // 0.6s default timing
     }
   };
 
