@@ -363,20 +363,35 @@ export const LeftNavBar: React.FC = () => {
                         >
                           Dashboard
                         </button>
-                        <button 
-                          className={`nav-tab ${activeTab === 'admin-muon-people' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-muon-people', '/admin-dashboard?tab=muon&muon=people')}
-                          style={{ fontSize: '0.8rem' }}
-                        >
-                          People
-                        </button>
-                        <button 
-                          className={`nav-tab ${activeTab === 'admin-muon-tema' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-muon-tema', '/admin-dashboard?tab=muon&muon=tema')}
-                          style={{ fontSize: '0.8rem' }}
-                        >
-                          Tema
-                        </button>
+                        
+                        {/* PEOPLE - EXPANDABLE WITH TEMA SUBTAB */}
+                        <div style={{ width: '100%' }}>
+                          <button 
+                            className={`nav-tab ${(activeTab as string).includes('admin-muon-people') ? 'active' : ''}`}
+                            onClick={() => setActiveTab((activeTab as string).includes('admin-muon-people-') ? 'admin-muon-people' : 'admin-muon-people-main')}
+                            style={{ fontSize: '0.8rem' }}
+                          >
+                            People ▼
+                          </button>
+                          {(activeTab as string).includes('admin-muon-people-') && (
+                            <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-muon-people-main' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-muon-people-main', '/admin-dashboard?tab=muon&muon=people')}
+                                style={{ fontSize: '0.75rem' }}
+                              >
+                                People
+                              </button>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-muon-people-tema' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-muon-people-tema', '/admin-dashboard?tab=muon&muon=tema')}
+                                style={{ fontSize: '0.75rem' }}
+                              >
+                                Tema
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
