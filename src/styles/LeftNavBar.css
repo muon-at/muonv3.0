@@ -16,8 +16,8 @@
 .nav-items {
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0.5rem 0.5rem;
+  gap: 0.2rem;
+  padding: 0.4rem 0.5rem;
   align-items: center;
   flex: 1;
   overflow-y: auto;
@@ -111,12 +111,12 @@
 }
 
 .nav-tab {
-  padding: 0.3rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   background: transparent;
   border: none;
   border-bottom: none;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   cursor: pointer;
   text-align: center;
   border-radius: 0;
@@ -146,8 +146,8 @@
 }
 
 .nav-tab-submenu .nav-tab {
-  font-size: 0.8rem;
-  padding-left: 0.5rem;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.3rem;
   color: rgba(255, 255, 255, 0.6);
 }
 
