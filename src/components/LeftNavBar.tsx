@@ -387,7 +387,7 @@ export const LeftNavBar: React.FC = () => {
                     >
                       Prosjekt ▼
                     </button>
-                    {(activeTab as string).includes('admin-proj-') && (
+                    {((activeTab as string).includes('admin-proj-') || activeProject !== null) && (
                       <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
                         {/* SUB-ACCORDION: Show selected project OR all projects */}
                         {activeProject === null && (
