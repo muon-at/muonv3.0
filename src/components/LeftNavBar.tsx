@@ -371,13 +371,6 @@ export const LeftNavBar: React.FC = () => {
                           People
                         </button>
                         <button 
-                          className={`nav-tab ${activeTab === 'admin-muon-team' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-muon-team', '/admin-dashboard?tab=muon&muon=team')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
-                        >
-                          Team
-                        </button>
-                        <button 
                           className={`nav-tab ${activeTab === 'admin-muon-tema' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-muon-tema', '/admin-dashboard?tab=muon&muon=tema')}
                           style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
