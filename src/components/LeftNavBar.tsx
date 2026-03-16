@@ -343,12 +343,35 @@ export const LeftNavBar: React.FC = () => {
               {/* TABS DROPDOWN FOR ADMIN */}
               {(expandedItem === 'admin' || closingItem === 'admin') && (
                 <div className={`nav-tabs-dropdown ${closingItem === 'admin' ? 'closing' : ''}`}>
-                  <button 
-                    className={`nav-tab ${activeTab === 'admin-dashboard' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('admin-dashboard', '/admin-dashboard?tab=dashboard')}
-                  >
-                    Dashboard
-                  </button>
+                  {/* MUON - EXPANDABLE SUBMENU AT TOP */}
+                  <div style={{ width: '100%' }}>
+                    <button 
+                      className={`nav-tab ${(activeTab as string).startsWith('admin-muon') ? 'active' : ''}`}
+                      onClick={() => setActiveTab((activeTab as string).includes('admin-muon-') ? 'admin-muon' : 'admin-muon-dashboard')}
+                      style={{ position: 'relative', fontWeight: '600' }}
+                    >
+                      Muon ▼
+                    </button>
+                    {(activeTab as string).includes('admin-muon-') && (
+                      <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-muon-dashboard' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-muon-dashboard', '/admin-dashboard?tab=muon&muon=dashboard')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          Dashboard
+                        </button>
+                        <button 
+                          className={`nav-tab ${activeTab === 'admin-muon-people' ? 'active' : ''}`}
+                          onClick={() => handleTabClick('admin-muon-people', '/admin-dashboard?tab=muon&muon=people')}
+                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                        >
+                          People
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <button 
                     className={`nav-tab ${activeTab === 'admin-org' ? 'active' : ''}`}
                     onClick={() => handleTabClick('admin-org', '/admin-dashboard?tab=organisasjon')}
@@ -367,13 +390,42 @@ export const LeftNavBar: React.FC = () => {
                     </button>
                     {(activeTab as string).includes('admin-proj-') && (
                       <div style={{ paddingLeft: '0.5rem', borderLeft: '2px solid rgba(255,255,255,0.3)' }}>
-                        <button 
-                          className={`nav-tab ${activeTab === 'admin-proj-allente' ? 'active' : ''}`}
-                          onClick={() => handleTabClick('admin-proj-allente', '/admin-dashboard?tab=prosjekt&prosjekt=allente')}
-                          style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
-                        >
-                          Allente
-                        </button>
+                        {/* ALLENTE - EXPANDABLE WITH TABS */}
+                        <div style={{ width: '100%' }}>
+                          <button 
+                            className={`nav-tab ${(activeTab as string).startsWith('admin-proj-allente') ? 'active' : ''}`}
+                            onClick={() => setActiveTab((activeTab as string).includes('admin-allente-') ? 'admin-proj-allente' : 'admin-allente-progresjon')}
+                            style={{ fontSize: '0.8rem', paddingLeft: '0.5rem' }}
+                          >
+                            Allente ▼
+                          </button>
+                          {(activeTab as string).includes('admin-allente-') && (
+                            <div style={{ paddingLeft: '0.3rem', borderLeft: '2px solid rgba(255,255,255,0.2)' }}>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-progresjon' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-progresjon', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=progresjon')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                Progresjon
+                              </button>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                Produkt
+                              </button>
+                              <button 
+                                className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
+                                style={{ fontSize: '0.75rem', paddingLeft: '0.3rem' }}
+                              >
+                                Badges
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
                         <button 
                           className={`nav-tab ${activeTab === 'admin-proj-surfnet' ? 'active' : ''}`}
                           onClick={() => handleTabClick('admin-proj-surfnet', '/admin-dashboard?tab=prosjekt&prosjekt=surfnet')}
@@ -393,28 +445,10 @@ export const LeftNavBar: React.FC = () => {
                   </div>
 
                   <button 
-                    className={`nav-tab ${activeTab === 'admin-progresjon' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('admin-progresjon', '/admin-dashboard?tab=progresjon')}
-                  >
-                    Progresjon
-                  </button>
-                  <button 
-                    className={`nav-tab ${activeTab === 'admin-produkt' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('admin-produkt', '/admin-dashboard?tab=produkt')}
-                  >
-                    Produkt
-                  </button>
-                  <button 
                     className={`nav-tab ${activeTab === 'admin-tema' ? 'active' : ''}`}
                     onClick={() => handleTabClick('admin-tema', '/admin-dashboard?tab=tema')}
                   >
                     Tema
-                  </button>
-                  <button 
-                    className={`nav-tab ${activeTab === 'admin-badges' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('admin-badges', '/admin-dashboard?tab=badges')}
-                  >
-                    Badges
                   </button>
                 </div>
               )}
