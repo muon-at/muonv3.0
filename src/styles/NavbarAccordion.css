@@ -249,3 +249,12 @@
 .navbar-accordion::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.4);
 }
+
+/* Hide any scroll-to-top or floating buttons on right side */
+button[style*='position: fixed'][style*='right'],
+.scroll-to-top,
+.scroll-button,
+[class*='scroll'][class*='top'],
+[class*='scroll'][class*='button'] {
+  display: none !important;
+}

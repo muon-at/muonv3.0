@@ -1,0 +1,8 @@
+
+/* Hide scroll-to-top or any floating buttons on right side */
+button[style*='position: fixed'][style*='right'],
+.scroll-to-top,
+.scroll-button {
+  display: none !important;
+}
+
