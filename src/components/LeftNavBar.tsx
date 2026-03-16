@@ -14,6 +14,7 @@ export const LeftNavBar: React.FC = () => {
   const [totalUnread, setTotalUnread] = useState(0);
   const [expandedItem, setExpandedItem] = useState<string | null>('min-side'); // Min Side expanded by default
   const [activeTab, setActiveTab] = useState<string>('status'); // Default tab
+  const [closingItem, setClosingItem] = useState<string | null>(null); // Track which item is closing
 
   const handleLogout = () => {
     logout();
@@ -102,9 +103,17 @@ export const LeftNavBar: React.FC = () => {
 
   const toggleExpandItem = (itemId: string) => {
     if (expandedItem === itemId) {
-      setExpandedItem(null); // Close if already open
+      // Start closing animation
+      setClosingItem(itemId);
+      // After animation completes (3.2s), actually close
+      setTimeout(() => {
+        setExpandedItem(null);
+        setClosingItem(null);
+      }, 3200);
     } else {
-      setExpandedItem(itemId); // Open this item
+      // Opening new item
+      setClosingItem(null);
+      setExpandedItem(itemId);
     }
   };
 
@@ -133,8 +142,8 @@ export const LeftNavBar: React.FC = () => {
             </button>
 
             {/* TABS DROPDOWN FOR MIN SIDE */}
-            {expandedItem === 'min-side' && (
-              <div className="nav-tabs-dropdown">
+            {(expandedItem === 'min-side' || closingItem === 'min-side') && (
+              <div className={`nav-tabs-dropdown ${closingItem === 'min-side' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'status' ? 'active' : ''}`}
                   onClick={() => handleTabClick('status', '/min-side?tab=status')}
@@ -178,8 +187,8 @@ export const LeftNavBar: React.FC = () => {
             </button>
 
             {/* TABS DROPDOWN FOR MIN AVDELING */}
-            {expandedItem === 'min-avdeling' && (
-              <div className="nav-tabs-dropdown">
+            {(expandedItem === 'min-avdeling' || closingItem === 'min-avdeling') && (
+              <div className={`nav-tabs-dropdown ${closingItem === 'min-avdeling' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'avd-status' ? 'active' : ''}`}
                   onClick={() => handleTabClick('avd-status', '/min-avdeling?tab=status')}
@@ -211,8 +220,8 @@ export const LeftNavBar: React.FC = () => {
             </button>
 
             {/* TABS DROPDOWN FOR MITT PROSJEKT */}
-            {expandedItem === 'mitt-prosjekt' && (
-              <div className="nav-tabs-dropdown">
+            {(expandedItem === 'mitt-prosjekt' || closingItem === 'mitt-prosjekt') && (
+              <div className={`nav-tabs-dropdown ${closingItem === 'mitt-prosjekt' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'proj-status' ? 'active' : ''}`}
                   onClick={() => handleTabClick('proj-status', '/mitt-prosjekt?tab=status')}
@@ -245,8 +254,8 @@ export const LeftNavBar: React.FC = () => {
               </button>
 
               {/* TABS DROPDOWN FOR TEAMLEDER */}
-              {expandedItem === 'teamleder' && (
-                <div className="nav-tabs-dropdown">
+              {(expandedItem === 'teamleder' || closingItem === 'teamleder') && (
+                <div className={`nav-tabs-dropdown ${closingItem === 'teamleder' ? 'closing' : ''}`}>
                   <button 
                     className={`nav-tab ${activeTab === 'tl-kalendere' ? 'active' : ''}`}
                     onClick={() => handleTabClick('tl-kalendere', '/teamleder?tab=kalendere')}
@@ -280,8 +289,8 @@ export const LeftNavBar: React.FC = () => {
               </button>
 
               {/* TABS DROPDOWN FOR ADMIN */}
-              {expandedItem === 'admin' && (
-                <div className="nav-tabs-dropdown">
+              {(expandedItem === 'admin' || closingItem === 'admin') && (
+                <div className={`nav-tabs-dropdown ${closingItem === 'admin' ? 'closing' : ''}`}>
                   <button 
                     className={`nav-tab ${activeTab === 'admin-dashboard' ? 'active' : ''}`}
                     onClick={() => handleTabClick('admin-dashboard', '/admin-dashboard?tab=dashboard')}
