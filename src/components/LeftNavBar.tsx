@@ -451,20 +451,20 @@ export const LeftNavBar: React.FC = () => {
               )}
             </div>
           )}
-
-          {/* 6. LOGOUT - Door icon */}
-          <button 
-            className="nav-button"
-            onClick={handleLogout}
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5M17 9l4 4m0 0l-4 4m4-4H9"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Logg ut</div>
-          </button>
         </div>
+
+        {/* STICKY LOGOUT - Always at bottom */}
+        <button 
+          className="nav-button logout-sticky"
+          onClick={handleLogout}
+        >
+          <div className="icon-circle">
+            <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5M17 9l4 4m0 0l-4 4m4-4H9"/>
+            </svg>
+          </div>
+          <div className="nav-tooltip">Logg ut</div>
+        </button>
       </div>
 
       {/* Mobile Hamburger Menu */}
