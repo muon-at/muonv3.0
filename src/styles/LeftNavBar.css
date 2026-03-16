@@ -35,7 +35,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   flex-shrink: 0;
   padding: 0.5rem;
@@ -63,7 +63,7 @@
 
 .nav-button.expanded {
   background: transparent;
-  transition: all 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* Tabs Dropdown - NO BOX, CLEAN GRADIENT */
@@ -166,7 +166,7 @@
   flex-shrink: 0;
   overflow: visible;
   position: relative;
-  transition: all 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .nav-button:hover .icon-circle {
@@ -178,7 +178,7 @@
 .nav-button:hover .icon-circle .nav-icon {
   stroke: #666;
   color: #666;
-  transition: all 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* SVG ICONS */
