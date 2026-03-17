@@ -1052,48 +1052,52 @@ export default function AdminDashboard() {
                           </thead>
                           <tbody>
                             {(() => {
-                              const filtered = salgData.filter((row: any) => {
-                                if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
-                                if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
-                                if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
-                                if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
-                                if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
-                                if (salgFilters.datoFrom || salgFilters.datoTo) {
-                                  // Parse row.dato - handles M/D/YYYY, DD/MM/YYYY, and DD.MM.YYYY
-                                  let rowDateISO = '';
-                                  const rawDate = row.dato || '';
-                                  
-                                  let dateParts = rawDate.split('/');
-                                  if (dateParts.length !== 3) {
-                                    dateParts = rawDate.split('.');
-                                  }
-                                  
-                                  if (dateParts.length === 3) {
-                                    const first = parseInt(dateParts[0]);
-                                    const second = parseInt(dateParts[1]);
-                                    const year = parseInt(dateParts[2]);
-                                    
-                                    // Detect format: if first > 12, it's DD/MM/YYYY, otherwise assume M/D/YYYY
-                                    let day, month;
-                                    if (first > 12) {
-                                      // DD/MM/YYYY or DD.MM.YYYY
-                                      day = first;
-                                      month = second;
-                                    } else {
-                                      // M/D/YYYY (like 12/3/2026 = March 12)
-                                      month = first;
-                                      day = second;
-                                    }
-                                    
-                                    // Format as YYYY-MM-DD with zero-padding
-                                    rowDateISO = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                                  }
-                                  
-                                  if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
-                                  if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
+                              const parseDate = (rawDate: string): string => {
+                                let dateParts = rawDate.split('/');
+                                if (dateParts.length !== 3) {
+                                  dateParts = rawDate.split('.');
                                 }
-                                return true;
-                              });
+                                
+                                if (dateParts.length === 3) {
+                                  const first = parseInt(dateParts[0]);
+                                  const second = parseInt(dateParts[1]);
+                                  const year = parseInt(dateParts[2]);
+                                  
+                                  let day, month;
+                                  if (first > 12) {
+                                    day = first;
+                                    month = second;
+                                  } else {
+                                    month = first;
+                                    day = second;
+                                  }
+                                  
+                                  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                }
+                                return '';
+                              };
+
+                              const filtered = salgData
+                                .filter((row: any) => {
+                                  if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                                  if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                                  if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                                  if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                                  if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                                  if (salgFilters.datoFrom || salgFilters.datoTo) {
+                                    const rowDateISO = parseDate(row.dato || '');
+                                    
+                                    if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
+                                    if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
+                                  }
+                                  return true;
+                                })
+                                .sort((a: any, b: any) => {
+                                  // Sort by date descending (newest first)
+                                  const dateA = parseDate(a.dato || '');
+                                  const dateB = parseDate(b.dato || '');
+                                  return dateB.localeCompare(dateA);
+                                });
                               
                               return (
                                 <>
@@ -1128,35 +1132,32 @@ export default function AdminDashboard() {
                           if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                           if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                           if (salgFilters.datoFrom || salgFilters.datoTo) {
-                            // Parse row.dato - handles M/D/YYYY, DD/MM/YYYY, and DD.MM.YYYY
-                            let rowDateISO = '';
-                            const rawDate = row.dato || '';
-                            
-                            let dateParts = rawDate.split('/');
-                            if (dateParts.length !== 3) {
-                              dateParts = rawDate.split('.');
-                            }
-                            
-                            if (dateParts.length === 3) {
-                              const first = parseInt(dateParts[0]);
-                              const second = parseInt(dateParts[1]);
-                              const year = parseInt(dateParts[2]);
-                              
-                              // Detect format: if first > 12, it's DD/MM/YYYY, otherwise assume M/D/YYYY
-                              let day, month;
-                              if (first > 12) {
-                                // DD/MM/YYYY or DD.MM.YYYY
-                                day = first;
-                                month = second;
-                              } else {
-                                // M/D/YYYY (like 12/3/2026 = March 12)
-                                month = first;
-                                day = second;
+                            const parseDate = (rawDate: string): string => {
+                              let dateParts = rawDate.split('/');
+                              if (dateParts.length !== 3) {
+                                dateParts = rawDate.split('.');
                               }
                               
-                              // Format as YYYY-MM-DD with zero-padding
-                              rowDateISO = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                            }
+                              if (dateParts.length === 3) {
+                                const first = parseInt(dateParts[0]);
+                                const second = parseInt(dateParts[1]);
+                                const year = parseInt(dateParts[2]);
+                                
+                                let day, month;
+                                if (first > 12) {
+                                  day = first;
+                                  month = second;
+                                } else {
+                                  month = first;
+                                  day = second;
+                                }
+                                
+                                return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                              }
+                              return '';
+                            };
+                            
+                            const rowDateISO = parseDate(row.dato || '');
                             
                             if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
                             if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
