@@ -1059,18 +1059,10 @@ export default function AdminDashboard() {
                                 }
                                 
                                 if (dateParts.length === 3) {
-                                  const first = parseInt(dateParts[0]);
-                                  const second = parseInt(dateParts[1]);
+                                  // ALWAYS assume DD/MM/YYYY format (Norwegian convention)
+                                  const day = parseInt(dateParts[0]);
+                                  const month = parseInt(dateParts[1]);
                                   const year = parseInt(dateParts[2]);
-                                  
-                                  let day, month;
-                                  if (first > 12) {
-                                    day = first;
-                                    month = second;
-                                  } else {
-                                    month = first;
-                                    day = second;
-                                  }
                                   
                                   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                                 }
@@ -1139,18 +1131,10 @@ export default function AdminDashboard() {
                               }
                               
                               if (dateParts.length === 3) {
-                                const first = parseInt(dateParts[0]);
-                                const second = parseInt(dateParts[1]);
+                                // ALWAYS assume DD/MM/YYYY format (Norwegian convention)
+                                const day = parseInt(dateParts[0]);
+                                const month = parseInt(dateParts[1]);
                                 const year = parseInt(dateParts[2]);
-                                
-                                let day, month;
-                                if (first > 12) {
-                                  day = first;
-                                  month = second;
-                                } else {
-                                  month = first;
-                                  day = second;
-                                }
                                 
                                 return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                               }
