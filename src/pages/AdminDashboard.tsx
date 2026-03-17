@@ -89,9 +89,6 @@ export default function AdminDashboard() {
   // UPLOAD
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
 
-  // SEARCH RESULTS
-  const [searchResults, setSearchResults] = useState<number | null>(null);
-
   // ===== FETCH EMPLOYEES =====
   const fetchEmployees = async () => {
     if (employeesCache.current && employeesCache.current.length > 0) {
@@ -1029,12 +1026,9 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                          <div>
                             <button
-                              onClick={() => {
-                                setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' });
-                                setSearchResults(null);
-                              }}
+                              onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -1050,68 +1044,9 @@ export default function AdminDashboard() {
                             >
                               🔄 Nullstill
                             </button>
-                            <button
-                              onClick={() => {
-                                const filtered = salgData.filter((row: any) => {
-                                  if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
-                                  if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
-                                  if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
-                                  if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
-                                  if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
-                                  if (salgFilters.datoFrom || salgFilters.datoTo) {
-                                    // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
-                                    const dateParts = (row.dato || '').split('/');
-                                    let rowDateISO = '';
-                                    if (dateParts.length === 3) {
-                                      rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                                    }
-                                    
-                                    if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
-                                    if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
-                                  }
-                                  return true;
-                                });
-                                setSearchResults(filtered.length);
-                              }}
-                              style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                background: '#5a67d8',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                fontSize: '0.9rem',
-                                marginTop: '1.5rem',
-                              }}
-                            >
-                              🔍 Søk
-                            </button>
                           </div>
                         </div>
                       </div>
-
-                      {/* Search Results Counter */}
-                      {searchResults !== null && (
-                        <div style={{ 
-                          width: '100%', 
-                          maxWidth: '1200px',
-                          background: '#2d3748',
-                          border: '2px solid #5a67d8',
-                          borderRadius: '6px',
-                          padding: '1rem',
-                          marginBottom: '1.5rem',
-                          textAlign: 'center'
-                        }}>
-                          <p style={{ margin: 0, color: '#5a67d8', fontSize: '1.1rem', fontWeight: '600' }}>
-                            🔍 Søkresultat
-                          </p>
-                          <p style={{ margin: '0.5rem 0 0 0', color: '#e2e8f0', fontSize: '1.3rem', fontWeight: '700' }}>
-                            Antall: {searchResults}
-                          </p>
-                        </div>
-                      )}
 
                       {/* Data Table */}
                       <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
