@@ -193,25 +193,25 @@ export const LeftNavBar: React.FC = () => {
               <div className={`nav-tabs-dropdown ${closingItem === 'min-side' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'status' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('status', '/min-side?tab=status')}
+                  onClick={() => handleTabClick('status', '/status')}
                 >
                   Status
                 </button>
                 <button 
                   className={`nav-tab ${activeTab === 'rekorder' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('rekorder', '/min-side?tab=rekorder')}
+                  onClick={() => handleTabClick('rekorder', '/records')}
                 >
                   Rekorder
                 </button>
                 <button 
                   className={`nav-tab ${activeTab === 'lonn' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('lonn', '/min-side?tab=lonn')}
+                  onClick={() => handleTabClick('lonn', '/earnings')}
                 >
                   Lønn
                 </button>
                 <button 
                   className={`nav-tab ${activeTab === 'kalender' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('kalender', '/min-side?tab=kalender')}
+                  onClick={() => handleTabClick('kalender', '/home/calendar')}
                 >
                   Kalender
                 </button>
