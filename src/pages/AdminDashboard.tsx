@@ -726,318 +726,338 @@ export default function AdminDashboard() {
           );
         })()}
 
-        {/* ===== WAR ROOM - SALG TAB ===== */}
+        {/* ===== UNIFIED WAR ROOM WITH TABS ===== */}
         {(() => {
           const params = new URLSearchParams(location.search);
-          return params.get('sub') === 'warroom' && warRoomTab === 'salg' && (
+          return params.get('sub') === 'warroom' && (
             <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#333', marginTop: '1.5rem', marginBottom: '0.5rem' }}>War Room - Salg 🎯</h2>
-              <p style={{ fontSize: '0.95rem', color: '#666', marginBottom: '1.5rem' }}>Fullstendig oversikt over alle kontrakter</p>
+              
+              {/* Tab Navigation */}
+              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '0', paddingLeft: '1rem', borderBottom: '2px solid #e2e8f0' }}>
+                {['salg', 'anger', 'progresjon'].map((tab) => {
+                  const tabLabels: { [key: string]: string } = { salg: 'Salg 🎯', anger: 'Anger 😤', progresjon: 'Progresjon 📈' };
+                  const isActive = warRoomTab === tab;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setWarRoomTab(tab)}
+                      style={{
+                        padding: '0.75rem 1.5rem',
+                        border: 'none',
+                        borderBottom: isActive ? '3px solid #667eea' : 'none',
+                        background: isActive ? '#f3f0ff' : 'transparent',
+                        color: isActive ? '#667eea' : '#666',
+                        fontWeight: isActive ? '700' : '600',
+                        fontSize: '0.95rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {tabLabels[tab]}
+                    </button>
+                  );
+                })}
+              </div>
 
-              {loadingSalg ? (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster salg data...</p>
-              ) : salgData.length > 0 ? (
-                <>
-                  {/* Filter Panel */}
-                  <div style={{ width: '100%', background: '#f9fafb', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '1200px', boxSizing: 'border-box' }}>
-                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#333' }}>Filtrer resultater</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Selger</label>
-                        <select
-                          value={salgFilters.selger}
-                          onChange={(e) => setSalgFilters({ ...salgFilters, selger: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.9rem',
-                            color: '#333',
-                            backgroundColor: '#fff',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          <option value="">Alle</option>
-                          {[...new Set(salgData.map((r: any) => r.selger).filter(Boolean))].sort().map((s: any) => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
+              {/* SALG TAB CONTENT */}
+              {warRoomTab === 'salg' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {loadingSalg ? (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster salg data...</p>
+                  ) : salgData.length > 0 ? (
+                    <>
+                      {/* Filter Panel */}
+                      <div style={{ width: '100%', background: '#f9fafb', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', marginTop: '1.5rem', maxWidth: '1200px', boxSizing: 'border-box' }}>
+                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#333' }}>Filtrer resultater</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Selger</label>
+                            <select
+                              value={salgFilters.selger}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, selger: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                backgroundColor: '#fff',
+                                boxSizing: 'border-box',
+                              }}
+                            >
+                              <option value="">Alle</option>
+                              {[...new Set(salgData.map((r: any) => r.selger).filter(Boolean))].sort().map((s: any) => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Avdeling</label>
+                            <select
+                              value={salgFilters.avdeling}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, avdeling: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                backgroundColor: '#fff',
+                                boxSizing: 'border-box',
+                              }}
+                            >
+                              <option value="">Alle</option>
+                              {[...new Set(salgData.map((r: any) => r.avdeling).filter(Boolean))].sort().map((a: any) => (
+                                <option key={a} value={a}>{a}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Produkt</label>
+                            <select
+                              value={salgFilters.produkt}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, produkt: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                backgroundColor: '#fff',
+                                boxSizing: 'border-box',
+                              }}
+                            >
+                              <option value="">Alle</option>
+                              {[...new Set(salgData.map((r: any) => r.produkt).filter(Boolean))].sort().map((p: any) => (
+                                <option key={p} value={p}>{p}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Plattform</label>
+                            <select
+                              value={salgFilters.platform}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, platform: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                backgroundColor: '#fff',
+                                boxSizing: 'border-box',
+                              }}
+                            >
+                              <option value="">Alle</option>
+                              {[...new Set(salgData.map((r: any) => r.platform).filter(Boolean))].sort().map((pl: any) => (
+                                <option key={pl} value={pl}>{pl}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Kundenummer</label>
+                            <input
+                              type="text"
+                              placeholder="Søk..."
+                              value={salgFilters.kundenummer}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, kundenummer: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#333',
+                                backgroundColor: '#fff',
+                                boxSizing: 'border-box',
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <button
+                              onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                background: '#f59e0b',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                marginTop: '1.5rem',
+                              }}
+                            >
+                              🔄 Nullstill
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Avdeling</label>
-                        <select
-                          value={salgFilters.avdeling}
-                          onChange={(e) => setSalgFilters({ ...salgFilters, avdeling: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.9rem',
-                            color: '#333',
-                            backgroundColor: '#fff',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          <option value="">Alle</option>
-                          {[...new Set(salgData.map((r: any) => r.avdeling).filter(Boolean))].sort().map((a: any) => (
-                            <option key={a} value={a}>{a}</option>
-                          ))}
-                        </select>
+                      {/* Data Table */}
+                      <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                          <thead>
+                            <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>ID</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Produkt</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Avdeling</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Plattform</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {salgData
+                              .filter((row: any) => {
+                                if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                                if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                                if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                                if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                                if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                                return true;
+                              })
+                              .map((row: any) => (
+                                <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.csvId || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.kundeNr || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.produkt || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.selger || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.avdeling || 'Ukjent'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#10b981' }}>{row.platform || '-'}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
                       </div>
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Produkt</label>
-                        <select
-                          value={salgFilters.produkt}
-                          onChange={(e) => setSalgFilters({ ...salgFilters, produkt: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.9rem',
-                            color: '#333',
-                            backgroundColor: '#fff',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          <option value="">Alle</option>
-                          {[...new Set(salgData.map((r: any) => r.produkt).filter(Boolean))].sort().map((p: any) => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
-                        </select>
-                      </div>
+                      <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem', maxWidth: '1200px', marginBottom: '1.5rem' }}>
+                        Viser {salgData.filter((row: any) => {
+                          if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                          if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                          if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                          if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                          if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                          return true;
+                        }).length} av {salgData.length} kontrakter
+                      </p>
+                    </>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen salg data funnet</p>
+                  )}
+                </div>
+              )}
 
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Plattform</label>
-                        <select
-                          value={salgFilters.platform}
-                          onChange={(e) => setSalgFilters({ ...salgFilters, platform: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.9rem',
-                            color: '#333',
-                            backgroundColor: '#fff',
-                            boxSizing: 'border-box',
-                          }}
-                        >
-                          <option value="">Alle</option>
-                          {[...new Set(salgData.map((r: any) => r.platform).filter(Boolean))].sort().map((pl: any) => (
-                            <option key={pl} value={pl}>{pl}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Kundenummer</label>
-                        <input
-                          type="text"
-                          placeholder="Søk..."
-                          value={salgFilters.kundenummer}
-                          onChange={(e) => setSalgFilters({ ...salgFilters, kundenummer: e.target.value })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            border: '1px solid #e2e8f0',
-                            borderRadius: '4px',
-                            fontSize: '0.9rem',
-                            color: '#333',
-                            backgroundColor: '#fff',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      </div>
-
-                      <div>
-                        <button
-                          onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
-                          style={{
-                            width: '100%',
-                            padding: '0.5rem',
-                            background: '#f59e0b',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            marginTop: '1.5rem',
-                          }}
-                        >
-                          🔄 Nullstill
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Data Table */}
-                  <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <thead>
-                        <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>ID</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Produkt</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Avdeling</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Plattform</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {salgData
-                          .filter((row: any) => {
-                            if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
-                            if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
-                            if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
-                            if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
-                            if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
-                            return true;
-                          })
-                          .map((row: any) => (
+              {/* ANGER TAB CONTENT */}
+              {warRoomTab === 'anger' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {loadingAnger ? (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster anger data...</p>
+                  ) : angerData.length > 0 ? (
+                    <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto', marginTop: '1.5rem' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Beskrivelse</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {angerData.map((row: any) => (
                             <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                               <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.csvId || '-'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.kundeNr || '-'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.produkt || '-'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.selger || '-'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.avdeling || 'Ukjent'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#10b981' }}>{row.platform || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.kundeNr || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.beskrivelse || row.description || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>
+                                <span style={{ background: row.status === 'Løst' ? '#d1fae5' : '#fecaca', color: row.status === 'Løst' ? '#059669' : '#dc2626', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>
+                                  {row.status || 'Aktiv'}
+                                </span>
+                              </td>
                             </tr>
                           ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem', maxWidth: '1200px' }}>
-                    Viser {salgData.filter((row: any) => {
-                      if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
-                      if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
-                      if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
-                      if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
-                      if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
-                      return true;
-                    }).length} av {salgData.length} kontrakter
-                  </p>
-                </>
-              ) : (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen salg data funnet</p>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* ===== WAR ROOM - ANGER TAB ===== */}
-        {(() => {
-          const params = new URLSearchParams(location.search);
-          return params.get('sub') === 'warroom' && warRoomTab === 'anger' && (
-            <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#333', marginTop: '1.5rem', marginBottom: '0.5rem' }}>War Room - Anger 😤</h2>
-              
-              {loadingAnger ? (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster anger data...</p>
-              ) : angerData.length > 0 ? (
-                <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Beskrivelse</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {angerData.map((row: any) => (
-                        <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.kundeNr || '-'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.beskrivelse || row.description || '-'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>
-                            <span style={{ background: row.status === 'Løst' ? '#d1fae5' : '#fecaca', color: row.status === 'Løst' ? '#059669' : '#dc2626', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>
-                              {row.status || 'Aktiv'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen anger data funnet</p>
+                  )}
                 </div>
-              ) : (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen anger data funnet</p>
               )}
-            </div>
-          );
-        })()}
 
-        {/* ===== WAR ROOM - PROGRESJON TAB ===== */}
-        {(() => {
-          const params = new URLSearchParams(location.search);
-          return params.get('sub') === 'warroom' && warRoomTab === 'progresjon' && (
-            <div style={{ marginLeft: '135px', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '1.5rem', paddingBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: 'calc(100% - 145px)', background: '#1a1a1a', minHeight: '100vh' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#e0e0e0', marginBottom: '1.5rem' }}>Progresjon 📈</h2>
-              
-              {loadingProgresjon ? (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Laster progresjon data...</p>
-              ) : progresjonData.length > 0 ? (
-                <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a' }}>
-                  <table style={{ 
-                    borderCollapse: 'collapse',
-                    background: '#1a1a1a',
-                    color: '#b0b0b0',
-                    minWidth: '100%',
-                  }}>
-                    <thead>
-                      {/* Group Header Row */}
-                      <tr style={{ background: '#0d0d0d', borderBottom: '1px solid #404040' }}>
-                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Ansatt</th>
-                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>I dag</th>
-                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Total</th>
-                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Rekorder</th>
-                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Badges</th>
-                      </tr>
-                      {/* Column Header Row */}
-                      <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}></th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#4db8ff', whiteSpace: 'nowrap' }}>BTV</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ff6b6b', whiteSpace: 'nowrap' }}>DTH</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#51cf66', whiteSpace: 'nowrap' }}>Free box</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Uke</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Måned</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Free box</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Dag</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Uke</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Måned</th>
-                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {progresjonData.map((row: any, idx: number) => (
-                        <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
-                          <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_week}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_month}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_month}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_day}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_week}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_month}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* PROGRESJON TAB CONTENT */}
+              {warRoomTab === 'progresjon' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', background: '#1a1a1a', marginLeft: '-10px', marginRight: '-10px', marginTop: '-10px', marginBottom: '-10px', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
+                  {loadingProgresjon ? (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Laster progresjon data...</p>
+                  ) : progresjonData.length > 0 ? (
+                    <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a' }}>
+                      <table style={{ 
+                        borderCollapse: 'collapse',
+                        background: '#1a1a1a',
+                        color: '#b0b0b0',
+                        minWidth: '100%',
+                      }}>
+                        <thead>
+                          {/* Group Header Row */}
+                          <tr style={{ background: '#0d0d0d', borderBottom: '1px solid #404040' }}>
+                            <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Ansatt</th>
+                            <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>I dag</th>
+                            <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Total</th>
+                            <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Rekorder</th>
+                            <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Badges</th>
+                          </tr>
+                          {/* Column Header Row */}
+                          <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}></th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#4db8ff', whiteSpace: 'nowrap' }}>BTV</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ff6b6b', whiteSpace: 'nowrap' }}>DTH</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#51cf66', whiteSpace: 'nowrap' }}>Free box</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Uke</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Måned</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Free box</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Dag</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Uke</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Måned</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {progresjonData.map((row: any, idx: number) => (
+                            <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
+                              <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_week}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_month}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_month}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_day}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_week}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_month}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Ingen progresjon data funnet</p>
+                  )}
                 </div>
-              ) : (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Ingen progresjon data funnet</p>
               )}
             </div>
           );
