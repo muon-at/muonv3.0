@@ -75,11 +75,6 @@ export default function AdminDashboard() {
   const [loadingAnger, setLoadingAnger] = useState(false);
   const angerCache = React.useRef<any[] | null>(null);
 
-  // MÅL
-  const [malData, setMalData] = useState<any[]>([]);
-  const [loadingMal, setLoadingMal] = useState(false);
-  const malCache = React.useRef<any[] | null>(null);
-
   // PROGRESJON
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [loadingProgresjon, setLoadingProgresjon] = useState(false);
@@ -186,36 +181,6 @@ export default function AdminDashboard() {
       console.error('Error fetching anger:', err);
     } finally {
       setLoadingAnger(false);
-    }
-  };
-
-  // ===== FETCH MÅL =====
-  const fetchMal = async () => {
-    if (malCache.current && malCache.current.length > 0) {
-      setMalData(malCache.current);
-      setLoadingMal(false);
-    } else {
-      setLoadingMal(true);
-    }
-
-    try {
-      const malRef = collection(db, 'allente_mal');
-      const snapshot = await getDocs(malRef);
-      
-      const malList: any[] = [];
-      snapshot.forEach((doc) => {
-        malList.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-
-      malCache.current = malList;
-      setMalData(malList);
-    } catch (err) {
-      console.error('Error fetching mal:', err);
-    } finally {
-      setLoadingMal(false);
     }
   };
 
@@ -479,7 +444,6 @@ export default function AdminDashboard() {
       setWarRoomTab(tab2Param);
       if (tab2Param === 'salg') fetchSalg();
       if (tab2Param === 'anger') fetchAnger();
-      if (tab2Param === 'mal') fetchMal();
       if (tab2Param === 'progresjon') fetchProgresjon();
     }
   }, [location.search]);
@@ -974,49 +938,6 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen anger data funnet</p>
-              )}
-            </div>
-          );
-        })()}
-
-        {/* ===== WAR ROOM - MÅL TAB ===== */}
-        {(() => {
-          const params = new URLSearchParams(location.search);
-          return params.get('sub') === 'warroom' && warRoomTab === 'mal' && (
-            <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#333', marginTop: '1.5rem', marginBottom: '0.5rem' }}>War Room - Mål 🎯</h2>
-              
-              {loadingMal ? (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster mål data...</p>
-              ) : malData.length > 0 ? (
-                <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Mål</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Periode</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {malData.map((row: any) => (
-                        <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem', fontWeight: '600' }}>{row.selger || '-'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.mal || row.target || '-'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.periode || row.period || 'Måned'}</td>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>
-                            <span style={{ background: '#dbeafe', color: '#1e40af', padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600' }}>
-                              {row.status || 'Aktiv'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen mål data funnet</p>
               )}
             </div>
           );

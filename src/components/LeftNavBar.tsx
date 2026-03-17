@@ -454,13 +454,6 @@ export const LeftNavBar: React.FC = () => {
                                     Anger
                                   </button>
                                   <button 
-                                    className={`nav-tab ${activeTab === 'warroom-mal' ? 'active' : ''}`}
-                                    onClick={() => handleTabClick('warroom-mal', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=mal')}
-                                    style={{ fontSize: '0.7rem' }}
-                                  >
-                                    Mål
-                                  </button>
-                                  <button 
                                     className={`nav-tab ${activeTab === 'warroom-progresjon' ? 'active' : ''}`}
                                     onClick={() => handleTabClick('warroom-progresjon', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=progresjon')}
                                     style={{ fontSize: '0.7rem' }}
