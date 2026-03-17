@@ -2296,7 +2296,7 @@ export default function AdminDashboard() {
         )}
 
         {(activeMainTab === 'organisasjon' || muonParam === 'people') && (
-          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: '-140px', paddingLeft: '150px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' } : {}}>
+          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: 0, paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'calc(100% - 130px)', marginLeft: '130px' } : {}}>
             {muonParam !== 'people' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <div>
@@ -2333,7 +2333,7 @@ export default function AdminDashboard() {
                   </p>
                 )}
                 {/* Statistics Cards - 4 Columns */}
-                <div style={{ width: '100%', maxWidth: muonParam === 'people' ? '1400px' : '100%' }}>
+                <div style={{ width: '100%' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
                   <div style={{ background: '#667eea', borderRadius: '12px', padding: '2rem', textAlign: 'center', color: 'white', boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)' }}>
                     <p style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: '600', opacity: 0.9 }}>TOTALT</p>
