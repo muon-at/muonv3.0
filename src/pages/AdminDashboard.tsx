@@ -206,17 +206,31 @@ export default function AdminDashboard() {
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
       const startOfWeek = new Date(today);
       startOfWeek.setDate(today.getDate() - today.getDay());
+      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
       const sellerStats: { [key: string]: any } = {};
       
       contracts.forEach((data) => {
-        const selger = data.selger || 'Ukjent';
-        if (!sellerStats[selger]) {
-          sellerStats[selger] = { month: 0, week: 0, total: 0, bestWeek: 0, bestMonth: 0 };
+        const ansatt = data.selger || 'Ukjent';
+        if (!sellerStats[ansatt]) {
+          sellerStats[ansatt] = { 
+            btv_today: 0, 
+            dth_today: 0, 
+            free_today: 0,
+            total_week: 0, 
+            total_month: 0,
+            free_month: 0,
+            best_day: 0,
+            best_week: 0,
+            best_month: 0,
+            badges: 0,
+          };
         }
-        sellerStats[selger].total++;
 
         const orderedateStr = data.dato || '';
+        const produkt = (data.produkt || '').toLowerCase();
+        
         if (orderedateStr && typeof orderedateStr === 'string') {
           const parts = orderedateStr.split('/');
           if (parts.length === 3) {
@@ -225,20 +239,39 @@ export default function AdminDashboard() {
             const year = parseInt(parts[2]);
             const orderDate = new Date(year, month - 1, day);
 
-            if (orderDate >= startOfMonth && orderDate <= today) {
-              sellerStats[selger].month++;
+            // Today counts
+            if (orderDate >= startOfDay && orderDate < endOfDay) {
+              if (produkt.includes('btv')) {
+                sellerStats[ansatt].btv_today++;
+              } else if (produkt.includes('dth')) {
+                sellerStats[ansatt].dth_today++;
+              } else if (produkt.includes('free dekoder') || produkt.includes('free')) {
+                sellerStats[ansatt].free_today++;
+              }
             }
+
+            // Month counts
+            if (orderDate >= startOfMonth && orderDate <= today) {
+              sellerStats[ansatt].total_month++;
+              if (produkt.includes('free dekoder') || produkt.includes('free')) {
+                sellerStats[ansatt].free_month++;
+              }
+            }
+
+            // Week counts
             if (orderDate >= startOfWeek && orderDate <= today) {
-              sellerStats[selger].week++;
+              sellerStats[ansatt].total_week++;
             }
           }
         }
       });
 
-      const progresjonList = Object.entries(sellerStats).map(([selger, stats]) => ({
-        selger,
-        ...stats,
-      }));
+      const progresjonList = Object.entries(sellerStats)
+        .map(([ansatt, stats]) => ({
+          ansatt,
+          ...stats,
+        }))
+        .sort((a, b) => b.total_week - a.total_week); // Sort by week total
 
       progresjonCache.current = progresjonList;
       setProgresjonData(progresjonList);
@@ -947,36 +980,55 @@ export default function AdminDashboard() {
         {(() => {
           const params = new URLSearchParams(location.search);
           return params.get('sub') === 'warroom' && warRoomTab === 'progresjon' && (
-            <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#333', marginTop: '1.5rem', marginBottom: '0.5rem' }}>War Room - Progresjon 📈</h2>
+            <div style={{ marginLeft: '135px', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '1.5rem', paddingBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', width: 'calc(100% - 145px)', background: '#1a1a1a', minHeight: '100vh' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#e0e0e0', marginBottom: '1.5rem' }}>Progresjon 📈</h2>
               
               {loadingProgresjon ? (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster progresjon data...</p>
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Laster progresjon data...</p>
               ) : progresjonData.length > 0 ? (
-                <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <div style={{ width: '100%', overflowX: 'auto', background: '#1a1a1a' }}>
+                  <table style={{ 
+                    borderCollapse: 'collapse',
+                    background: '#1a1a1a',
+                    color: '#b0b0b0',
+                    minWidth: '100%',
+                  }}>
                     <thead>
-                      <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.85rem' }}>Denne Uka</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.85rem' }}>Denne Måneden</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.85rem' }}>Totalt</th>
+                      <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Ansatt</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>BTV i dag</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>DTH i dag</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Free i dag</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Total uke</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Total måned</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Free måned</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste dag</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste uke</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste måned</th>
+                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Badges</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {progresjonData.map((row: any) => (
-                        <tr key={row.selger} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                          <td style={{ padding: '0.75rem', fontSize: '0.85rem', fontWeight: '600' }}>{row.selger}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.85rem', background: '#f0fdf4', color: '#15803d', fontWeight: '700' }}>{row.week}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.85rem', background: '#eff6ff', color: '#1e40af', fontWeight: '700' }}>{row.month}</td>
-                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.85rem', background: '#fef3c7', color: '#92400e', fontWeight: '700' }}>{row.total}</td>
+                      {progresjonData.map((row: any, idx: number) => (
+                        <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
+                          <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_week}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_month}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_month}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_day}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_week}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_month}</td>
+                          <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               ) : (
-                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen progresjon data funnet</p>
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Ingen progresjon data funnet</p>
               )}
             </div>
           );
