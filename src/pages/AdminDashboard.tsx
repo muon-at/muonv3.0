@@ -994,18 +994,27 @@ export default function AdminDashboard() {
                     minWidth: '100%',
                   }}>
                     <thead>
+                      {/* Group Header Row */}
+                      <tr style={{ background: '#0d0d0d', borderBottom: '1px solid #404040' }}>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Ansatt</th>
+                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>I dag</th>
+                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Total</th>
+                        <th colSpan={3} style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Rekorder</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap', borderLeft: '1px solid #404040' }}>Badges</th>
+                      </tr>
+                      {/* Column Header Row */}
                       <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Ansatt</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>BTV i dag</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>DTH i dag</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Free i dag</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Total uke</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Total måned</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Free måned</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste dag</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste uke</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Beste måned</th>
-                        <th style={{ padding: '1rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}>Badges</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}></th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#4db8ff', whiteSpace: 'nowrap' }}>BTV</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ff6b6b', whiteSpace: 'nowrap' }}>DTH</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#51cf66', whiteSpace: 'nowrap' }}>Free box</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Uke</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Måned</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffd700', whiteSpace: 'nowrap' }}>Free box</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Dag</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Uke</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#b366ff', whiteSpace: 'nowrap' }}>Måned</th>
+                        <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐</th>
                       </tr>
                     </thead>
                     <tbody>
