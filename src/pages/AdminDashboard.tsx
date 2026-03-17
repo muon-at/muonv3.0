@@ -1085,6 +1085,18 @@ export default function AdminDashboard() {
                                     rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                                   }
                                   
+                                  // DEBUG: Log first few rows to see date format
+                                  if (!(window as any).__debugLogDone) {
+                                    console.log('DEBUG DATE FILTERING:');
+                                    console.log('Raw date:', rawDate);
+                                    console.log('Converted ISO:', rowDateISO);
+                                    console.log('Filter datoFrom:', salgFilters.datoFrom);
+                                    console.log('Filter datoTo:', salgFilters.datoTo);
+                                    console.log('Comparison datoFrom:', rowDateISO, '<', salgFilters.datoFrom, '=', rowDateISO < salgFilters.datoFrom);
+                                    console.log('Comparison datoTo:', rowDateISO, '>', salgFilters.datoTo, '=', rowDateISO > salgFilters.datoTo);
+                                    (window as any).__debugLogDone = true;
+                                  }
+                                  
                                   if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
                                   if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
                                 }
