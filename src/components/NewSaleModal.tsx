@@ -96,12 +96,12 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
   const handleSend = async () => {
     if (!selectedGif) {
-      alert('Velg en GIF først!');
+      console.warn('GIF ikke valgt');
       return;
     }
 
     if (!user) {
-      alert('Du må være logget inn');
+      console.warn('Bruker ikke logget inn');
       return;
     }
 
@@ -121,7 +121,6 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       });
 
       console.log('📤 SALG POSTED TIL LIVEFEED!');
-      alert(`✅ Salg registrert!\nProdukt: ${selectedProduct}\nSelger: ${userName}`);
       
       // Reset and close
       setSelectedGif(null);
@@ -131,7 +130,6 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       onClose();
     } catch (err) {
       console.error('Error posting sale:', err);
-      alert('❌ Feil ved opprettelse av salg');
     }
   };
 
