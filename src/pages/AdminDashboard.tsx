@@ -697,19 +697,19 @@ export default function AdminDashboard() {
                   <div style={{ width: '100%' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
                       <thead>
-                        <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Produkt</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Plattform</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>CPO</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Provisjon</th>
-                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Tilstand</th>
+                        <tr style={{ background: 'transparent', borderBottom: '2px solid #4b5563' }}>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#b0b0b0' }}>Produkt</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#b0b0b0' }}>Plattform</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#b0b0b0' }}>CPO</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#b0b0b0' }}>Provisjon</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#b0b0b0' }}>Tilstand</th>
                         </tr>
                       </thead>
                       <tbody>
                         {produkterData.map((produkt, idx) => (
-                          <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <tr key={idx} style={{ borderBottom: '1px solid #4b5563', background: '#1f2937', color: '#e5e7eb' }}>
                             <td style={{ padding: '0.75rem', textAlign: 'left' }}>{produkt.navn}</td>
-                            <td style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', color: '#667eea' }}>{produkt.plattform}</td>
+                            <td style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', color: '#60a5fa' }}>{produkt.plattform}</td>
                             <td style={{ padding: '0.75rem' }}>
                               <input
                                 type="text"
@@ -723,10 +723,10 @@ export default function AdminDashboard() {
                                 style={{
                                   width: '100%',
                                   padding: '0.5rem',
-                                  border: '1px solid #e2e8f0',
+                                  border: '1px solid #4b5563',
                                   borderRadius: '4px',
-                                  color: '#333',
-                                  backgroundColor: '#fff',
+                                  color: '#e2e8f0',
+                                  backgroundColor: '#374151',
                                   boxSizing: 'border-box',
                                 }}
                               />
@@ -744,10 +744,10 @@ export default function AdminDashboard() {
                                 style={{
                                   width: '100%',
                                   padding: '0.5rem',
-                                  border: '1px solid #e2e8f0',
+                                  border: '1px solid #4b5563',
                                   borderRadius: '4px',
-                                  color: '#333',
-                                  backgroundColor: '#fff',
+                                  color: '#e2e8f0',
+                                  backgroundColor: '#374151',
                                   boxSizing: 'border-box',
                                 }}
                               />
@@ -763,10 +763,10 @@ export default function AdminDashboard() {
                                 style={{
                                   width: '100%',
                                   padding: '0.5rem',
-                                  border: '1px solid #e2e8f0',
+                                  border: '1px solid #4b5563',
                                   borderRadius: '4px',
-                                  color: '#333',
-                                  backgroundColor: '#fff',
+                                  color: '#e2e8f0',
+                                  backgroundColor: '#374151',
                                   boxSizing: 'border-box',
                                 }}
                               >
