@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthProvider } from './lib/authContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useServiceWorkerUpdate } from './lib/useServiceWorkerUpdate';
 import SalesLivefeed from './components/SalesLivefeed';
+import RevenueDisplay from './components/RevenueDisplay';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import MinSide from './pages/MinSide';
@@ -23,6 +24,8 @@ import MobileCalendar from './pages/MobileCalendar';
 import './App.css';
 
 function AppContent() {
+  const [revenueAmount, setRevenueAmount] = useState<number | null>(null);
+  
   // Initialize service worker updates
   useServiceWorkerUpdate();
 
@@ -37,7 +40,8 @@ function AppContent() {
 
   return (
     <>
-      <SalesLivefeed />
+      <RevenueDisplay amount={revenueAmount} />
+      <SalesLivefeed onPostAdded={(price) => setRevenueAmount(price)} />
       <Routes>
         <Route path="/" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />

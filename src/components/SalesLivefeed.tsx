@@ -16,9 +16,14 @@ interface LivefeedPost {
   userRole?: string;
 }
 
-export const SalesLivefeed: React.FC = () => {
+interface SalesLivefeedProps {
+  onPostAdded?: (price: number) => void;
+}
+
+export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => {
   const [posts, setPosts] = useState<LivefeedPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previousCount, setPreviousCount] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -37,6 +42,14 @@ export const SalesLivefeed: React.FC = () => {
           ...doc.data(),
         } as LivefeedPost);
       });
+      
+      // Check if a new post was added (first post in list)
+      if (previousCount > 0 && newPosts.length > previousCount && onPostAdded) {
+        const newestPost = newPosts[0];
+        onPostAdded(newestPost.productPrice);
+      }
+      
+      setPreviousCount(newPosts.length);
       setPosts(newPosts);
       setLoading(false);
     });
@@ -61,7 +74,6 @@ export const SalesLivefeed: React.FC = () => {
   if (loading) {
     return (
       <div className="livefeed-container">
-        <div className="livefeed-header">📊 LIVE SALG</div>
         <div className="livefeed-content">
           <div className="livefeed-loading">Laster...</div>
         </div>
@@ -71,7 +83,6 @@ export const SalesLivefeed: React.FC = () => {
 
   return (
     <div className="livefeed-container">
-      <div className="livefeed-header">📊 LIVE SALG</div>
       <div className="livefeed-content">
         {posts.length === 0 ? (
           <div className="livefeed-empty">Ingen salg ennå</div>
@@ -90,7 +101,9 @@ export const SalesLivefeed: React.FC = () => {
               {/* Post content */}
               <div className="livefeed-post-content">
                 <div className="livefeed-user">
-                  <strong>{post.userName}</strong>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <strong>🔔 {post.userName}</strong>
+                  </div>
                   <span className="livefeed-department">{post.userDepartment}</span>
                 </div>
 
