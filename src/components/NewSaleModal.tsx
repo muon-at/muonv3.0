@@ -15,12 +15,22 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [gifLoading, setGifLoading] = useState(false);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gifCache = useRef<Map<string, any[]>>(new Map());
 
   const GIPHY_API_KEY = 'rocNGj67aZ4GXyTkBiLKHDgso3j4EQ3c';
 
   const searchGifs = async (query: string) => {
     if (!query.trim()) {
       setGifResults([]);
+      return;
+    }
+
+    // Check cache first
+    const cached = gifCache.current.get(query);
+    if (cached) {
+      console.log('🔥 Using cached GIFs for:', query);
+      setGifResults(cached);
+      setGifLoading(false);
       return;
     }
 
@@ -48,6 +58,9 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       const gifs = (data.data || []).filter((gif: any) => 
         gif.images && (gif.images.fixed_width_small || gif.images.fixed_width)
       );
+      
+      // Cache the results
+      gifCache.current.set(query, gifs);
       setGifResults(gifs);
     } catch (err) {
       console.error('Error searching GIFs:', err);

@@ -191,11 +191,23 @@
   transition: all 0.3s;
   flex: 1;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23e2e8f0' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.25rem center;
+  padding-right: 2.5rem;
+}
+
+.new-sale-select option {
+  background: #1a1a1a;
+  color: #e2e8f0;
+  padding: 0.75rem;
 }
 
 .new-sale-select:hover {
   border-color: #5a67d8;
-  background: linear-gradient(135deg, #454f5f 0%, #556171 100%);
+  background-color: #454f5f;
   box-shadow: 0 6px 16px rgba(90, 103, 216, 0.2);
 }
 
