@@ -1064,6 +1064,29 @@ export default function AdminDashboard() {
                           </thead>
                           <tbody>
                             {(() => {
+                              // DEBUG: Show data stats
+                              if (!(window as any).__debugDataStats && salgData.length > 0) {
+                                const marchData = salgData.filter((row: any) => {
+                                  const rawDate = row.dato || '';
+                                  let dateParts = rawDate.split('/');
+                                  if (dateParts.length !== 3) {
+                                    dateParts = rawDate.split('.');
+                                  }
+                                  if (dateParts.length === 3) {
+                                    const dateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+                                    return dateISO >= '2026-03-01' && dateISO <= '2026-03-31';
+                                  }
+                                  return false;
+                                });
+                                
+                                console.log('=== DATA STATS ===');
+                                console.log('Total rows:', salgData.length);
+                                console.log('Rows with dato field:', salgData.filter((r: any) => r.dato).length);
+                                console.log('March data (2026-03):', marchData.length);
+                                console.log('Sample march dates:', marchData.slice(0, 5).map((r: any) => r.dato));
+                                (window as any).__debugDataStats = true;
+                              }
+                              
                               const filtered = salgData.filter((row: any) => {
                                 if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
                                 if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
