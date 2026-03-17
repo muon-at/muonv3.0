@@ -11,6 +11,9 @@ import MinSide from './pages/MinSide';
 import Chat from './pages/Chat';
 import Teamleder from './pages/Teamleder';
 import AdminDashboard from './pages/AdminDashboard';
+import Status from './pages/Status';
+import Records from './pages/Records';
+import Earnings from './pages/Earnings';
 import AvdelingDashboard from './pages/AvdelingDashboard';
 import ProsjektDashboard from './pages/ProsjektDashboard';
 import MobileHome from './pages/MobileHome';
@@ -165,6 +168,30 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <Chat />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/status" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <Status />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/records" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <Records />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/earnings" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <Earnings />
               </ProtectedRoute>
             } 
           />
