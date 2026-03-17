@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import FileUploadModal from '../components/FileUploadModal';
@@ -48,6 +49,9 @@ interface KontraktsarkivFilters {
 }
 
 export default function AdminDashboard() {
+  const [searchParams] = useSearchParams();
+  const muonParam = searchParams.get('muon');
+  
   console.log('✅ AdminDashboard component mounted!');
   
   // Calculate working days (weekdays only) for a given month
@@ -74,7 +78,13 @@ export default function AdminDashboard() {
     return d.toLocaleString('no-NO', { month: 'long', year: 'numeric' });
   };
 
-  const [activeMainTab, setActiveMainTab] = useState('allente');
+  const [activeMainTab, setActiveMainTab] = useState(() => {
+    // If muon parameter is set, use it; otherwise default to allente
+    if (muonParam === 'people' || muonParam === 'dashboard' || muonParam === 'tema') {
+      return muonParam;
+    }
+    return 'allente';
+  });
   const [activeAllenteTab, setActiveAllenteTab] = useState('salg');
   const [dashboardFromDate, setDashboardFromDate] = useState('');
   const [dashboardToDate, setDashboardToDate] = useState('');
@@ -181,12 +191,12 @@ export default function AdminDashboard() {
     kundenummer: '',
   });
 
-  // Fetch employees when Organisasjon tab is opened
+  // Fetch employees when Organisasjon tab is opened OR when muon=people from navbar
   useEffect(() => {
-    if (activeMainTab === 'organisasjon') {
+    if (activeMainTab === 'organisasjon' || muonParam === 'people') {
       fetchEmployees();
     }
-  }, [activeMainTab]);
+  }, [activeMainTab, muonParam]);
 
   // Load dashboard data when dates change or tab opens
   useEffect(() => {
@@ -2281,7 +2291,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {activeMainTab === 'organisasjon' && (
+        {(activeMainTab === 'organisasjon' || muonParam === 'people') && (
           <div className="tab-content">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <div>
