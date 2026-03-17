@@ -737,7 +737,7 @@ export default function AdminDashboard() {
             <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
               
               {/* Tab Navigation */}
-              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '0', paddingLeft: '1rem', borderBottom: '2px solid #e2e8f0' }}>
+              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '0', paddingLeft: '1rem', borderBottom: 'none' }}>
                 {['salg', 'anger', 'progresjon'].map((tab) => {
                   const tabLabels: { [key: string]: string } = { salg: 'Salg 🎯', anger: 'Anger 😤', progresjon: 'Progresjon 📈' };
                   const isActive = warRoomTab === tab;
@@ -748,9 +748,9 @@ export default function AdminDashboard() {
                       style={{
                         padding: '0.75rem 1.5rem',
                         border: 'none',
-                        borderBottom: isActive ? '3px solid #667eea' : 'none',
-                        background: isActive ? '#f3f0ff' : 'transparent',
-                        color: isActive ? '#667eea' : '#666',
+                        borderBottom: isActive ? '3px solid #5a67d8' : 'none',
+                        background: isActive ? '#5a67d8' : 'transparent',
+                        color: isActive ? '#fff' : '#999',
                         fontWeight: isActive ? '700' : '600',
                         fontSize: '0.95rem',
                         cursor: 'pointer',
@@ -771,22 +771,22 @@ export default function AdminDashboard() {
                   ) : salgData.length > 0 ? (
                     <>
                       {/* Filter Panel */}
-                      <div style={{ width: '100%', background: '#f9fafb', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', marginTop: '1.5rem', maxWidth: '1200px', boxSizing: 'border-box' }}>
-                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#333' }}>Filtrer resultater</h3>
+                      <div style={{ width: '100%', background: '#2d3748', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', marginTop: '0', maxWidth: '1200px', boxSizing: 'border-box' }}>
+                        <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#e2e8f0' }}>Filtrer resultater</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Selger</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Selger</label>
                             <select
                               value={salgFilters.selger}
                               onChange={(e) => setSalgFilters({ ...salgFilters, selger: e.target.value })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #4b5563',
                                 borderRadius: '4px',
                                 fontSize: '0.9rem',
-                                color: '#333',
-                                backgroundColor: '#fff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
                                 boxSizing: 'border-box',
                               }}
                             >
@@ -798,18 +798,18 @@ export default function AdminDashboard() {
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Avdeling</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Avdeling</label>
                             <select
                               value={salgFilters.avdeling}
                               onChange={(e) => setSalgFilters({ ...salgFilters, avdeling: e.target.value })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #4b5563',
                                 borderRadius: '4px',
                                 fontSize: '0.9rem',
-                                color: '#333',
-                                backgroundColor: '#fff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
                                 boxSizing: 'border-box',
                               }}
                             >
@@ -821,18 +821,18 @@ export default function AdminDashboard() {
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Produkt</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Produkt</label>
                             <select
                               value={salgFilters.produkt}
                               onChange={(e) => setSalgFilters({ ...salgFilters, produkt: e.target.value })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #4b5563',
                                 borderRadius: '4px',
                                 fontSize: '0.9rem',
-                                color: '#333',
-                                backgroundColor: '#fff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
                                 boxSizing: 'border-box',
                               }}
                             >
@@ -844,18 +844,18 @@ export default function AdminDashboard() {
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Plattform</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Plattform</label>
                             <select
                               value={salgFilters.platform}
                               onChange={(e) => setSalgFilters({ ...salgFilters, platform: e.target.value })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #4b5563',
                                 borderRadius: '4px',
                                 fontSize: '0.9rem',
-                                color: '#333',
-                                backgroundColor: '#fff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
                                 boxSizing: 'border-box',
                               }}
                             >
@@ -867,7 +867,7 @@ export default function AdminDashboard() {
                           </div>
 
                           <div>
-                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Kundenummer</label>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Kundenummer</label>
                             <input
                               type="text"
                               placeholder="Søk..."
@@ -876,11 +876,49 @@ export default function AdminDashboard() {
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
-                                border: '1px solid #e2e8f0',
+                                border: '1px solid #4b5563',
                                 borderRadius: '4px',
                                 fontSize: '0.9rem',
-                                color: '#333',
-                                backgroundColor: '#fff',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
+                                boxSizing: 'border-box',
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Dato fra</label>
+                            <input
+                              type="date"
+                              value={salgFilters.datoFrom}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, datoFrom: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #4b5563',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
+                                boxSizing: 'border-box',
+                              }}
+                            />
+                          </div>
+
+                          <div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Dato til</label>
+                            <input
+                              type="date"
+                              value={salgFilters.datoTo}
+                              onChange={(e) => setSalgFilters({ ...salgFilters, datoTo: e.target.value })}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                border: '1px solid #4b5563',
+                                borderRadius: '4px',
+                                fontSize: '0.9rem',
+                                color: '#e2e8f0',
+                                backgroundColor: '#374151',
                                 boxSizing: 'border-box',
                               }}
                             />
@@ -930,6 +968,17 @@ export default function AdminDashboard() {
                                 if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
                                 if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                                 if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                                if (salgFilters.datoFrom || salgFilters.datoTo) {
+                                  const rowDate = new Date(row.dato);
+                                  if (salgFilters.datoFrom) {
+                                    const fromDate = new Date(salgFilters.datoFrom);
+                                    if (rowDate < fromDate) return false;
+                                  }
+                                  if (salgFilters.datoTo) {
+                                    const toDate = new Date(salgFilters.datoTo);
+                                    if (rowDate > toDate) return false;
+                                  }
+                                }
                                 return true;
                               })
                               .map((row: any) => (
@@ -954,6 +1003,17 @@ export default function AdminDashboard() {
                           if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
                           if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                           if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                          if (salgFilters.datoFrom || salgFilters.datoTo) {
+                            const rowDate = new Date(row.dato);
+                            if (salgFilters.datoFrom) {
+                              const fromDate = new Date(salgFilters.datoFrom);
+                              if (rowDate < fromDate) return false;
+                            }
+                            if (salgFilters.datoTo) {
+                              const toDate = new Date(salgFilters.datoTo);
+                              if (rowDate > toDate) return false;
+                            }
+                          }
                           return true;
                         }).length} av {salgData.length} kontrakter
                       </p>
