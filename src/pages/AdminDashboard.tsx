@@ -1053,15 +1053,15 @@ export default function AdminDashboard() {
                                   if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                                   if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                                   if (salgFilters.datoFrom || salgFilters.datoTo) {
-                                    const rowDate = new Date(row.dato);
-                                    if (salgFilters.datoFrom) {
-                                      const fromDate = new Date(salgFilters.datoFrom);
-                                      if (rowDate < fromDate) return false;
+                                    // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
+                                    const dateParts = (row.dato || '').split('/');
+                                    let rowDateISO = '';
+                                    if (dateParts.length === 3) {
+                                      rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                                     }
-                                    if (salgFilters.datoTo) {
-                                      const toDate = new Date(salgFilters.datoTo);
-                                      if (rowDate > toDate) return false;
-                                    }
+                                    
+                                    if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
+                                    if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
                                   }
                                   return true;
                                 });
@@ -1101,27 +1101,35 @@ export default function AdminDashboard() {
                             </tr>
                           </thead>
                           <tbody>
-                            {salgData
-                              .filter((row: any) => {
+                            {(() => {
+                              const filtered = salgData.filter((row: any) => {
                                 if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
                                 if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
                                 if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
                                 if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                                 if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                                 if (salgFilters.datoFrom || salgFilters.datoTo) {
-                                  const rowDate = new Date(row.dato);
-                                  if (salgFilters.datoFrom) {
-                                    const fromDate = new Date(salgFilters.datoFrom);
-                                    if (rowDate < fromDate) return false;
+                                  // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
+                                  const dateParts = (row.dato || '').split('/');
+                                  let rowDateISO = '';
+                                  if (dateParts.length === 3) {
+                                    rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                                   }
-                                  if (salgFilters.datoTo) {
-                                    const toDate = new Date(salgFilters.datoTo);
-                                    if (rowDate > toDate) return false;
-                                  }
+                                  
+                                  if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
+                                  if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
                                 }
                                 return true;
-                              })
-                              .map((row: any) => (
+                              });
+                              
+                              return (
+                                <>
+                                  <tr style={{ background: '#2d3748', borderBottom: '1px solid #4b5563' }}>
+                                    <td colSpan={7} style={{ padding: '0.75rem', textAlign: 'center', color: '#b0b0b0', fontSize: '0.85rem', fontWeight: '600' }}>
+                                      📊 Resultater: {filtered.length} av {salgData.length}
+                                    </td>
+                                  </tr>
+                                  {filtered.map((row: any) => (
                                 <tr key={row.id} style={{ borderBottom: '1px solid #4b5563', background: '#1f2937', color: '#e5e7eb' }}>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#60a5fa', fontWeight: '600' }}>{row.csvId || '-'}</td>
@@ -1132,6 +1140,9 @@ export default function AdminDashboard() {
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#4ade80' }}>{row.platform || '-'}</td>
                                 </tr>
                               ))}
+                                </>
+                              );
+                            })()}
                           </tbody>
                         </table>
                       </div>
@@ -1144,15 +1155,15 @@ export default function AdminDashboard() {
                           if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                           if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                           if (salgFilters.datoFrom || salgFilters.datoTo) {
-                            const rowDate = new Date(row.dato);
-                            if (salgFilters.datoFrom) {
-                              const fromDate = new Date(salgFilters.datoFrom);
-                              if (rowDate < fromDate) return false;
+                            // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
+                            const dateParts = (row.dato || '').split('/');
+                            let rowDateISO = '';
+                            if (dateParts.length === 3) {
+                              rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                             }
-                            if (salgFilters.datoTo) {
-                              const toDate = new Date(salgFilters.datoTo);
-                              if (rowDate > toDate) return false;
-                            }
+                            
+                            if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
+                            if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
                           }
                           return true;
                         }).length} av {salgData.length} kontrakter
