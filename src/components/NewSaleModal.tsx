@@ -139,10 +139,15 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
             </div>
           </div>
 
-          {/* Send Button */}
-          <button className="new-sale-send" onClick={handleSend}>
-            ✅ Send Salg
-          </button>
+          {/* Action Buttons */}
+          <div className="new-sale-buttons">
+            <button className="new-sale-cancel" onClick={onClose}>
+              ❌ Avbryt
+            </button>
+            <button className="new-sale-send" onClick={handleSend}>
+              ✅ Send Salg
+            </button>
+          </div>
         </div>
       </div>
     </div>

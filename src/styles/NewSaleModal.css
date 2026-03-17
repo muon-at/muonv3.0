@@ -194,6 +194,35 @@
   box-shadow: 0 0 10px rgba(90, 103, 216, 0.5);
 }
 
+.new-sale-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.new-sale-cancel {
+  padding: 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.new-sale-cancel:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+}
+
+.new-sale-cancel:active {
+  transform: translateY(0);
+}
+
 .new-sale-send {
   padding: 1rem;
   background: #5a67d8;
@@ -204,7 +233,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-  margin-top: 1rem;
 }
 
 .new-sale-send:hover {
