@@ -1052,29 +1052,6 @@ export default function AdminDashboard() {
                           </thead>
                           <tbody>
                             {(() => {
-                              // DEBUG: Show data stats
-                              if (!(window as any).__debugDataStats && salgData.length > 0) {
-                                const marchData = salgData.filter((row: any) => {
-                                  const rawDate = row.dato || '';
-                                  let dateParts = rawDate.split('/');
-                                  if (dateParts.length !== 3) {
-                                    dateParts = rawDate.split('.');
-                                  }
-                                  if (dateParts.length === 3) {
-                                    const dateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                                    return dateISO >= '2026-03-01' && dateISO <= '2026-03-31';
-                                  }
-                                  return false;
-                                });
-                                
-                                console.log('=== DATA STATS ===');
-                                console.log('Total rows:', salgData.length);
-                                console.log('Rows with dato field:', salgData.filter((r: any) => r.dato).length);
-                                console.log('March data (2026-03):', marchData.length);
-                                console.log('Sample march dates:', marchData.slice(0, 5).map((r: any) => r.dato));
-                                (window as any).__debugDataStats = true;
-                              }
-                              
                               const filtered = salgData.filter((row: any) => {
                                 if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
                                 if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
@@ -1094,18 +1071,6 @@ export default function AdminDashboard() {
                                   
                                   if (dateParts.length === 3) {
                                     rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-                                  }
-                                  
-                                  // DEBUG: Log first few rows to see date format
-                                  if (!(window as any).__debugLogDone) {
-                                    console.log('DEBUG DATE FILTERING:');
-                                    console.log('Raw date:', rawDate);
-                                    console.log('Converted ISO:', rowDateISO);
-                                    console.log('Filter datoFrom:', salgFilters.datoFrom);
-                                    console.log('Filter datoTo:', salgFilters.datoTo);
-                                    console.log('Comparison datoFrom:', rowDateISO, '<', salgFilters.datoFrom, '=', rowDateISO < salgFilters.datoFrom);
-                                    console.log('Comparison datoTo:', rowDateISO, '>', salgFilters.datoTo, '=', rowDateISO > salgFilters.datoTo);
-                                    (window as any).__debugLogDone = true;
                                   }
                                   
                                   if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
