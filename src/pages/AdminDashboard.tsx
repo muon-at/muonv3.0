@@ -1026,7 +1026,7 @@ export default function AdminDashboard() {
                             />
                           </div>
 
-                          <div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                             <button
                               onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
                               style={{
@@ -1043,6 +1043,44 @@ export default function AdminDashboard() {
                               }}
                             >
                               🔄 Nullstill
+                            </button>
+                            <button
+                              onClick={() => {
+                                const filtered = salgData.filter((row: any) => {
+                                  if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                                  if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                                  if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                                  if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                                  if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                                  if (salgFilters.datoFrom || salgFilters.datoTo) {
+                                    const rowDate = new Date(row.dato);
+                                    if (salgFilters.datoFrom) {
+                                      const fromDate = new Date(salgFilters.datoFrom);
+                                      if (rowDate < fromDate) return false;
+                                    }
+                                    if (salgFilters.datoTo) {
+                                      const toDate = new Date(salgFilters.datoTo);
+                                      if (rowDate > toDate) return false;
+                                    }
+                                  }
+                                  return true;
+                                });
+                                alert(`✅ Søk utført\n${filtered.length} resultater funnet`);
+                              }}
+                              style={{
+                                width: '100%',
+                                padding: '0.5rem',
+                                background: '#5a67d8',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                marginTop: '1.5rem',
+                              }}
+                            >
+                              🔍 Søk
                             </button>
                           </div>
                         </div>
