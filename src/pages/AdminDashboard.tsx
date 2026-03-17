@@ -148,6 +148,23 @@ export default function AdminDashboard() {
         });
       });
 
+      // DEBUG: Log what was loaded
+      const marchCount = salgList.filter((row: any) => {
+        const rawDate = row.dato || '';
+        let dateParts = rawDate.split('/');
+        if (dateParts.length !== 3) dateParts = rawDate.split('.');
+        if (dateParts.length === 3) {
+          const dateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          return dateISO >= '2026-03-01' && dateISO <= '2026-03-31';
+        }
+        return false;
+      }).length;
+      
+      console.log('✅ LOADED SALG DATA:');
+      console.log('Total rows:', salgList.length);
+      console.log('March rows (2026-03):', marchCount);
+      console.log('First 3 dates:', salgList.slice(0, 3).map((r: any) => r.dato));
+
       setSalgData(salgList);
     } catch (err) {
       console.error('Error fetching salg:', err);
