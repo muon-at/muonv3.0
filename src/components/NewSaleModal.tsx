@@ -26,12 +26,12 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
     setGifLoading(true);
     try {
-      // Add timeout for slow networks
+      // Add timeout for slow networks - 5 seconds max
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=50&offset=0&api_key=${GIPHY_API_KEY}`,
+        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=60&offset=0&api_key=${GIPHY_API_KEY}`,
         { signal: controller.signal }
       );
       
@@ -44,7 +44,10 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       }
 
       const data = await response.json();
-      const gifs = (data.data || []).filter((gif: any) => gif.images && gif.images.fixed_height);
+      // Use fixed_width_small for faster loading
+      const gifs = (data.data || []).filter((gif: any) => 
+        gif.images && (gif.images.fixed_width_small || gif.images.fixed_width)
+      );
       setGifResults(gifs);
     } catch (err) {
       console.error('Error searching GIFs:', err);
@@ -57,14 +60,14 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const handleGifSearch = (query: string) => {
     setGifSearch(query);
     
-    // Debounce: wait 300ms before searching
+    // Debounce: wait only 100ms before searching (very fast)
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
     
     debounceTimer.current = setTimeout(() => {
       searchGifs(query);
-    }, 300);
+    }, 100);
   };
 
   const handleSend = async () => {
@@ -141,7 +144,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
               onChange={(e) => handleGifSearch(e.target.value)}
             />
 
-            {gifLoading && <div className="new-sale-loading">Laster GIFs...</div>}
+            {gifLoading && <div className="new-sale-loading">🔍 Søker...</div>}
 
             {selectedGif && (
               <div className="new-sale-selected-gif">
@@ -161,21 +164,26 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
             <div className="new-sale-gif-grid">
               {gifResults.length > 0 ? (
-                gifResults.map((gif) => (
-                  <img
-                    key={gif.id}
-                    src={gif.images.fixed_height.url}
-                    alt="GIF"
-                    className={`new-sale-gif-item ${selectedGif === gif.images.fixed_height.url ? 'selected' : ''}`}
-                    onClick={() => setSelectedGif(gif.images.fixed_height.url)}
-                    title="Klikk for å velge"
-                    loading="lazy"
-                    onError={(e) => {
-                      console.error('Failed to load GIF:', gif.id);
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                ))
+                gifResults.map((gif) => {
+                  // Use fixed_width_small for faster loading, fallback to fixed_width
+                  const gifImage = gif.images.fixed_width_small || gif.images.fixed_width;
+                  const gifUrl = gifImage.url;
+                  return (
+                    <img
+                      key={gif.id}
+                      src={gifUrl}
+                      alt="GIF"
+                      className={`new-sale-gif-item ${selectedGif === gifUrl ? 'selected' : ''}`}
+                      onClick={() => setSelectedGif(gifUrl)}
+                      title="Klikk for å velge"
+                      loading="lazy"
+                      onError={(e) => {
+                        console.error('Failed to load GIF:', gif.id);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  );
+                })
               ) : (
                 gifSearch && !gifLoading && (
                   <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#999', padding: '2rem' }}>
