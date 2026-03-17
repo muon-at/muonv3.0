@@ -1116,44 +1116,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveProdukter = async () => {
-    try {
-      const produkterRef = collection(db, 'allente_produkter');
-      const snapshot = await getDocs(produkterRef);
-      const existingIds = new Set<string>();
-      
-      snapshot.forEach((d) => {
-        existingIds.add(d.id);
-      });
-
-      for (const produkt of produkterData) {
-        if (produkt.navn.trim()) {
-          if (existingIds.has(produkt.navn)) {
-            // Update existing
-            await updateDoc(doc(db, 'allente_produkter', produkt.navn), {
-              cpo: produkt.cpo || '',
-              provisjon: produkt.provisjon || '',
-              updatedAt: new Date().toISOString(),
-            });
-          } else {
-            // Create new - use product name as document ID
-            await addDoc(produkterRef, {
-              navn: produkt.navn,
-              cpo: produkt.cpo || '',
-              provisjon: produkt.provisjon || '',
-              createdAt: new Date().toISOString(),
-            });
-          }
-        }
-      }
-
-      alert('✅ Produkter lagret!');
-    } catch (err) {
-      console.error('Error saving produkter:', err);
-      alert('❌ Feil ved lagring');
-    }
-  };
-
   const handleSaveAdd = async () => {
     if (!newEmployee.name.trim()) {
       alert('Navn er påkrevd');
@@ -1330,6 +1292,43 @@ export default function AdminDashboard() {
       console.error('Error fetching produkter:', err);
     } finally {
       setLoadingProdukter(false);
+    }
+  };
+
+  const handleSaveProdukter = async () => {
+    try {
+      const cpoRef = collection(db, 'allente_produkter');
+      
+      for (const produkt of produkterData) {
+        const snapshot = await getDocs(cpoRef);
+        
+        let found = false;
+        for (const doc of snapshot.docs) {
+          if (doc.data().navn === produkt.navn) {
+            await updateDoc(doc.ref, {
+              cpo: produkt.cpo || '',
+              provisjon: produkt.provisjon || '',
+              tilstand: produkt.tilstand || 'Aktiv',
+            });
+            found = true;
+            break;
+          }
+        }
+        
+        if (!found) {
+          // Create new if doesn't exist
+          await addDoc(cpoRef, {
+            navn: produkt.navn,
+            cpo: produkt.cpo || '',
+            provisjon: produkt.provisjon || '',
+            tilstand: produkt.tilstand || 'Aktiv',
+          });
+        }
+      }
+      
+      console.log('✅ Produkter saved!');
+    } catch (err) {
+      console.error('Error saving produkter:', err);
     }
   };
 
@@ -2634,6 +2633,129 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        {/* PRODUKTER - Allente Produkt View */}
+        {(() => {
+          const params = new URLSearchParams(location.search);
+          return (params.get('sub') === 'produkt' || (activeMainTab === 'allente' && activeAllenteTab === 'produkt')) && (
+            <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'calc(100% - 145px)' }}>
+              {loadingProdukter ? (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster produkter...</p>
+              ) : produkterData.length > 0 ? (
+                <>
+                  <div style={{ width: '100%' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
+                      <thead>
+                        <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Produkt</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Plattform</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>CPO</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Provisjon</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Tilstand</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {produkterData.map((produkt, idx) => (
+                          <tr key={idx} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ padding: '0.75rem', textAlign: 'left' }}>{produkt.navn}</td>
+                            <td style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', color: '#667eea' }}>{produkt.plattform}</td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <input
+                                type="text"
+                                value={produkt.cpo || ''}
+                                onChange={(e) => {
+                                  const updated = [...produkterData];
+                                  updated[idx].cpo = e.target.value;
+                                  setProdukterData(updated);
+                                }}
+                                placeholder="f.eks 500"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '4px',
+                                  color: '#333',
+                                  backgroundColor: '#fff',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <input
+                                type="text"
+                                value={produkt.provisjon || ''}
+                                onChange={(e) => {
+                                  const updated = [...produkterData];
+                                  updated[idx].provisjon = e.target.value;
+                                  setProdukterData(updated);
+                                }}
+                                placeholder="f.eks 10%"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '4px',
+                                  color: '#333',
+                                  backgroundColor: '#fff',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <select
+                                value={produkt.tilstand || 'Aktiv'}
+                                onChange={(e) => {
+                                  const updated = [...produkterData];
+                                  updated[idx].tilstand = e.target.value;
+                                  setProdukterData(updated);
+                                }}
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #e2e8f0',
+                                  borderRadius: '4px',
+                                  color: '#333',
+                                  backgroundColor: '#fff',
+                                  boxSizing: 'border-box',
+                                }}
+                              >
+                                <option value="Aktiv">Aktiv</option>
+                                <option value="Pause">Pause</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <button
+                    onClick={handleSaveProdukter}
+                    style={{
+                      marginTop: '1.5rem',
+                      padding: '0.75rem 1.5rem',
+                      background: '#667eea',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    💾 Lagre CPO, Provisjon & Tilstand
+                  </button>
+
+                  <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
+                    Viser {produkterData.length} unike Produkt + Plattform kombinasjoner
+                  </p>
+                </>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen produkter funnet</p>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Delete Confirmation Modal */}
