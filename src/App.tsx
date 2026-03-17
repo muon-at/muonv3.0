@@ -9,6 +9,8 @@ import MinSide from './pages/MinSide';
 import Chat from './pages/Chat';
 import Teamleder from './pages/Teamleder';
 import AdminDashboard from './pages/AdminDashboard';
+import AvdelingDashboard from './pages/AvdelingDashboard';
+import ProsjektDashboard from './pages/ProsjektDashboard';
 import MobileHome from './pages/MobileHome';
 import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
@@ -132,6 +134,22 @@ function AppContent() {
             element={
               <ProtectedRoute requiredRole="owner">
                 <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/min-avdeling" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <AvdelingDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/mitt-prosjekt" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <ProsjektDashboard />
               </ProtectedRoute>
             } 
           />
