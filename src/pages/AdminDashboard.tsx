@@ -2356,7 +2356,7 @@ export default function AdminDashboard() {
 
                 {/* Search Field + Add Employee - on same line when muon=people */}
                 {muonParam === 'people' ? (
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', width: '100%' }}>
                   <input
                     type="text"
                     placeholder="Søk etter navn eller e-post..."
