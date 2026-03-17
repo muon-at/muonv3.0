@@ -950,14 +950,14 @@ export default function AdminDashboard() {
                       <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                           <thead>
-                            <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>ID</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Produkt</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Avdeling</th>
-                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Plattform</th>
+                            <tr style={{ background: 'transparent', borderBottom: '2px solid #4b5563' }}>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Dato</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>ID</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Kundenummer</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Produkt</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Selger</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Avdeling</th>
+                              <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Plattform</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -982,14 +982,14 @@ export default function AdminDashboard() {
                                 return true;
                               })
                               .map((row: any) => (
-                                <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                                <tr key={row.id} style={{ borderBottom: '1px solid #4b5563', background: '#1f2937', color: '#e5e7eb' }}>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
-                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.csvId || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#60a5fa', fontWeight: '600' }}>{row.csvId || '-'}</td>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.kundeNr || '-'}</td>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.produkt || '-'}</td>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.selger || '-'}</td>
                                   <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.avdeling || 'Ukjent'}</td>
-                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#10b981' }}>{row.platform || '-'}</td>
+                                  <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#4ade80' }}>{row.platform || '-'}</td>
                                 </tr>
                               ))}
                           </tbody>
