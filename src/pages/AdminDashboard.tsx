@@ -1466,7 +1466,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Content Area */}
-      <div className="admin-content" style={muonParam === 'people' ? { marginLeft: '140px', paddingTop: '2rem' } : {}}>
+      <div className="admin-content" style={muonParam === 'people' ? { marginLeft: 0, paddingTop: 0 } : {}}>
         {activeMainTab === 'allente' && (
           <>
             {/* Allente Header */}
@@ -2296,7 +2296,8 @@ export default function AdminDashboard() {
         )}
 
         {(activeMainTab === 'organisasjon' || muonParam === 'people') && (
-          <div className="tab-content">
+          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: '-140px', paddingLeft: '140px', paddingTop: 0 } : {}}>
+            {muonParam !== 'people' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '700', color: '#333' }}>Ansattestyring</h2>
@@ -2318,6 +2319,26 @@ export default function AdminDashboard() {
                 ➕ Legg til Ansatt
               </button>
             </div>
+            )}
+            {muonParam === 'people' && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
+              <button 
+                onClick={() => setShowAddModal(true)}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                }}
+              >
+                ➕ Legg til Ansatt
+              </button>
+            </div>
+            )}
 
             {loadingEmployees ? (
               <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
