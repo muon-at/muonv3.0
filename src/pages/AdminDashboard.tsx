@@ -211,6 +211,15 @@ export default function AdminDashboard() {
       });
 
       const sorted = badgesList.sort((a, b) => {
+        // Badges med navn kommer først
+        const aHasName = a.navn && a.navn.trim().length > 0 ? 1 : 0;
+        const bHasName = b.navn && b.navn.trim().length > 0 ? 1 : 0;
+        
+        if (aHasName !== bHasName) {
+          return bHasName - aHasName; // Med navn først (1 > 0)
+        }
+        
+        // Innenfor samme gruppe, sorter etter ID
         const aIndex = parseInt(a.id) || 999;
         const bIndex = parseInt(b.id) || 999;
         return aIndex - bIndex;
