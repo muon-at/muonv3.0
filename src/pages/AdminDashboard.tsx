@@ -53,6 +53,21 @@ export default function AdminDashboard() {
   const [loadingProdukter, setLoadingProdukter] = useState(false);
   const produkterCache = React.useRef<any[] | null>(null);
 
+  // ===== WAR ROOM STATE =====
+  const [warRoomTab, setWarRoomTab] = useState('salg');
+  const [salgData, setSalgData] = useState<any[]>([]);
+  const [loadingSalg, setLoadingSalg] = useState(false);
+  const salgCache = React.useRef<any[] | null>(null);
+  const [salgFilters, setSalgFilters] = useState({
+    selger: '',
+    avdeling: '',
+    produkt: '',
+    platform: '',
+    kundenummer: '',
+    datoFrom: '',
+    datoTo: '',
+  });
+
   // ===== FETCH EMPLOYEES =====
   const fetchEmployees = async () => {
     if (employeesCache.current && employeesCache.current.length > 0) {
@@ -94,6 +109,36 @@ export default function AdminDashboard() {
       console.error('Error fetching employees:', err);
     } finally {
       setLoadingEmployees(false);
+    }
+  };
+
+  // ===== FETCH SALG (WAR ROOM) =====
+  const fetchSalg = async () => {
+    if (salgCache.current && salgCache.current.length > 0) {
+      setSalgData(salgCache.current);
+      setLoadingSalg(false);
+    } else {
+      setLoadingSalg(true);
+    }
+
+    try {
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      const snapshot = await getDocs(contractsRef);
+      
+      const salgList: any[] = [];
+      snapshot.forEach((doc) => {
+        salgList.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      salgCache.current = salgList;
+      setSalgData(salgList);
+    } catch (err) {
+      console.error('Error fetching salg:', err);
+    } finally {
+      setLoadingSalg(false);
     }
   };
 
@@ -282,8 +327,17 @@ export default function AdminDashboard() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const subParam = params.get('sub');
+    const tab2Param = params.get('tab2');
+    
     if (subParam === 'produkt') {
       fetchProdukter();
+    }
+    
+    if (subParam === 'warroom') {
+      setWarRoomTab(tab2Param || 'salg');
+      if (tab2Param === 'salg' || !tab2Param) {
+        fetchSalg();
+      }
     }
   }, [location.search]);
 
@@ -532,11 +586,218 @@ export default function AdminDashboard() {
           );
         })()}
 
+        {/* ===== WAR ROOM - SALG TAB ===== */}
+        {(() => {
+          const params = new URLSearchParams(location.search);
+          return params.get('sub') === 'warroom' && warRoomTab === 'salg' && (
+            <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#333', marginTop: '1.5rem', marginBottom: '0.5rem' }}>War Room - Salg 🎯</h2>
+              <p style={{ fontSize: '0.95rem', color: '#666', marginBottom: '1.5rem' }}>Fullstendig oversikt over alle kontrakter</p>
+
+              {loadingSalg ? (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster salg data...</p>
+              ) : salgData.length > 0 ? (
+                <>
+                  {/* Filter Panel */}
+                  <div style={{ width: '100%', background: '#f9fafb', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', maxWidth: '1200px', boxSizing: 'border-box' }}>
+                    <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#333' }}>Filtrer resultater</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Selger</label>
+                        <select
+                          value={salgFilters.selger}
+                          onChange={(e) => setSalgFilters({ ...salgFilters, selger: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                            color: '#333',
+                            backgroundColor: '#fff',
+                            boxSizing: 'border-box',
+                          }}
+                        >
+                          <option value="">Alle</option>
+                          {[...new Set(salgData.map((r: any) => r.selger).filter(Boolean))].sort().map((s: any) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Avdeling</label>
+                        <select
+                          value={salgFilters.avdeling}
+                          onChange={(e) => setSalgFilters({ ...salgFilters, avdeling: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                            color: '#333',
+                            backgroundColor: '#fff',
+                            boxSizing: 'border-box',
+                          }}
+                        >
+                          <option value="">Alle</option>
+                          {[...new Set(salgData.map((r: any) => r.avdeling).filter(Boolean))].sort().map((a: any) => (
+                            <option key={a} value={a}>{a}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Produkt</label>
+                        <select
+                          value={salgFilters.produkt}
+                          onChange={(e) => setSalgFilters({ ...salgFilters, produkt: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                            color: '#333',
+                            backgroundColor: '#fff',
+                            boxSizing: 'border-box',
+                          }}
+                        >
+                          <option value="">Alle</option>
+                          {[...new Set(salgData.map((r: any) => r.produkt).filter(Boolean))].sort().map((p: any) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Plattform</label>
+                        <select
+                          value={salgFilters.platform}
+                          onChange={(e) => setSalgFilters({ ...salgFilters, platform: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                            color: '#333',
+                            backgroundColor: '#fff',
+                            boxSizing: 'border-box',
+                          }}
+                        >
+                          <option value="">Alle</option>
+                          {[...new Set(salgData.map((r: any) => r.platform).filter(Boolean))].sort().map((pl: any) => (
+                            <option key={pl} value={pl}>{pl}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Kundenummer</label>
+                        <input
+                          type="text"
+                          placeholder="Søk..."
+                          value={salgFilters.kundenummer}
+                          onChange={(e) => setSalgFilters({ ...salgFilters, kundenummer: e.target.value })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #e2e8f0',
+                            borderRadius: '4px',
+                            fontSize: '0.9rem',
+                            color: '#333',
+                            backgroundColor: '#fff',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <button
+                          onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            background: '#f59e0b',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            marginTop: '1.5rem',
+                          }}
+                        >
+                          🔄 Nullstill
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Data Table */}
+                  <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Dato</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>ID</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Kundenummer</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Produkt</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Selger</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Avdeling</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem' }}>Plattform</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {salgData
+                          .filter((row: any) => {
+                            if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                            if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                            if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                            if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                            if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                            return true;
+                          })
+                          .map((row: any) => (
+                            <tr key={row.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.dato || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#667eea', fontWeight: '600' }}>{row.csvId || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.kundeNr || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.produkt || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.selger || '-'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem' }}>{row.avdeling || 'Ukjent'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.85rem', color: '#10b981' }}>{row.platform || '-'}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem', maxWidth: '1200px' }}>
+                    Viser {salgData.filter((row: any) => {
+                      if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                      if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
+                      if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
+                      if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
+                      if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
+                      return true;
+                    }).length} av {salgData.length} kontrakter
+                  </p>
+                </>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen salg data funnet</p>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ===== DEFAULT: COMING SOON ===== */}
         {!muonParam && (() => {
           const params = new URLSearchParams(location.search);
           const subParam = params.get('sub');
-          return !subParam || (subParam !== 'produkt') ? (
+          return !subParam || (subParam !== 'produkt' && subParam !== 'warroom') ? (
             <div style={{ textAlign: 'center', padding: '4rem 2rem', color: '#999' }}>
               <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#333' }}>Coming Soon 🚀</h2>
               <p style={{ fontSize: '1.1rem' }}>More admin features coming soon...</p>

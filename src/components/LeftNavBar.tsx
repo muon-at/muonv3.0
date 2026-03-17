@@ -430,12 +430,45 @@ export const LeftNavBar: React.FC = () => {
                             {/* Always show sub-tabs when Allente is open */}
                             <div style={{ paddingLeft: '0.3rem' }}>
                               <button 
-                                className={`nav-tab ${activeTab === 'admin-allente-warroom' ? 'active' : ''}`}
-                                onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom')}
+                                className={`nav-tab ${(activeTab as string)?.includes('warroom') ? 'active' : ''}`}
+                                onClick={() => handleTabClick('admin-allente-warroom', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=salg')}
                                 style={{ fontSize: '0.75rem' }}
                               >
-                                War room
+                                🎯 War room
                               </button>
+                              {/* War room sub-tabs - show when War room is selected */}
+                              {(activeTab as string)?.includes('warroom') && (
+                                <div style={{ paddingLeft: '0.5rem', fontSize: '0.7rem' }}>
+                                  <button 
+                                    className={`nav-tab ${activeTab === 'warroom-salg' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('warroom-salg', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=salg')}
+                                    style={{ fontSize: '0.7rem' }}
+                                  >
+                                    Salg
+                                  </button>
+                                  <button 
+                                    className={`nav-tab ${activeTab === 'warroom-anger' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('warroom-anger', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=anger')}
+                                    style={{ fontSize: '0.7rem' }}
+                                  >
+                                    Anger
+                                  </button>
+                                  <button 
+                                    className={`nav-tab ${activeTab === 'warroom-mal' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('warroom-mal', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=mal')}
+                                    style={{ fontSize: '0.7rem' }}
+                                  >
+                                    Mål
+                                  </button>
+                                  <button 
+                                    className={`nav-tab ${activeTab === 'warroom-progresjon' ? 'active' : ''}`}
+                                    onClick={() => handleTabClick('warroom-progresjon', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=warroom&tab2=progresjon')}
+                                    style={{ fontSize: '0.7rem' }}
+                                  >
+                                    Progresjon
+                                  </button>
+                                </div>
+                              )}
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-produkt' ? 'active' : ''}`}
                                 onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
