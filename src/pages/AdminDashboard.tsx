@@ -467,19 +467,23 @@ export default function AdminDashboard() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const subParam = params.get('sub');
-    const tab2Param = params.get('tab2') || 'salg';
     
     if (subParam === 'produkt') {
       fetchProdukter();
     }
     
     if (subParam === 'warroom') {
-      setWarRoomTab(tab2Param);
-      if (tab2Param === 'salg') fetchSalg();
-      if (tab2Param === 'anger') fetchAnger();
-      if (tab2Param === 'progresjon') fetchProgresjon();
+      // Set initial tab on first load
+      if (warRoomTab === 'salg') fetchSalg();
     }
   }, [location.search]);
+
+  // Fetch data when War Room tab changes
+  useEffect(() => {
+    if (warRoomTab === 'salg') fetchSalg();
+    if (warRoomTab === 'anger') fetchAnger();
+    if (warRoomTab === 'progresjon') fetchProgresjon();
+  }, [warRoomTab]);
 
   return (
     <div className="admin-dashboard-container">
