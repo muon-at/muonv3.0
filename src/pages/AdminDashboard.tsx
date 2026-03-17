@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -91,6 +91,7 @@ export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const employeesCache = React.useRef<Employee[] | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
   const [deleting, setDeleting] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
@@ -1201,7 +1202,15 @@ export default function AdminDashboard() {
 
 
   const fetchEmployees = async () => {
-    setLoadingEmployees(true);
+    // If we have cached data, use it immediately and fetch in background
+    if (employeesCache.current && employeesCache.current.length > 0) {
+      setEmployees(employeesCache.current);
+      setLoadingEmployees(false);
+    } else {
+      // No cache - show loading state
+      setLoadingEmployees(true);
+    }
+
     try {
       const employeesRef = collection(db, 'employees');
       const snapshot = await getDocs(employeesRef);
@@ -1228,9 +1237,14 @@ export default function AdminDashboard() {
         });
       });
       
-      setEmployees(employeeList.sort((a, b) => a.name.localeCompare(b.name)));
-      console.log('🔍 DEBUG - Employees loaded:', employeeList.length, 'records');
-      console.log('📋 Sample employee:', employeeList[0]);
+      const sortedEmployees = employeeList.sort((a, b) => a.name.localeCompare(b.name));
+      
+      // Cache the data
+      employeesCache.current = sortedEmployees;
+      
+      setEmployees(sortedEmployees);
+      console.log('🔍 DEBUG - Employees loaded:', sortedEmployees.length, 'records (cached)');
+      console.log('📋 Sample employee:', sortedEmployees[0]);
     } catch (err) {
       console.error('Error fetching employees:', err);
     } finally {
