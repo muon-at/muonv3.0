@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/authContext';
 
 import { useChannelUnread } from '../lib/ChannelUnreadContext';
+import NewSaleModal from './NewSaleModal';
 import '../styles/LeftNavBar.css';
 
 export const LeftNavBar: React.FC = () => {
@@ -15,8 +16,8 @@ export const LeftNavBar: React.FC = () => {
   const [expandedItem, setExpandedItem] = useState<string | null>('min-side'); // Min Side expanded by default
   const [activeTab, setActiveTab] = useState<string>('status'); // Default tab
   const [closingItem, setClosingItem] = useState<string | null>(null); // Track which item is closing
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // Notification panel state
   const [activeProject, setActiveProject] = useState<string | null>(null); // Sub-accordion for projects
+  const [showNewSaleModal, setShowNewSaleModal] = useState(false); // New Sale Modal state
 
   const handleLogout = () => {
     logout();
@@ -130,10 +131,11 @@ export const LeftNavBar: React.FC = () => {
       {/* Desktop NavBar */}
       <div className="left-nav-bar left-nav-bar-desktop">
         <div className="nav-items">
-          {/* NOTIFICATION BELL - Top of navbar - Simple Yellow Emoji */}
+          {/* NOTIFICATION BELL - Opens NYTT SALG Modal */}
           <button 
             className="notification-bell-button"
-            onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            onClick={() => setShowNewSaleModal(true)}
+            title="Registrer nytt salg"
             style={{
               background: 'none',
               border: 'none',
@@ -171,15 +173,6 @@ export const LeftNavBar: React.FC = () => {
               </div>
             )}
           </button>
-
-          {/* NOTIFICATION PANEL */}
-          {isNotificationOpen && (
-            <div className="notification-panel">
-              <div style={{ padding: '1rem', color: '#999', fontSize: '0.9rem' }}>
-                Notifikasjoner kommer her
-              </div>
-            </div>
-          )}
 
           {/* 1. MIN SIDE - Person icon WITH TABS */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
@@ -585,6 +578,14 @@ export const LeftNavBar: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* NYTT SALG MODAL */}
+      <NewSaleModal
+        isOpen={showNewSaleModal}
+        onClose={() => setShowNewSaleModal(false)}
+        userName={user?.name || user?.email || 'Bruker'}
+        userDepartment={user?.department || 'Ukjent avdeling'}
+      />
     </>
   );
 };
