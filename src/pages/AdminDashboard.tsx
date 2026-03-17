@@ -1071,15 +1071,22 @@ export default function AdminDashboard() {
                                 if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                                 if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                                 if (salgFilters.datoFrom || salgFilters.datoTo) {
-                                  // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
-                                  const dateParts = (row.dato || '').split('/');
+                                  // Convert row.dato from DD/MM/YYYY or DD.MM.YYYY to YYYY-MM-DD for proper comparison
                                   let rowDateISO = '';
+                                  const rawDate = row.dato || '';
+                                  
+                                  // Try split with / first, then with .
+                                  let dateParts = rawDate.split('/');
+                                  if (dateParts.length !== 3) {
+                                    dateParts = rawDate.split('.');
+                                  }
+                                  
                                   if (dateParts.length === 3) {
                                     rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                                   }
                                   
-                                  if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
-                                  if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
+                                  if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
+                                  if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
                                 }
                                 return true;
                               });
@@ -1117,15 +1124,22 @@ export default function AdminDashboard() {
                           if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
                           if (salgFilters.kundenummer && !row.kundeNr?.toLowerCase().includes(salgFilters.kundenummer.toLowerCase())) return false;
                           if (salgFilters.datoFrom || salgFilters.datoTo) {
-                            // Convert row.dato from DD/MM/YYYY to YYYY-MM-DD for proper comparison
-                            const dateParts = (row.dato || '').split('/');
+                            // Convert row.dato from DD/MM/YYYY or DD.MM.YYYY to YYYY-MM-DD for proper comparison
                             let rowDateISO = '';
+                            const rawDate = row.dato || '';
+                            
+                            // Try split with / first, then with .
+                            let dateParts = rawDate.split('/');
+                            if (dateParts.length !== 3) {
+                              dateParts = rawDate.split('.');
+                            }
+                            
                             if (dateParts.length === 3) {
                               rowDateISO = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
                             }
                             
-                            if (salgFilters.datoFrom && rowDateISO < salgFilters.datoFrom) return false;
-                            if (salgFilters.datoTo && rowDateISO > salgFilters.datoTo) return false;
+                            if (salgFilters.datoFrom && rowDateISO && rowDateISO < salgFilters.datoFrom) return false;
+                            if (salgFilters.datoTo && rowDateISO && rowDateISO > salgFilters.datoTo) return false;
                           }
                           return true;
                         }).length} av {salgData.length} kontrakter
