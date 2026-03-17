@@ -2296,7 +2296,7 @@ export default function AdminDashboard() {
         )}
 
         {(activeMainTab === 'organisasjon' || muonParam === 'people') && (
-          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: 0, paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'calc(100% - 130px)', marginLeft: '130px' } : {}}>
+          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: '130px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'calc(100% - 130px)' } : {}}>
             {muonParam !== 'people' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <div>
