@@ -1,1 +1,20 @@
 /* App styles - full bleed layout */
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Account for livefeed on desktop */
+@media (min-width: 1400px) {
+  #root {
+    margin-right: 320px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1400px) {
+  #root {
+    margin-right: 0;
+  }
+}

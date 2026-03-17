@@ -1,5 +1,15 @@
 import { useState, useRef } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from '../lib/authContext';
 import '../styles/NewSaleModal.css';
+
+// Product pricing
+const PRODUCT_PRICES: { [key: string]: number } = {
+  'BTV': 1000,
+  'BTV - free box': 800,
+  'DTH': 1000,
+};
 
 interface NewSaleModalProps {
   isOpen: boolean;
@@ -16,6 +26,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gifCache = useRef<Map<string, any[]>>(new Map());
+  const { user } = useAuth();
 
   const GIPHY_API_KEY = 'rocNGj67aZ4GXyTkBiLKHDgso3j4EQ3c';
 
@@ -89,25 +100,39 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       return;
     }
 
-    const saleData = {
-      selgerNavn: userName,
-      avdeling: userDepartment,
-      produkt: selectedProduct,
-      gifUrl: selectedGif,
-      dato: new Date().toISOString(),
-    };
+    if (!user) {
+      alert('Du må være logget inn');
+      return;
+    }
 
-    console.log('📤 SENDING NYTT SALG:', saleData);
-    
-    // TODO: Send to Firestore/API
-    // For now just log it
-    alert(`✅ Salg registrert!\nProdukt: ${selectedProduct}\nSelger: ${userName}`);
-    
-    // Reset and close
-    setSelectedGif(null);
-    setGifSearch('');
-    setGifResults([]);
-    onClose();
+    try {
+      const productPrice = PRODUCT_PRICES[selectedProduct] || 1000;
+
+      // Post to livefeed
+      await addDoc(collection(db, 'livefeed_sales'), {
+        userId: user.id,
+        userName: userName,
+        userDepartment: userDepartment,
+        product: selectedProduct,
+        productPrice: productPrice,
+        gifUrl: selectedGif,
+        timestamp: Date.now(),
+        userRole: user.role || 'employee',
+      });
+
+      console.log('📤 SALG POSTED TIL LIVEFEED!');
+      alert(`✅ Salg registrert!\nProdukt: ${selectedProduct}\nSelger: ${userName}`);
+      
+      // Reset and close
+      setSelectedGif(null);
+      setGifSearch('');
+      setGifResults([]);
+      setSelectedProduct('BTV');
+      onClose();
+    } catch (err) {
+      console.error('Error posting sale:', err);
+      alert('❌ Feil ved opprettelse av salg');
+    }
   };
 
   if (!isOpen) return null;

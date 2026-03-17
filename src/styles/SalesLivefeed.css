@@ -1,0 +1,225 @@
+/* Sales Livefeed - Right Sidebar */
+
+.livefeed-container {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 320px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1a1a1a 0%, #1f2937 100%);
+  border-left: 3px solid #5a67d8;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+.livefeed-header {
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(135deg, #2d3748 0%, #3d4758 100%);
+  color: #5a67d8;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  border-bottom: 2px solid #5a67d8;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.livefeed-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Scrollbar styling */
+.livefeed-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.livefeed-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.livefeed-content::-webkit-scrollbar-thumb {
+  background: #5a67d8;
+  border-radius: 3px;
+}
+
+.livefeed-content::-webkit-scrollbar-thumb:hover {
+  background: #7c8ff0;
+}
+
+/* Individual post */
+.livefeed-post {
+  margin: 0 0.75rem;
+  background: linear-gradient(135deg, #2d3748 0%, #374151 100%);
+  border: 2px solid #4b5563;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideInPost 0.4s ease-out;
+}
+
+@keyframes slideInPost {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.livefeed-post:hover {
+  border-color: #5a67d8;
+  box-shadow: 0 6px 16px rgba(90, 103, 216, 0.3);
+  transform: translateY(-2px);
+}
+
+/* GIF in post */
+.livefeed-gif {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+  background: #1a1a1a;
+}
+
+/* Post content */
+.livefeed-post-content {
+  padding: 1rem;
+  position: relative;
+}
+
+.livefeed-user {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.livefeed-user strong {
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.livefeed-department {
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.livefeed-product {
+  background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  border: 1px solid #5a67d8;
+}
+
+.livefeed-product-name {
+  color: #5a67d8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.livefeed-product-price {
+  color: #60a5fa;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.livefeed-time {
+  color: #666;
+  font-size: 0.75rem;
+  text-align: right;
+  font-weight: 500;
+}
+
+/* Delete button */
+.livefeed-delete-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  padding: 0;
+}
+
+.livefeed-delete-btn:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+  transform: scale(1.15);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.livefeed-delete-btn:active {
+  transform: scale(0.98);
+}
+
+/* Empty state */
+.livefeed-empty {
+  color: #666;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Loading state */
+.livefeed-loading {
+  color: #999;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.9rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Mobile responsive - hide livefeed on small screens */
+@media (max-width: 1400px) {
+  .livefeed-container {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .livefeed-container {
+    width: 280px;
+  }
+
+  .livefeed-post {
+    margin: 0 0.5rem;
+  }
+
+  .livefeed-gif {
+    height: 120px;
+  }
+}

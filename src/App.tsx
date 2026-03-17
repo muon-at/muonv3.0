@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { AuthProvider } from './lib/authContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useServiceWorkerUpdate } from './lib/useServiceWorkerUpdate';
+import SalesLivefeed from './components/SalesLivefeed';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import MinSide from './pages/MinSide';
@@ -35,8 +36,10 @@ function AppContent() {
   }, []);
 
   return (
-    <Routes>
-          <Route path="/" element={<Login />} />
+    <>
+      <SalesLivefeed />
+      <Routes>
+        <Route path="/" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/change-password-first-login" element={<ResetPassword />} />
           {/* Public preview route - no auth required */}
@@ -161,7 +164,8 @@ function AppContent() {
               </ProtectedRoute>
             } 
           />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
