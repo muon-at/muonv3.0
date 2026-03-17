@@ -26,13 +26,29 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
     setGifLoading(true);
     try {
+      // Add timeout for slow networks
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=50&offset=0&api_key=${GIPHY_API_KEY}`
+        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=50&offset=0&api_key=${GIPHY_API_KEY}`,
+        { signal: controller.signal }
       );
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        console.error('GIF search failed:', response.status);
+        setGifResults([]);
+        return;
+      }
+
       const data = await response.json();
-      setGifResults(data.data || []);
+      const gifs = (data.data || []).filter((gif: any) => gif.images && gif.images.fixed_height);
+      setGifResults(gifs);
     } catch (err) {
       console.error('Error searching GIFs:', err);
+      setGifResults([]);
     } finally {
       setGifLoading(false);
     }
@@ -131,22 +147,44 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
             {selectedGif && (
               <div className="new-sale-selected-gif">
-                <p>✅ GIF valgt:</p>
+                <div className="new-sale-selected-gif-header">
+                  <p>✅ GIF valgt:</p>
+                  <button 
+                    className="new-sale-clear-gif"
+                    onClick={() => setSelectedGif(null)}
+                    title="Fjern valgt GIF"
+                  >
+                    ✕
+                  </button>
+                </div>
                 <img src={selectedGif} alt="Valgt GIF" />
               </div>
             )}
 
             <div className="new-sale-gif-grid">
-              {gifResults.map((gif) => (
-                <img
-                  key={gif.id}
-                  src={gif.images.fixed_height.url}
-                  alt="GIF"
-                  className={`new-sale-gif-item ${selectedGif === gif.images.fixed_height.url ? 'selected' : ''}`}
-                  onClick={() => setSelectedGif(gif.images.fixed_height.url)}
-                  title="Klikk for å velge"
-                />
-              ))}
+              {gifResults.length > 0 ? (
+                gifResults.map((gif) => (
+                  <img
+                    key={gif.id}
+                    src={gif.images.fixed_height.url}
+                    alt="GIF"
+                    className={`new-sale-gif-item ${selectedGif === gif.images.fixed_height.url ? 'selected' : ''}`}
+                    onClick={() => setSelectedGif(gif.images.fixed_height.url)}
+                    title="Klikk for å velge"
+                    loading="lazy"
+                    onError={(e) => {
+                      console.error('Failed to load GIF:', gif.id);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                ))
+              ) : (
+                gifSearch && !gifLoading && (
+                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#999', padding: '2rem' }}>
+                    Ingen GIFer funnet for "{gifSearch}"
+                  </div>
+                )
+              )}
             </div>
           </div>
 
