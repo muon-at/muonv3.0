@@ -89,6 +89,15 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
         ) : (
           posts.map((post) => (
             <div key={post.id} className="livefeed-post">
+              {/* Timestamp above post */}
+              <div className="livefeed-timestamp">
+                {new Date(post.timestamp).toLocaleTimeString('no-NO', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
+              </div>
+
               {/* GIF at top */}
               {post.gifUrl && (
                 <img 
@@ -122,14 +131,6 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                     ✕
                   </button>
                 )}
-
-                {/* Timestamp */}
-                <div className="livefeed-time">
-                  {new Date(post.timestamp).toLocaleTimeString('no-NO', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </div>
               </div>
             </div>
           ))

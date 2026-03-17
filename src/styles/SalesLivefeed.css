@@ -49,30 +49,56 @@
 /* Individual post */
 .livefeed-post {
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideInPost 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.livefeed-timestamp {
+  color: #666;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.35rem 0 0.5rem 0;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.livefeed-post .livefeed-gif,
+.livefeed-post .livefeed-post-content {
   background: linear-gradient(135deg, #2d3748 0%, #374151 100%);
   border: 2px solid #4b5563;
-  border-radius: 6px;
-  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  animation: slideInPost 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.livefeed-post .livefeed-gif {
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #4b5563;
+  margin: 0;
+}
+
+.livefeed-post .livefeed-post-content {
+  border-radius: 0 0 6px 6px;
+  border-top: none;
 }
 
 @keyframes slideInPost {
   from {
     opacity: 0;
-    transform: translateY(-30px) scale(0.9);
+    transform: translateY(-30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
-.livefeed-post:hover {
+.livefeed-post .livefeed-gif:hover,
+.livefeed-post .livefeed-post-content:hover {
   border-color: #5a67d8;
   box-shadow: 0 6px 16px rgba(90, 103, 216, 0.3);
-  transform: translateY(-2px);
 }
 
 /* GIF in post */
@@ -128,13 +154,6 @@
   color: #60a5fa;
   font-size: 1.1rem;
   font-weight: 800;
-}
-
-.livefeed-time {
-  color: #666;
-  font-size: 0.75rem;
-  text-align: right;
-  font-weight: 500;
 }
 
 /* Delete button */
