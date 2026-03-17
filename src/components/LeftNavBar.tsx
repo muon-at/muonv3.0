@@ -448,7 +448,7 @@ export const LeftNavBar: React.FC = () => {
                                 onClick={() => handleTabClick('admin-allente-badges', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=badges')}
                                 style={{ fontSize: '0.75rem' }}
                               >
-                                Badges
+                                🎖️ Badges
                               </button>
                             </div>
                           </div>

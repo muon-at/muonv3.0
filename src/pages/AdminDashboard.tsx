@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { collection, getDocs, doc, updateDoc, addDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/AdminDashboard.css';
 
@@ -79,6 +79,11 @@ export default function AdminDashboard() {
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [loadingProgresjon, setLoadingProgresjon] = useState(false);
   const progresjonCache = React.useRef<any[] | null>(null);
+
+  // BADGES
+  const [badgesData, setBadgesData] = useState<any[]>([]);
+  const [loadingBadges, setLoadingBadges] = useState(false);
+  const badgesCache = React.useRef<any[] | null>(null);
 
   // ===== FETCH EMPLOYEES =====
   const fetchEmployees = async () => {
@@ -181,6 +186,62 @@ export default function AdminDashboard() {
       console.error('Error fetching anger:', err);
     } finally {
       setLoadingAnger(false);
+    }
+  };
+
+  // ===== FETCH BADGES =====
+  const fetchBadges = async () => {
+    if (badgesCache.current && badgesCache.current.length > 0) {
+      setBadgesData(badgesCache.current);
+      setLoadingBadges(false);
+    } else {
+      setLoadingBadges(true);
+    }
+
+    try {
+      const badgesRef = collection(db, 'allente_badges');
+      const snapshot = await getDocs(badgesRef);
+      
+      const badgesList: any[] = [];
+      snapshot.forEach((doc) => {
+        badgesList.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      const sorted = badgesList.sort((a, b) => {
+        const aIndex = parseInt(a.id) || 999;
+        const bIndex = parseInt(b.id) || 999;
+        return aIndex - bIndex;
+      });
+
+      badgesCache.current = sorted;
+      setBadgesData(sorted);
+    } catch (err) {
+      console.error('Error fetching badges:', err);
+    } finally {
+      setLoadingBadges(false);
+    }
+  };
+
+  // ===== SAVE BADGES =====
+  const handleSaveBadges = async () => {
+    try {
+      for (const badge of badgesData) {
+        if (badge.emoji) {
+          const badgeRef = doc(db, 'allente_badges', badge.id || badge.emoji);
+          await setDoc(badgeRef, {
+            emoji: badge.emoji,
+            navn: badge.navn || '',
+            verdi: badge.verdi || '',
+            beskrivelse: badge.beskrivelse || '',
+          }, { merge: true });
+        }
+      }
+      console.log('✅ Badges saved!');
+    } catch (err) {
+      console.error('Error saving badges:', err);
     }
   };
 
@@ -484,6 +545,14 @@ export default function AdminDashboard() {
     if (warRoomTab === 'anger') fetchAnger();
     if (warRoomTab === 'progresjon') fetchProgresjon();
   }, [warRoomTab]);
+
+  // Fetch Badges
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('sub') === 'badges') {
+      fetchBadges();
+    }
+  }, [location.search]);
 
   return (
     <div className="admin-dashboard-container">
@@ -1122,6 +1191,129 @@ export default function AdminDashboard() {
                     <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Ingen progresjon data funnet</p>
                   )}
                 </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ===== BADGES ===== */}
+        {(() => {
+          const params = new URLSearchParams(location.search);
+          return params.get('sub') === 'badges' && (
+            <div style={{ marginLeft: '135px', paddingLeft: '1rem', paddingRight: '1rem', paddingTop: '1.5rem', paddingBottom: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: 'calc(100% - 145px)', background: '#1a1a1a', minHeight: '100vh' }}>
+              <h2 style={{ fontSize: '1.8rem', fontWeight: '700', color: '#e2e8f0', marginBottom: '0.5rem' }}>🎖️ Badges</h2>
+              <p style={{ fontSize: '0.95rem', color: '#b0b0b0', marginBottom: '1.5rem' }}>Administrer badge verdier og beskrivelser</p>
+
+              {loadingBadges ? (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Laster badges...</p>
+              ) : badgesData.length > 0 ? (
+                <>
+                  <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', background: '#1a1a1a' }}>
+                      <thead>
+                        <tr style={{ background: 'transparent', borderBottom: '2px solid #4b5563' }}>
+                          <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0', width: '80px' }}>Emoji</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Navn</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Verdi</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.85rem', color: '#b0b0b0' }}>Beskrivelse</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {badgesData.map((badge, idx) => (
+                          <tr key={badge.id || idx} style={{ borderBottom: '1px solid #4b5563', background: '#1f2937', color: '#e5e7eb' }}>
+                            <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '2rem' }}>{badge.emoji}</td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <input
+                                type="text"
+                                value={badge.navn || ''}
+                                onChange={(e) => {
+                                  const updated = [...badgesData];
+                                  updated[idx].navn = e.target.value;
+                                  setBadgesData(updated);
+                                }}
+                                placeholder="f.eks King"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #4b5563',
+                                  borderRadius: '4px',
+                                  background: '#374151',
+                                  color: '#e2e8f0',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <input
+                                type="text"
+                                value={badge.verdi || ''}
+                                onChange={(e) => {
+                                  const updated = [...badgesData];
+                                  updated[idx].verdi = e.target.value;
+                                  setBadgesData(updated);
+                                }}
+                                placeholder="f.eks 100 poeng"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #4b5563',
+                                  borderRadius: '4px',
+                                  background: '#374151',
+                                  color: '#e2e8f0',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <input
+                                type="text"
+                                value={badge.beskrivelse || ''}
+                                onChange={(e) => {
+                                  const updated = [...badgesData];
+                                  updated[idx].beskrivelse = e.target.value;
+                                  setBadgesData(updated);
+                                }}
+                                placeholder="Hva betyr denne badge?"
+                                style={{
+                                  width: '100%',
+                                  padding: '0.5rem',
+                                  border: '1px solid #4b5563',
+                                  borderRadius: '4px',
+                                  background: '#374151',
+                                  color: '#e2e8f0',
+                                  boxSizing: 'border-box',
+                                }}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <button
+                    onClick={handleSaveBadges}
+                    style={{
+                      marginTop: '1.5rem',
+                      padding: '0.75rem 1.5rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '0.95rem',
+                    }}
+                  >
+                    💾 Lagre badges
+                  </button>
+
+                  <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem' }}>
+                    Total: {badgesData.length} badges
+                  </p>
+                </>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Ingen badges funnet</p>
               )}
             </div>
           );
