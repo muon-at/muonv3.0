@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc, getDoc, setDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import FileUploadModal from '../components/FileUploadModal';
@@ -51,6 +51,7 @@ interface KontraktsarkivFilters {
 export default function AdminDashboard() {
   const [searchParams] = useSearchParams();
   const muonParam = searchParams.get('muon');
+  const location = useLocation();
   
   console.log('✅ AdminDashboard component mounted!');
   
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const employeesCache = React.useRef<Employee[] | null>(null);
+  const produkterCache = React.useRef<any[] | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
   const [deleting, setDeleting] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
@@ -198,6 +200,15 @@ export default function AdminDashboard() {
       fetchEmployees();
     }
   }, [activeMainTab, muonParam]);
+
+  // Fetch produkter when Allente Produkt tab is opened
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const subParam = params.get('sub');
+    if ((activeMainTab === 'allente' && activeAllenteTab === 'produkt') || subParam === 'produkt') {
+      fetchProdukter();
+    }
+  }, [activeMainTab, activeAllenteTab, location.search]);
 
   // Load dashboard data when dates change or tab opens
   useEffect(() => {
@@ -1249,6 +1260,76 @@ export default function AdminDashboard() {
       console.error('Error fetching employees:', err);
     } finally {
       setLoadingEmployees(false);
+    }
+  };
+
+  const fetchProdukter = async () => {
+    // If we have cached data, use it immediately
+    if (produkterCache.current && produkterCache.current.length > 0) {
+      setProdukterData(produkterCache.current);
+      setLoadingProdukter(false);
+    } else {
+      setLoadingProdukter(true);
+    }
+
+    try {
+      // Get unique Produkt + Plattform combinations from contracts
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      const contractsSnapshot = await getDocs(contractsRef);
+      const produkterMap = new Map<string, any>();
+      
+      contractsSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const produkt = data.produkt || '';
+        const plattform = data.platform || 'Ukjent';
+        const key = `${produkt}|${plattform}`;
+        
+        if (produkt.trim() && !produkterMap.has(key)) {
+          produkterMap.set(key, {
+            navn: produkt,
+            plattform: plattform,
+            cpo: '',
+            provisjon: '',
+            tilstand: 'Aktiv', // NEW: Default to Aktiv
+          });
+        }
+      });
+
+      // Get CPO/Provisjon data from Firestore
+      const cpoRef = collection(db, 'allente_produkter');
+      const cpoSnapshot = await getDocs(cpoRef);
+      
+      cpoSnapshot.forEach((doc) => {
+        const data = doc.data();
+        produkterMap.forEach((value) => {
+          if (value.navn === data.navn) {
+            value.cpo = data.cpo || '';
+            value.provisjon = data.provisjon || '';
+            value.tilstand = data.tilstand || 'Aktiv'; // NEW: Load from DB
+          }
+        });
+      });
+
+      // Build products list - sort with Aktiv first, then by navn
+      const products = Array.from(produkterMap.values()).sort((a, b) => {
+        // Sort by tilstand: Aktiv first
+        if (a.tilstand !== b.tilstand) {
+          return a.tilstand === 'Aktiv' ? -1 : 1;
+        }
+        // Then by navn
+        if (a.navn !== b.navn) {
+          return a.navn.localeCompare(b.navn);
+        }
+        return a.plattform.localeCompare(b.plattform);
+      });
+
+      produkterCache.current = products;
+      setProdukterData(products);
+      console.log('📦 Produkter loaded:', products.length, 'records');
+    } catch (err) {
+      console.error('Error fetching produkter:', err);
+    } finally {
+      setLoadingProdukter(false);
     }
   };
 
