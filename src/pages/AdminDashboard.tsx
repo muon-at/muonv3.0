@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import FileUploadModal from '../components/FileUploadModal';
 import '../styles/AdminDashboard.css';
 
 interface Employee {
@@ -84,6 +85,9 @@ export default function AdminDashboard() {
   const [badgesData, setBadgesData] = useState<any[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(false);
   const badgesCache = React.useRef<any[] | null>(null);
+
+  // UPLOAD
+  const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
 
   // ===== FETCH EMPLOYEES =====
   const fetchEmployees = async () => {
@@ -251,6 +255,19 @@ export default function AdminDashboard() {
       console.log('✅ Badges saved!');
     } catch (err) {
       console.error('Error saving badges:', err);
+    }
+  };
+
+  // ===== HANDLE FILE UPLOAD =====
+  const handleFileUpload = async () => {
+    // Data will auto-refresh when tab changes via useEffect
+    // Reset cache so fresh data is fetched
+    salgCache.current = null;
+    badgesCache.current = null;
+    
+    // Auto-refresh the current view
+    if (warRoomTab === 'salg') {
+      fetchSalg();
     }
   };
 
@@ -1212,24 +1229,66 @@ export default function AdminDashboard() {
               {/* UPLOAD SALG TAB */}
               {warRoomTab === 'upload-salg' && (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>📤 Last opp Salg</p>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
+                  <button
+                    onClick={() => setUploadModal({ isOpen: true, fileType: 'salg' })}
+                    style={{
+                      padding: '1rem 2rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    📤 Last opp Salg
+                  </button>
+                  <p style={{ marginTop: '1rem', color: '#999', fontSize: '0.9rem' }}>Velg CSV/Excel-fil med salgsdata</p>
                 </div>
               )}
 
               {/* UPLOAD STATS TAB */}
               {warRoomTab === 'upload-stats' && (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>📊 Last opp Stats</p>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
+                  <button
+                    onClick={() => setUploadModal({ isOpen: true, fileType: 'stats' })}
+                    style={{
+                      padding: '1rem 2rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    📊 Last opp Stats
+                  </button>
+                  <p style={{ marginTop: '1rem', color: '#999', fontSize: '0.9rem' }}>Velg CSV/Excel-fil med statistikk</p>
                 </div>
               )}
 
               {/* UPLOAD ANGER TAB */}
               {warRoomTab === 'upload-anger' && (
                 <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>↩️ Last opp Angring</p>
-                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
+                  <button
+                    onClick={() => setUploadModal({ isOpen: true, fileType: 'angring' })}
+                    style={{
+                      padding: '1rem 2rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    ↩️ Last opp Angring
+                  </button>
+                  <p style={{ marginTop: '1rem', color: '#999', fontSize: '0.9rem' }}>Velg CSV/Excel-fil med kanselleringer</p>
                 </div>
               )}
             </div>
@@ -1495,6 +1554,15 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* FILE UPLOAD MODAL */}
+      <FileUploadModal
+        isOpen={uploadModal.isOpen}
+        title={uploadModal.fileType === 'salg' ? '📤 Last opp Salg' : uploadModal.fileType === 'stats' ? '📊 Last opp Stats' : '↩️ Last opp Angring'}
+        fileType={uploadModal.fileType || 'salg'}
+        onClose={() => setUploadModal({ isOpen: false })}
+        onUpload={handleFileUpload}
+      />
     </div>
   );
 }
