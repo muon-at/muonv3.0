@@ -89,6 +89,9 @@ export default function AdminDashboard() {
   // UPLOAD
   const [uploadModal, setUploadModal] = useState<{ isOpen: boolean; fileType?: 'salg' | 'stats' | 'angring' }>({ isOpen: false });
 
+  // SEARCH RESULTS
+  const [searchResults, setSearchResults] = useState<number | null>(null);
+
   // ===== FETCH EMPLOYEES =====
   const fetchEmployees = async () => {
     if (employeesCache.current && employeesCache.current.length > 0) {
@@ -1028,7 +1031,10 @@ export default function AdminDashboard() {
 
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                             <button
-                              onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
+                              onClick={() => {
+                                setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' });
+                                setSearchResults(null);
+                              }}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -1065,7 +1071,7 @@ export default function AdminDashboard() {
                                   }
                                   return true;
                                 });
-                                alert(`✅ Søk utført\n${filtered.length} resultater funnet`);
+                                setSearchResults(filtered.length);
                               }}
                               style={{
                                 width: '100%',
@@ -1085,6 +1091,27 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       </div>
+
+                      {/* Search Results Counter */}
+                      {searchResults !== null && (
+                        <div style={{ 
+                          width: '100%', 
+                          maxWidth: '1200px',
+                          background: '#2d3748',
+                          border: '2px solid #5a67d8',
+                          borderRadius: '6px',
+                          padding: '1rem',
+                          marginBottom: '1.5rem',
+                          textAlign: 'center'
+                        }}>
+                          <p style={{ margin: 0, color: '#5a67d8', fontSize: '1.1rem', fontWeight: '600' }}>
+                            🔍 Søkresultat
+                          </p>
+                          <p style={{ margin: '0.5rem 0 0 0', color: '#e2e8f0', fontSize: '1.3rem', fontWeight: '700' }}>
+                            Antall: {searchResults}
+                          </p>
+                        </div>
+                      )}
 
                       {/* Data Table */}
                       <div style={{ width: '100%', maxWidth: '1200px', overflowX: 'auto' }}>
