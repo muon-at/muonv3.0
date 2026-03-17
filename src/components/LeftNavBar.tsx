@@ -441,7 +441,7 @@ export const LeftNavBar: React.FC = () => {
                                 onClick={() => handleTabClick('admin-allente-produkt', '/admin-dashboard?tab=prosjekt&prosjekt=allente&sub=produkt')}
                                 style={{ fontSize: '0.75rem' }}
                               >
-                                Produkt
+                                📦 Produkt
                               </button>
                               <button 
                                 className={`nav-tab ${activeTab === 'admin-allente-badges' ? 'active' : ''}`}
