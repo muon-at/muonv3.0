@@ -60,7 +60,6 @@ export default function AdminDashboard() {
   // SALG
   const [salgData, setSalgData] = useState<any[]>([]);
   const [loadingSalg, setLoadingSalg] = useState(false);
-  const salgCache = React.useRef<any[] | null>(null);
   const [salgFilters, setSalgFilters] = useState({
     selger: '',
     avdeling: '',
@@ -135,12 +134,7 @@ export default function AdminDashboard() {
 
   // ===== FETCH SALG (WAR ROOM) =====
   const fetchSalg = async () => {
-    if (salgCache.current && salgCache.current.length > 0) {
-      setSalgData(salgCache.current);
-      setLoadingSalg(false);
-    } else {
-      setLoadingSalg(true);
-    }
+    setLoadingSalg(true);
 
     try {
       const contractsRef = collection(db, 'allente_kontraktsarkiv');
@@ -154,7 +148,6 @@ export default function AdminDashboard() {
         });
       });
 
-      salgCache.current = salgList;
       setSalgData(salgList);
     } catch (err) {
       console.error('Error fetching salg:', err);
@@ -260,12 +253,7 @@ export default function AdminDashboard() {
 
   // ===== HANDLE FILE UPLOAD =====
   const handleFileUpload = async () => {
-    // Data will auto-refresh when tab changes via useEffect
-    // Reset cache so fresh data is fetched
-    salgCache.current = null;
-    badgesCache.current = null;
-    
-    // Auto-refresh the current view
+    // Auto-refresh the current view with fresh data
     if (warRoomTab === 'salg') {
       fetchSalg();
     }
