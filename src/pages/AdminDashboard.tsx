@@ -2296,32 +2296,13 @@ export default function AdminDashboard() {
         )}
 
         {(activeMainTab === 'organisasjon' || muonParam === 'people') && (
-          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: '-140px', paddingLeft: '140px', paddingTop: 0 } : {}}>
+          <div className="tab-content" style={muonParam === 'people' ? { marginLeft: '-140px', paddingLeft: '150px', paddingTop: 0 } : {}}>
             {muonParam !== 'people' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
               <div>
                 <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: '700', color: '#333' }}>Ansattestyring</h2>
                 <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.95rem', color: '#666' }}>Administrere alle ansatte i Muon AS</p>
               </div>
-              <button 
-                onClick={() => setShowAddModal(true)}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: '#667eea',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem',
-                }}
-              >
-                ➕ Legg til Ansatt
-              </button>
-            </div>
-            )}
-            {muonParam === 'people' && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1.5rem' }}>
               <button 
                 onClick={() => setShowAddModal(true)}
                 style={{
@@ -2371,7 +2352,43 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Search Field */}
+                {/* Search Field + Add Employee - on same line when muon=people */}
+                {muonParam === 'people' ? (
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    placeholder="Søk etter navn eller e-post..."
+                    value={employeeSearchQuery}
+                    onChange={(e) => setEmployeeSearchQuery(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem 1rem',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '6px',
+                      fontSize: '0.95rem',
+                      color: '#333',
+                      boxSizing: 'border-box',
+                      backgroundColor: '#fff',
+                    }}
+                  />
+                  <button 
+                    onClick={() => setShowAddModal(true)}
+                    style={{
+                      padding: '0.75rem 1.5rem',
+                      background: '#667eea',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontSize: '0.95rem',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    ➕ Legg til Ansatt
+                  </button>
+                </div>
+                ) : (
                 <div style={{ marginBottom: '1.5rem' }}>
                   <input
                     type="text"
@@ -2390,6 +2407,7 @@ export default function AdminDashboard() {
                     }}
                   />
                 </div>
+                )}
 
                 <div style={{ width: '100%', marginBottom: '1rem', overflowX: 'auto' }}>
                   <div className="employees-table" style={{ width: '100%', minWidth: '1200px' }}>
