@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import '../styles/NewSaleModal.css';
 
 interface NewSaleModalProps {
@@ -14,6 +14,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [gifResults, setGifResults] = useState<any[]>([]);
   const [gifLoading, setGifLoading] = useState(false);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const GIPHY_API_KEY = 'rocNGj67aZ4GXyTkBiLKHDgso3j4EQ3c';
 
@@ -26,7 +27,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     setGifLoading(true);
     try {
       const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=20&api_key=${GIPHY_API_KEY}`
+        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=50&offset=0&api_key=${GIPHY_API_KEY}`
       );
       const data = await response.json();
       setGifResults(data.data || []);
@@ -35,6 +36,19 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     } finally {
       setGifLoading(false);
     }
+  };
+
+  const handleGifSearch = (query: string) => {
+    setGifSearch(query);
+    
+    // Debounce: wait 300ms before searching
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    debounceTimer.current = setTimeout(() => {
+      searchGifs(query);
+    }, 300);
   };
 
   const handleSend = async () => {
@@ -110,10 +124,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
               className="new-sale-gif-search"
               placeholder="Søk GIF (f.eks. 'celebration', 'party')..."
               value={gifSearch}
-              onChange={(e) => {
-                setGifSearch(e.target.value);
-                searchGifs(e.target.value);
-              }}
+              onChange={(e) => handleGifSearch(e.target.value)}
             />
 
             {gifLoading && <div className="new-sale-loading">Laster GIFs...</div>}
