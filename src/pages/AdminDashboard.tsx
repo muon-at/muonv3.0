@@ -815,9 +815,16 @@ export default function AdminDashboard() {
             <div className="tab-content" style={{ marginLeft: '135px', paddingLeft: '0px', paddingRight: '10px', paddingTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', width: 'calc(100% - 145px)' }}>
               
               {/* Tab Navigation */}
-              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '0', paddingLeft: '1rem', borderBottom: 'none' }}>
-                {['salg', 'anger', 'progresjon'].map((tab) => {
-                  const tabLabels: { [key: string]: string } = { salg: 'Salg 🎯', anger: 'Anger 😤', progresjon: 'Progresjon 📈' };
+              <div style={{ width: '100%', display: 'flex', gap: '0.5rem', marginTop: '1.5rem', marginBottom: '0', paddingLeft: '1rem', borderBottom: 'none', flexWrap: 'wrap' }}>
+                {['salg', 'anger', 'progresjon', 'upload-salg', 'upload-stats', 'upload-anger'].map((tab) => {
+                  const tabLabels: { [key: string]: string } = { 
+                    salg: 'Salg 🎯', 
+                    anger: 'Anger 😤', 
+                    progresjon: 'Progresjon 📈',
+                    'upload-salg': 'Last opp Salg 📤',
+                    'upload-stats': 'Last opp Stats 📊',
+                    'upload-anger': 'Last opp Angring ↩️'
+                  };
                   const isActive = warRoomTab === tab;
                   return (
                     <button
@@ -1199,6 +1206,30 @@ export default function AdminDashboard() {
                   ) : (
                     <p style={{ textAlign: 'center', color: '#999', padding: '2rem', width: '100%' }}>Ingen progresjon data funnet</p>
                   )}
+                </div>
+              )}
+
+              {/* UPLOAD SALG TAB */}
+              {warRoomTab === 'upload-salg' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>📤 Last opp Salg</p>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
+                </div>
+              )}
+
+              {/* UPLOAD STATS TAB */}
+              {warRoomTab === 'upload-stats' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>📊 Last opp Stats</p>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
+                </div>
+              )}
+
+              {/* UPLOAD ANGER TAB */}
+              {warRoomTab === 'upload-anger' && (
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '2rem' }}>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '1.2rem' }}>↩️ Last opp Angring</p>
+                  <p style={{ textAlign: 'center', color: '#999', fontSize: '0.95rem' }}>Coming Soon...</p>
                 </div>
               )}
             </div>
