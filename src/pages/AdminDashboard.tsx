@@ -1419,7 +1419,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-dashboard-container">
-      {/* Header */}
+      {/* Header - Hidden when viewing People from navbar */}
+      {muonParam !== 'people' && (
       <div className="admin-header">
         <div className="header-left">
           <div>
@@ -1447,8 +1448,10 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      )}
 
-      {/* Main Tab Navigation */}
+      {/* Main Tab Navigation - Hidden when viewing People from navbar */}
+      {muonParam !== 'people' && (
       <div className="main-tabs">
         {mainTabs.map((tab) => (
           <button
@@ -1460,9 +1463,10 @@ export default function AdminDashboard() {
           </button>
         ))}
       </div>
+      )}
 
       {/* Content Area */}
-      <div className="admin-content">
+      <div className="admin-content" style={muonParam === 'people' ? { marginLeft: '140px', paddingTop: '2rem' } : {}}>
         {activeMainTab === 'allente' && (
           <>
             {/* Allente Header */}
