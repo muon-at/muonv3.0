@@ -101,26 +101,22 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       <div className="new-sale-modal" onClick={(e) => e.stopPropagation()}>
         <div className="new-sale-header">
           <h2>🎉 NYTT SALG</h2>
+          <button className="new-sale-send-header" onClick={handleSend}>
+            ✅ Send
+          </button>
           <button className="new-sale-close" onClick={onClose}>×</button>
         </div>
 
         <div className="new-sale-content">
-          {/* User Info */}
-          <div className="new-sale-section">
-            <h3>📋 Dine Opplysninger</h3>
-            <div className="new-sale-info-row">
-              <label>Navn:</label>
-              <span>{userName}</span>
-            </div>
-            <div className="new-sale-info-row">
-              <label>Avdeling:</label>
-              <span>{userDepartment}</span>
-            </div>
+          {/* User Info - Compact */}
+          <div className="new-sale-info-compact">
+            <div><strong>{userName}</strong></div>
+            <div className="new-sale-department">{userDepartment}</div>
           </div>
 
-          {/* Product Selection */}
-          <div className="new-sale-section">
-            <h3>📦 Produkt</h3>
+          {/* Product Selection - Inline */}
+          <div className="new-sale-inline-row">
+            <label>📦</label>
             <select
               value={selectedProduct}
               onChange={(e) => setSelectedProduct(e.target.value)}
@@ -132,9 +128,11 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
             </select>
           </div>
 
-          {/* GIF Picker */}
-          <div className="new-sale-section">
-            <h3>🎬 Velg GIF</h3>
+          {/* GIF Picker - Inline Label */}
+          <div className="new-sale-gif-section">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              🎬 Velg GIF
+            </label>
             <input
               type="text"
               className="new-sale-gif-search"
@@ -148,7 +146,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
             {selectedGif && (
               <div className="new-sale-selected-gif">
                 <div className="new-sale-selected-gif-header">
-                  <p>✅ GIF valgt:</p>
+                  <p>✅ GIF:</p>
                   <button 
                     className="new-sale-clear-gif"
                     onClick={() => setSelectedGif(null)}
@@ -188,15 +186,6 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="new-sale-buttons">
-            <button className="new-sale-cancel" onClick={onClose}>
-              ❌ Avbryt
-            </button>
-            <button className="new-sale-send" onClick={handleSend}>
-              ✅ Send Salg
-            </button>
-          </div>
         </div>
       </div>
     </div>
