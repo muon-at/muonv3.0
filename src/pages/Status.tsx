@@ -146,12 +146,14 @@ export default function Status() {
         const badgesSnap = await getDocs(collection(db, 'allente_badges'));
         const badgesList: Badge[] = [];
         badgesSnap.forEach((doc) => {
+          const emoji = doc.id || '';
           badgesList.push({
-            emoji: doc.id,
+            emoji: emoji,
             navn: doc.data().navn || '',
             verdi: doc.data().verdi || 0,
             beskrivelse: doc.data().beskrivelse || '',
           });
+          console.log('Loaded badge:', { emoji: emoji, navn: doc.data().navn });
         });
         setBadges(badgesList);
         
