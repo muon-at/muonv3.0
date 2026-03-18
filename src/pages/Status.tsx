@@ -56,7 +56,7 @@ export default function Status() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievedBadges, setAchievedBadges] = useState<string[]>([]);
 
-  // Load LIVE data from allente_kontraktsarkiv - Real-time listener
+  // Load LIVE data - TODAY from livefeed_sales, HISTORICAL from allente_kontraktsarkiv
   useEffect(() => {
     if (!user || !user.name) return;
 
@@ -66,52 +66,60 @@ export default function Status() {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
-    
-    const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
-    // Real-time listener
-    const contractsRef = collection(db, 'allente_kontraktsarkiv');
-    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
-      try {
-        let btvToday = 0;
-        let dthToday = 0;
-        let totalWeek = 0;
-        let totalMonth = 0;
-        let totalRevenue = 0;
+    // Listener 1: livefeed_sales (TODAY only)
+    const livefeedRef = collection(db, 'livefeed_sales');
+    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
+      // Listener 2: allente_kontraktsarkiv (HISTORICAL + week/month)
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
+        try {
+          let btvToday = 0;
+          let dthToday = 0;
+          let totalWeek = 0;
+          let totalMonth = 0;
+          let totalRevenue = 0;
 
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          const selger = data.selger || '';
-          const dato = data.dato || '';
-          const produkt = (data.produkt || '').toLowerCase();
+          // Process TODAY data from livefeed_sales (temp posts from 🔔 modal)
+          livefeedSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const userName = data.userName || '';
+            const product = (data.product || '').toLowerCase();
+            
+            if (userName !== user.name) return;
+            
+            if (product.includes('btv')) {
+              btvToday++;
+            } else if (product.includes('dth')) {
+              dthToday++;
+            }
+          });
 
-          // Filter by seller name
-          if (selger !== user.name) return;
+          // Process WEEK/MONTH data from allente_kontraktsarkiv (historical CSV uploads)
+          archiveSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const selger = data.selger || '';
+            const dato = data.dato || '';
+            const produkt = (data.produkt || '').toLowerCase();
 
-          // Parse date: "12/3/2026" → [12, 3, 2026]
-          if (dato && typeof dato === 'string') {
-            const parts = dato.split('/');
-            if (parts.length === 3) {
-              const day = parseInt(parts[0]);
-              const month = parseInt(parts[1]);
-              const year = parseInt(parts[2]);
-              const orderDate = new Date(year, month - 1, day);
+            // Filter by seller name
+            if (selger !== user.name) return;
 
-              // TODAY counts
-              if (orderDate >= today && orderDate < endOfDay) {
-                if (produkt.includes('btv')) {
-                  btvToday++;
-                } else if (produkt.includes('dth')) {
-                  dthToday++;
+            // Parse date: "12/3/2026" → [12, 3, 2026]
+            if (dato && typeof dato === 'string') {
+              const parts = dato.split('/');
+              if (parts.length === 3) {
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                const orderDate = new Date(year, month - 1, day);
+
+                // WEEK counts
+                if (orderDate >= startOfWeek && orderDate <= today) {
+                  totalWeek++;
                 }
-              }
 
-              // WEEK counts
-              if (orderDate >= startOfWeek && orderDate <= today) {
-                totalWeek++;
-              }
-
-              // MONTH counts
+                // MONTH counts
               if (orderDate >= startOfMonth && orderDate <= today) {
                 totalMonth++;
               }
@@ -158,14 +166,18 @@ export default function Status() {
           month: monthRunRate,
         });
 
-        console.log('✅ LIVE STATS UPDATED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
-      } catch (err) {
-        console.error('❌ Error loading stats:', err);
-      }
+          console.log('✅ LIVE STATS UPDATED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
+        } catch (err) {
+          console.error('❌ Error loading stats:', err);
+        }
+      });
+
+      // Cleanup inner archive listener
+      return () => unsubscribeArchive();
     });
 
-    // Cleanup: unsubscribe when component unmounts or user changes
-    return () => unsubscribe();
+    // Cleanup outer livefeed listener
+    return () => unsubscribeLivefeed();
   }, [user?.id, user?.name]);
 
   // Load badges from Firestore - Option B: emoji as field, not doc ID

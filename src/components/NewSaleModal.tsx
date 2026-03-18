@@ -137,10 +137,8 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       // Trigger slide-to-livefeed animation
       setIsAnimating(true);
 
-      const today = new Date();
-      const datoDDMYYYY = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-
-      // 1. Save to livefeed_sales (for livefeed display)
+      // Save to livefeed_sales ONLY (temporary today data, deleted nightly at 04:00)
+      // allente_kontraktsarkiv is for CSV uploads from Stian - not for modal posts
       await addDoc(collection(db, 'livefeed_sales'), {
         userId: user.id,
         userName: userName,
@@ -152,18 +150,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         userRole: user.role || 'employee',
       });
 
-      // 2. Save to allente_kontraktsarkiv (for Progresjon + Status + Records)
-      await addDoc(collection(db, 'allente_kontraktsarkiv'), {
-        dato: datoDDMYYYY,
-        selger: user.name, // Use user.name to match Firestore auth names
-        produkt: selectedProduct,
-        avdeling: userDepartment,
-        platform: 'Manual', // Mark as manually entered
-        csvId: '', // Empty for manual entries
-        kundeNr: '', // Empty for manual entries
-      });
-
-      console.log('✅ Sale posted to livefeed & archive!');
+      console.log('✅ Sale posted to livefeed!');
       
       // Dispatch custom event for RevenueDisplay
       const price = PRODUCT_PRICES[selectedProduct] || 1000;

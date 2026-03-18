@@ -263,27 +263,68 @@ export default function AdminDashboard() {
 
   // ===== FETCH PROGRESJON (Real-time listener) =====
   const fetchProgresjon = () => {
-    // Don't use cache for Progresjon - always use live data from listener
+    // Always use live data from listeners
     setLoadingProgresjon(true);
 
-    const contractsRef = collection(db, 'allente_kontraktsarkiv');
-    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
-      try {
-        const contracts: any[] = [];
-        snapshot.docs.forEach((doc) => {
-          contracts.push(doc.data());
-        });
+    // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
+    const livefeedRef = collection(db, 'livefeed_sales');
+    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
+      // Listener 2: allente_kontraktsarkiv (HISTORICAL CSV data)
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
+        try {
+          const todayPosts: any[] = [];
+          const historicalContracts: any[] = [];
+          
+          // Collect today's posts from livefeed_sales
+          livefeedSnapshot.docs.forEach((doc) => {
+            todayPosts.push(doc.data());
+          });
+          
+          // Collect historical from allente_kontraktsarkiv
+          archiveSnapshot.docs.forEach((doc) => {
+            historicalContracts.push(doc.data());
+          });
 
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay());
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
+          const today = new Date();
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+          const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
 
-      const sellerStats: { [key: string]: any } = {};
-      
-      contracts.forEach((data) => {
+          const sellerStats: { [key: string]: any } = {};
+          
+          // Process TODAY posts from livefeed_sales (🔔 modal posts)
+          todayPosts.forEach((data) => {
+            const ansatt = data.userName || 'Ukjent';
+            if (!sellerStats[ansatt]) {
+              sellerStats[ansatt] = { 
+                btv_today: 0, 
+                dth_today: 0, 
+                free_today: 0,
+                total_week: 0, 
+                total_month: 0,
+                free_month: 0,
+                best_day: 0,
+                best_week: 0,
+                best_month: 0,
+                badges: 0,
+              };
+            }
+            
+            const produkt = (data.product || '').toLowerCase();
+            if (produkt.includes('btv')) {
+              sellerStats[ansatt].btv_today++;
+            } else if (produkt.includes('dth')) {
+              sellerStats[ansatt].dth_today++;
+            } else if (produkt.includes('free')) {
+              sellerStats[ansatt].free_today++;
+            }
+          });
+          
+          // Process HISTORICAL from allente_kontraktsarkiv (CSV uploads)
+          historicalContracts.forEach((data) => {
         const ansatt = data.selger || 'Ukjent';
         if (!sellerStats[ansatt]) {
           sellerStats[ansatt] = { 
@@ -345,17 +386,20 @@ export default function AdminDashboard() {
         }))
         .sort((a, b) => b.total_week - a.total_week); // Sort by week total
 
-        progresjonCache.current = progresjonList;
-        setProgresjonData(progresjonList);
-        console.log('✅ LIVE PROGRESJON UPDATED');
-      } catch (err) {
-        console.error('Error updating progresjon:', err);
-      } finally {
-        setLoadingProgresjon(false);
-      }
+          progresjonCache.current = progresjonList;
+          setProgresjonData(progresjonList);
+          console.log('✅ LIVE PROGRESJON UPDATED (from livefeed + archive)');
+        } catch (err) {
+          console.error('Error updating progresjon:', err);
+        } finally {
+          setLoadingProgresjon(false);
+        }
+      });
+      
+      return unsubscribeArchive;
     });
 
-    return unsubscribe;
+    return unsubscribeLivefeed;
   };
 
   // ===== FETCH PRODUKTER =====
