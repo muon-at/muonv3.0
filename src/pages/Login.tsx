@@ -19,7 +19,7 @@ export default function Login() {
   useEffect(() => {
     if (isAuthenticated) {
       const isMobile = window.innerWidth < 769;
-      navigate(isMobile ? '/home' : '/min-side');
+      navigate(isMobile ? '/home' : '/status');
     }
   }, [isAuthenticated, navigate]);
 
@@ -105,7 +105,7 @@ export default function Login() {
       } else {
         login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
         const isMobile = window.innerWidth < 769;
-        navigate(isMobile ? '/home' : '/min-side');
+        navigate(isMobile ? '/home' : '/status');
       }
     } catch (err) {
       console.error('Login error:', err);
