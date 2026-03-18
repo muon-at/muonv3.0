@@ -25,8 +25,24 @@ export default function Records() {
       <div className="records-content">
         <h1 className="user-header">{user?.name}</h1>
 
-        <div className="records-grid">
-          {Object.entries(records).map(([key, record]) => (
+        {/* Top 3 Records */}
+        <div className="records-grid-top">
+          {Object.entries(records).slice(0, 3).map(([key, record]) => (
+            <div key={key} className="record-plaque">
+              <div className="plaque-icon">⭐</div>
+              <div className="plaque-content">
+                <div className="plaque-title">{record.title}</div>
+                <div className="plaque-value">{record.value}</div>
+                <div className="plaque-date">{record.date}</div>
+              </div>
+              <div className="plaque-laurel">🌿</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom 2 Records - Centered */}
+        <div className="records-grid-bottom">
+          {Object.entries(records).slice(3).map(([key, record]) => (
             <div key={key} className="record-plaque">
               <div className="plaque-icon">⭐</div>
               <div className="plaque-content">

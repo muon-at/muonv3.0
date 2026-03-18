@@ -25,14 +25,27 @@
   font-size: 3.5rem;
   font-weight: 900;
   letter-spacing: -1px;
+  margin-bottom: 2.5rem;
+}
+
+/* Records Grid - Top 3 */
+.records-grid-top {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
   margin-bottom: 3rem;
 }
 
-/* Records Grid */
-.records-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+/* Records Bottom - Year + Total */
+.records-grid-bottom {
+  display: flex;
   gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.records-grid-bottom .record-plaque {
+  width: 300px;
 }
 
 /* Gold Plaque */
