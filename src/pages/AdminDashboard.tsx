@@ -382,6 +382,71 @@ export default function AdminDashboard() {
         }
       });
 
+          // Calculate records (best day/week/month) for each ansatt
+          const dailyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> day -> count
+          const weeklyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> week -> count
+          const monthlyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> month -> count
+
+          historicalContracts.forEach((data) => {
+            let ansatt = data.selger || 'Ukjent';
+            ansatt = ansatt.replace(/ \/ selger$/i, '').trim();
+            const dato = data.dato || '';
+
+            if (dato && typeof dato === 'string') {
+              const parts = dato.split('/');
+              if (parts.length === 3) {
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                const orderDate = new Date(year, month - 1, day);
+
+                // Day key
+                const dayKey = orderDate.toISOString().split('T')[0];
+                if (!dailyCounts[ansatt]) dailyCounts[ansatt] = {};
+                dailyCounts[ansatt][dayKey] = (dailyCounts[ansatt][dayKey] || 0) + 1;
+
+                // Week key
+                const weekNum = Math.ceil(orderDate.getDate() / 7);
+                const weekKey = `${year}-W${weekNum}`;
+                if (!weeklyCounts[ansatt]) weeklyCounts[ansatt] = {};
+                weeklyCounts[ansatt][weekKey] = (weeklyCounts[ansatt][weekKey] || 0) + 1;
+
+                // Month key
+                const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+                if (!monthlyCounts[ansatt]) monthlyCounts[ansatt] = {};
+                monthlyCounts[ansatt][monthKey] = (monthlyCounts[ansatt][monthKey] || 0) + 1;
+              }
+            }
+          });
+
+          // Update best records for each ansatt
+          Object.entries(sellerStats).forEach(([ansatt, stats]) => {
+            // Best day
+            const ansattDailyMax = dailyCounts[ansatt] 
+              ? Math.max(...Object.values(dailyCounts[ansatt]))
+              : 0;
+            stats.best_day = Math.max(ansattDailyMax, stats.btv_today + stats.dth_today + stats.free_today);
+
+            // Best week - this week's total from archive + today's livefeed
+            const weekNum = Math.ceil(today.getDate() / 7);
+            const thisWeekKey = `${today.getFullYear()}-W${weekNum}`;
+            const thisWeekCount = weeklyCounts[ansatt]?.[thisWeekKey] || 0;
+            const ansattWeeklyMax = weeklyCounts[ansatt] 
+              ? Math.max(...Object.values(weeklyCounts[ansatt]))
+              : 0;
+            const thisWeekTotal = thisWeekCount + (todayPosts.filter(p => p.userName === ansatt).length);
+            stats.best_week = Math.max(ansattWeeklyMax, thisWeekTotal);
+
+            // Best month - this month's total from archive + today's livefeed
+            const thisMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+            const thisMonthCount = monthlyCounts[ansatt]?.[thisMonthKey] || 0;
+            const ansattMonthlyMax = monthlyCounts[ansatt] 
+              ? Math.max(...Object.values(monthlyCounts[ansatt]))
+              : 0;
+            const thisMonthTotal = thisMonthCount + (todayPosts.filter(p => p.userName === ansatt).length);
+            stats.best_month = Math.max(ansattMonthlyMax, thisMonthTotal);
+          });
+
       const progresjonList = Object.entries(sellerStats)
         .map(([ansatt, stats]) => ({
           ansatt,
@@ -391,7 +456,7 @@ export default function AdminDashboard() {
 
           progresjonCache.current = progresjonList;
           setProgresjonData(progresjonList);
-          console.log('✅ LIVE PROGRESJON UPDATED (from livefeed + archive)');
+          console.log('✅ LIVE PROGRESJON UPDATED (with records) - ansatte:', progresjonList.map(p => p.ansatt).join(', '));
         } catch (err) {
           console.error('Error updating progresjon:', err);
         } finally {
