@@ -153,12 +153,13 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         })
       );
 
-      // Reset modal after animation completes
+      // Reset modal and close after animation completes
       setTimeout(() => {
         setGifSearch('');
         setGifResults([]);
         setCurrentGifIndex(0);
         setSelectedGif(null);
+        onClose(); // CLOSE THE MODAL
       }, 600);
     } catch (err) {
       console.error('❌ Error posting sale:', err);
