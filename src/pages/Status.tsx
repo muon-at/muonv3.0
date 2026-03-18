@@ -18,6 +18,7 @@ interface DailyStat {
 
 export default function Status() {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [targets, setTargets] = useState<Target>({
     day: 5,
     week: 25,
@@ -46,10 +47,15 @@ export default function Status() {
     month: 0,
   });
 
-  // Load data from Progresjon/livefeed
+  // Load data from Progresjon/livefeed - Runs on mount AND every time page is visited
   useEffect(() => {
     const loadStats = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(true);
+        return;
+      }
+
+      setLoading(true);
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -124,13 +130,13 @@ export default function Status() {
         });
       } catch (err) {
         console.error('Error loading stats:', err);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadStats();
-    const interval = setInterval(loadStats, 60000); // Refresh every minute
-    return () => clearInterval(interval);
-  }, [user]);
+  }, [user?.id]);
 
   const handleTargetEdit = (type: 'day' | 'week' | 'month') => {
     setEditingTarget(type);
@@ -161,7 +167,7 @@ export default function Status() {
     return Math.min((current / target) * 100, 100);
   };
 
-  if (!user) return <div className="status-container">Laster...</div>;
+  if (!user || loading) return <div className="status-container"><div className="status-content"><h1>📊 STATUS</h1><div style={{ textAlign: 'center', color: '#999', marginTop: '2rem' }}>Laster data...</div></div></div>;
 
   return (
     <div className="status-container">
