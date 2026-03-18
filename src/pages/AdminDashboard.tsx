@@ -280,15 +280,24 @@ export default function AdminDashboard() {
     // Always use live data from listeners
     setLoadingProgresjon(true);
 
-    // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
-    const livefeedRef = collection(db, 'livefeed_sales');
-    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
-      // Listener 2: allente_kontraktsarkiv (HISTORICAL CSV data)
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
-        try {
-          const todayPosts: any[] = [];
-          const historicalContracts: any[] = [];
+    // Fetch People data ONCE for department lookup
+    getDocs(collection(db, 'employees')).then((empSnapshot) => {
+      const employeeMap: { [key: string]: string } = {};
+      empSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.name) employeeMap[data.name] = data.department || 'Unknown';
+        if (data.externalName) employeeMap[data.externalName] = data.department || 'Unknown';
+      });
+
+      // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
+      const livefeedRef = collection(db, 'livefeed_sales');
+      const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
+        // Listener 2: allente_kontraktsarkiv (HISTORICAL CSV data)
+        const contractsRef = collection(db, 'allente_kontraktsarkiv');
+        const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
+          try {
+            const todayPosts: any[] = [];
+            const historicalContracts: any[] = [];
           
           // Collect today's posts from livefeed_sales
           livefeedSnapshot.docs.forEach((doc) => {
@@ -315,6 +324,8 @@ export default function AdminDashboard() {
             
             if (!sellerStats[ansatt]) {
               sellerStats[ansatt] = { 
+                ansatt: ansatt,
+                avdeling: employeeMap[ansatt] || 'Unknown',
                 btv_today: 0, 
                 dth_today: 0, 
                 free_today: 0,
@@ -346,7 +357,7 @@ export default function AdminDashboard() {
         if (!sellerStats[ansatt]) {
           sellerStats[ansatt] = { 
             ansatt: ansatt,
-            avdeling: data.avdeling || 'Unknown',
+            avdeling: employeeMap[ansatt] || 'Unknown',
             btv_today: 0, 
             dth_today: 0, 
             free_today: 0,
@@ -480,10 +491,16 @@ export default function AdminDashboard() {
         }
       });
       
-      return unsubscribeArchive;
+      return () => {
+        unsubscribeLivefeed();
+        unsubscribeArchive();
+      };
+    });
     });
 
-    return unsubscribeLivefeed;
+    return () => {
+      // Placeholder - getDocs doesn't have unsubscribe
+    };
   };
 
   // ===== FETCH PRODUKTER =====
