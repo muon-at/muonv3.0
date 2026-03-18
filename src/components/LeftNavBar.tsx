@@ -18,6 +18,21 @@ export const LeftNavBar: React.FC = () => {
   const [closingItem, setClosingItem] = useState<string | null>(null); // Track which item is closing
   const [activeProject, setActiveProject] = useState<string | null>(null); // Sub-accordion for projects
   const [showNewSaleModal, setShowNewSaleModal] = useState(false); // New Sale Modal state
+  const [modalClickDebounce, setModalClickDebounce] = useState(false); // Prevent double-clicks
+
+  const handleBellClick = () => {
+    if (modalClickDebounce) return; // Already clicking/closing
+    setShowNewSaleModal(true);
+    setModalClickDebounce(true); // Block clicks for 800ms
+    setTimeout(() => {
+      setModalClickDebounce(false);
+    }, 800);
+  };
+
+  const handleModalClose = () => {
+    setShowNewSaleModal(false);
+    // Don't reset debounce here - let it expire naturally
+  };
 
   const handleLogout = () => {
     logout();
@@ -134,7 +149,7 @@ export const LeftNavBar: React.FC = () => {
           {/* NOTIFICATION BELL - Opens NYTT SALG Modal */}
           <button 
             className="notification-bell-button"
-            onClick={() => setShowNewSaleModal(true)}
+            onClick={handleBellClick}
             title="Registrer nytt salg"
             style={{
               background: 'none',
@@ -582,7 +597,7 @@ export const LeftNavBar: React.FC = () => {
       {/* NYTT SALG MODAL */}
       <NewSaleModal
         isOpen={showNewSaleModal}
-        onClose={() => setShowNewSaleModal(false)}
+        onClose={handleModalClose}
         userName={user?.name || user?.email || 'Bruker'}
         userDepartment={user?.department || 'Ukjent avdeling'}
       />
