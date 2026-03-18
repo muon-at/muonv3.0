@@ -16,7 +16,6 @@ import Records from './pages/Records';
 import Earnings from './pages/Earnings';
 import MittProsjekt from './pages/MittProsjekt';
 import AvdelingDashboard from './pages/AvdelingDashboard';
-import ProsjektDashboard from './pages/ProsjektDashboard';
 import MobileHome from './pages/MobileHome';
 import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
@@ -44,7 +43,7 @@ function RoutedContent() {
   }, []);
 
   // Show livefeed only on Min Side routes
-  const showLivefeed = ['/status', '/records', '/earnings', '/calendar'].includes(location.pathname);
+  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt'].includes(location.pathname);
 
   return (
     <>
@@ -157,14 +156,6 @@ function RoutedContent() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <AvdelingDashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/mitt-prosjekt" 
-            element={
-              <ProtectedRoute requiredRole="employee">
-                <ProsjektDashboard />
               </ProtectedRoute>
             } 
           />
