@@ -45,10 +45,20 @@ export default function MittProsjekt() {
     const employeesRef = collection(db, 'employees');
     const employeeUnsub = onSnapshot(employeesRef, (empSnapshot) => {
       const employeeMap: { [key: string]: string } = {}; // name -> department
+      const missingDepts: string[] = [];
+      
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
-        employeeMap[data.name] = data.department || 'Unknown';
+        if (!data.department) {
+          missingDepts.push(data.name);
+        }
+        // Default to OSL if missing department
+        employeeMap[data.name] = data.department || 'OSL';
       });
+      
+      if (missingDepts.length > 0) {
+        console.warn('⚠️ Employees missing department (defaulting to OSL):', missingDepts);
+      }
 
       // Listen to progresjon data (via contracts)
       const contractsRef = collection(db, 'allente_kontraktsarkiv');
@@ -67,12 +77,18 @@ export default function MittProsjekt() {
           let unknownSales = { today: 0, week: 0, month: 0 };
 
           // Process contracts (historical)
+          const notFoundInPeople: string[] = [];
           contractSnapshot.docs.forEach((doc) => {
             const data = doc.data();
             let selger = data.selger || '';
             selger = selger.replace(/ \/ selger$/i, '').trim();
-            const dept = employeeMap[selger]; // dept is undefined if selger not in People
+            const dept = employeeMap[selger]; // dept will be 'OSL' default if in People but missing dept, undefined if not in People at all
             const dato = data.dato || '';
+            
+            // Track truly missing employees (not in People at all)
+            if (!dept && selger && !notFoundInPeople.includes(selger)) {
+              notFoundInPeople.push(selger);
+            }
 
             if (dato && typeof dato === 'string') {
               const parts = dato.split('/');
@@ -183,7 +199,11 @@ export default function MittProsjekt() {
           setMuonTotal(muonTotals);
           setTopEmployees({ today: topToday, week: topWeek, month: topMonth });
 
+          if (notFoundInPeople.length > 0) {
+            console.warn('⚠️ Sellers not found in People (counted as Unknown):', notFoundInPeople);
+          }
           console.log('✅ MITT PROSJEKT UPDATED:', deptStats);
+          console.log('📊 Muon Totals:', muonTotals);
         });
 
         return () => {
