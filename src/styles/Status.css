@@ -1,13 +1,17 @@
 .status-container {
+  margin-left: 108px;
   margin-right: 320px;
   min-height: 100vh;
   background: linear-gradient(180deg, #0f172a 0%, #1a1a2e 100%);
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .status-content {
+  width: 100%;
   max-width: 800px;
-  margin: 0 auto;
 }
 
 .status-content h1 {

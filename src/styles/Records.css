@@ -1,13 +1,17 @@
 .records-container {
+  margin-left: 108px;
   margin-right: 320px;
   min-height: 100vh;
   background: linear-gradient(180deg, #0f172a 0%, #1a1a2e 100%);
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .records-content {
+  width: 100%;
   max-width: 1000px;
-  margin: 0 auto;
 }
 
 .records-content h1 {
