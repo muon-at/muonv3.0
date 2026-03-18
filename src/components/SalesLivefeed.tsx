@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, deleteDoc, doc, where } from 'firebase/firestore';
+import { collection, query, orderBy, limit, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/SalesLivefeed.css';
@@ -27,20 +27,9 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
   const { user } = useAuth();
 
   useEffect(() => {
-    // Get start and end of today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startOfToday = today.getTime();
-    
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const startOfTomorrow = tomorrow.getTime();
-
-    // Real-time listener for livefeed (only today's posts)
+    // Real-time listener for livefeed - just get 8 newest posts
     const q = query(
       collection(db, 'livefeed_sales'),
-      where('timestamp', '>=', startOfToday),
-      where('timestamp', '<', startOfTomorrow),
       orderBy('timestamp', 'desc'),
       limit(8)
     );
