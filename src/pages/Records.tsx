@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/authContext';
-import RecordPlaque from '../components/RecordPlaque';
 import '../styles/Records.css';
 
 export default function Records() {
@@ -23,14 +22,36 @@ export default function Records() {
         {/* Top 3 Records */}
         <div className="records-grid-top">
           {Object.entries(records).slice(0, 3).map(([key, record]) => (
-            <RecordPlaque key={key} record={record} />
+            <div key={key} className="record-plaque">
+              <div className="plaque-icon">⭐</div>
+              <div className="plaque-content">
+                <div className="plaque-title">{record.title}</div>
+                <div className="plaque-value-wreath">
+                  <div className="wreath-left">🌿</div>
+                  <div className="plaque-value">{record.value}</div>
+                  <div className="wreath-right">🌿</div>
+                </div>
+                <div className="plaque-date">{record.date}</div>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Bottom 2 Records - Centered */}
         <div className="records-grid-bottom">
           {Object.entries(records).slice(3).map(([key, record]) => (
-            <RecordPlaque key={key} record={record} />
+            <div key={key} className="record-plaque">
+              <div className="plaque-icon">⭐</div>
+              <div className="plaque-content">
+                <div className="plaque-title">{record.title}</div>
+                <div className="plaque-value-wreath">
+                  <div className="wreath-left">🌿</div>
+                  <div className="plaque-value">{record.value}</div>
+                  <div className="wreath-right">🌿</div>
+                </div>
+                <div className="plaque-date">{record.date}</div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
