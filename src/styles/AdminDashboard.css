@@ -644,6 +644,18 @@
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
+.modal-btn.save-btn {
+  background: #5a67d8;
+  color: white;
+  pointer-events: auto;
+  z-index: 1001;
+}
+
+.modal-btn.save-btn:hover:not(:disabled) {
+  background: #4c51bf;
+  box-shadow: 0 4px 12px rgba(90, 103, 216, 0.3);
+}
+
 .modal-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
