@@ -16,6 +16,7 @@ import Records from './pages/Records';
 import Earnings from './pages/Earnings';
 import MittProsjekt from './pages/MittProsjekt';
 import AvdelingDashboard from './pages/AvdelingDashboard';
+import MissingEmployees from './pages/MissingEmployees';
 import MobileHome from './pages/MobileHome';
 import MobileChat from './pages/MobileChat';
 import MobileChatConversation from './pages/MobileChatConversation';
@@ -150,6 +151,14 @@ function RoutedContent() {
                 <AdminDashboard />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/missing-employees"
+            element={
+              <ProtectedRoute requiredRole="owner">
+                <MissingEmployees />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/min-avdeling" 
