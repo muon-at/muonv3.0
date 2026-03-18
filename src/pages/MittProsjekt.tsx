@@ -60,12 +60,15 @@ export default function MittProsjekt() {
           };
           const employeeSales: { [key: string]: { today: number; week: number; month: number; dept: string } } = {};
 
+          // Track unknown/unmapped sales separately
+          let unknownSales = { today: 0, week: 0, month: 0 };
+
           // Process contracts (historical)
           contractSnapshot.docs.forEach((doc) => {
             const data = doc.data();
             let selger = data.selger || '';
             selger = selger.replace(/ \/ selger$/i, '').trim();
-            const dept = employeeMap[selger] || 'Unknown';
+            const dept = employeeMap[selger]; // dept is undefined if selger not in People
             const dato = data.dato || '';
 
             if (dato && typeof dato === 'string') {
@@ -77,13 +80,14 @@ export default function MittProsjekt() {
                 const orderDate = new Date(year, month - 1, day);
 
                 if (!employeeSales[selger]) {
-                  employeeSales[selger] = { today: 0, week: 0, month: 0, dept };
+                  employeeSales[selger] = { today: 0, week: 0, month: 0, dept: dept || 'Unknown' };
                 }
 
                 // Count sales
                 const sale = 1; // 1 contract = 1 sale
 
-                if (dept in deptStats) {
+                if (dept) {
+                  // Selger found in People - count on their department
                   // Today
                   if (orderDate >= today) {
                     deptStats[dept].todaySales += sale;
@@ -99,24 +103,45 @@ export default function MittProsjekt() {
                     deptStats[dept].monthSales += sale;
                     employeeSales[selger].month += sale;
                   }
+                } else {
+                  // Selger NOT found in People - count toward Unknown (fallback to Muon total)
+                  // Today
+                  if (orderDate >= today) {
+                    unknownSales.today += sale;
+                  }
+                  // Week
+                  if (orderDate >= startOfWeek && orderDate <= today) {
+                    unknownSales.week += sale;
+                  }
+                  // Month
+                  if (orderDate >= startOfMonth && orderDate <= today) {
+                    unknownSales.month += sale;
+                  }
                 }
               }
             }
           });
 
+          // Store unknown sales to add to Muon total when rendering
+          let muonUnknownSales = { today: unknownSales.today, week: unknownSales.week, month: unknownSales.month };
+
           // Add livefeed (today only)
           livefeedSnapshot.docs.forEach((doc) => {
             const data = doc.data();
             const userName = data.userName || '';
-            const dept = employeeMap[userName] || 'Unknown';
+            const dept = employeeMap[userName]; // undefined if not in People
 
             if (!employeeSales[userName]) {
-              employeeSales[userName] = { today: 0, week: 0, month: 0, dept };
+              employeeSales[userName] = { today: 0, week: 0, month: 0, dept: dept || 'Unknown' };
             }
 
-            if (dept in deptStats) {
+            if (dept && dept in deptStats) {
+              // Found in People - count on their department
               deptStats[dept].todaySales += 1;
               employeeSales[userName].today += 1;
+            } else if (!dept) {
+              // NOT found in People - count as unknown/fallback
+              muonUnknownSales.today += 1;
             }
           });
 
@@ -144,11 +169,11 @@ export default function MittProsjekt() {
             .slice(0, 3)
             .map(e => ({ name: e.name, sales: e.month, department: e.dept }));
 
-          // Calculate Muon totals (KRS + OSL + Skien)
+          // Calculate Muon totals (KRS + OSL + Skien + Unknown people fallback)
           const muonTotals = {
-            todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales,
-            weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales,
-            monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales,
+            todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales + muonUnknownSales.today,
+            weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales + muonUnknownSales.week,
+            monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales + muonUnknownSales.month,
           };
 
           setDepartments(deptStats);
