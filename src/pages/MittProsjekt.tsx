@@ -18,6 +18,7 @@ interface TopEmployee {
 }
 
 export default function MittProsjekt() {
+  const [activeTab, setActiveTab] = useState<'status' | 'wall-of-fame'>('status');
   const [departments, setDepartments] = useState<{ [key: string]: DepartmentStats }>({
     'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
     'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
@@ -199,6 +200,25 @@ export default function MittProsjekt() {
     <div className="mitt-prosjekt-container">
       <h1>Mitt Prosjekt</h1>
 
+      {/* Tabs */}
+      <div className="tabs-container">
+        <button 
+          className={`tab-button ${activeTab === 'status' ? 'active' : ''}`}
+          onClick={() => setActiveTab('status')}
+        >
+          Status
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'wall-of-fame' ? 'active' : ''}`}
+          onClick={() => setActiveTab('wall-of-fame')}
+        >
+          Wall of Fame
+        </button>
+      </div>
+
+      {/* Status Tab */}
+      {activeTab === 'status' && (
+      <>
       {/* Department Grid */}
       <div className="dept-grid">
         {['KRS', 'OSL', 'Skien'].map((deptName) => (
@@ -279,6 +299,85 @@ export default function MittProsjekt() {
           ))}
         </div>
       </div>
+      </>
+      )}
+
+      {/* Wall of Fame Tab */}
+      {activeTab === 'wall-of-fame' && (
+        <div style={{ width: '100%', maxWidth: '1000px' }}>
+          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#e2e8f0' }}>🏆 Wall of Fame</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+            {/* Best Today */}
+            <div style={{
+              backgroundColor: '#2d3748',
+              border: '2px solid #ffd700',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              textAlign: 'center',
+            }}>
+              <h3 style={{ fontSize: '1.1rem', color: '#ffd700', marginBottom: '1rem' }}>🔥 Beste I dag</h3>
+              {topEmployees.today.length > 0 ? (
+                <>
+                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    {topEmployees.today[0].name}
+                  </p>
+                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
+                    {topEmployees.today[0].sales} salg
+                  </p>
+                </>
+              ) : (
+                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
+              )}
+            </div>
+
+            {/* Best Week */}
+            <div style={{
+              backgroundColor: '#2d3748',
+              border: '2px solid #c0c0c0',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              textAlign: 'center',
+            }}>
+              <h3 style={{ fontSize: '1.1rem', color: '#c0c0c0', marginBottom: '1rem' }}>📈 Beste Uke</h3>
+              {topEmployees.week.length > 0 ? (
+                <>
+                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    {topEmployees.week[0].name}
+                  </p>
+                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
+                    {topEmployees.week[0].sales} salg
+                  </p>
+                </>
+              ) : (
+                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
+              )}
+            </div>
+
+            {/* Best Month */}
+            <div style={{
+              backgroundColor: '#2d3748',
+              border: '2px solid #cd7f32',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              textAlign: 'center',
+            }}>
+              <h3 style={{ fontSize: '1.1rem', color: '#cd7f32', marginBottom: '1rem' }}>🎯 Beste Måned</h3>
+              {topEmployees.month.length > 0 ? (
+                <>
+                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    {topEmployees.month[0].name}
+                  </p>
+                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
+                    {topEmployees.month[0].sales} salg
+                  </p>
+                </>
+              ) : (
+                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
