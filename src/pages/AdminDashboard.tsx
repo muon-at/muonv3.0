@@ -555,11 +555,22 @@ export default function AdminDashboard() {
     if (subParam === 'warroom') {
       // Set initial tab on first load
       if (warRoomTab === 'salg') fetchSalg();
+      if (warRoomTab === 'anger') fetchAnger();
+      if (warRoomTab === 'progresjon') {
+        const unsubscribe = fetchProgresjon();
+        return () => unsubscribe();
+      }
     }
-  }, [location.search]);
+  }, [location.search, warRoomTab]);
 
-  // Fetch data when War Room tab changes
+  // Fetch data when War Room tab changes (only if not already started by location.search)
   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const subParam = params.get('sub');
+    
+    // Only handle tab changes if we're in warroom AND not handling it via location.search
+    if (subParam !== 'warroom') return;
+    
     if (warRoomTab === 'salg') fetchSalg();
     if (warRoomTab === 'anger') fetchAnger();
     if (warRoomTab === 'progresjon') {
