@@ -324,11 +324,6 @@ export default function AdminDashboard() {
         
         return { dept: 'Unknown', externalName: '' };
       };
-      
-      // Backwards compatible wrapper
-      const getAvdeling = (ansatt: string): string => {
-        return getEmployeeDetail(ansatt).dept;
-      };
 
       // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
       const livefeedRef = collection(db, 'livefeed_sales');
@@ -368,7 +363,7 @@ export default function AdminDashboard() {
               sellerStats[ansatt] = { 
                 ansatt: ansatt,
                 avdeling: detail.dept,
-                externalName: detail.externalName,
+                externalName: ansatt,
                 btv_today: 0, 
                 dth_today: 0, 
                 free_today: 0,
@@ -394,13 +389,16 @@ export default function AdminDashboard() {
           
           // Process HISTORICAL from allente_kontraktsarkiv (CSV uploads)
           historicalContracts.forEach((data) => {
-        let ansatt = data.selger || 'Ukjent';
+        let originalSelger = data.selger || 'Ukjent'; // Keep original for display
+        let ansatt = originalSelger;
         // Deduplicate: strip "/ selger" suffix from old format names
         ansatt = ansatt.replace(/ \/ selger$/i, '').trim();
         if (!sellerStats[ansatt]) {
+          const detail = getEmployeeDetail(ansatt);
           sellerStats[ansatt] = { 
             ansatt: ansatt,
-            avdeling: getAvdeling(ansatt),
+            avdeling: detail.dept,
+            externalName: originalSelger,
             btv_today: 0, 
             dth_today: 0, 
             free_today: 0,
