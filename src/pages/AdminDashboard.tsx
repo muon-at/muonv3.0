@@ -981,9 +981,9 @@ export default function AdminDashboard() {
                                   }}
                                 />
                               </td>
-                              <td style={{ padding: '0.75rem', fontWeight: '700' }}>{emp.name}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center' }}>{emp.count}</td>
-                              <td style={{ padding: '0.75rem', background: '#d1d5db', fontWeight: '600' }}>{emp.dept}</td>
+                              <td style={{ padding: '0.75rem', fontWeight: '700', color: '#000' }}>{emp.name}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center', color: '#000' }}>{emp.count}</td>
+                              <td style={{ padding: '0.75rem', background: '#d1d5db', fontWeight: '600', color: '#000' }}>{emp.dept}</td>
                               <td style={{ padding: '0.75rem', color: '#000' }}>{emp.latestDate}</td>
                             </tr>
                           ))}
