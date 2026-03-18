@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Status.css';
@@ -56,89 +56,118 @@ export default function Status() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievedBadges, setAchievedBadges] = useState<string[]>([]);
 
-  // Load data from Progresjon/livefeed - Runs on mount AND every time page is visited
+  // Load LIVE data from allente_kontraktsarkiv - Same logic as Progresjon
   useEffect(() => {
     const loadStats = async () => {
-      if (!user) return;
+      if (!user || !user.name) return;
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      const startOfToday = today.getTime();
-      const startOfTomorrow = new Date(today);
-      startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-      const endOfToday = startOfTomorrow.getTime();
+      
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay()); // Monday of this week
+      
+      const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
       try {
-        // Get today's stats
-        const todayQuery = query(
-          collection(db, 'livefeed_sales'),
-          where('timestamp', '>=', startOfToday),
-          where('timestamp', '<', endOfToday),
-          where('userId', '==', user.id)
-        );
-        const todaySnap = await getDocs(todayQuery);
-        const todayCount = todaySnap.size;
-        const todayRevenue = todaySnap.docs.reduce((sum, doc) => sum + (doc.data().productPrice || 0), 0);
+        // Fetch all contracts
+        const contractsRef = collection(db, 'allente_kontraktsarkiv');
+        const snapshot = await getDocs(contractsRef);
+        
+        let btvToday = 0;
+        let dthToday = 0;
+        let totalWeek = 0;
+        let totalMonth = 0;
+        let totalRevenue = 0;
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const selger = data.selger || '';
+          const dato = data.dato || '';
+          const produkt = (data.produkt || '').toLowerCase();
+
+          // Filter by seller name
+          if (selger !== user.name) return;
+
+          // Parse date: "12/3/2026" → [12, 3, 2026]
+          if (dato && typeof dato === 'string') {
+            const parts = dato.split('/');
+            if (parts.length === 3) {
+              const day = parseInt(parts[0]);
+              const month = parseInt(parts[1]);
+              const year = parseInt(parts[2]);
+              const orderDate = new Date(year, month - 1, day);
+
+              // TODAY counts
+              if (orderDate >= today && orderDate < endOfDay) {
+                if (produkt.includes('btv')) {
+                  btvToday++;
+                } else if (produkt.includes('dth')) {
+                  dthToday++;
+                }
+              }
+
+              // WEEK counts
+              if (orderDate >= startOfWeek && orderDate <= today) {
+                totalWeek++;
+              }
+
+              // MONTH counts
+              if (orderDate >= startOfMonth && orderDate <= today) {
+                totalMonth++;
+              }
+
+              // REVENUE (1000 kr for BTV/DTH, 800 kr for free)
+              const price = produkt.includes('free') ? 800 : 1000;
+              totalRevenue += price;
+            }
+          }
+        });
+
+        const todayCount = btvToday + dthToday;
         setTodayStats({
           date: new Date().toLocaleDateString('no-NO'),
           count: todayCount,
-          revenue: todayRevenue,
+          revenue: todayCount * 1000, // Assume all today items are 1000 kr
         });
 
         // Calculate runrates
         const now = new Date();
         const hoursElapsed = now.getHours() + (now.getMinutes() / 60);
         const dayRunRate = hoursElapsed > 0 ? Math.round((todayCount / hoursElapsed) * 8) : 0;
-        
-        // Get week stats (simplified - last 7 days)
-        const weekStart = new Date(today);
-        weekStart.setDate(weekStart.getDate() - 7);
-        const weekQuery = query(
-          collection(db, 'livefeed_sales'),
-          where('timestamp', '>=', weekStart.getTime()),
-          where('userId', '==', user.id)
-        );
-        const weekSnap = await getDocs(weekQuery);
-        const weekCount = weekSnap.size;
-        const weekRevenue = weekSnap.docs.reduce((sum, doc) => sum + (doc.data().productPrice || 0), 0);
-        const weekRunRate = weekCount > 0 ? Math.round((weekCount / 7) * 7) : 0;
+
         setWeekStats({
           date: 'Denne uken',
-          count: weekCount,
-          revenue: weekRevenue,
+          count: totalWeek,
+          revenue: totalWeek * 1000, // Simplified
         });
 
-        // Get month stats
-        const monthStart = new Date(today);
-        monthStart.setDate(1);
-        const monthQuery = query(
-          collection(db, 'livefeed_sales'),
-          where('timestamp', '>=', monthStart.getTime()),
-          where('userId', '==', user.id)
-        );
-        const monthSnap = await getDocs(monthQuery);
-        const monthCount = monthSnap.size;
-        const monthRevenue = monthSnap.docs.reduce((sum, doc) => sum + (doc.data().productPrice || 0), 0);
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const monthRunRate = monthCount > 0 ? Math.round((monthCount / today.getDate()) * daysInMonth) : 0;
+        const weekRunRate = totalWeek > 0 ? Math.round((totalWeek / 7) * 7) : 0;
+
         setMonthStats({
           date: new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }),
-          count: monthCount,
-          revenue: monthRevenue,
+          count: totalMonth,
+          revenue: totalMonth * 1000, // Simplified
         });
+
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const monthRunRate = totalMonth > 0 ? Math.round((totalMonth / today.getDate()) * daysInMonth) : 0;
 
         setRunRates({
           day: dayRunRate,
           week: weekRunRate,
           month: monthRunRate,
         });
+
+        console.log('✅ LIVE STATS LOADED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
       } catch (err) {
-        console.error('Error loading stats:', err);
+        console.error('❌ Error loading stats:', err);
       }
     };
 
     loadStats();
-  }, [user?.id]);
+  }, [user?.id, user?.name]);
 
   // Load badges from Firestore - Option B: emoji as field, not doc ID
   useEffect(() => {
