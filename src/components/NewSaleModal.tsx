@@ -137,6 +137,10 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       // Trigger slide-to-livefeed animation
       setIsAnimating(true);
 
+      const today = new Date();
+      const datoDDMYYYY = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+
+      // 1. Save to livefeed_sales (for livefeed display)
       await addDoc(collection(db, 'livefeed_sales'), {
         userId: user.id,
         userName: userName,
@@ -148,7 +152,18 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         userRole: user.role || 'employee',
       });
 
-      console.log('✅ Sale posted to livefeed!');
+      // 2. Save to allente_kontraktsarkiv (for Progresjon + Status + Records)
+      await addDoc(collection(db, 'allente_kontraktsarkiv'), {
+        dato: datoDDMYYYY,
+        selger: userName,
+        produkt: selectedProduct,
+        avdeling: userDepartment,
+        platform: 'Manual', // Mark as manually entered
+        csvId: '', // Empty for manual entries
+        kundeNr: '', // Empty for manual entries
+      });
+
+      console.log('✅ Sale posted to livefeed & archive!');
       
       // Dispatch custom event for RevenueDisplay
       const price = PRODUCT_PRICES[selectedProduct] || 1000;
