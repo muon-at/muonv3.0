@@ -43,7 +43,7 @@ export default function Earnings() {
   return (
     <div className="earnings-container">
       <div className="earnings-content">
-        <h1>💰 LØNN</h1>
+        <h1 className="user-header">{user?.name}</h1>
 
         {/* Earnings Summary */}
         <div className="earnings-summary">

@@ -23,7 +23,7 @@ export default function Records() {
   return (
     <div className="records-container">
       <div className="records-content">
-        <h1>🏆 REKORDER</h1>
+        <h1 className="user-header">{user?.name}</h1>
 
         <div className="records-grid">
           {Object.entries(records).map(([key, record]) => (

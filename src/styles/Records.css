@@ -17,6 +17,13 @@
   text-align: center;
 }
 
+.records-content h1.user-header {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 3rem;
+}
+
 /* Records Grid */
 .records-grid {
   display: grid;

@@ -164,7 +164,7 @@ export default function Status() {
   return (
     <div className="status-container">
       <div className="status-content">
-        <h1>📊 STATUS</h1>
+        <h1 className="user-header">{user?.name}</h1>
 
         {/* Progress Bars */}
         <div className="progress-section">
