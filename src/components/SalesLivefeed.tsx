@@ -143,19 +143,19 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                           <span className="livefeed-bell-emoji">🔔</span>
                         </div>
                       </div>
-
-                      {/* Delete button */}
-                      {(user?.id === post.userId || user?.role === 'owner') && (
-                        <button
-                          className="livefeed-delete-btn"
-                          onClick={() => handleDeletePost(post.id, post.userId)}
-                          title="Slett post"
-                        >
-                          ✕
-                        </button>
-                      )}
                     </div>
                   </>
+                )}
+
+                {/* Delete button - appears on ALL posts (badge + regular) */}
+                {(user?.id === post.userId || user?.role === 'owner') && (
+                  <button
+                    className="livefeed-delete-btn"
+                    onClick={() => handleDeletePost(post.id, post.userId)}
+                    title="Slett post"
+                  >
+                    ✕
+                  </button>
                 )}
               </div>
             </div>
