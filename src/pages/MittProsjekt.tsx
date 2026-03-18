@@ -49,11 +49,19 @@ export default function MittProsjekt() {
       
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
+        const dept = data.department || 'OSL';
+        
         if (!data.department) {
           missingDepts.push(data.name);
         }
-        // Default to OSL if missing department
-        employeeMap[data.name] = data.department || 'OSL';
+        
+        // Map both name and externalName to department
+        if (data.name) {
+          employeeMap[data.name] = dept;
+        }
+        if (data.externalName) {
+          employeeMap[data.externalName] = dept;
+        }
       });
       
       if (missingDepts.length > 0) {
