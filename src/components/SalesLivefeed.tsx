@@ -123,17 +123,22 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                 {/* Post content on right */}
                 <div className="livefeed-post-content">
                   <div className="livefeed-user">
-                    <strong>🔔 {post.userName}</strong>
+                    {/* Split name into first and last */}
+                    {post.userName.split(' ').length > 1 ? (
+                      <>
+                        <strong className="livefeed-firstname">{post.userName.split(' ')[0]}</strong>
+                        <span className="livefeed-lastname">{post.userName.split(' ').slice(1).join(' ')}</span>
+                      </>
+                    ) : (
+                      <strong className="livefeed-firstname">{post.userName}</strong>
+                    )}
                     <span className="livefeed-department">{post.userDepartment}</span>
                   </div>
 
                   <div className="livefeed-product-info">
                     <div className="livefeed-product-row">
-                      <span className="livefeed-product-name">{post.product}</span>
+                      <span className="livefeed-product-name">🔔 {post.product}</span>
                       <span className="livefeed-product-price">{post.productPrice} kr</span>
-                    </div>
-                    <div className="livefeed-product-row">
-                      <span className="livefeed-provisjon">PROV: 100 kr</span>
                     </div>
                   </div>
 
