@@ -43,6 +43,9 @@ export default function AdminDashboard() {
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; employeeId?: string; employeeName?: string }>({ show: false });
   const [deleting, setDeleting] = useState(false);
+  const [missingEmployees, setMissingEmployees] = useState<{ name: string; count: number; latestDate: string; dept: string }[]>([]);
+  const [selectedMissing, setSelectedMissing] = useState<Set<string>>(new Set());
+  const [addingMissing, setAddingMissing] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -664,6 +667,85 @@ export default function AdminDashboard() {
     }
   };
 
+  const loadMissingEmployees = async () => {
+    try {
+      const empSnap = await getDocs(collection(db, 'employees'));
+      const peopleNames = new Set<string>();
+      empSnap.docs.forEach(doc => {
+        const data = doc.data();
+        peopleNames.add(data.name);
+        if (data.externalName) peopleNames.add(data.externalName);
+      });
+
+      const contractSnap = await getDocs(collection(db, 'allente_kontraktsarkiv'));
+      const sellersMap = new Map<string, { count: number; latestDate: string; dept: string }>();
+      
+      contractSnap.docs.forEach(doc => {
+        const data = doc.data();
+        let selger = (data.selger || '').replace(/ \/ selger$/i, '').trim();
+        if (selger) {
+          if (!sellersMap.has(selger)) {
+            sellersMap.set(selger, { count: 0, latestDate: '', dept: data.avdeling || 'OSL' });
+          }
+          const entry = sellersMap.get(selger)!;
+          entry.count += 1;
+          if (data.dato > entry.latestDate) entry.latestDate = data.dato;
+        }
+      });
+
+      const missing = Array.from(sellersMap.entries())
+        .filter(([name]) => !peopleNames.has(name))
+        .map(([name, data]) => ({
+          name,
+          count: data.count,
+          latestDate: data.latestDate,
+          dept: data.dept || 'OSL'
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      setMissingEmployees(missing);
+    } catch (err) {
+      console.error('Error loading missing employees:', err);
+    }
+  };
+
+  const handleAddMissingEmployees = async () => {
+    if (selectedMissing.size === 0) {
+      alert('Velg minst en ansatt');
+      return;
+    }
+
+    setAddingMissing(true);
+    try {
+      const toAdd = missingEmployees.filter(emp => selectedMissing.has(emp.name));
+      
+      for (const emp of toAdd) {
+        await addDoc(collection(db, 'employees'), {
+          name: emp.name,
+          email: '',
+          password: '',
+          role: 'employee',
+          project: 'Allente',
+          stilling: 'Fulltid',
+          department: emp.dept || 'OSL',
+          slackName: '',
+          externalName: '',
+          tmgName: '',
+        });
+      }
+
+      // Reload missing list
+      setSelectedMissing(new Set());
+      loadMissingEmployees();
+      alert(`✅ La til ${toAdd.length} ansatte!`);
+    } catch (err) {
+      console.error('Error adding missing employees:', err);
+      alert('Feil ved adding: ' + (err as any).message);
+    } finally {
+      setAddingMissing(false);
+    }
+  };
+
   // ===== USEEFFECTS =====
   useEffect(() => {
     if (muonParam === 'people') {
@@ -829,6 +911,108 @@ export default function AdminDashboard() {
                         ))}
                     </tbody>
                   </table>
+                </div>
+
+                {/* Missing Employees Section */}
+                <div style={{ width: '100%', marginTop: '3rem', padding: '2rem', background: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h3 style={{ margin: 0, color: '#856404' }}>🔍 Manglende ansatte fra kontrakter</h3>
+                    <button 
+                      onClick={() => {
+                        loadMissingEmployees();
+                        setSelectedMissing(new Set());
+                      }}
+                      style={{
+                        padding: '0.5rem 1rem',
+                        background: '#ffc107',
+                        color: '#333',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        fontSize: '0.9rem',
+                      }}
+                    >
+                      🔄 Last inn
+                    </button>
+                  </div>
+
+                  {missingEmployees.length === 0 ? (
+                    <p style={{ margin: 0, color: '#856404' }}>Ingen manglende ansatte funnet. Alle selgere fra kontrakter finnes i People! ✅</p>
+                  ) : (
+                    <>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
+                        <thead>
+                          <tr style={{ background: '#ffe69c', borderBottom: '2px solid #ffc107' }}>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>
+                              <input 
+                                type="checkbox" 
+                                checked={selectedMissing.size === missingEmployees.length && missingEmployees.length > 0}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedMissing(new Set(missingEmployees.map(emp => emp.name)));
+                                  } else {
+                                    setSelectedMissing(new Set());
+                                  }
+                                }}
+                              /> Velg
+                            </th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Navn</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Kontrakter</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Avdeling</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Siste dato</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {missingEmployees.map((emp) => (
+                            <tr key={emp.name} style={{ borderBottom: '1px solid #ffe69c' }}>
+                              <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                <input 
+                                  type="checkbox" 
+                                  checked={selectedMissing.has(emp.name)}
+                                  onChange={(e) => {
+                                    const newSet = new Set(selectedMissing);
+                                    if (e.target.checked) {
+                                      newSet.add(emp.name);
+                                    } else {
+                                      newSet.delete(emp.name);
+                                    }
+                                    setSelectedMissing(newSet);
+                                  }}
+                                />
+                              </td>
+                              <td style={{ padding: '0.75rem', fontWeight: '700' }}>{emp.name}</td>
+                              <td style={{ padding: '0.75rem', textAlign: 'center' }}>{emp.count}</td>
+                              <td style={{ padding: '0.75rem', background: '#ffeaa7', fontWeight: '600' }}>{emp.dept}</td>
+                              <td style={{ padding: '0.75rem', color: '#666' }}>{emp.latestDate}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      <div style={{ display: 'flex', gap: '1rem' }}>
+                        <button 
+                          onClick={handleAddMissingEmployees}
+                          disabled={selectedMissing.size === 0 || addingMissing}
+                          style={{
+                            padding: '0.75rem 1.5rem',
+                            background: selectedMissing.size === 0 ? '#ccc' : '#10b981',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontWeight: '600',
+                            cursor: selectedMissing.size === 0 ? 'not-allowed' : 'pointer',
+                            fontSize: '0.95rem',
+                          }}
+                        >
+                          {addingMissing ? '⏳ Legger til...' : `✅ Legg til ${selectedMissing.size} ansatt${selectedMissing.size === 1 ? '' : 'e'}`}
+                        </button>
+                        <span style={{ color: '#666', fontSize: '0.9rem', alignSelf: 'center' }}>
+                          {selectedMissing.size > 0 && `${selectedMissing.size} av ${missingEmployees.length} valgt`}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
                 </div>
               </>
