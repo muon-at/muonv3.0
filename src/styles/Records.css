@@ -3,7 +3,7 @@
   margin-right: 320px;
   min-height: 100vh;
   background: linear-gradient(180deg, #0f172a 0%, #1a1a2e 100%);
-  padding: 1rem 2rem;
+  padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -25,21 +25,21 @@
   font-size: 3.5rem;
   font-weight: 900;
   letter-spacing: -1px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 /* Records Grid - Top 3 */
 .records-grid-top {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 1.75rem;
+  margin-bottom: 2.5rem;
 }
 
 /* Records Bottom - Year + Total */
 .records-grid-bottom {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.75rem;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -53,14 +53,14 @@
   background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
   border: 3px solid #b8932f;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 1.75rem;
   text-align: center;
   box-shadow: 
     0 8px 16px rgba(0, 0, 0, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2),
     inset 0 -2px 4px rgba(0, 0, 0, 0.2);
   position: relative;
-  min-height: 180px;
+  min-height: 190px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -68,8 +68,8 @@
 }
 
 .plaque-icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
+  font-size: 2.2rem;
+  margin-bottom: 0.85rem;
   opacity: 0.9;
 }
 
@@ -81,19 +81,19 @@
 }
 
 .plaque-title {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
   color: #6b5d29;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.75px;
+  margin-bottom: 0.6rem;
 }
 
 .plaque-value {
-  font-size: 2.2rem;
+  font-size: 2.35rem;
   font-weight: 800;
   color: #3d2f1f;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
