@@ -167,16 +167,9 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
   if (!isOpen && !isAnimating) return null;
 
-  // When animating: ONLY show the sliding version, NOT the centered version
-  if (isAnimating) {
-    return (
-      <div ref={modalRef} className="modal-content modal-slide-to-livefeed" />
-    );
-  }
-
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div ref={modalRef} className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className={`modal-overlay ${isAnimating ? 'modal-animating-out' : ''}`} onClick={isAnimating ? undefined : onClose}>
+      <div ref={modalRef} className={`modal-content ${isAnimating ? 'modal-slide-to-livefeed' : ''}`} onClick={(e) => !isAnimating && e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
         
         <h2>🔔 NYTT SALG</h2>
