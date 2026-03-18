@@ -4,7 +4,6 @@ import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/NewSaleModal.css';
 
-// Product pricing
 const PRODUCT_PRICES: { [key: string]: number } = {
   'BTV': 1000,
   'BTV - free box': 800,
@@ -22,9 +21,9 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [selectedProduct, setSelectedProduct] = useState('BTV');
   const [gifSearch, setGifSearch] = useState('');
   const [gifResults, setGifResults] = useState<any[]>([]);
+  const [currentGifIndex, setCurrentGifIndex] = useState(0);
   const [gifLoading, setGifLoading] = useState(false);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gifCache = useRef<Map<string, any[]>>(new Map());
   const { user } = useAuth();
 
@@ -33,6 +32,8 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const searchGifs = async (query: string) => {
     if (!query.trim()) {
       setGifResults([]);
+      setCurrentGifIndex(0);
+      setSelectedGif(null);
       return;
     }
 
@@ -41,18 +42,21 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     if (cached) {
       console.log('🔥 Using cached GIFs for:', query);
       setGifResults(cached);
+      setCurrentGifIndex(0);
+      if (cached.length > 0) {
+        setSelectedGif(cached[0].images?.fixed_width_small?.url || cached[0].images?.fixed_width?.url);
+      }
       setGifLoading(false);
       return;
     }
 
     setGifLoading(true);
     try {
-      // Add timeout for slow networks - 5 seconds max
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       const response = await fetch(
-        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=60&offset=0&api_key=${GIPHY_API_KEY}`,
+        `https://api.giphy.com/v1/gifs/search?q=${encodeURIComponent(query)}&limit=50&offset=0&api_key=${GIPHY_API_KEY}`,
         { signal: controller.signal }
       );
       
@@ -61,37 +65,44 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       if (!response.ok) {
         console.error('GIF search failed:', response.status);
         setGifResults([]);
+        setSelectedGif(null);
         return;
       }
 
       const data = await response.json();
-      // Use fixed_width_small for faster loading
       const gifs = (data.data || []).filter((gif: any) => 
         gif.images && (gif.images.fixed_width_small || gif.images.fixed_width)
       );
       
-      // Cache the results
       gifCache.current.set(query, gifs);
       setGifResults(gifs);
+      setCurrentGifIndex(0);
+      
+      if (gifs.length > 0) {
+        setSelectedGif(gifs[0].images?.fixed_width_small?.url || gifs[0].images?.fixed_width?.url);
+      } else {
+        setSelectedGif(null);
+      }
     } catch (err) {
       console.error('Error searching GIFs:', err);
       setGifResults([]);
+      setSelectedGif(null);
     } finally {
       setGifLoading(false);
     }
   };
 
-  const handleGifSearch = (query: string) => {
-    setGifSearch(query);
-    
-    // Debounce: wait only 100ms before searching (very fast)
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
+  const handleSearch = () => {
+    searchGifs(gifSearch);
+  };
+
+  const handleShuffle = () => {
+    if (gifResults.length > 0) {
+      const nextIndex = (currentGifIndex + 1) % gifResults.length;
+      setCurrentGifIndex(nextIndex);
+      const nextGif = gifResults[nextIndex];
+      setSelectedGif(nextGif.images?.fixed_width_small?.url || nextGif.images?.fixed_width?.url);
     }
-    
-    debounceTimer.current = setTimeout(() => {
-      searchGifs(query);
-    }, 100);
   };
 
   const handleSend = async () => {
@@ -101,135 +112,115 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     }
 
     if (!user) {
-      console.warn('Bruker ikke logget inn');
+      console.error('User not authenticated');
       return;
     }
 
     try {
-      const productPrice = PRODUCT_PRICES[selectedProduct] || 1000;
-
-      // Post to livefeed
       await addDoc(collection(db, 'livefeed_sales'), {
         userId: user.id,
         userName: userName,
         userDepartment: userDepartment,
         product: selectedProduct,
-        productPrice: productPrice,
+        productPrice: PRODUCT_PRICES[selectedProduct] || 1000,
         gifUrl: selectedGif,
-        timestamp: Date.now(),
+        timestamp: new Date(),
         userRole: user.role || 'employee',
       });
 
-      console.log('📤 SALG POSTED TIL LIVEFEED!');
+      console.log('✅ Sale posted to livefeed!');
       
-      // Reset and close
-      setSelectedGif(null);
+      // Dispatch custom event for RevenueDisplay
+      const price = PRODUCT_PRICES[selectedProduct] || 1000;
+      window.dispatchEvent(
+        new CustomEvent('salePosted', { 
+          detail: { amount: price }
+        })
+      );
+
+      // Reset modal
       setGifSearch('');
       setGifResults([]);
-      setSelectedProduct('BTV');
+      setCurrentGifIndex(0);
+      setSelectedGif(null);
       onClose();
     } catch (err) {
-      console.error('Error posting sale:', err);
+      console.error('❌ Error posting sale:', err);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="new-sale-modal-overlay" onClick={onClose}>
-      <div className="new-sale-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="new-sale-header">
-          <h2>🎉 NYTT SALG</h2>
-          <button className="new-sale-send-header" onClick={handleSend}>
-            ✅ Send
-          </button>
-          <button className="new-sale-close" onClick={onClose}>×</button>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button className="close-btn" onClick={onClose}>✕</button>
+        
+        <h2>🔔 NYTT SALG</h2>
+        
+        {/* User Info */}
+        <div className="user-info">
+          <div><strong>{userName}</strong></div>
+          <div className="department">{userDepartment}</div>
         </div>
 
-        <div className="new-sale-content">
-          {/* User Info - Compact */}
-          <div className="new-sale-info-compact">
-            <div><strong>{userName}</strong></div>
-            <div className="new-sale-department">{userDepartment}</div>
-          </div>
+        {/* Product Selection */}
+        <div className="product-select">
+          <label>Produkt:</label>
+          <select 
+            value={selectedProduct} 
+            onChange={(e) => setSelectedProduct(e.target.value)}
+          >
+            <option>BTV</option>
+            <option>BTV - free box</option>
+            <option>DTH</option>
+          </select>
+          <span className="price">{PRODUCT_PRICES[selectedProduct]} kr</span>
+        </div>
 
-          {/* Product Selection - Inline */}
-          <div className="new-sale-inline-row">
-            <label>📦</label>
-            <select
-              value={selectedProduct}
-              onChange={(e) => setSelectedProduct(e.target.value)}
-              className="new-sale-select"
-            >
-              <option value="BTV">BTV</option>
-              <option value="BTV - free box">BTV - free box</option>
-              <option value="DTH">DTH</option>
-            </select>
-          </div>
-
-          {/* GIF Picker - Inline Label */}
-          <div className="new-sale-gif-section">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
-              🎬 Velg GIF
-            </label>
+        {/* GIF Search & Display */}
+        <div className="gif-section">
+          <div className="gif-search">
             <input
               type="text"
-              className="new-sale-gif-search"
-              placeholder="Søk GIF (f.eks. 'celebration', 'party')..."
+              placeholder="Søk GIF..."
               value={gifSearch}
-              onChange={(e) => handleGifSearch(e.target.value)}
+              onChange={(e) => setGifSearch(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
-
-            {gifLoading && <div className="new-sale-loading">🔍 Søker...</div>}
-
-            {selectedGif && (
-              <div className="new-sale-selected-gif">
-                <div className="new-sale-selected-gif-header">
-                  <p>✅ GIF:</p>
-                  <button 
-                    className="new-sale-clear-gif"
-                    onClick={() => setSelectedGif(null)}
-                    title="Fjern valgt GIF"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <img src={selectedGif} alt="Valgt GIF" />
-              </div>
-            )}
-
-            <div className="new-sale-gif-grid">
-              {gifResults.length > 0 ? (
-                gifResults.map((gif) => {
-                  // Use fixed_width_small for faster loading, fallback to fixed_width
-                  const gifImage = gif.images.fixed_width_small || gif.images.fixed_width;
-                  const gifUrl = gifImage.url;
-                  return (
-                    <img
-                      key={gif.id}
-                      src={gifUrl}
-                      alt="GIF"
-                      className={`new-sale-gif-item ${selectedGif === gifUrl ? 'selected' : ''}`}
-                      onClick={() => setSelectedGif(gifUrl)}
-                      title="Klikk for å velge"
-                      loading="lazy"
-                      onError={(e) => {
-                        console.error('Failed to load GIF:', gif.id);
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  );
-                })
-              ) : (
-                gifSearch && !gifLoading && (
-                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', color: '#999', padding: '2rem' }}>
-                    Ingen GIFer funnet for "{gifSearch}"
-                  </div>
-                )
-              )}
-            </div>
+            <button onClick={handleSearch} disabled={gifLoading} className="search-btn">
+              {gifLoading ? '⏳ Søker...' : 'Søk'}
+            </button>
           </div>
 
+          {/* GIF Display */}
+          {selectedGif && (
+            <div className="gif-display">
+              <img src={selectedGif} alt="Selected GIF" />
+              <div className="gif-counter">
+                {currentGifIndex + 1} / {gifResults.length}
+              </div>
+            </div>
+          )}
+
+          {/* Shuffle Button */}
+          {gifResults.length > 1 && (
+            <button onClick={handleShuffle} className="shuffle-btn">
+              🔀 Shuffle
+            </button>
+          )}
+
+          {gifSearch && !selectedGif && !gifLoading && (
+            <div className="no-gif">Ingen GIFer funnet</div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="modal-actions">
+          <button onClick={onClose} className="cancel-btn">Avbryt</button>
+          <button onClick={handleSend} disabled={!selectedGif} className="send-btn">
+            Send ✓
+          </button>
         </div>
       </div>
     </div>
