@@ -857,7 +857,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Search + Add Button */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '0rem', alignItems: 'center', width: '100%' }}>
                   <input
                     type="text"
                     placeholder="Søk etter navn eller e-post..."
