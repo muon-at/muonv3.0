@@ -16,6 +16,13 @@ interface DailyStat {
   revenue: number;
 }
 
+interface Badge {
+  emoji: string;
+  navn: string;
+  verdi: number;
+  beskrivelse: string;
+}
+
 export default function Status() {
   const { user } = useAuth();
   const [targets, setTargets] = useState<Target>({
@@ -45,6 +52,8 @@ export default function Status() {
     week: 0,
     month: 0,
   });
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [achievedBadges, setAchievedBadges] = useState<string[]>([]);
 
   // Load data from Progresjon/livefeed - Runs on mount AND every time page is visited
   useEffect(() => {
@@ -129,6 +138,33 @@ export default function Status() {
 
     loadStats();
   }, [user?.id]);
+
+  // Load badges from Firestore
+  useEffect(() => {
+    const loadBadges = async () => {
+      try {
+        const badgesSnap = await getDocs(collection(db, 'allente_badges'));
+        const badgesList: Badge[] = [];
+        badgesSnap.forEach((doc) => {
+          badgesList.push({
+            emoji: doc.id,
+            navn: doc.data().navn || '',
+            verdi: doc.data().verdi || 0,
+            beskrivelse: doc.data().beskrivelse || '',
+          });
+        });
+        setBadges(badgesList);
+        
+        // For now, set some test achieved badges
+        // In the future, this should come from user data or progresjon
+        setAchievedBadges(['🥇', '🏆']); // Example: user has these badges
+      } catch (err) {
+        console.error('Error loading badges:', err);
+      }
+    };
+
+    loadBadges();
+  }, []);
 
   const handleTargetEdit = (type: 'day' | 'week' | 'month') => {
     setEditingTarget(type);
@@ -286,6 +322,22 @@ export default function Status() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+
+        {/* Badges Section */}
+        <div className="badges-section">
+          <div className="badges-container">
+            {badges.map((badge) => (
+              <div
+                key={badge.emoji}
+                className={`badge-item ${achievedBadges.includes(badge.emoji) ? 'achieved' : 'dimmed'}`}
+                title={badge.beskrivelse}
+              >
+                <div className="badge-emoji">{badge.emoji}</div>
+                <div className="badge-name">{badge.navn}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
