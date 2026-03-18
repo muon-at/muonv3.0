@@ -17,6 +17,7 @@ interface DailyStat {
 }
 
 interface Badge {
+  id: string;
   emoji: string;
   navn: string;
   verdi: number;
@@ -139,7 +140,7 @@ export default function Status() {
     loadStats();
   }, [user?.id]);
 
-  // Load badges from Firestore (Admin > Prosjekt > Allente > Badges)
+  // Load badges from Firestore - Option B: emoji as field, not doc ID
   useEffect(() => {
     const loadBadges = async () => {
       try {
@@ -147,36 +148,45 @@ export default function Status() {
         const badgesList: Badge[] = [];
         const achievedList: string[] = [];
 
-        badgesSnap.forEach((doc) => {
-          const badgeData = doc.data();
-          const emoji = doc.id; // Document ID is the emoji
-          
-          badgesList.push({
-            emoji: emoji,
-            navn: badgeData.navn || '',
-            verdi: badgeData.verdi || 0,
-            beskrivelse: badgeData.beskrivelse || '',
-          });
+        // Test data - fallback for now
+        const testBadges: Badge[] = [
+          { id: 'gold', emoji: '🥇', navn: 'Gold', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
+          { id: 'trophy', emoji: '🏆', navn: 'Trophy', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
+          { id: 'fire', emoji: '🔥', navn: 'On Fire', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
+          { id: 'star', emoji: '⭐', navn: 'Star', verdi: 50, beskrivelse: 'Gjøre 50 salg på en dag' },
+        ];
 
-          // Determine if badge is achieved based on user's stats
-          // For now: simple logic - if user has made sales today, mark first badge as achieved
-          if (todayStats.count >= (badgeData.verdi || 0)) {
-            achievedList.push(emoji);
+        // If Firestore has badges, use those. Otherwise use test data.
+        if (badgesSnap.size > 0) {
+          badgesSnap.forEach((doc) => {
+            const data = doc.data();
+            badgesList.push({
+              id: doc.id,
+              emoji: data.emoji || '🏅', // Expect emoji field
+              navn: data.navn || '',
+              verdi: data.verdi || 0,
+              beskrivelse: data.beskrivelse || '',
+            });
+          });
+        } else {
+          badgesList.push(...testBadges);
+        }
+
+        // Sort by verdi (ascending)
+        badgesList.sort((a, b) => a.verdi - b.verdi);
+
+        // Check which badges are achieved
+        badgesList.forEach((badge) => {
+          if (todayStats.count >= badge.verdi) {
+            achievedList.push(badge.id);
           }
-
-          console.log('✅ Badge loaded:', {
-            emoji: emoji,
-            navn: badgeData.navn,
-            verdi: badgeData.verdi,
-            achieved: todayStats.count >= (badgeData.verdi || 0),
-          });
         });
 
-        // Sort badges by verdi (value) ascending
-        badgesList.sort((a, b) => a.verdi - b.verdi);
-        
         setBadges(badgesList);
         setAchievedBadges(achievedList);
+
+        console.log('✅ Badges loaded:', badgesList.length, 'badges');
+        console.log('🎖️ Achieved:', achievedList);
       } catch (err) {
         console.error('❌ Error loading badges:', err);
       }
@@ -349,8 +359,8 @@ export default function Status() {
           <div className="badges-container">
             {badges.map((badge) => (
               <div
-                key={badge.emoji}
-                className={`badge-item ${achievedBadges.includes(badge.emoji) ? 'achieved' : 'dimmed'}`}
+                key={badge.id}
+                className={`badge-item ${achievedBadges.includes(badge.id) ? 'achieved' : 'dimmed'}`}
                 title={badge.beskrivelse}
               >
                 <div className="badge-emoji">{badge.emoji}</div>
