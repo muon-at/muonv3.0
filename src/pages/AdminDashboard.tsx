@@ -1493,9 +1493,10 @@ export default function AdminDashboard() {
                 <label>Rolle</label>
                 <select value={editingEmployee.role || ''} onChange={(e) => setEditingEmployee({ ...editingEmployee, role: e.target.value })}>
                   <option value="">Velg rolle</option>
-                  <option value="owner">Owner</option>
+                  <option value="owner">Eier</option>
                   <option value="teamleder">Teamleder</option>
-                  <option value="employee">Employee</option>
+                  <option value="senior">Senior</option>
+                  <option value="junior">Junior</option>
                 </select>
               </div>
               <div className="form-group">
@@ -1544,15 +1545,43 @@ export default function AdminDashboard() {
               </div>
               <div className="form-group">
                 <label>Passord *</label>
-                <input type="password" value={newEmployee.password || ''} onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })} placeholder="Sikker passord" />
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input 
+                    type="password" 
+                    value={newEmployee.password || ''} 
+                    onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })} 
+                    placeholder="Sikker passord" 
+                    style={{ flex: 1 }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const generatedPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2).toUpperCase();
+                      setNewEmployee({ ...newEmployee, password: generatedPassword });
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Generer
+                  </button>
+                </div>
               </div>
               <div className="form-group">
                 <label>Rolle</label>
                 <select value={newEmployee.role || ''} onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}>
                   <option value="">Velg rolle</option>
-                  <option value="owner">Owner</option>
+                  <option value="owner">Eier</option>
                   <option value="teamleder">Teamleder</option>
-                  <option value="employee">Employee</option>
+                  <option value="senior">Senior</option>
+                  <option value="junior">Junior</option>
                 </select>
               </div>
               <div className="form-group">
