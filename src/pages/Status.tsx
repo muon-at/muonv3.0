@@ -172,20 +172,23 @@ export default function Status() {
           badgesList.push(...testBadges);
         }
 
+        // Filter: Only badges with navn (name) set
+        const namedBadges = badgesList.filter((badge) => badge.navn && badge.navn.trim().length > 0);
+
         // Sort by verdi (ascending)
-        badgesList.sort((a, b) => a.verdi - b.verdi);
+        namedBadges.sort((a, b) => a.verdi - b.verdi);
 
         // Check which badges are achieved
-        badgesList.forEach((badge) => {
+        namedBadges.forEach((badge) => {
           if (todayStats.count >= badge.verdi) {
             achievedList.push(badge.id);
           }
         });
 
-        setBadges(badgesList);
+        setBadges(namedBadges);
         setAchievedBadges(achievedList);
 
-        console.log('✅ Badges loaded:', badgesList.length, 'badges');
+        console.log('✅ Badges loaded:', namedBadges.length, 'badges with names');
         console.log('🎖️ Achieved:', achievedList);
       } catch (err) {
         console.error('❌ Error loading badges:', err);
