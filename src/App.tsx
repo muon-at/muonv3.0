@@ -14,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Status from './pages/Status';
 import Records from './pages/Records';
 import Earnings from './pages/Earnings';
+import MittProsjekt from './pages/MittProsjekt';
 import AvdelingDashboard from './pages/AvdelingDashboard';
 import ProsjektDashboard from './pages/ProsjektDashboard';
 import MobileHome from './pages/MobileHome';
@@ -196,6 +197,14 @@ function RoutedContent() {
             element={
               <ProtectedRoute requiredRole="employee">
                 <Earnings />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/mitt-prosjekt" 
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <MittProsjekt />
               </ProtectedRoute>
             } 
           />
