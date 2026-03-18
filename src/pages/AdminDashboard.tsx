@@ -916,7 +916,7 @@ export default function AdminDashboard() {
                 {/* Missing Employees Section */}
                 <div style={{ width: '100%', marginTop: '3rem', padding: '2rem', background: '#f3f4f6', borderRadius: '8px', border: '1px solid #9ca3af' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: '#374151' }}>🔍 Manglende ansatte fra kontrakter</h3>
+                    <h3 style={{ margin: 0, color: '#000' }}>🔍 Manglende ansatte fra kontrakter</h3>
                     <button 
                       onClick={() => {
                         loadMissingEmployees();
@@ -938,7 +938,7 @@ export default function AdminDashboard() {
                   </div>
 
                   {missingEmployees.length === 0 ? (
-                    <p style={{ margin: 0, color: '#374151' }}>Ingen manglende ansatte funnet. Alle selgere fra kontrakter finnes i People! ✅</p>
+                    <p style={{ margin: 0, color: '#000' }}>Ingen manglende ansatte funnet. Alle selgere fra kontrakter finnes i People! ✅</p>
                   ) : (
                     <>
                       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
@@ -957,10 +957,10 @@ export default function AdminDashboard() {
                                 }}
                               /> Velg
                             </th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Navn</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Kontrakter</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Avdeling</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Siste dato</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#000' }}>Navn</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#000' }}>Kontrakter</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#000' }}>Avdeling</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#000' }}>Siste dato</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -984,7 +984,7 @@ export default function AdminDashboard() {
                               <td style={{ padding: '0.75rem', fontWeight: '700' }}>{emp.name}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center' }}>{emp.count}</td>
                               <td style={{ padding: '0.75rem', background: '#d1d5db', fontWeight: '600' }}>{emp.dept}</td>
-                              <td style={{ padding: '0.75rem', color: '#666' }}>{emp.latestDate}</td>
+                              <td style={{ padding: '0.75rem', color: '#000' }}>{emp.latestDate}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -1007,7 +1007,7 @@ export default function AdminDashboard() {
                         >
                           {addingMissing ? '⏳ Legger til...' : `✅ Legg til ${selectedMissing.size} ansatt${selectedMissing.size === 1 ? '' : 'e'}`}
                         </button>
-                        <span style={{ color: '#666', fontSize: '0.9rem', alignSelf: 'center' }}>
+                        <span style={{ color: '#000', fontSize: '0.9rem', alignSelf: 'center' }}>
                           {selectedMissing.size > 0 && `${selectedMissing.size} av ${missingEmployees.length} valgt`}
                         </span>
                       </div>
