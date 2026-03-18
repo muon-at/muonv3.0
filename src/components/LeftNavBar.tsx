@@ -267,18 +267,38 @@ export const LeftNavBar: React.FC = () => {
             )}
           </div>
 
-          {/* 3. MITT PROSJEKT - Briefcase icon */}
-          <button 
-            className="nav-button"
-            onClick={() => navigate('/mitt-prosjekt')}
-          >
-            <div className="icon-circle">
-              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
-              </svg>
-            </div>
-            <div className="nav-tooltip">Mitt Prosjekt</div>
-          </button>
+          {/* 3. MITT PROSJEKT - Briefcase icon WITH TABS */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            <button 
+              className={`nav-button ${expandedItem === 'mitt-prosjekt' ? 'expanded' : ''}`}
+              onClick={() => toggleExpandItem('mitt-prosjekt')}
+            >
+              <div className="icon-circle">
+                <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                </svg>
+              </div>
+              <div className="nav-tooltip">Mitt Prosjekt</div>
+            </button>
+
+            {/* TABS DROPDOWN FOR MITT PROSJEKT */}
+            {(expandedItem === 'mitt-prosjekt' || closingItem === 'mitt-prosjekt') && (
+              <div className={`nav-tabs-dropdown ${closingItem === 'mitt-prosjekt' ? 'closing' : ''}`}>
+                <button 
+                  className={`nav-tab ${activeTab === 'proj-status' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('proj-status', '/mitt-prosjekt?tab=status')}
+                >
+                  Status
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'proj-walloffame' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('proj-walloffame', '/mitt-prosjekt?tab=walloffame')}
+                >
+                  Wall of Fame
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* 4. TEAMLEDER - People icon WITH TABS */}
           {(user?.role === 'owner' || user?.role === 'teamleder') && (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MittProsjekt.css';
@@ -18,7 +19,8 @@ interface TopEmployee {
 }
 
 export default function MittProsjekt() {
-  const [activeTab, setActiveTab] = useState<'status' | 'wall-of-fame'>('status');
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'status';
   const [departments, setDepartments] = useState<{ [key: string]: DepartmentStats }>({
     'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
     'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
@@ -200,22 +202,6 @@ export default function MittProsjekt() {
     <div className="mitt-prosjekt-container">
       <h1>Mitt Prosjekt</h1>
 
-      {/* Tabs */}
-      <div className="tabs-container">
-        <button 
-          className={`tab-button ${activeTab === 'status' ? 'active' : ''}`}
-          onClick={() => setActiveTab('status')}
-        >
-          Status
-        </button>
-        <button 
-          className={`tab-button ${activeTab === 'wall-of-fame' ? 'active' : ''}`}
-          onClick={() => setActiveTab('wall-of-fame')}
-        >
-          Wall of Fame
-        </button>
-      </div>
-
       {/* Status Tab */}
       {activeTab === 'status' && (
       <>
@@ -303,7 +289,7 @@ export default function MittProsjekt() {
       )}
 
       {/* Wall of Fame Tab */}
-      {activeTab === 'wall-of-fame' && (
+      {activeTab === 'walloffame' && (
         <div style={{ width: '100%', maxWidth: '1000px' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#e2e8f0' }}>🏆 Wall of Fame</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
