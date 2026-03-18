@@ -73,7 +73,7 @@ export default function AdminDashboard() {
   const [salgData, setSalgData] = useState<any[]>([]);
   const [loadingSalg, setLoadingSalg] = useState(false);
   const [salgFilters, setSalgFilters] = useState({
-    selger: '',
+    selger: [] as string[],
     avdeling: '',
     produkt: '',
     platform: '',
@@ -81,6 +81,7 @@ export default function AdminDashboard() {
     datoFrom: '',
     datoTo: '',
   });
+  const [selgerDropdownOpen, setSelgerDropdownOpen] = useState(false);
 
   // ANGER
   const [angerData, setAngerData] = useState<any[]>([]);
@@ -1001,11 +1002,57 @@ export default function AdminDashboard() {
                       <div style={{ width: '100%', background: '#2d3748', borderRadius: '8px', padding: '1.5rem', marginBottom: '1.5rem', marginTop: '0', maxWidth: '1200px', boxSizing: 'border-box' }}>
                         <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', fontWeight: '700', color: '#e2e8f0' }}>Filtrer resultater</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-                          <div>
+                          <div style={{ position: 'relative' }}>
                             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>Selger</label>
-                            <select
-                              value={salgFilters.selger}
-                              onChange={(e) => setSalgFilters({ ...salgFilters, selger: e.target.value })}
+                            
+                            {/* Selected chips */}
+                            <div style={{
+                              display: 'flex',
+                              flexWrap: 'wrap',
+                              gap: '0.5rem',
+                              marginBottom: '0.5rem',
+                              minHeight: '1.8rem',
+                            }}>
+                              {salgFilters.selger.map((s) => (
+                                <div
+                                  key={s}
+                                  style={{
+                                    backgroundColor: '#5a67d8',
+                                    color: '#fff',
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '16px',
+                                    fontSize: '0.85rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                  }}
+                                >
+                                  {s}
+                                  <button
+                                    onClick={() => setSalgFilters({
+                                      ...salgFilters,
+                                      selger: salgFilters.selger.filter(x => x !== s)
+                                    })}
+                                    style={{
+                                      background: 'none',
+                                      border: 'none',
+                                      color: '#fff',
+                                      cursor: 'pointer',
+                                      fontSize: '1rem',
+                                      padding: '0',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                    }}
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Dropdown button */}
+                            <button
+                              onClick={() => setSelgerDropdownOpen(!selgerDropdownOpen)}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -1014,14 +1061,67 @@ export default function AdminDashboard() {
                                 fontSize: '0.9rem',
                                 color: '#e2e8f0',
                                 backgroundColor: '#374151',
-                                boxSizing: 'border-box',
+                                cursor: 'pointer',
+                                textAlign: 'left',
                               }}
                             >
-                              <option value="">Alle</option>
-                              {[...new Set(salgData.map((r: any) => r.selger).filter(Boolean))].sort().map((s: any) => (
-                                <option key={s} value={s}>{s}</option>
-                              ))}
-                            </select>
+                              {salgFilters.selger.length === 0 ? 'Alle' : `${salgFilters.selger.length} valgt`}
+                            </button>
+
+                            {/* Dropdown menu */}
+                            {selgerDropdownOpen && (
+                              <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '0',
+                                right: '0',
+                                backgroundColor: '#2d3748',
+                                border: '1px solid #4b5563',
+                                borderRadius: '4px',
+                                zIndex: 1000,
+                                maxHeight: '300px',
+                                overflowY: 'auto',
+                                marginTop: '0.25rem',
+                              }}>
+                                {[...new Set(salgData.map((r: any) => r.selger).filter(Boolean))].sort().map((s: any) => (
+                                  <label
+                                    key={s}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      padding: '0.75rem',
+                                      cursor: 'pointer',
+                                      borderBottom: '1px solid #3a4552',
+                                      color: '#e2e8f0',
+                                      fontSize: '0.9rem',
+                                    }}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={salgFilters.selger.includes(s)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSalgFilters({
+                                            ...salgFilters,
+                                            selger: [...salgFilters.selger, s]
+                                          });
+                                        } else {
+                                          setSalgFilters({
+                                            ...salgFilters,
+                                            selger: salgFilters.selger.filter(x => x !== s)
+                                          });
+                                        }
+                                      }}
+                                      style={{
+                                        marginRight: '0.5rem',
+                                        cursor: 'pointer',
+                                      }}
+                                    />
+                                    {s}
+                                  </label>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
                           <div>
@@ -1153,7 +1253,7 @@ export default function AdminDashboard() {
 
                           <div>
                             <button
-                              onClick={() => setSalgFilters({ selger: '', avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
+                              onClick={() => setSalgFilters({ selger: [], avdeling: '', produkt: '', platform: '', kundenummer: '', datoFrom: '', datoTo: '' })}
                               style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -1208,7 +1308,7 @@ export default function AdminDashboard() {
 
                               const filtered = salgData
                                 .filter((row: any) => {
-                                  if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                                  if (salgFilters.selger.length > 0 && !salgFilters.selger.includes(row.selger)) return false;
                                   if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
                                   if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
                                   if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
@@ -1255,7 +1355,7 @@ export default function AdminDashboard() {
 
                       <p style={{ marginTop: '1.5rem', color: '#999', fontSize: '0.9rem', maxWidth: '1200px', marginBottom: '1.5rem' }}>
                         Viser {salgData.filter((row: any) => {
-                          if (salgFilters.selger && row.selger !== salgFilters.selger) return false;
+                          if (salgFilters.selger.length > 0 && !salgFilters.selger.includes(row.selger)) return false;
                           if (salgFilters.avdeling && row.avdeling !== salgFilters.avdeling) return false;
                           if (salgFilters.produkt && row.produkt !== salgFilters.produkt) return false;
                           if (salgFilters.platform && row.platform !== salgFilters.platform) return false;
