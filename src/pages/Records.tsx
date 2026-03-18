@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Records.css';
@@ -14,14 +14,13 @@ export default function Records() {
     allTime: { title: 'Totalt', value: 0, date: 'All-time' },
   });
 
-  // Load LIVE record data from allente_kontraktsarkiv
+  // Load LIVE record data from allente_kontraktsarkiv - Real-time listener
   useEffect(() => {
-    const loadRecords = async () => {
-      if (!user || !user.name) return;
+    if (!user || !user.name) return;
 
+    const contractsRef = collection(db, 'allente_kontraktsarkiv');
+    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
       try {
-        const contractsRef = collection(db, 'allente_kontraktsarkiv');
-        const snapshot = await getDocs(contractsRef);
 
         // Group by user and organize by date
         const userContracts: any[] = [];
@@ -31,7 +30,7 @@ export default function Records() {
         const yearlyCounts: { [key: string]: number } = {};
         let totalCount = 0;
 
-        snapshot.forEach((doc) => {
+        snapshot.docs.forEach((doc) => {
           const data = doc.data();
           const selger = data.selger || '';
           const dato = data.dato || '';
@@ -110,13 +109,14 @@ export default function Records() {
           allTime: { title: 'Totalt', value: totalCount, date: 'All-time' },
         });
 
-        console.log('✅ LIVE RECORDS LOADED:', { bestDayCount, bestWeekCount, bestMonthCount, bestYearCount, totalCount });
+        console.log('✅ LIVE RECORDS UPDATED:', { bestDayCount, bestWeekCount, bestMonthCount, bestYearCount, totalCount });
       } catch (err) {
         console.error('❌ Error loading records:', err);
       }
-    };
+    });
 
-    loadRecords();
+    // Cleanup: unsubscribe when component unmounts or user changes
+    return () => unsubscribe();
   }, [user?.id, user?.name]);
 
   if (!user) return <div className="records-container">Laster...</div>;

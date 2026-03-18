@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Status.css';
@@ -56,32 +56,30 @@ export default function Status() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievedBadges, setAchievedBadges] = useState<string[]>([]);
 
-  // Load LIVE data from allente_kontraktsarkiv - Same logic as Progresjon
+  // Load LIVE data from allente_kontraktsarkiv - Real-time listener
   useEffect(() => {
-    const loadStats = async () => {
-      if (!user || !user.name) return;
+    if (!user || !user.name) return;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay()); // Monday of this week
-      
-      const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
+    // Real-time listener
+    const contractsRef = collection(db, 'allente_kontraktsarkiv');
+    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
       try {
-        // Fetch all contracts
-        const contractsRef = collection(db, 'allente_kontraktsarkiv');
-        const snapshot = await getDocs(contractsRef);
-        
         let btvToday = 0;
         let dthToday = 0;
         let totalWeek = 0;
         let totalMonth = 0;
         let totalRevenue = 0;
 
-        snapshot.forEach((doc) => {
+        snapshot.docs.forEach((doc) => {
           const data = doc.data();
           const selger = data.selger || '';
           const dato = data.dato || '';
@@ -160,13 +158,14 @@ export default function Status() {
           month: monthRunRate,
         });
 
-        console.log('✅ LIVE STATS LOADED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
+        console.log('✅ LIVE STATS UPDATED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
       } catch (err) {
         console.error('❌ Error loading stats:', err);
       }
-    };
+    });
 
-    loadStats();
+    // Cleanup: unsubscribe when component unmounts or user changes
+    return () => unsubscribe();
   }, [user?.id, user?.name]);
 
   // Load badges from Firestore - Option B: emoji as field, not doc ID

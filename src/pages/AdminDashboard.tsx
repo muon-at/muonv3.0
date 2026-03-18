@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
-import { collection, getDocs, doc, updateDoc, addDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, addDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import FileUploadModal from '../components/FileUploadModal';
 import '../styles/AdminDashboard.css';
@@ -261,8 +261,8 @@ export default function AdminDashboard() {
     }
   };
 
-  // ===== FETCH PROGRESJON =====
-  const fetchProgresjon = async () => {
+  // ===== FETCH PROGRESJON (Real-time listener) =====
+  const fetchProgresjon = () => {
     if (progresjonCache.current && progresjonCache.current.length > 0) {
       setProgresjonData(progresjonCache.current);
       setLoadingProgresjon(false);
@@ -270,14 +270,13 @@ export default function AdminDashboard() {
       setLoadingProgresjon(true);
     }
 
-    try {
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const snapshot = await getDocs(contractsRef);
-      
-      const contracts: any[] = [];
-      snapshot.forEach((doc) => {
-        contracts.push(doc.data());
-      });
+    const contractsRef = collection(db, 'allente_kontraktsarkiv');
+    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
+      try {
+        const contracts: any[] = [];
+        snapshot.docs.forEach((doc) => {
+          contracts.push(doc.data());
+        });
 
       const today = new Date();
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -350,13 +349,17 @@ export default function AdminDashboard() {
         }))
         .sort((a, b) => b.total_week - a.total_week); // Sort by week total
 
-      progresjonCache.current = progresjonList;
-      setProgresjonData(progresjonList);
-    } catch (err) {
-      console.error('Error fetching progresjon:', err);
-    } finally {
-      setLoadingProgresjon(false);
-    }
+        progresjonCache.current = progresjonList;
+        setProgresjonData(progresjonList);
+        console.log('✅ LIVE PROGRESJON UPDATED');
+      } catch (err) {
+        console.error('Error updating progresjon:', err);
+      } finally {
+        setLoadingProgresjon(false);
+      }
+    });
+
+    return unsubscribe;
   };
 
   // ===== FETCH PRODUKTER =====
@@ -559,7 +562,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (warRoomTab === 'salg') fetchSalg();
     if (warRoomTab === 'anger') fetchAnger();
-    if (warRoomTab === 'progresjon') fetchProgresjon();
+    if (warRoomTab === 'progresjon') {
+      const unsubscribe = fetchProgresjon();
+      return () => unsubscribe();
+    }
   }, [warRoomTab]);
 
   // Fetch Badges

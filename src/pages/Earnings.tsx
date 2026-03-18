@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Earnings.css';
@@ -36,24 +36,23 @@ export default function Earnings() {
   });
   const [payments, setPayments] = useState<PaymentHistory[]>([]);
 
-  // Load LIVE data from allente_kontraktsarkiv - Same logic as Status
+  // Load LIVE data from allente_kontraktsarkiv - Real-time listener
   useEffect(() => {
-    const loadEarnings = async () => {
-      if (!user || !user.name) return;
+    if (!user || !user.name) return;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay()); // Monday of this week
-      
-      const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    const endOfDay = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 
+    // Real-time listener
+    const contractsRef = collection(db, 'allente_kontraktsarkiv');
+    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
       try {
-        // Fetch all contracts
-        const contractsRef = collection(db, 'allente_kontraktsarkiv');
-        const snapshot = await getDocs(contractsRef);
         
         let dayRevenue = 0;
         let weekRevenue = 0;
@@ -64,7 +63,7 @@ export default function Earnings() {
         
         const paymentsList: PaymentHistory[] = [];
 
-        snapshot.forEach((doc) => {
+        snapshot.docs.forEach((doc) => {
           const data = doc.data();
           const selger = data.selger || '';
           const dato = data.dato || '';
@@ -142,13 +141,14 @@ export default function Earnings() {
 
         setPayments(sortedPayments);
 
-        console.log('✅ LIVE EARNINGS LOADED:', { dayRevenue, weekRevenue, monthRevenue, payments: sortedPayments.length });
+        console.log('✅ LIVE EARNINGS UPDATED:', { dayRevenue, weekRevenue, monthRevenue, payments: sortedPayments.length });
       } catch (err) {
         console.error('❌ Error loading earnings:', err);
       }
-    };
+    });
 
-    loadEarnings();
+    // Cleanup: unsubscribe when component unmounts or user changes
+    return () => unsubscribe();
   }, [user?.id, user?.name]);
 
   if (!user) return <div className="earnings-container">Laster...</div>;
