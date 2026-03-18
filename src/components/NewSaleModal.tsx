@@ -153,14 +153,15 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         })
       );
 
-      // Reset modal and close after animation completes
+      // Wait for animation to FULLY complete before closing
+      // Animation is 700ms, so wait 750ms to be safe
       setTimeout(() => {
         setGifSearch('');
         setGifResults([]);
         setCurrentGifIndex(0);
         setSelectedGif(null);
-        onClose(); // CLOSE THE MODAL
-      }, 600);
+        onClose(); // NOW close the modal
+      }, 750);
     } catch (err) {
       console.error('❌ Error posting sale:', err);
       setIsAnimating(false);
