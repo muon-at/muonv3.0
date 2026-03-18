@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Status.css';
@@ -198,28 +198,79 @@ export default function Status() {
     loadBadges();
   }, [todayStats.count]);
 
+  // Load user targets from Firestore
+  useEffect(() => {
+    const loadTargets = async () => {
+      if (!user) return;
+
+      try {
+        const snapshot = await getDocs(collection(db, 'user_targets'));
+        let found = false;
+        
+        snapshot.forEach((doc) => {
+          if (doc.id === user.id) {
+            const data = doc.data();
+            setTargets({
+              day: data.day || 5,
+              week: data.week || 25,
+              month: data.month || 100,
+            });
+            console.log('✅ Targets loaded from Firestore');
+            found = true;
+          }
+        });
+
+        if (!found) {
+          console.log('ℹ️ No targets saved - using defaults');
+        }
+      } catch (err) {
+        console.error('❌ Error loading targets:', err);
+      }
+    };
+
+    loadTargets();
+  }, [user?.id]);
+
   const handleTargetEdit = (type: 'day' | 'week' | 'month') => {
     setEditingTarget(type);
     setTempValue(targets[type]);
   };
 
-  const saveTarget = (type: 'day' | 'week' | 'month') => {
+  const saveTarget = async (type: 'day' | 'week' | 'month') => {
+    if (!user) return;
+
+    let newTargets = { ...targets };
+
     if (type === 'month') {
       // Auto-calculate day and week from month
       const workdaysInMonth = 22; // Approximate
       const dayTarget = Math.round(tempValue / workdaysInMonth);
       const weekTarget = dayTarget * 5;
-      setTargets({
+      newTargets = {
         day: dayTarget,
         week: weekTarget,
         month: tempValue,
-      });
+      };
     } else {
-      setTargets({
+      newTargets = {
         ...targets,
         [type]: tempValue,
-      });
+      };
     }
+
+    // Save to Firestore
+    try {
+      const targetRef = doc(db, 'user_targets', user.id);
+      await setDoc(targetRef, {
+        ...newTargets,
+        updatedAt: new Date().toISOString(),
+      });
+      console.log('✅ Targets saved to Firestore');
+    } catch (err) {
+      console.error('❌ Error saving targets:', err);
+    }
+
+    setTargets(newTargets);
     setEditingTarget(null);
   };
 
