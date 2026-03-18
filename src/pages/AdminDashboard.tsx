@@ -283,11 +283,38 @@ export default function AdminDashboard() {
     // Fetch People data ONCE for department lookup
     getDocs(collection(db, 'employees')).then((empSnapshot) => {
       const employeeMap: { [key: string]: string } = {};
+      const employeeMapLower: { [key: string]: string } = {}; // lowercase for fuzzy matching
+      
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
-        if (data.name) employeeMap[data.name] = data.department || 'Unknown';
-        if (data.externalName) employeeMap[data.externalName] = data.department || 'Unknown';
+        if (data.name) {
+          employeeMap[data.name] = data.department || 'Unknown';
+          employeeMapLower[data.name.toLowerCase().trim()] = data.department || 'Unknown';
+        }
+        if (data.externalName) {
+          employeeMap[data.externalName] = data.department || 'Unknown';
+          employeeMapLower[data.externalName.toLowerCase().trim()] = data.department || 'Unknown';
+        }
       });
+      
+      // Smart lookup function: exact → lowercase → partial match
+      const getAvdeling = (ansatt: string): string => {
+        // 1. Exact match
+        if (employeeMap[ansatt]) return employeeMap[ansatt];
+        
+        // 2. Case-insensitive match
+        const ansattLower = ansatt.toLowerCase().trim();
+        if (employeeMapLower[ansattLower]) return employeeMapLower[ansattLower];
+        
+        // 3. Partial match: check if any masterfil name contains or is contained in ansatt
+        for (const [key, dept] of Object.entries(employeeMapLower)) {
+          if (key.includes(ansattLower) || ansattLower.includes(key)) {
+            return dept;
+          }
+        }
+        
+        return 'Unknown';
+      };
 
       // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
       const livefeedRef = collection(db, 'livefeed_sales');
@@ -325,7 +352,7 @@ export default function AdminDashboard() {
             if (!sellerStats[ansatt]) {
               sellerStats[ansatt] = { 
                 ansatt: ansatt,
-                avdeling: employeeMap[ansatt] || 'Unknown',
+                avdeling: getAvdeling(ansatt),
                 btv_today: 0, 
                 dth_today: 0, 
                 free_today: 0,
@@ -357,7 +384,7 @@ export default function AdminDashboard() {
         if (!sellerStats[ansatt]) {
           sellerStats[ansatt] = { 
             ansatt: ansatt,
-            avdeling: employeeMap[ansatt] || 'Unknown',
+            avdeling: getAvdeling(ansatt),
             btv_today: 0, 
             dth_today: 0, 
             free_today: 0,
