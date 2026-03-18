@@ -1749,23 +1749,89 @@ export default function AdminDashboard() {
                           </tr>
                         </thead>
                         <tbody>
-                          {progresjonData.map((row: any, idx: number) => (
-                            <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
-                              <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: '600', color: '#a0a0a0', whiteSpace: 'nowrap' }}>{row.avdeling || 'Unknown'}</td>
-                              <td style={{ padding: '0.75rem', fontSize: '0.7rem', fontWeight: '600', color: '#808080', whiteSpace: 'nowrap' }}>{row.externalName || '-'}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_week}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_month}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_month}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_day}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_week}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_month}</td>
-                              <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
-                            </tr>
-                          ))}
+                          {(() => {
+                            // Group by avdeling
+                            const grouped: { [key: string]: any[] } = {};
+                            const avdelingOrder = ['KRS', 'OSL', 'Skien'];
+                            
+                            progresjonData.forEach(row => {
+                              const dept = row.avdeling || 'Unknown';
+                              if (!grouped[dept]) grouped[dept] = [];
+                              grouped[dept].push(row);
+                            });
+                            
+                            const rows: any[] = [];
+                            
+                            // Render each avdeling section
+                            avdelingOrder.forEach(dept => {
+                              if (!grouped[dept] || grouped[dept].length === 0) return;
+                              
+                              const deptRows = grouped[dept];
+                              
+                              // Render rows for this avdeling
+                              deptRows.forEach((row, idx) => {
+                                rows.push(
+                                  <tr key={`${dept}-${row.ansatt}`} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
+                                    <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
+                                    <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: '600', color: '#a0a0a0', whiteSpace: 'nowrap' }}>{row.avdeling || 'Unknown'}</td>
+                                    <td style={{ padding: '0.75rem', fontSize: '0.7rem', fontWeight: '600', color: '#808080', whiteSpace: 'nowrap' }}>{row.externalName || '-'}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_week}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffd700', whiteSpace: 'nowrap' }}>{row.total_month}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_month}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_day}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_week}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#b366ff', whiteSpace: 'nowrap' }}>{row.best_month}</td>
+                                    <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
+                                  </tr>
+                                );
+                              });
+                              
+                              // Subtotal row for this avdeling
+                              const deptSum = {
+                                btv_today: deptRows.reduce((s, r) => s + (r.btv_today || 0), 0),
+                                dth_today: deptRows.reduce((s, r) => s + (r.dth_today || 0), 0),
+                                free_today: deptRows.reduce((s, r) => s + (r.free_today || 0), 0),
+                                total_week: deptRows.reduce((s, r) => s + (r.total_week || 0), 0),
+                                total_month: deptRows.reduce((s, r) => s + (r.total_month || 0), 0),
+                                free_month: deptRows.reduce((s, r) => s + (r.free_month || 0), 0),
+                                best_day: deptRows.reduce((s, r) => s + (r.best_day || 0), 0),
+                                best_week: deptRows.reduce((s, r) => s + (r.best_week || 0), 0),
+                                best_month: deptRows.reduce((s, r) => s + (r.best_month || 0), 0),
+                                badges: deptRows.reduce((s, r) => s + (r.badges || 0), 0),
+                              };
+                              
+                              rows.push(
+                                <tr key={`${dept}-subtotal`} style={{ background: '#1f3a52', borderTop: '2px solid #4b5563', borderBottom: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.8rem' }}>
+                                  <td style={{ padding: '0.8rem 0.75rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>TOTALT {dept}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem' }}></td>
+                                  <td style={{ padding: '0.8rem 0.75rem' }}></td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#4db8ff', fontWeight: '700' }}>{deptSum.btv_today}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ff6b6b', fontWeight: '700' }}>{deptSum.dth_today}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#51cf66', fontWeight: '700' }}>{deptSum.free_today}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffd700', fontWeight: '700' }}>{deptSum.total_week}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffd700', fontWeight: '700' }}>{deptSum.total_month}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#51cf66', fontWeight: '700' }}>{deptSum.free_month}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_day}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_week}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_month}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffaa00', fontWeight: '700' }}>⭐ {deptSum.badges}</td>
+                                </tr>
+                              );
+                              
+                              // Spacing row between avdelinger
+                              rows.push(
+                                <tr key={`${dept}-spacing`} style={{ height: '0.5rem', background: 'transparent', borderBottom: 'none' }}>
+                                  <td colSpan={13} style={{ padding: 0 }}></td>
+                                </tr>
+                              );
+                            });
+                            
+                            // Render all rows
+                            return rows;
+                          })()}
                           {/* TOTALT ROW */}
                           <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
                             <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT</td>
