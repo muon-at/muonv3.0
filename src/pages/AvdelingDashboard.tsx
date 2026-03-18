@@ -176,61 +176,60 @@ export default function AvdelingDashboard() {
   }
 
   return (
-    <div style={{ padding: '2rem', marginRight: '330px', color: '#e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <h1 style={{ marginBottom: '2rem', color: '#e2e8f0', textAlign: 'center', fontSize: '2.5rem' }}>{user.department}</h1>
+    <div style={{ padding: '2rem', marginRight: '330px', marginLeft: '108px', color: '#e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', minHeight: '100vh' }}>
+      <h1 style={{ marginBottom: '3rem', color: '#e2e8f0', textAlign: 'center', fontSize: '4rem', fontWeight: '900' }}>{user.department}</h1>
 
       {/* Department Stats */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
-        marginBottom: '2rem',
+        gap: '2rem',
+        marginBottom: '3rem',
         width: '100%',
-        maxWidth: '800px',
       }}>
         {/* Salg I dag */}
         <div style={{
           backgroundColor: '#2d3748',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '3rem 2rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <span style={{ fontSize: '0.85rem', color: '#b0b0b0', marginBottom: '0.5rem' }}>Salg I dag</span>
-          <span style={{ fontSize: '2.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.todaySales}</span>
+          <span style={{ fontSize: '1.3rem', color: '#b0b0b0', marginBottom: '1rem' }}>Salg I dag</span>
+          <span style={{ fontSize: '4.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.todaySales}</span>
         </div>
 
         {/* Salg Denne uken */}
         <div style={{
           backgroundColor: '#2d3748',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '3rem 2rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <span style={{ fontSize: '0.85rem', color: '#b0b0b0', marginBottom: '0.5rem' }}>Salg Denne uken</span>
-          <span style={{ fontSize: '2.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.weekSales}</span>
+          <span style={{ fontSize: '1.3rem', color: '#b0b0b0', marginBottom: '1rem' }}>Salg Denne uken</span>
+          <span style={{ fontSize: '4.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.weekSales}</span>
         </div>
 
         {/* Salg Denne måneden */}
         <div style={{
           backgroundColor: '#2d3748',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '3rem 2rem',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <span style={{ fontSize: '0.85rem', color: '#b0b0b0', marginBottom: '0.5rem' }}>Salg Denne måneden</span>
-          <span style={{ fontSize: '2.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.monthSales}</span>
+          <span style={{ fontSize: '1.3rem', color: '#b0b0b0', marginBottom: '1rem' }}>Salg Denne måneden</span>
+          <span style={{ fontSize: '4.5rem', color: '#90ee90', fontWeight: 'bold' }}>{deptStats.monthSales}</span>
         </div>
       </div>
 
@@ -238,35 +237,34 @@ export default function AvdelingDashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
-        gap: '1rem',
+        gap: '2rem',
         width: '100%',
-        maxWidth: '800px',
       }}>
         {/* Top Today */}
         <div style={{
           backgroundColor: '#1f2937',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '2rem',
         }}>
-          <h3 style={{ fontSize: '1rem', color: '#5a67d8', marginBottom: '1rem', textAlign: 'center' }}>Top 3 I dag</h3>
+          <h3 style={{ fontSize: '1.5rem', color: '#5a67d8', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>Top 3 I dag</h3>
           {topEmployees.today.length === 0 ? (
-            <p style={{ color: '#b0b0b0', fontSize: '0.9rem' }}>Ingen salg i dag</p>
+            <p style={{ color: '#b0b0b0', fontSize: '1.1rem', textAlign: 'center' }}>Ingen salg i dag</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {topEmployees.today.map((emp, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem',
+                  padding: '1rem',
                   backgroundColor: '#2d3748',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                 }}>
-                  <span style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#e2e8f0', fontSize: '1.1rem' }}>
                     {idx + 1}. {emp.name}
                   </span>
-                  <span style={{ color: '#90ee90', fontWeight: 'bold' }}>{emp.sales}</span>
+                  <span style={{ color: '#90ee90', fontWeight: 'bold', fontSize: '1.3rem' }}>{emp.sales}</span>
                 </div>
               ))}
             </div>
@@ -276,28 +274,28 @@ export default function AvdelingDashboard() {
         {/* Top Week */}
         <div style={{
           backgroundColor: '#1f2937',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '2rem',
         }}>
-          <h3 style={{ fontSize: '1rem', color: '#5a67d8', marginBottom: '1rem', textAlign: 'center' }}>Top 3 Uke</h3>
+          <h3 style={{ fontSize: '1.5rem', color: '#5a67d8', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>Top 3 Uke</h3>
           {topEmployees.week.length === 0 ? (
-            <p style={{ color: '#b0b0b0', fontSize: '0.9rem' }}>Ingen salg denne uken</p>
+            <p style={{ color: '#b0b0b0', fontSize: '1.1rem', textAlign: 'center' }}>Ingen salg denne uken</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {topEmployees.week.map((emp, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem',
+                  padding: '1rem',
                   backgroundColor: '#2d3748',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                 }}>
-                  <span style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#e2e8f0', fontSize: '1.1rem' }}>
                     {idx + 1}. {emp.name}
                   </span>
-                  <span style={{ color: '#90ee90', fontWeight: 'bold' }}>{emp.sales}</span>
+                  <span style={{ color: '#90ee90', fontWeight: 'bold', fontSize: '1.3rem' }}>{emp.sales}</span>
                 </div>
               ))}
             </div>
@@ -307,28 +305,28 @@ export default function AvdelingDashboard() {
         {/* Top Month */}
         <div style={{
           backgroundColor: '#1f2937',
-          border: '1px solid #5a67d8',
-          borderRadius: '8px',
-          padding: '1.5rem',
+          border: '2px solid #5a67d8',
+          borderRadius: '12px',
+          padding: '2rem',
         }}>
-          <h3 style={{ fontSize: '1rem', color: '#5a67d8', marginBottom: '1rem', textAlign: 'center' }}>Top 3 Måned</h3>
+          <h3 style={{ fontSize: '1.5rem', color: '#5a67d8', marginBottom: '1.5rem', textAlign: 'center', fontWeight: 'bold' }}>Top 3 Måned</h3>
           {topEmployees.month.length === 0 ? (
-            <p style={{ color: '#b0b0b0', fontSize: '0.9rem' }}>Ingen salg denne måneden</p>
+            <p style={{ color: '#b0b0b0', fontSize: '1.1rem', textAlign: 'center' }}>Ingen salg denne måneden</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {topEmployees.month.map((emp, idx) => (
                 <div key={idx} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '0.5rem',
+                  padding: '1rem',
                   backgroundColor: '#2d3748',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                 }}>
-                  <span style={{ color: '#e2e8f0', fontSize: '0.9rem' }}>
+                  <span style={{ color: '#e2e8f0', fontSize: '1.1rem' }}>
                     {idx + 1}. {emp.name}
                   </span>
-                  <span style={{ color: '#90ee90', fontWeight: 'bold' }}>{emp.sales}</span>
+                  <span style={{ color: '#90ee90', fontWeight: 'bold', fontSize: '1.3rem' }}>{emp.sales}</span>
                 </div>
               ))}
             </div>
