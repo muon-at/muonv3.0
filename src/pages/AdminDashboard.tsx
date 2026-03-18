@@ -896,17 +896,17 @@ export default function AdminDashboard() {
                 <div style={{ width: '100%', marginBottom: '0rem', overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Navn</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>E-post</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Rolle</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Prosjekt</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Avdeling</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>TMG-navn</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Stilling</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Ekstern navn</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Min Side</th>
-                        <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700' }}>Handlinger</th>
+                      <tr style={{ background: 'transparent', borderBottom: '2px solid #e2e8f0', margin: 0, padding: 0 }}>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Navn</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>E-post</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Rolle</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Prosjekt</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Avdeling</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>TMG-navn</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Stilling</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Ekstern navn</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Min Side</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Handlinger</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -971,7 +971,7 @@ export default function AdminDashboard() {
                     <>
                       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
                         <thead>
-                          <tr style={{ background: '#e5e7eb', borderBottom: '2px solid #9ca3af' }}>
+                          <tr style={{ background: 'transparent', borderBottom: '2px solid #9ca3af', margin: 0, padding: 0 }}>
                             <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>
                               <input 
                                 type="checkbox" 
