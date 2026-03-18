@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs, doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, onSnapshot, addDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/Status.css';
@@ -179,6 +179,71 @@ export default function Status() {
     // Cleanup outer livefeed listener
     return () => unsubscribeLivefeed();
   }, [user?.id, user?.name]);
+
+  // Check for badge achievements and post to livefeed
+  useEffect(() => {
+    if (!user || todayStats.count === 0) return;
+
+    const postAchievedBadges = async () => {
+      const announceKey = `announced_badges_${user.id}`;
+      const announced = JSON.parse(localStorage.getItem(announceKey) || '{}') as { [key: string]: boolean };
+
+      const badgesToPost: { id: string; emoji: string; name: string }[] = [];
+
+      // Check 5 SALG
+      if (todayStats.count >= 5 && !announced.fem) {
+        badgesToPost.push({ id: 'fem', emoji: '🚀', name: '5 SALG' });
+        announced.fem = true;
+      }
+      // Check 10 SALG
+      if (todayStats.count >= 10 && !announced.ti) {
+        badgesToPost.push({ id: 'ti', emoji: '🎯', name: '10 SALG' });
+        announced.ti = true;
+      }
+      // Check 15 SALG
+      if (todayStats.count >= 15 && !announced.femten) {
+        badgesToPost.push({ id: 'femten', emoji: '🔥', name: '15 SALG' });
+        announced.femten = true;
+      }
+      // Check 20 SALG
+      if (todayStats.count >= 20 && !announced.tjue) {
+        badgesToPost.push({ id: 'tjue', emoji: '💎', name: '20 SALG' });
+        announced.tjue = true;
+      }
+      // Check FØRSTE
+      if (todayStats.count >= 1 && !announced.forste) {
+        badgesToPost.push({ id: 'forste', emoji: '🎓', name: 'FØRSTE SALGET' });
+        announced.forste = true;
+      }
+
+      // Post new badges to livefeed
+      for (const badge of badgesToPost) {
+        try {
+          await addDoc(collection(db, 'livefeed_sales'), {
+            userId: user.id,
+            userName: user.name,
+            userDepartment: user.department || 'Ukjent',
+            product: `${badge.emoji} ${badge.name}`,
+            productPrice: 0,
+            gifUrl: 'BADGE_ACHIEVEMENT',
+            timestamp: new Date(),
+            userRole: user.role || 'employee',
+            isBadgePost: true,
+          });
+          console.log(`✅ Badge posted: ${user.name} - ${badge.name}`);
+        } catch (err) {
+          console.error('❌ Error posting badge:', err);
+        }
+      }
+
+      // Save announced badges
+      if (badgesToPost.length > 0) {
+        localStorage.setItem(announceKey, JSON.stringify(announced));
+      }
+    };
+
+    postAchievedBadges();
+  }, [user?.id, todayStats.count]);
 
   // Load badges from Firestore - Option B: emoji as field, not doc ID
   useEffect(() => {

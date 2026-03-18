@@ -99,52 +99,64 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
               </div>
 
               {/* Horizontal post */}
-              <div className="livefeed-post">
-                {/* GIF on left */}
-                {post.gifUrl && (
-                  <img 
-                    src={post.gifUrl} 
-                    alt="Sale GIF" 
-                    className="livefeed-gif"
-                  />
-                )}
-
-                {/* Post content on right */}
-                <div className="livefeed-post-content">
-                  {/* Top section - Name & Department */}
-                  <div className="livefeed-user">
-                    {/* Split name into first and last */}
-                    {post.userName.split(' ').length > 1 ? (
-                      <>
-                        <strong className="livefeed-firstname">{post.userName.split(' ')[0]}</strong>
-                        <span className="livefeed-lastname">{post.userName.split(' ').slice(1).join(' ')}</span>
-                      </>
-                    ) : (
-                      <strong className="livefeed-firstname">{post.userName}</strong>
-                    )}
-                    <span className="livefeed-department">{post.userDepartment}</span>
-                  </div>
-
-                  {/* Bottom section - Product + Price + Bell */}
-                  <div className="livefeed-product-info">
-                    <span className="livefeed-product-name">{post.product}</span>
-                    <div className="livefeed-price-row">
-                      <span className="livefeed-product-price">{post.productPrice} kr</span>
-                      <span className="livefeed-bell-emoji">🔔</span>
+              <div className={`livefeed-post ${(post as any).isBadgePost ? 'badge-post' : ''}`}>
+                {/* Badge post - special styling */}
+                {(post as any).isBadgePost ? (
+                  <div className="livefeed-post-content badge-content">
+                    <div className="badge-message">
+                      <strong>{post.userName}</strong> {post.product}
                     </div>
+                    <div className="badge-celebration">Gratulerer 🥂</div>
                   </div>
+                ) : (
+                  <>
+                    {/* GIF on left */}
+                    {post.gifUrl && (
+                      <img 
+                        src={post.gifUrl} 
+                        alt="Sale GIF" 
+                        className="livefeed-gif"
+                      />
+                    )}
 
-                  {/* Delete button */}
-                  {(user?.id === post.userId || user?.role === 'owner') && (
-                    <button
-                      className="livefeed-delete-btn"
-                      onClick={() => handleDeletePost(post.id, post.userId)}
-                      title="Slett post"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
+                    {/* Post content on right */}
+                    <div className="livefeed-post-content">
+                      {/* Top section - Name & Department */}
+                      <div className="livefeed-user">
+                        {/* Split name into first and last */}
+                        {post.userName.split(' ').length > 1 ? (
+                          <>
+                            <strong className="livefeed-firstname">{post.userName.split(' ')[0]}</strong>
+                            <span className="livefeed-lastname">{post.userName.split(' ').slice(1).join(' ')}</span>
+                          </>
+                        ) : (
+                          <strong className="livefeed-firstname">{post.userName}</strong>
+                        )}
+                        <span className="livefeed-department">{post.userDepartment}</span>
+                      </div>
+
+                      {/* Bottom section - Product + Price + Bell */}
+                      <div className="livefeed-product-info">
+                        <span className="livefeed-product-name">{post.product}</span>
+                        <div className="livefeed-price-row">
+                          <span className="livefeed-product-price">{post.productPrice} kr</span>
+                          <span className="livefeed-bell-emoji">🔔</span>
+                        </div>
+                      </div>
+
+                      {/* Delete button */}
+                      {(user?.id === post.userId || user?.role === 'owner') && (
+                        <button
+                          className="livefeed-delete-btn"
+                          onClick={() => handleDeletePost(post.id, post.userId)}
+                          title="Slett post"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           ))
