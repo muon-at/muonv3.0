@@ -613,6 +613,7 @@ export default function AdminDashboard() {
   const handleSaveEdit = async () => {
     if (!editingEmployee.name.trim()) return;
     try {
+      console.log('Saving employee:', editingEmployee.id, editingEmployee.name);
       await updateDoc(doc(db, 'employees', editingEmployee.id), {
         name: editingEmployee.name,
         email: editingEmployee.email,
@@ -625,11 +626,13 @@ export default function AdminDashboard() {
         tmgName: editingEmployee.tmgName,
         stilling: editingEmployee.stilling,
       });
+      console.log('✅ Employee saved successfully');
       setEmployees(employees.map(e => e.id === editingEmployee.id ? editingEmployee : e));
       setShowEditModal(false);
       setEditingEmployee(null);
     } catch (err) {
-      console.error('Error saving employee:', err);
+      console.error('❌ Error saving employee:', err);
+      alert('Feil ved lagring: ' + (err as any).message);
     }
   };
 
