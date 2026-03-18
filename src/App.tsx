@@ -155,7 +155,7 @@ function RoutedContent() {
           <Route 
             path="/missing-employees"
             element={
-              <ProtectedRoute requiredRole="owner">
+              <ProtectedRoute requiredRole="employee">
                 <MissingEmployees />
               </ProtectedRoute>
             }
