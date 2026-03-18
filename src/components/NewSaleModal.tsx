@@ -155,7 +155,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       // 2. Save to allente_kontraktsarkiv (for Progresjon + Status + Records)
       await addDoc(collection(db, 'allente_kontraktsarkiv'), {
         dato: datoDDMYYYY,
-        selger: userName,
+        selger: user.name, // Use user.name to match Firestore auth names
         produkt: selectedProduct,
         avdeling: userDepartment,
         platform: 'Manual', // Mark as manually entered
