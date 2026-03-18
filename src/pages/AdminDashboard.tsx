@@ -1704,6 +1704,20 @@ export default function AdminDashboard() {
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ffaa00', whiteSpace: 'nowrap' }}>⭐ {row.badges}</td>
                             </tr>
                           ))}
+                          {/* TOTALT ROW */}
+                          <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
+                            <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#4db8ff' }}>{progresjonData.reduce((sum, r) => sum + (r.btv_today || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ff6b6b' }}>{progresjonData.reduce((sum, r) => sum + (r.dth_today || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_today || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_week || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_month || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_month || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_day || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_week || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_month || 0), 0)}</td>
+                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffaa00' }}>⭐ {progresjonData.reduce((sum, r) => sum + (r.badges || 0), 0)}</td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
