@@ -345,6 +345,8 @@ export default function AdminDashboard() {
         ansatt = ansatt.replace(/ \/ selger$/i, '').trim();
         if (!sellerStats[ansatt]) {
           sellerStats[ansatt] = { 
+            ansatt: ansatt,
+            avdeling: data.avdeling || 'Unknown',
             btv_today: 0, 
             dth_today: 0, 
             free_today: 0,
@@ -1676,6 +1678,7 @@ export default function AdminDashboard() {
                           {/* Column Header Row */}
                           <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}></th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Avd</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#4db8ff', whiteSpace: 'nowrap' }}>BTV</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ff6b6b', whiteSpace: 'nowrap' }}>DTH</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#51cf66', whiteSpace: 'nowrap' }}>Free box</th>
@@ -1692,6 +1695,7 @@ export default function AdminDashboard() {
                           {progresjonData.map((row: any, idx: number) => (
                             <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
                               <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: '600', color: '#a0a0a0', whiteSpace: 'nowrap' }}>{row.avdeling || 'Unknown'}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
@@ -1707,6 +1711,7 @@ export default function AdminDashboard() {
                           {/* TOTALT ROW */}
                           <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
                             <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT</td>
+                            <td style={{ padding: '1rem 0.75rem' }}></td>
                             <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#4db8ff' }}>{progresjonData.reduce((sum, r) => sum + (r.btv_today || 0), 0)}</td>
                             <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ff6b6b' }}>{progresjonData.reduce((sum, r) => sum + (r.dth_today || 0), 0)}</td>
                             <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_today || 0), 0)}</td>
