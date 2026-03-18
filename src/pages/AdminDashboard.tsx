@@ -283,37 +283,51 @@ export default function AdminDashboard() {
     // Fetch People data ONCE for department lookup
     getDocs(collection(db, 'employees')).then((empSnapshot) => {
       const employeeMap: { [key: string]: string } = {};
+      const employeeDetailMap: { [key: string]: { dept: string; externalName: string } } = {}; // Store both dept + external name
       const employeeMapLower: { [key: string]: string } = {}; // lowercase for fuzzy matching
       
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
+        const dept = data.department || 'Unknown';
+        const externalName = data.externalName || '';
+        
         if (data.name) {
-          employeeMap[data.name] = data.department || 'Unknown';
-          employeeMapLower[data.name.toLowerCase().trim()] = data.department || 'Unknown';
+          employeeMap[data.name] = dept;
+          employeeDetailMap[data.name] = { dept, externalName };
+          employeeMapLower[data.name.toLowerCase().trim()] = dept;
         }
         if (data.externalName) {
-          employeeMap[data.externalName] = data.department || 'Unknown';
-          employeeMapLower[data.externalName.toLowerCase().trim()] = data.department || 'Unknown';
+          employeeMap[data.externalName] = dept;
+          employeeDetailMap[data.externalName] = { dept, externalName };
+          employeeMapLower[data.externalName.toLowerCase().trim()] = dept;
         }
       });
       
-      // Smart lookup function: exact → lowercase → partial match
-      const getAvdeling = (ansatt: string): string => {
+      // Smart lookup function: exact → lowercase → partial match (returns detail object)
+      const getEmployeeDetail = (ansatt: string): { dept: string; externalName: string } => {
         // 1. Exact match
-        if (employeeMap[ansatt]) return employeeMap[ansatt];
+        if (employeeDetailMap[ansatt]) return employeeDetailMap[ansatt];
         
         // 2. Case-insensitive match
         const ansattLower = ansatt.toLowerCase().trim();
-        if (employeeMapLower[ansattLower]) return employeeMapLower[ansattLower];
+        for (const [key, detail] of Object.entries(employeeDetailMap)) {
+          if (key.toLowerCase().trim() === ansattLower) return detail;
+        }
         
         // 3. Partial match: check if any masterfil name contains or is contained in ansatt
-        for (const [key, dept] of Object.entries(employeeMapLower)) {
-          if (key.includes(ansattLower) || ansattLower.includes(key)) {
-            return dept;
+        for (const [key, detail] of Object.entries(employeeDetailMap)) {
+          const keyLower = key.toLowerCase().trim();
+          if (keyLower.includes(ansattLower) || ansattLower.includes(keyLower)) {
+            return detail;
           }
         }
         
-        return 'Unknown';
+        return { dept: 'Unknown', externalName: '' };
+      };
+      
+      // Backwards compatible wrapper
+      const getAvdeling = (ansatt: string): string => {
+        return getEmployeeDetail(ansatt).dept;
       };
 
       // Listener 1: livefeed_sales (TODAY posts from 🔔 modal)
@@ -350,9 +364,11 @@ export default function AdminDashboard() {
             const ansatt = data.userName || 'Ukjent';
             
             if (!sellerStats[ansatt]) {
+              const detail = getEmployeeDetail(ansatt);
               sellerStats[ansatt] = { 
                 ansatt: ansatt,
-                avdeling: getAvdeling(ansatt),
+                avdeling: detail.dept,
+                externalName: detail.externalName,
                 btv_today: 0, 
                 dth_today: 0, 
                 free_today: 0,
@@ -1721,6 +1737,7 @@ export default function AdminDashboard() {
                           <tr style={{ background: '#0d0d0d', borderBottom: '2px solid #404040' }}>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#d0d0d0', whiteSpace: 'nowrap' }}></th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.75rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Avd</th>
+                            <th style={{ padding: '0.75rem 0.75rem', textAlign: 'left', fontWeight: '700', fontSize: '0.65rem', color: '#a0a0a0', whiteSpace: 'nowrap' }}>Ekst. navn</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#4db8ff', whiteSpace: 'nowrap' }}>BTV</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#ff6b6b', whiteSpace: 'nowrap' }}>DTH</th>
                             <th style={{ padding: '0.75rem 0.75rem', textAlign: 'center', fontWeight: '700', fontSize: '0.75rem', color: '#51cf66', whiteSpace: 'nowrap' }}>Free box</th>
@@ -1738,6 +1755,7 @@ export default function AdminDashboard() {
                             <tr key={row.ansatt} style={{ background: idx % 2 === 0 ? '#1a1a1a' : '#252525', borderBottom: '1px solid #333333', color: '#b0b0b0' }}>
                               <td style={{ padding: '0.75rem', fontSize: '0.8rem', fontWeight: '600', color: '#e0e0e0', whiteSpace: 'nowrap' }}>{row.ansatt}</td>
                               <td style={{ padding: '0.75rem', fontSize: '0.75rem', fontWeight: '600', color: '#a0a0a0', whiteSpace: 'nowrap' }}>{row.avdeling || 'Unknown'}</td>
+                              <td style={{ padding: '0.75rem', fontSize: '0.7rem', fontWeight: '600', color: '#808080', whiteSpace: 'nowrap' }}>{row.externalName || '-'}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#4db8ff', whiteSpace: 'nowrap' }}>{row.btv_today}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#ff6b6b', whiteSpace: 'nowrap' }}>{row.dth_today}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center', fontSize: '0.8rem', fontWeight: '700', color: '#51cf66', whiteSpace: 'nowrap' }}>{row.free_today}</td>
@@ -1753,6 +1771,7 @@ export default function AdminDashboard() {
                           {/* TOTALT ROW */}
                           <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
                             <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT</td>
+                            <td style={{ padding: '1rem 0.75rem' }}></td>
                             <td style={{ padding: '1rem 0.75rem' }}></td>
                             <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#4db8ff' }}>{progresjonData.reduce((sum, r) => sum + (r.btv_today || 0), 0)}</td>
                             <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ff6b6b' }}>{progresjonData.reduce((sum, r) => sum + (r.dth_today || 0), 0)}</td>
