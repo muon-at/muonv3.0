@@ -48,7 +48,7 @@
   padding: 0 !important;
   overflow: hidden !important;
   pointer-events: none;
-  animation: slideToLivefeed 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: slideToLivefeed 3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* Animate modal from center to right side + fade out */

@@ -39,7 +39,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         setCurrentGifIndex(0);
         setSelectedGif(null);
         onClose(); // Close after animation fully completes
-      }, 750); // Must match or exceed CSS animation duration (700ms)
+      }, 3100); // Must match or exceed CSS animation duration (3000ms)
       return () => clearTimeout(timer);
     }
   }, [isAnimating, onClose]);
