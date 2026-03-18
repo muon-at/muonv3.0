@@ -33,365 +33,170 @@ export default function MittProsjekt() {
     month: [],
   });
 
-  // Calculate sales by department & employee
+  // Simplified: Read directly from contracts with avdeling field
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const contractsRef = collection(db, 'allente_kontraktsarkiv');
+    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay());
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    // Listen to employees for department mapping
-    const employeesRef = collection(db, 'employees');
-    const employeeUnsub = onSnapshot(employeesRef, (empSnapshot) => {
-      const employeeMap: { [key: string]: string } = {}; // name -> department
-      const missingDepts: string[] = [];
-      
-      empSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        const dept = data.department || 'OSL';
-        
-        if (!data.department) {
-          missingDepts.push(data.name);
-        }
-        
-        // Map both name and externalName to department
-        if (data.name) {
-          employeeMap[data.name] = dept;
-        }
-        if (data.externalName) {
-          employeeMap[data.externalName] = dept;
-        }
-      });
-      
-      if (missingDepts.length > 0) {
-        console.warn('⚠️ Employees missing department (defaulting to OSL):', missingDepts);
-      }
+        const deptStats: { [key: string]: DepartmentStats } = {
+          'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+          'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+          'Skien': { name: 'Skien', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+        };
+        const employeeSales: { [key: string]: { today: number; week: number; month: number; dept: string } } = {};
 
-      // Listen to progresjon data (via contracts)
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const contractUnsub = onSnapshot(contractsRef, (contractSnapshot) => {
-        // Listen to livefeed for today
-        const livefeedRef = collection(db, 'livefeed_sales');
-        const livefeedUnsub = onSnapshot(livefeedRef, (livefeedSnapshot) => {
-          const deptStats: { [key: string]: DepartmentStats } = {
-            'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-            'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-            'Skien': { name: 'Skien', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-          };
-          const employeeSales: { [key: string]: { today: number; week: number; month: number; dept: string } } = {};
+        // Process contracts
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          let ansatt = (data.selger || '').replace(/ \/ selger$/i, '').trim();
+          const avdeling = data.avdeling || 'OSL';
+          const dato = data.dato || '';
 
-          // Track unknown/unmapped sales separately
-          let unknownSales = { today: 0, week: 0, month: 0 };
+          if (dato && typeof dato === 'string' && ansatt) {
+            const parts = dato.split('/');
+            if (parts.length === 3) {
+              const day = parseInt(parts[0]);
+              const month = parseInt(parts[1]);
+              const year = parseInt(parts[2]);
+              const orderDate = new Date(year, month - 1, day);
 
-          // Process contracts (historical)
-          const notFoundInPeople: string[] = [];
-          contractSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            let selger = data.selger || '';
-            selger = selger.replace(/ \/ selger$/i, '').trim();
-            const dept = employeeMap[selger]; // dept will be 'OSL' default if in People but missing dept, undefined if not in People at all
-            const dato = data.dato || '';
-            
-            // Track truly missing employees (not in People at all)
-            if (!dept && selger && !notFoundInPeople.includes(selger)) {
-              notFoundInPeople.push(selger);
-            }
+              if (!employeeSales[ansatt]) {
+                employeeSales[ansatt] = { today: 0, week: 0, month: 0, dept: avdeling };
+              }
 
-            if (dato && typeof dato === 'string') {
-              const parts = dato.split('/');
-              if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
-                const year = parseInt(parts[2]);
-                const orderDate = new Date(year, month - 1, day);
+              const sale = 1; // 1 contract = 1 sale
 
-                if (!employeeSales[selger]) {
-                  employeeSales[selger] = { today: 0, week: 0, month: 0, dept: dept || 'Unknown' };
-                }
-
-                // Count sales
-                const sale = 1; // 1 contract = 1 sale
-
-                if (dept) {
-                  // Selger found in People - count on their department
-                  // Today
-                  if (orderDate >= today) {
-                    deptStats[dept].todaySales += sale;
-                    employeeSales[selger].today += sale;
-                  }
-                  // Week
-                  if (orderDate >= startOfWeek && orderDate <= today) {
-                    deptStats[dept].weekSales += sale;
-                    employeeSales[selger].week += sale;
-                  }
-                  // Month
-                  if (orderDate >= startOfMonth && orderDate <= today) {
-                    deptStats[dept].monthSales += sale;
-                    employeeSales[selger].month += sale;
-                  }
-                } else {
-                  // Selger NOT found in People - count toward Unknown (fallback to Muon total)
-                  // Today
-                  if (orderDate >= today) {
-                    unknownSales.today += sale;
-                  }
-                  // Week
-                  if (orderDate >= startOfWeek && orderDate <= today) {
-                    unknownSales.week += sale;
-                  }
-                  // Month
-                  if (orderDate >= startOfMonth && orderDate <= today) {
-                    unknownSales.month += sale;
-                  }
-                }
+              // Today
+              if (orderDate >= today) {
+                if (avdeling in deptStats) deptStats[avdeling].todaySales += sale;
+                employeeSales[ansatt].today += sale;
+              }
+              // Week
+              if (orderDate >= startOfWeek && orderDate <= today) {
+                if (avdeling in deptStats) deptStats[avdeling].weekSales += sale;
+                employeeSales[ansatt].week += sale;
+              }
+              // Month
+              if (orderDate >= startOfMonth && orderDate <= today) {
+                if (avdeling in deptStats) deptStats[avdeling].monthSales += sale;
+                employeeSales[ansatt].month += sale;
               }
             }
-          });
-
-          // Store unknown sales to add to Muon total when rendering
-          let muonUnknownSales = { today: unknownSales.today, week: unknownSales.week, month: unknownSales.month };
-
-          // Add livefeed (today only)
-          livefeedSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const userName = data.userName || '';
-            const dept = employeeMap[userName]; // undefined if not in People
-
-            if (!employeeSales[userName]) {
-              employeeSales[userName] = { today: 0, week: 0, month: 0, dept: dept || 'Unknown' };
-            }
-
-            if (dept && dept in deptStats) {
-              // Found in People - count on their department
-              deptStats[dept].todaySales += 1;
-              employeeSales[userName].today += 1;
-            } else if (!dept) {
-              // NOT found in People - count as unknown/fallback
-              muonUnknownSales.today += 1;
-            }
-          });
-
-          // Build top 3 employees for each period
-          const employeeList = Object.entries(employeeSales).map(([name, stats]) => ({
-            name,
-            dept: stats.dept,
-            today: stats.today,
-            week: stats.week,
-            month: stats.month,
-          }));
-
-          const topToday = employeeList
-            .sort((a, b) => b.today - a.today)
-            .slice(0, 3)
-            .map(e => ({ name: e.name, sales: e.today, department: e.dept }));
-
-          const topWeek = employeeList
-            .sort((a, b) => b.week - a.week)
-            .slice(0, 3)
-            .map(e => ({ name: e.name, sales: e.week, department: e.dept }));
-
-          const topMonth = employeeList
-            .sort((a, b) => b.month - a.month)
-            .slice(0, 3)
-            .map(e => ({ name: e.name, sales: e.month, department: e.dept }));
-
-          // Calculate Muon totals (sum of all 3 departments)
-          const muonTotals = {
-            todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales,
-            weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales,
-            monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales,
-          };
-
-          setDepartments(deptStats);
-          setMuonTotal(muonTotals);
-          setTopEmployees({ today: topToday, week: topWeek, month: topMonth });
-
-          if (notFoundInPeople.length > 0) {
-            console.warn('⚠️ Sellers not found in People (counted as Unknown):', notFoundInPeople);
           }
-          console.log('✅ MITT PROSJEKT UPDATED:', deptStats);
-          console.log('📊 Muon Totals:', muonTotals);
         });
 
-        return () => {
-          livefeedUnsub();
-          contractUnsub();
-        };
-      });
+        // Build top 3 employees for each period
+        const employeeList = Object.entries(employeeSales).map(([name, stats]) => ({
+          name,
+          dept: stats.dept,
+          today: stats.today,
+          week: stats.week,
+          month: stats.month,
+        }));
 
-      return () => contractUnsub();
+        const topToday = employeeList
+          .sort((a, b) => b.today - a.today)
+          .slice(0, 3)
+          .map(e => ({ name: e.name, sales: e.today, department: e.dept }));
+
+        const topWeek = employeeList
+          .sort((a, b) => b.week - a.week)
+          .slice(0, 3)
+          .map(e => ({ name: e.name, sales: e.week, department: e.dept }));
+
+        const topMonth = employeeList
+          .sort((a, b) => b.month - a.month)
+          .slice(0, 3)
+          .map(e => ({ name: e.name, sales: e.month, department: e.dept }));
+
+        // Calculate Muon totals (sum of all 3 departments)
+        const muonTotals = {
+          todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales,
+          weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales,
+          monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales,
+        };
+
+        setDepartments(deptStats);
+        setMuonTotal(muonTotals);
+        setTopEmployees({ today: topToday, week: topWeek, month: topMonth });
+
+        console.log('✅ MITT PROSJEKT UPDATED (from contracts):', deptStats);
+        console.log('📊 Muon Totals:', muonTotals);
+      } catch (err) {
+        console.error('Error in Mitt Prosjekt:', err);
+      }
     });
 
-    return () => employeeUnsub();
+    return () => unsubscribe();
   }, []);
 
   return (
-    <div className="mitt-prosjekt-container">
-      <h1>Mitt Prosjekt</h1>
+    <div style={{ marginLeft: '135px', paddingLeft: '10px', paddingRight: '340px', paddingTop: '2rem', paddingBottom: '2rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0' }}>
+      <h1 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '2rem', color: '#e2e8f0' }}>Mitt Prosjekt</h1>
 
-      {/* Status Tab */}
-      {activeTab === 'status' && (
-      <>
-      {/* Department Grid */}
-      <div className="dept-grid">
-        {['KRS', 'OSL', 'Skien'].map((deptName) => (
-          <div key={deptName} className="dept-card">
-            <h3>{deptName}</h3>
-            <div className="sales-row">
-              <div className="sale-item">
-                <span className="label">I dag</span>
-                <span className="value">{departments[deptName].todaySales}</span>
+      {/* Department Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', marginBottom: '3rem' }}>
+        {['KRS', 'OSL', 'Skien'].map((dept) => (
+          <div key={dept} style={{ background: '#2d3748', borderRadius: '12px', padding: '2rem', border: '1px solid #4b5563' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem', color: '#e2e8f0' }}>{dept}</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+              <div>
+                <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>I dag</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#4db8ff' }}>{departments[dept]?.todaySales || 0}</p>
               </div>
-              <div className="sale-item">
-                <span className="label">Uke</span>
-                <span className="value">{departments[deptName].weekSales}</span>
+              <div>
+                <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>Uke</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#ffd700' }}>{departments[dept]?.weekSales || 0}</p>
               </div>
-              <div className="sale-item">
-                <span className="label">Måned</span>
-                <span className="value">{departments[deptName].monthSales}</span>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>Måned</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#ffd700' }}>{departments[dept]?.monthSales || 0}</p>
               </div>
             </div>
+
+            {/* Top 3 for this department */}
+            {activeTab === 'status' && (
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #4b5563' }}>
+                <p style={{ fontSize: '0.9rem', fontWeight: '700', color: '#b0b0b0', marginBottom: '1rem' }}>Topp 3 denne måneden</p>
+                {topEmployees.month
+                  .filter(emp => emp.department === dept)
+                  .slice(0, 3)
+                  .map((emp, idx) => (
+                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #374151' }}>
+                      <span style={{ fontSize: '0.85rem', color: '#d0d0d0' }}>{emp.name}</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#10b981' }}>{emp.sales}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       {/* Muon Total */}
-      <div className="muon-total-card">
-        <h3>🏢 Muon Totalt</h3>
-        <div className="sales-row">
-          <div className="sale-item">
-            <span className="label">I dag</span>
-            <span className="value">{muonTotal.todaySales}</span>
+      <div style={{ background: '#2d3748', borderRadius: '12px', padding: '2rem', border: '2px solid #667eea', marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1.5rem', color: '#667eea' }}>MUON TOTALT</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+          <div>
+            <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>I dag</p>
+            <p style={{ fontSize: '3rem', fontWeight: '700', color: '#4db8ff' }}>{muonTotal.todaySales}</p>
           </div>
-          <div className="sale-item">
-            <span className="label">Uke</span>
-            <span className="value">{muonTotal.weekSales}</span>
+          <div>
+            <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>Uke</p>
+            <p style={{ fontSize: '3rem', fontWeight: '700', color: '#ffd700' }}>{muonTotal.weekSales}</p>
           </div>
-          <div className="sale-item">
-            <span className="label">Måned</span>
-            <span className="value">{muonTotal.monthSales}</span>
+          <div>
+            <p style={{ fontSize: '0.85rem', color: '#9ca3af', marginBottom: '0.5rem' }}>Måned</p>
+            <p style={{ fontSize: '3rem', fontWeight: '700', color: '#ffd700' }}>{muonTotal.monthSales}</p>
           </div>
         </div>
       </div>
-
-      {/* Top 3 Employees */}
-      <div className="top-employees-grid">
-        {/* Today */}
-        <div className="top-card">
-          <h4>🔥 Topp 3 I dag</h4>
-          {topEmployees.today.map((emp, idx) => (
-            <div key={idx} className="top-employee">
-              <span className="rank">{idx + 1}.</span>
-              <span className="name">{emp.name}</span>
-              <span className="sales">{emp.sales}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Week */}
-        <div className="top-card">
-          <h4>📈 Topp 3 Uke</h4>
-          {topEmployees.week.map((emp, idx) => (
-            <div key={idx} className="top-employee">
-              <span className="rank">{idx + 1}.</span>
-              <span className="name">{emp.name}</span>
-              <span className="sales">{emp.sales}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Month */}
-        <div className="top-card">
-          <h4>🎯 Topp 3 Måned</h4>
-          {topEmployees.month.map((emp, idx) => (
-            <div key={idx} className="top-employee">
-              <span className="rank">{idx + 1}.</span>
-              <span className="name">{emp.name}</span>
-              <span className="sales">{emp.sales}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      </>
-      )}
-
-      {/* Wall of Fame Tab */}
-      {activeTab === 'walloffame' && (
-        <div style={{ width: '100%', maxWidth: '1000px' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', textAlign: 'center', color: '#e2e8f0' }}>🏆 Wall of Fame</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-            {/* Best Today */}
-            <div style={{
-              backgroundColor: '#2d3748',
-              border: '2px solid #ffd700',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              textAlign: 'center',
-            }}>
-              <h3 style={{ fontSize: '1.1rem', color: '#ffd700', marginBottom: '1rem' }}>🔥 Beste I dag</h3>
-              {topEmployees.today.length > 0 ? (
-                <>
-                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    {topEmployees.today[0].name}
-                  </p>
-                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
-                    {topEmployees.today[0].sales} salg
-                  </p>
-                </>
-              ) : (
-                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
-              )}
-            </div>
-
-            {/* Best Week */}
-            <div style={{
-              backgroundColor: '#2d3748',
-              border: '2px solid #c0c0c0',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              textAlign: 'center',
-            }}>
-              <h3 style={{ fontSize: '1.1rem', color: '#c0c0c0', marginBottom: '1rem' }}>📈 Beste Uke</h3>
-              {topEmployees.week.length > 0 ? (
-                <>
-                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    {topEmployees.week[0].name}
-                  </p>
-                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
-                    {topEmployees.week[0].sales} salg
-                  </p>
-                </>
-              ) : (
-                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
-              )}
-            </div>
-
-            {/* Best Month */}
-            <div style={{
-              backgroundColor: '#2d3748',
-              border: '2px solid #cd7f32',
-              borderRadius: '8px',
-              padding: '1.5rem',
-              textAlign: 'center',
-            }}>
-              <h3 style={{ fontSize: '1.1rem', color: '#cd7f32', marginBottom: '1rem' }}>🎯 Beste Måned</h3>
-              {topEmployees.month.length > 0 ? (
-                <>
-                  <p style={{ fontSize: '1.8rem', color: '#90ee90', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                    {topEmployees.month[0].name}
-                  </p>
-                  <p style={{ fontSize: '1.2rem', color: '#e2e8f0' }}>
-                    {topEmployees.month[0].sales} salg
-                  </p>
-                </>
-              ) : (
-                <p style={{ color: '#b0b0b0' }}>Ingen data</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
