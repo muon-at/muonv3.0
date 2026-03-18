@@ -671,10 +671,21 @@ export default function AdminDashboard() {
     try {
       const empSnap = await getDocs(collection(db, 'employees'));
       const peopleNames = new Set<string>();
+      const peopleNamesLower = new Set<string>();
+      
       empSnap.docs.forEach(doc => {
         const data = doc.data();
-        peopleNames.add(data.name);
-        if (data.externalName) peopleNames.add(data.externalName);
+        const name = (data.name || '').trim();
+        const externalName = (data.externalName || '').trim();
+        
+        if (name) {
+          peopleNames.add(name);
+          peopleNamesLower.add(name.toLowerCase());
+        }
+        if (externalName) {
+          peopleNames.add(externalName);
+          peopleNamesLower.add(externalName.toLowerCase());
+        }
       });
 
       const contractSnap = await getDocs(collection(db, 'allente_kontraktsarkiv'));
@@ -693,8 +704,25 @@ export default function AdminDashboard() {
         }
       });
 
+      // Smart matching: exact match first, then case-insensitive, then partial match
       const missing = Array.from(sellersMap.entries())
-        .filter(([name]) => !peopleNames.has(name))
+        .filter(([selgerName]) => {
+          // Exact match
+          if (peopleNames.has(selgerName)) return false;
+          
+          // Case-insensitive match
+          if (peopleNamesLower.has(selgerName.toLowerCase())) return false;
+          
+          // Partial match: check if any people name contains or is contained in selger name
+          const selgerLower = selgerName.toLowerCase();
+          for (const peopleName of peopleNamesLower) {
+            if (peopleName.includes(selgerLower) || selgerLower.includes(peopleName)) {
+              return false;
+            }
+          }
+          
+          return true;
+        })
         .map(([name, data]) => ({
           name,
           count: data.count,
