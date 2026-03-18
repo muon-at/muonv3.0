@@ -176,8 +176,8 @@ export default function AvdelingDashboard() {
   }
 
   return (
-    <div style={{ padding: '2rem', marginRight: '330px', color: '#e2e8f0' }}>
-      <h1 style={{ marginBottom: '2rem', color: '#e2e8f0' }}>Min Avdeling: {user.department}</h1>
+    <div style={{ padding: '2rem', marginRight: '330px', color: '#e2e8f0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <h1 style={{ marginBottom: '2rem', color: '#e2e8f0', textAlign: 'center', fontSize: '2.5rem' }}>{user.department}</h1>
 
       {/* Department Stats */}
       <div style={{
@@ -185,6 +185,8 @@ export default function AvdelingDashboard() {
         gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '1rem',
         marginBottom: '2rem',
+        width: '100%',
+        maxWidth: '800px',
       }}>
         {/* Salg I dag */}
         <div style={{
@@ -237,6 +239,8 @@ export default function AvdelingDashboard() {
         display: 'grid',
         gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '1rem',
+        width: '100%',
+        maxWidth: '800px',
       }}>
         {/* Top Today */}
         <div style={{
