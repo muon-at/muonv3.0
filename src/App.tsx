@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { AuthProvider } from './lib/authContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -26,8 +26,9 @@ import MobileTeam from './pages/MobileTeam';
 import MobileCalendar from './pages/MobileCalendar';
 import './App.css';
 
-function AppContent() {
+function RoutedContent() {
   const [revenueAmount, setRevenueAmount] = useState<number | null>(null);
+  const location = useLocation();
   
   // Initialize service worker updates
   useServiceWorkerUpdate();
@@ -41,10 +42,13 @@ function AppContent() {
     }
   }, []);
 
+  // Show livefeed only on Min Side routes
+  const showLivefeed = ['/status', '/records', '/earnings', '/calendar'].includes(location.pathname);
+
   return (
     <>
       <RevenueDisplay amount={revenueAmount} />
-      <SalesLivefeed onPostAdded={(price) => setRevenueAmount(price)} />
+      {showLivefeed && <SalesLivefeed onPostAdded={(price) => setRevenueAmount(price)} />}
       <Routes>
         <Route path="/" element={<Login />} />
           <Route path="/reset-password" element={<ResetPassword />} />
@@ -204,7 +208,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppContent />
+        <RoutedContent />
       </Router>
     </AuthProvider>
   );
