@@ -36,6 +36,8 @@ export default function AdminDashboard() {
   const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddPassword, setShowAddPassword] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
     name: '',
     email: '',
@@ -1493,12 +1495,28 @@ export default function AdminDashboard() {
                 <label>Passord</label>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <input 
-                    type="password" 
+                    type={showEditPassword ? 'text' : 'password'} 
                     value={editingEmployee.password || ''} 
                     onChange={(e) => setEditingEmployee({ ...editingEmployee, password: e.target.value })} 
                     placeholder="Sikker passord" 
                     style={{ flex: 1 }}
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    style={{
+                      padding: '0.5rem 0.7rem',
+                      background: 'transparent',
+                      color: '#b0b0b0',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1.2rem',
+                      transition: 'color 0.2s'
+                    }}
+                    title={showEditPassword ? 'Skjul passord' : 'Vis passord'}
+                  >
+                    {showEditPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
                   <button 
                     type="button"
                     onClick={() => {
@@ -1553,7 +1571,11 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="modal-actions">
-              <button className="modal-btn cancel-btn" onClick={() => { setShowEditModal(false); setEditingEmployee(null); }}>Avbryt</button>
+              <button className="modal-btn cancel-btn" onClick={() => { 
+                setShowEditModal(false); 
+                setEditingEmployee(null); 
+                setShowEditPassword(false);
+              }}>Avbryt</button>
               <button className="modal-btn save-btn" onClick={handleSaveEdit}>Lagre</button>
             </div>
           </div>
@@ -1578,12 +1600,28 @@ export default function AdminDashboard() {
                 <label>Passord *</label>
                 <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                   <input 
-                    type="password" 
+                    type={showAddPassword ? 'text' : 'password'} 
                     value={newEmployee.password || ''} 
                     onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })} 
                     placeholder="Sikker passord" 
                     style={{ flex: 1 }}
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowAddPassword(!showAddPassword)}
+                    style={{
+                      padding: '0.5rem 0.7rem',
+                      background: 'transparent',
+                      color: '#b0b0b0',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1.2rem',
+                      transition: 'color 0.2s'
+                    }}
+                    title={showAddPassword ? 'Skjul passord' : 'Vis passord'}
+                  >
+                    {showAddPassword ? '👁️' : '👁️‍🗨️'}
+                  </button>
                   <button 
                     type="button"
                     onClick={() => {
@@ -1638,7 +1676,10 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="modal-actions">
-              <button className="modal-btn cancel-btn" onClick={() => setShowAddModal(false)}>Avbryt</button>
+              <button className="modal-btn cancel-btn" onClick={() => {
+                setShowAddModal(false);
+                setShowAddPassword(false);
+              }}>Avbryt</button>
               <button className="modal-btn save-btn" onClick={handleSaveAdd}>Lagre</button>
             </div>
           </div>
