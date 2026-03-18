@@ -286,12 +286,6 @@ export default function AdminDashboard() {
             historicalContracts.push(doc.data());
           });
 
-          // DEBUG: Log all livefeed posts to see userName values
-          console.log('📍 DEBUG Progresjon - livefeed posts:');
-          todayPosts.forEach((post) => {
-            console.log(`  userName: "${post.userName}" | product: "${post.product}"`);
-          });
-
           const today = new Date();
           const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
           const startOfWeek = new Date(today);
@@ -304,7 +298,6 @@ export default function AdminDashboard() {
           // Process TODAY posts from livefeed_sales (🔔 modal posts)
           todayPosts.forEach((data) => {
             const ansatt = data.userName || 'Ukjent';
-            console.log(`  → Processing: ${ansatt}`);
             
             if (!sellerStats[ansatt]) {
               sellerStats[ansatt] = { 
@@ -324,19 +317,18 @@ export default function AdminDashboard() {
             const produkt = (data.product || '').toLowerCase();
             if (produkt.includes('btv')) {
               sellerStats[ansatt].btv_today++;
-              console.log(`     ✓ Added BTV for ${ansatt}`);
             } else if (produkt.includes('dth')) {
               sellerStats[ansatt].dth_today++;
             } else if (produkt.includes('free')) {
               sellerStats[ansatt].free_today++;
             }
           });
-
-          console.log('📊 sellerStats after livefeed:', Object.keys(sellerStats));
           
           // Process HISTORICAL from allente_kontraktsarkiv (CSV uploads)
           historicalContracts.forEach((data) => {
-        const ansatt = data.selger || 'Ukjent';
+        let ansatt = data.selger || 'Ukjent';
+        // Deduplicate: strip "/ selger" suffix from old format names
+        ansatt = ansatt.replace(/ \/ selger$/i, '').trim();
         if (!sellerStats[ansatt]) {
           sellerStats[ansatt] = { 
             btv_today: 0, 
