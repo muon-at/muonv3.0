@@ -104,8 +104,16 @@ export default function Login() {
         navigate('/reset-password');
       } else {
         login(foundEmployee.name, foundEmployee.id, foundEmployee.role, foundEmployee);
+        
+        // Role-based redirect
         const isMobile = window.innerWidth < 769;
-        navigate(isMobile ? '/home' : '/status');
+        if (foundEmployee.role === 'owner') {
+          // Owner → Admin Dashboard
+          navigate('/admin-dashboard?tab=muon&muon=people');
+        } else {
+          // Junior/Senior/Teamleder → Min Side (Status)
+          navigate(isMobile ? '/home' : '/status');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { collection, getDocs, doc, updateDoc, addDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { useAuth } from '../lib/authContext';
 import FileUploadModal from '../components/FileUploadModal';
 import '../styles/AdminDashboard.css';
 
@@ -22,9 +23,18 @@ interface Employee {
 }
 
 export default function AdminDashboard() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const muonParam = searchParams.get('muon');
   const location = useLocation();
+
+  // Role check: Only owners can access admin
+  useEffect(() => {
+    if (user && user.role !== 'owner') {
+      navigate('/status');
+    }
+  }, [user, navigate]);
   
   // ===== PEOPLE STATE =====
   const [employees, setEmployees] = useState<Employee[]>([]);
