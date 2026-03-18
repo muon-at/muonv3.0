@@ -139,34 +139,51 @@ export default function Status() {
     loadStats();
   }, [user?.id]);
 
-  // Load badges from Firestore
+  // Load badges from Firestore (Admin > Prosjekt > Allente > Badges)
   useEffect(() => {
     const loadBadges = async () => {
       try {
         const badgesSnap = await getDocs(collection(db, 'allente_badges'));
         const badgesList: Badge[] = [];
+        const achievedList: string[] = [];
+
         badgesSnap.forEach((doc) => {
-          const emoji = doc.id || '';
+          const badgeData = doc.data();
+          const emoji = doc.id; // Document ID is the emoji
+          
           badgesList.push({
             emoji: emoji,
-            navn: doc.data().navn || '',
-            verdi: doc.data().verdi || 0,
-            beskrivelse: doc.data().beskrivelse || '',
+            navn: badgeData.navn || '',
+            verdi: badgeData.verdi || 0,
+            beskrivelse: badgeData.beskrivelse || '',
           });
-          console.log('Loaded badge:', { emoji: emoji, navn: doc.data().navn });
+
+          // Determine if badge is achieved based on user's stats
+          // For now: simple logic - if user has made sales today, mark first badge as achieved
+          if (todayStats.count >= (badgeData.verdi || 0)) {
+            achievedList.push(emoji);
+          }
+
+          console.log('✅ Badge loaded:', {
+            emoji: emoji,
+            navn: badgeData.navn,
+            verdi: badgeData.verdi,
+            achieved: todayStats.count >= (badgeData.verdi || 0),
+          });
         });
-        setBadges(badgesList);
+
+        // Sort badges by verdi (value) ascending
+        badgesList.sort((a, b) => a.verdi - b.verdi);
         
-        // For now, set some test achieved badges
-        // In the future, this should come from user data or progresjon
-        setAchievedBadges(['🥇', '🏆']); // Example: user has these badges
+        setBadges(badgesList);
+        setAchievedBadges(achievedList);
       } catch (err) {
-        console.error('Error loading badges:', err);
+        console.error('❌ Error loading badges:', err);
       }
     };
 
     loadBadges();
-  }, []);
+  }, [todayStats.count]);
 
   const handleTargetEdit = (type: 'day' | 'week' | 'month') => {
     setEditingTarget(type);
