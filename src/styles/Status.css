@@ -140,8 +140,8 @@
 
 /* Badges Section - V2.0 Style - COMPACT */
 .badges-section {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #6366f1 0%, #5a67d8 100%);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(90, 103, 216, 0.3);
