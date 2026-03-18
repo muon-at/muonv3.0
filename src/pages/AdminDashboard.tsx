@@ -914,9 +914,9 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Missing Employees Section */}
-                <div style={{ width: '100%', marginTop: '3rem', padding: '2rem', background: '#fff3cd', borderRadius: '8px', border: '1px solid #ffc107' }}>
+                <div style={{ width: '100%', marginTop: '3rem', padding: '2rem', background: '#f3f4f6', borderRadius: '8px', border: '1px solid #9ca3af' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                    <h3 style={{ margin: 0, color: '#856404' }}>🔍 Manglende ansatte fra kontrakter</h3>
+                    <h3 style={{ margin: 0, color: '#374151' }}>🔍 Manglende ansatte fra kontrakter</h3>
                     <button 
                       onClick={() => {
                         loadMissingEmployees();
@@ -924,8 +924,8 @@ export default function AdminDashboard() {
                       }}
                       style={{
                         padding: '0.5rem 1rem',
-                        background: '#ffc107',
-                        color: '#333',
+                        background: '#9ca3af',
+                        color: 'white',
                         border: 'none',
                         borderRadius: '6px',
                         fontWeight: '600',
@@ -938,13 +938,13 @@ export default function AdminDashboard() {
                   </div>
 
                   {missingEmployees.length === 0 ? (
-                    <p style={{ margin: 0, color: '#856404' }}>Ingen manglende ansatte funnet. Alle selgere fra kontrakter finnes i People! ✅</p>
+                    <p style={{ margin: 0, color: '#374151' }}>Ingen manglende ansatte funnet. Alle selgere fra kontrakter finnes i People! ✅</p>
                   ) : (
                     <>
                       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
                         <thead>
-                          <tr style={{ background: '#ffe69c', borderBottom: '2px solid #ffc107' }}>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>
+                          <tr style={{ background: '#e5e7eb', borderBottom: '2px solid #9ca3af' }}>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>
                               <input 
                                 type="checkbox" 
                                 checked={selectedMissing.size === missingEmployees.length && missingEmployees.length > 0}
@@ -957,15 +957,15 @@ export default function AdminDashboard() {
                                 }}
                               /> Velg
                             </th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Navn</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Kontrakter</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Avdeling</th>
-                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#333' }}>Siste dato</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Navn</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Kontrakter</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Avdeling</th>
+                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '700', color: '#374151' }}>Siste dato</th>
                           </tr>
                         </thead>
                         <tbody>
                           {missingEmployees.map((emp) => (
-                            <tr key={emp.name} style={{ borderBottom: '1px solid #ffe69c' }}>
+                            <tr key={emp.name} style={{ borderBottom: '1px solid #d1d5db' }}>
                               <td style={{ padding: '0.75rem', textAlign: 'center' }}>
                                 <input 
                                   type="checkbox" 
@@ -983,7 +983,7 @@ export default function AdminDashboard() {
                               </td>
                               <td style={{ padding: '0.75rem', fontWeight: '700' }}>{emp.name}</td>
                               <td style={{ padding: '0.75rem', textAlign: 'center' }}>{emp.count}</td>
-                              <td style={{ padding: '0.75rem', background: '#ffeaa7', fontWeight: '600' }}>{emp.dept}</td>
+                              <td style={{ padding: '0.75rem', background: '#d1d5db', fontWeight: '600' }}>{emp.dept}</td>
                               <td style={{ padding: '0.75rem', color: '#666' }}>{emp.latestDate}</td>
                             </tr>
                           ))}
@@ -996,7 +996,7 @@ export default function AdminDashboard() {
                           disabled={selectedMissing.size === 0 || addingMissing}
                           style={{
                             padding: '0.75rem 1.5rem',
-                            background: selectedMissing.size === 0 ? '#ccc' : '#10b981',
+                            background: selectedMissing.size === 0 ? '#9ca3af' : '#10b981',
                             color: 'white',
                             border: 'none',
                             borderRadius: '6px',
