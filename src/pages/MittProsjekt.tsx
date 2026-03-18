@@ -172,11 +172,11 @@ export default function MittProsjekt() {
             .slice(0, 3)
             .map(e => ({ name: e.name, sales: e.month, department: e.dept }));
 
-          // Calculate Muon totals (KRS + OSL + Skien + Unknown people fallback)
+          // Calculate Muon totals (sum of all 3 departments)
           const muonTotals = {
-            todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales + muonUnknownSales.today,
-            weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales + muonUnknownSales.week,
-            monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales + muonUnknownSales.month,
+            todaySales: deptStats['KRS'].todaySales + deptStats['OSL'].todaySales + deptStats['Skien'].todaySales,
+            weekSales: deptStats['KRS'].weekSales + deptStats['OSL'].weekSales + deptStats['Skien'].weekSales,
+            monthSales: deptStats['KRS'].monthSales + deptStats['OSL'].monthSales + deptStats['Skien'].monthSales,
           };
 
           setDepartments(deptStats);
