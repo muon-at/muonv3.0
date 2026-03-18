@@ -44,7 +44,7 @@ function RoutedContent() {
   }, []);
 
   // Show livefeed only on Min Side routes
-  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt'].includes(location.pathname);
+  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt', '/min-avdeling'].includes(location.pathname);
 
   return (
     <>
