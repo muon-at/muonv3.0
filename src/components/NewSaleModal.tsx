@@ -61,7 +61,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       setGifResults(cached);
       setCurrentGifIndex(0);
       if (cached.length > 0) {
-        setSelectedGif(cached[0].images?.fixed_width_small?.url || cached[0].images?.fixed_width?.url);
+        setSelectedGif(cached[0].images?.fixed_width?.url);
       }
       setGifLoading(false);
       return;
@@ -88,7 +88,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
       const data = await response.json();
       const gifs = (data.data || []).filter((gif: any) => 
-        gif.images && (gif.images.fixed_width_small || gif.images.fixed_width)
+        gif.images && gif.images.fixed_width
       );
       
       gifCache.current.set(query, gifs);
@@ -96,7 +96,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       setCurrentGifIndex(0);
       
       if (gifs.length > 0) {
-        setSelectedGif(gifs[0].images?.fixed_width_small?.url || gifs[0].images?.fixed_width?.url);
+        setSelectedGif(gifs[0].images?.fixed_width?.url);
       } else {
         setSelectedGif(null);
       }
@@ -118,7 +118,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
       const nextIndex = (currentGifIndex + 1) % gifResults.length;
       setCurrentGifIndex(nextIndex);
       const nextGif = gifResults[nextIndex];
-      setSelectedGif(nextGif.images?.fixed_width_small?.url || nextGif.images?.fixed_width?.url);
+      setSelectedGif(nextGif.images?.fixed_width?.url);
     }
   };
 

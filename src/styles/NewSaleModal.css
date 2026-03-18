@@ -243,6 +243,7 @@
   height: 100%;
   display: block;
   object-fit: contain;
+  image-rendering: crisp-edges;
 }
 
 /* GIF Counter */
