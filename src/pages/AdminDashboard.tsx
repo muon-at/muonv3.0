@@ -921,7 +921,6 @@ export default function AdminDashboard() {
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Rolle</th>
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Prosjekt</th>
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Avdeling</th>
-                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>TMG-navn</th>
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Stilling</th>
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Ekstern navn</th>
                         <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: '700' }}>Min Side</th>
@@ -942,7 +941,6 @@ export default function AdminDashboard() {
                             </td>
                             <td style={{ padding: '0.75rem' }}>{emp.project || '-'}</td>
                             <td style={{ padding: '0.75rem' }}>{emp.department || '-'}</td>
-                            <td style={{ padding: '0.75rem' }}>{emp.tmgName || '-'}</td>
                             <td style={{ padding: '0.75rem' }}>{emp.stilling || '-'}</td>
                             <td style={{ padding: '0.75rem' }}>{emp.externalName || '-'}</td>
                             <td style={{ padding: '0.75rem', textAlign: 'center' }}>
