@@ -450,15 +450,26 @@ export default function AdminDashboard() {
         }
       });
 
-          // Calculate records (best day/week/month) for each ansatt
+          // Calculate records (best day/week/month) for each ansatt AND department
           const dailyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> day -> count
           const weeklyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> week -> count
           const monthlyCounts: { [key: string]: { [key: string]: number } } = {}; // ansatt -> month -> count
+          
+          // Department-level tracking
+          const deptDailyCounts: { [key: string]: { [key: string]: number } } = {}; // dept -> day -> count
+          const deptWeeklyCounts: { [key: string]: { [key: string]: number } } = {}; // dept -> week -> count
+          const deptMonthlyCounts: { [key: string]: { [key: string]: number } } = {}; // dept -> month -> count
+          
+          // Muon total tracking (all depts combined)
+          const muonDailyCounts: { [key: string]: number } = {};
+          const muonWeeklyCounts: { [key: string]: number } = {};
+          const muonMonthlyCounts: { [key: string]: number } = {};
 
           historicalContracts.forEach((data) => {
             let ansatt = data.selger || 'Ukjent';
             ansatt = ansatt.replace(/ \/ selger$/i, '').trim();
             const dato = data.dato || '';
+            const dept = getEmployeeDetail(ansatt).dept;
 
             if (dato && typeof dato === 'string') {
               const parts = dato.split('/');
@@ -472,17 +483,38 @@ export default function AdminDashboard() {
                 const dayKey = orderDate.toISOString().split('T')[0];
                 if (!dailyCounts[ansatt]) dailyCounts[ansatt] = {};
                 dailyCounts[ansatt][dayKey] = (dailyCounts[ansatt][dayKey] || 0) + 1;
+                
+                // Department day tracking
+                if (!deptDailyCounts[dept]) deptDailyCounts[dept] = {};
+                deptDailyCounts[dept][dayKey] = (deptDailyCounts[dept][dayKey] || 0) + 1;
+                
+                // Muon total day tracking
+                muonDailyCounts[dayKey] = (muonDailyCounts[dayKey] || 0) + 1;
 
                 // Week key
                 const weekNum = Math.ceil(orderDate.getDate() / 7);
                 const weekKey = `${year}-W${weekNum}`;
                 if (!weeklyCounts[ansatt]) weeklyCounts[ansatt] = {};
                 weeklyCounts[ansatt][weekKey] = (weeklyCounts[ansatt][weekKey] || 0) + 1;
+                
+                // Department week tracking
+                if (!deptWeeklyCounts[dept]) deptWeeklyCounts[dept] = {};
+                deptWeeklyCounts[dept][weekKey] = (deptWeeklyCounts[dept][weekKey] || 0) + 1;
+                
+                // Muon total week tracking
+                muonWeeklyCounts[weekKey] = (muonWeeklyCounts[weekKey] || 0) + 1;
 
                 // Month key
                 const monthKey = `${year}-${String(month).padStart(2, '0')}`;
                 if (!monthlyCounts[ansatt]) monthlyCounts[ansatt] = {};
                 monthlyCounts[ansatt][monthKey] = (monthlyCounts[ansatt][monthKey] || 0) + 1;
+                
+                // Department month tracking
+                if (!deptMonthlyCounts[dept]) deptMonthlyCounts[dept] = {};
+                deptMonthlyCounts[dept][monthKey] = (deptMonthlyCounts[dept][monthKey] || 0) + 1;
+                
+                // Muon total month tracking
+                muonMonthlyCounts[monthKey] = (muonMonthlyCounts[monthKey] || 0) + 1;
               }
             }
           });
@@ -515,10 +547,28 @@ export default function AdminDashboard() {
             stats.best_month = Math.max(ansattMonthlyMax, thisMonthTotal);
           });
 
+      // Calculate department-level best records
+          const deptBestRecords: { [key: string]: { best_day: number; best_week: number; best_month: number } } = {};
+          const avdelingOrder = ['KRS', 'OSL', 'Skien'];
+          
+          avdelingOrder.forEach(dept => {
+            const dayMax = Math.max(0, ...Object.values(deptDailyCounts[dept] || {}));
+            const weekMax = Math.max(0, ...Object.values(deptWeeklyCounts[dept] || {}));
+            const monthMax = Math.max(0, ...Object.values(deptMonthlyCounts[dept] || {}));
+            deptBestRecords[dept] = { best_day: dayMax, best_week: weekMax, best_month: monthMax };
+          });
+          
+          // Calculate Muon total best records
+          const muonBestDay = Math.max(0, ...Object.values(muonDailyCounts));
+          const muonBestWeek = Math.max(0, ...Object.values(muonWeeklyCounts));
+          const muonBestMonth = Math.max(0, ...Object.values(muonMonthlyCounts));
+
       const progresjonList = Object.entries(sellerStats)
         .map(([ansatt, stats]) => ({
           ansatt,
           ...stats,
+          deptBestRecords,
+          muonBestRecords: { best_day: muonBestDay, best_week: muonBestWeek, best_month: muonBestMonth },
         }))
         .sort((a, b) => b.total_week - a.total_week); // Sort by week total
 
@@ -1797,11 +1847,12 @@ export default function AdminDashboard() {
                                 total_week: deptRows.reduce((s, r) => s + (r.total_week || 0), 0),
                                 total_month: deptRows.reduce((s, r) => s + (r.total_month || 0), 0),
                                 free_month: deptRows.reduce((s, r) => s + (r.free_month || 0), 0),
-                                best_day: deptRows.reduce((s, r) => s + (r.best_day || 0), 0),
-                                best_week: deptRows.reduce((s, r) => s + (r.best_week || 0), 0),
-                                best_month: deptRows.reduce((s, r) => s + (r.best_month || 0), 0),
                                 badges: deptRows.reduce((s, r) => s + (r.badges || 0), 0),
                               };
+                              
+                              // Get department-level best records
+                              const deptBestRecords = deptRows[0]?.deptBestRecords || {};
+                              const deptBest = deptBestRecords[dept] || { best_day: 0, best_week: 0, best_month: 0 };
                               
                               rows.push(
                                 <tr key={`${dept}-subtotal`} style={{ background: '#1f3a52', borderTop: '2px solid #4b5563', borderBottom: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.8rem' }}>
@@ -1814,9 +1865,9 @@ export default function AdminDashboard() {
                                   <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffd700', fontWeight: '700' }}>{deptSum.total_week}</td>
                                   <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffd700', fontWeight: '700' }}>{deptSum.total_month}</td>
                                   <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#51cf66', fontWeight: '700' }}>{deptSum.free_month}</td>
-                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_day}</td>
-                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_week}</td>
-                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptSum.best_month}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptBest.best_day}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptBest.best_week}</td>
+                                  <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{deptBest.best_month}</td>
                                   <td style={{ padding: '0.8rem 0.75rem', textAlign: 'center', color: '#ffaa00', fontWeight: '700' }}>⭐ {deptSum.badges}</td>
                                 </tr>
                               );
@@ -1832,22 +1883,27 @@ export default function AdminDashboard() {
                             // Render all rows
                             return rows;
                           })()}
-                          {/* TOTALT ROW */}
-                          <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
-                            <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT</td>
-                            <td style={{ padding: '1rem 0.75rem' }}></td>
-                            <td style={{ padding: '1rem 0.75rem' }}></td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#4db8ff' }}>{progresjonData.reduce((sum, r) => sum + (r.btv_today || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ff6b6b' }}>{progresjonData.reduce((sum, r) => sum + (r.dth_today || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_today || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_week || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_month || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_month || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_day || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_week || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff' }}>{progresjonData.reduce((sum, r) => sum + (r.best_month || 0), 0)}</td>
-                            <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffaa00' }}>⭐ {progresjonData.reduce((sum, r) => sum + (r.badges || 0), 0)}</td>
-                          </tr>
+                          {/* MUON TOTALT ROW */}
+                          {(() => {
+                            const muonBestRecords = progresjonData[0]?.muonBestRecords || { best_day: 0, best_week: 0, best_month: 0 };
+                            return (
+                              <tr style={{ background: '#2d3748', borderTop: '2px solid #4b5563', color: '#fff', fontWeight: '700', fontSize: '0.85rem' }}>
+                                <td style={{ padding: '1rem 0.75rem', fontWeight: '800', color: '#fff', whiteSpace: 'nowrap' }}>TOTALT MUON</td>
+                                <td style={{ padding: '1rem 0.75rem' }}></td>
+                                <td style={{ padding: '1rem 0.75rem' }}></td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#4db8ff' }}>{progresjonData.reduce((sum, r) => sum + (r.btv_today || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ff6b6b' }}>{progresjonData.reduce((sum, r) => sum + (r.dth_today || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_today || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_week || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffd700' }}>{progresjonData.reduce((sum, r) => sum + (r.total_month || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#51cf66' }}>{progresjonData.reduce((sum, r) => sum + (r.free_month || 0), 0)}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{muonBestRecords.best_day}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{muonBestRecords.best_week}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#b366ff', fontWeight: '700' }}>{muonBestRecords.best_month}</td>
+                                <td style={{ padding: '1rem 0.75rem', textAlign: 'center', color: '#ffaa00' }}>⭐ {progresjonData.reduce((sum, r) => sum + (r.badges || 0), 0)}</td>
+                              </tr>
+                            );
+                          })()}
                         </tbody>
                       </table>
                     </div>
