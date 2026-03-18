@@ -1490,6 +1490,37 @@ export default function AdminDashboard() {
                 <input type="email" value={editingEmployee.email || ''} onChange={(e) => setEditingEmployee({ ...editingEmployee, email: e.target.value })} placeholder="epost@bedrift.no" />
               </div>
               <div className="form-group">
+                <label>Passord</label>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input 
+                    type="password" 
+                    value={editingEmployee.password || ''} 
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, password: e.target.value })} 
+                    placeholder="Sikker passord" 
+                    style={{ flex: 1 }}
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      const generatedPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-2).toUpperCase();
+                      setEditingEmployee({ ...editingEmployee, password: generatedPassword });
+                    }}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      background: '#5a67d8',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Generer
+                  </button>
+                </div>
+              </div>
+              <div className="form-group">
                 <label>Rolle</label>
                 <select value={editingEmployee.role || ''} onChange={(e) => setEditingEmployee({ ...editingEmployee, role: e.target.value })}>
                   <option value="">Velg rolle</option>
