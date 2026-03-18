@@ -29,15 +29,20 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const modalRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
 
-  // Clean up animation state after modal slides out
+  // Clean up animation state and close modal after animation completes
   useEffect(() => {
     if (isAnimating) {
       const timer = setTimeout(() => {
         setIsAnimating(false);
-      }, 600); // Match animation duration
+        setGifSearch('');
+        setGifResults([]);
+        setCurrentGifIndex(0);
+        setSelectedGif(null);
+        onClose(); // Close after animation fully completes
+      }, 750); // Must match or exceed CSS animation duration (700ms)
       return () => clearTimeout(timer);
     }
-  }, [isAnimating]);
+  }, [isAnimating, onClose]);
 
   const GIPHY_API_KEY = 'rocNGj67aZ4GXyTkBiLKHDgso3j4EQ3c';
 
@@ -152,16 +157,8 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
           detail: { amount: price }
         })
       );
-
-      // Wait for animation to FULLY complete before closing
-      // Animation is 700ms, so wait 750ms to be safe
-      setTimeout(() => {
-        setGifSearch('');
-        setGifResults([]);
-        setCurrentGifIndex(0);
-        setSelectedGif(null);
-        onClose(); // NOW close the modal
-      }, 750);
+      
+      // useEffect will handle cleanup and closing after animation
     } catch (err) {
       console.error('❌ Error posting sale:', err);
       setIsAnimating(false);
@@ -170,9 +167,16 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
   if (!isOpen && !isAnimating) return null;
 
+  // When animating: ONLY show the sliding version, NOT the centered version
+  if (isAnimating) {
+    return (
+      <div ref={modalRef} className="modal-content modal-slide-to-livefeed" />
+    );
+  }
+
   return (
-    <div className={`modal-overlay ${isAnimating ? 'modal-animating-out' : ''}`} onClick={isAnimating ? undefined : onClose}>
-      <div ref={modalRef} className={`modal-content ${isAnimating ? 'modal-slide-to-livefeed' : ''}`} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div ref={modalRef} className="modal-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
         
         <h2>🔔 NYTT SALG</h2>
