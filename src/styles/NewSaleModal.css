@@ -10,6 +10,12 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  transition: opacity 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.modal-animating-out {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Modal Content */
@@ -25,6 +31,23 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   position: relative;
   animation: slideIn 0.3s ease-out;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Modal slides to livefeed (right side) */
+.modal-content.modal-slide-to-livefeed {
+  position: fixed;
+  width: 280px;
+  height: 130px;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  right: 0;
+  top: 1rem;
+  border-radius: 6px;
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 @keyframes slideIn {

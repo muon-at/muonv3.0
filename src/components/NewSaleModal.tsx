@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
@@ -24,8 +24,20 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [currentGifIndex, setCurrentGifIndex] = useState(0);
   const [gifLoading, setGifLoading] = useState(false);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const gifCache = useRef<Map<string, any[]>>(new Map());
+  const modalRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+
+  // Clean up animation state after modal slides out
+  useEffect(() => {
+    if (isAnimating) {
+      const timer = setTimeout(() => {
+        setIsAnimating(false);
+      }, 600); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [isAnimating]);
 
   const GIPHY_API_KEY = 'rocNGj67aZ4GXyTkBiLKHDgso3j4EQ3c';
 
@@ -117,6 +129,9 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     }
 
     try {
+      // Trigger slide-to-livefeed animation
+      setIsAnimating(true);
+
       await addDoc(collection(db, 'livefeed_sales'), {
         userId: user.id,
         userName: userName,
@@ -138,22 +153,24 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         })
       );
 
-      // Reset modal
-      setGifSearch('');
-      setGifResults([]);
-      setCurrentGifIndex(0);
-      setSelectedGif(null);
-      onClose();
+      // Reset modal after animation completes
+      setTimeout(() => {
+        setGifSearch('');
+        setGifResults([]);
+        setCurrentGifIndex(0);
+        setSelectedGif(null);
+      }, 600);
     } catch (err) {
       console.error('❌ Error posting sale:', err);
+      setIsAnimating(false);
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen && !isAnimating) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className={`modal-overlay ${isAnimating ? 'modal-animating-out' : ''}`} onClick={isAnimating ? undefined : onClose}>
+      <div ref={modalRef} className={`modal-content ${isAnimating ? 'modal-slide-to-livefeed' : ''}`} onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
         
         <h2>🔔 NYTT SALG</h2>
