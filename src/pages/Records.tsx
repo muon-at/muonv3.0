@@ -32,10 +32,13 @@ export default function Records() {
               <div className="plaque-icon">⭐</div>
               <div className="plaque-content">
                 <div className="plaque-title">{record.title}</div>
-                <div className="plaque-value">{record.value}</div>
+                <div className="plaque-value-wreath">
+                  <div className="wreath-left">🌿</div>
+                  <div className="plaque-value">{record.value}</div>
+                  <div className="wreath-right">🌿</div>
+                </div>
                 <div className="plaque-date">{record.date}</div>
               </div>
-              <div className="plaque-laurel">🌿</div>
             </div>
           ))}
         </div>
@@ -47,10 +50,13 @@ export default function Records() {
               <div className="plaque-icon">⭐</div>
               <div className="plaque-content">
                 <div className="plaque-title">{record.title}</div>
-                <div className="plaque-value">{record.value}</div>
+                <div className="plaque-value-wreath">
+                  <div className="wreath-left">🌿</div>
+                  <div className="plaque-value">{record.value}</div>
+                  <div className="wreath-right">🌿</div>
+                </div>
                 <div className="plaque-date">{record.date}</div>
               </div>
-              <div className="plaque-laurel">🌿</div>
             </div>
           ))}
         </div>
