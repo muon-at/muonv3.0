@@ -614,18 +614,23 @@ export default function AdminDashboard() {
     if (!editingEmployee.name.trim()) return;
     try {
       console.log('Saving employee:', editingEmployee.id, editingEmployee.name);
-      await updateDoc(doc(db, 'employees', editingEmployee.id), {
+      
+      // Build update object - only include fields that have values (not undefined/null)
+      const updateData: any = {
         name: editingEmployee.name,
-        email: editingEmployee.email,
-        password: editingEmployee.password,
-        role: editingEmployee.role,
-        project: editingEmployee.project,
-        department: editingEmployee.department,
-        slackName: editingEmployee.slackName,
-        externalName: editingEmployee.externalName,
-        tmgName: editingEmployee.tmgName,
-        stilling: editingEmployee.stilling,
-      });
+      };
+      
+      if (editingEmployee.email) updateData.email = editingEmployee.email;
+      if (editingEmployee.password) updateData.password = editingEmployee.password;
+      if (editingEmployee.role) updateData.role = editingEmployee.role;
+      if (editingEmployee.project) updateData.project = editingEmployee.project;
+      if (editingEmployee.department) updateData.department = editingEmployee.department;
+      if (editingEmployee.slackName) updateData.slackName = editingEmployee.slackName;
+      if (editingEmployee.externalName) updateData.externalName = editingEmployee.externalName;
+      if (editingEmployee.tmgName) updateData.tmgName = editingEmployee.tmgName;
+      if (editingEmployee.stilling) updateData.stilling = editingEmployee.stilling;
+      
+      await updateDoc(doc(db, 'employees', editingEmployee.id), updateData);
       console.log('✅ Employee saved successfully');
       setEmployees(employees.map(e => e.id === editingEmployee.id ? editingEmployee : e));
       setShowEditModal(false);
