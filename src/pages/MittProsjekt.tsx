@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/MittProsjekt.css';
 
@@ -33,30 +33,42 @@ export default function MittProsjekt() {
     month: [],
   });
 
-  // Simplified: Read directly from contracts with avdeling field
+  // Read from masterfil (employees) + contracts
   useEffect(() => {
-    const contractsRef = collection(db, 'allente_kontraktsarkiv');
-    const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
-      try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
-        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let unsubscribe = () => {};
+    
+    // Fetch masterfil ONCE for department mapping
+    getDocs(collection(db, 'employees')).then((empSnapshot) => {
+      const employeeMap: { [key: string]: string } = {};
+      empSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.name) employeeMap[data.name] = data.department || 'Unknown';
+        if (data.externalName) employeeMap[data.externalName] = data.department || 'Unknown';
+      });
 
-        const deptStats: { [key: string]: DepartmentStats } = {
-          'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-          'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-          'Skien': { name: 'Skien', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
-        };
-        const employeeSales: { [key: string]: { today: number; week: number; month: number; dept: string } } = {};
+      // Now listen to contracts
+      const contractsRef = collection(db, 'allente_kontraktsarkiv');
+      unsubscribe = onSnapshot(contractsRef, (snapshot) => {
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-        // Process contracts
-        snapshot.docs.forEach((doc) => {
-          const data = doc.data();
-          let ansatt = (data.selger || '').replace(/ \/ selger$/i, '').trim();
-          const avdeling = data.avdeling || 'OSL';
-          const dato = data.dato || '';
+          const deptStats: { [key: string]: DepartmentStats } = {
+            'KRS': { name: 'KRS', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+            'OSL': { name: 'OSL', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+            'Skien': { name: 'Skien', todaySales: 0, weekSales: 0, monthSales: 0, employees: [] },
+          };
+          const employeeSales: { [key: string]: { today: number; week: number; month: number; dept: string } } = {};
+
+          // Process contracts
+          snapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            let ansatt = (data.selger || '').replace(/ \/ selger$/i, '').trim();
+            const avdeling = employeeMap[ansatt] || 'Unknown'; // Get from masterfil!
+            const dato = data.dato || '';
 
           if (dato && typeof dato === 'string' && ansatt) {
             const parts = dato.split('/');
@@ -126,13 +138,14 @@ export default function MittProsjekt() {
         setMuonTotal(muonTotals);
         setTopEmployees({ today: topToday, week: topWeek, month: topMonth });
 
-        console.log('✅ MITT PROSJEKT UPDATED (from contracts):', deptStats);
+        console.log('✅ MITT PROSJEKT UPDATED (from contracts with masterfil avdeling):', deptStats);
         console.log('📊 Muon Totals:', muonTotals);
       } catch (err) {
         console.error('Error in Mitt Prosjekt:', err);
       }
+      });
     });
-
+    
     return () => unsubscribe();
   }, []);
 
