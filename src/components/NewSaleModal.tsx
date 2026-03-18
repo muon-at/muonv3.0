@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 import '../styles/NewSaleModal.css';
@@ -124,7 +124,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
         product: selectedProduct,
         productPrice: PRODUCT_PRICES[selectedProduct] || 1000,
         gifUrl: selectedGif,
-        timestamp: new Date(),
+        timestamp: serverTimestamp(),
         userRole: user.role || 'employee',
       });
 
