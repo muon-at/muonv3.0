@@ -263,12 +263,8 @@ export default function AdminDashboard() {
 
   // ===== FETCH PROGRESJON (Real-time listener) =====
   const fetchProgresjon = () => {
-    if (progresjonCache.current && progresjonCache.current.length > 0) {
-      setProgresjonData(progresjonCache.current);
-      setLoadingProgresjon(false);
-    } else {
-      setLoadingProgresjon(true);
-    }
+    // Don't use cache for Progresjon - always use live data from listener
+    setLoadingProgresjon(true);
 
     const contractsRef = collection(db, 'allente_kontraktsarkiv');
     const unsubscribe = onSnapshot(contractsRef, (snapshot) => {
