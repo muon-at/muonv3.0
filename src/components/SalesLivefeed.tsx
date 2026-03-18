@@ -122,6 +122,7 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
 
                 {/* Post content on right */}
                 <div className="livefeed-post-content">
+                  {/* Top section - Name & Department */}
                   <div className="livefeed-user">
                     {/* Split name into first and last */}
                     {post.userName.split(' ').length > 1 ? (
@@ -135,11 +136,14 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                     <span className="livefeed-department">{post.userDepartment}</span>
                   </div>
 
+                  {/* Bottom section - Product + Provisjon + Bell */}
                   <div className="livefeed-product-info">
-                    <div className="livefeed-product-row">
-                      <span className="livefeed-product-name">🔔 {post.product}</span>
-                      <span className="livefeed-product-price">{post.productPrice} kr</span>
+                    <span className="livefeed-product-name">{post.product}</span>
+                    <div className="livefeed-provisjon-row">
+                      <span className="livefeed-provisjon">PROV: 100 kr</span>
+                      <span className="livefeed-bell-emoji">🔔</span>
                     </div>
+                    <span className="livefeed-product-price">{post.productPrice} kr</span>
                   </div>
 
                   {/* Delete button */}
