@@ -136,14 +136,13 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                     <span className="livefeed-department">{post.userDepartment}</span>
                   </div>
 
-                  {/* Bottom section - Product + Provisjon + Bell */}
+                  {/* Bottom section - Product + Price + Bell */}
                   <div className="livefeed-product-info">
                     <span className="livefeed-product-name">{post.product}</span>
-                    <div className="livefeed-provisjon-row">
-                      <span className="livefeed-provisjon">PROV: 100 kr</span>
+                    <div className="livefeed-price-row">
+                      <span className="livefeed-product-price">{post.productPrice} kr</span>
                       <span className="livefeed-bell-emoji">🔔</span>
                     </div>
-                    <span className="livefeed-product-price">{post.productPrice} kr</span>
                   </div>
 
                   {/* Delete button */}
