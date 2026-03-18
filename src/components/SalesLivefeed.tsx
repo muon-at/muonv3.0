@@ -99,7 +99,7 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
           <div className="livefeed-empty">Ingen salg ennå</div>
         ) : (
           posts.map((post) => (
-            <div key={post.id} className="livefeed-post">
+            <div key={post.id} className="livefeed-post-wrapper">
               {/* Timestamp above post */}
               <div className="livefeed-timestamp">
                 {new Date(post.timestamp).toLocaleTimeString('no-NO', {
@@ -109,39 +109,45 @@ export const SalesLivefeed: React.FC<SalesLivefeedProps> = ({ onPostAdded }) => 
                 })}
               </div>
 
-              {/* GIF at top */}
-              {post.gifUrl && (
-                <img 
-                  src={post.gifUrl} 
-                  alt="Sale GIF" 
-                  className="livefeed-gif"
-                />
-              )}
-
-              {/* Post content */}
-              <div className="livefeed-post-content">
-                <div className="livefeed-user">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <strong>🔔 {post.userName}</strong>
-                  </div>
-                  <span className="livefeed-department">{post.userDepartment}</span>
-                </div>
-
-                <div className="livefeed-product">
-                  <div className="livefeed-product-name">{post.product}</div>
-                  <div className="livefeed-product-price">{post.productPrice} kr</div>
-                </div>
-
-                {/* Delete button - only show if user owns post or is owner */}
-                {(user?.id === post.userId || user?.role === 'owner') && (
-                  <button
-                    className="livefeed-delete-btn"
-                    onClick={() => handleDeletePost(post.id, post.userId)}
-                    title="Slett post"
-                  >
-                    ✕
-                  </button>
+              {/* Horizontal post */}
+              <div className="livefeed-post">
+                {/* GIF on left */}
+                {post.gifUrl && (
+                  <img 
+                    src={post.gifUrl} 
+                    alt="Sale GIF" 
+                    className="livefeed-gif"
+                  />
                 )}
+
+                {/* Post content on right */}
+                <div className="livefeed-post-content">
+                  <div className="livefeed-user">
+                    <strong>🔔 {post.userName}</strong>
+                    <span className="livefeed-department">{post.userDepartment}</span>
+                  </div>
+
+                  <div className="livefeed-product-info">
+                    <div className="livefeed-product-row">
+                      <span className="livefeed-product-name">{post.product}</span>
+                      <span className="livefeed-product-price">{post.productPrice} kr</span>
+                    </div>
+                    <div className="livefeed-product-row">
+                      <span className="livefeed-provisjon">PROV: 100 kr</span>
+                    </div>
+                  </div>
+
+                  {/* Delete button */}
+                  {(user?.id === post.userId || user?.role === 'owner') && (
+                    <button
+                      className="livefeed-delete-btn"
+                      onClick={() => handleDeletePost(post.id, post.userId)}
+                      title="Slett post"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))
