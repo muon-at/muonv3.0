@@ -71,12 +71,13 @@ export default function Earnings() {
       
       produktSnapshot.docs.forEach((doc) => {
         const data = doc.data();
-        const produktNavn = data.produkt || '';
+        const produktNavn = data.produkt || data.navn || '';
         const provisjon = parseInt(data.provisjon) || 1000;
-        produktMap[produktNavn.toLowerCase()] = provisjon;
+        produktMap[produktNavn.toLowerCase().trim()] = provisjon;
+        console.log(`📦 Produkt: ${produktNavn} => ${provisjon}kr`);
       });
 
-      console.log('📊 Produkter loaded:', Object.keys(produktMap).length);
+      console.log('📊 Produkter loaded:', Object.keys(produktMap).length, produktMap);
 
       // Now load livefeed and contracts
       const livefeedRef = collection(db, 'livefeed_sales');
@@ -114,13 +115,17 @@ export default function Earnings() {
             });
 
             // Process contracts for WEEK, MONTH, and PREVIOUS MONTH
+            let contractsFound = 0;
             archiveSnapshot.docs.forEach((doc) => {
               const data = doc.data();
               const selger = data.selger || '';
               const dato = data.dato || '';
               const produkt = data.produkt || '';
 
-              if (selger !== user.name) return;
+              if (selger.toLowerCase().trim() !== user.name.toLowerCase().trim()) return;
+
+              contractsFound++;
+              console.log(`📋 Contract ${contractsFound}: ${selger} | ${dato} | ${produkt}`);
 
               if (dato && typeof dato === 'string') {
                 const parts = dato.split('/');
@@ -131,20 +136,24 @@ export default function Earnings() {
                   const orderDate = new Date(year, month - 1, day);
 
                   // Look up provisjon from Admin Produkter
-                  const produktLower = produkt.toLowerCase();
-                  let provisjon = produktMap[produktLower] || 1000;
+                  const produktLower = produkt.toLowerCase().trim();
+                  let provisjon = 1000; // Default fallback
                   
-                  // Try partial match if exact match not found
-                  if (!produktMap[produktLower]) {
+                  if (produktMap[produktLower]) {
+                    provisjon = produktMap[produktLower];
+                  } else {
+                    // Try partial match
                     for (const [key, value] of Object.entries(produktMap)) {
                       if (produktLower.includes(key) || key.includes(produktLower)) {
                         provisjon = value;
+                        console.log(`✅ Matched: "${produkt}" to "${key}" = ${value}kr`);
                         break;
                       }
                     }
                   }
 
                   const revenue = provisjon;
+                  console.log(`💰 ${dato}: ${produkt} = ${revenue}kr`);
 
                   // WEEK counts
                   if (orderDate >= startOfWeek && orderDate <= today) {
@@ -219,7 +228,14 @@ export default function Earnings() {
 
             setPayments(prevMonthPayments);
 
-            console.log('💰 Earnings updated:', { dayRevenue, weekRevenue, monthRevenue, prevMonthRevenue });
+            console.log('💰 FINAL EARNINGS:', {
+              dayRevenue,
+              weekRevenue,
+              monthRevenue,
+              prevMonthRevenue,
+              contractsFound,
+              produktMapSize: Object.keys(produktMap).length,
+            });
           } catch (err) {
             console.error('❌ Error calculating earnings:', err);
           }
