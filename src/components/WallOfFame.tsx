@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/WallOfFame.css';
 
@@ -9,7 +9,6 @@ interface ProgresjonRow {
   dag: number;
   uke: number;
   måned: number;
-  totalt: number;
 }
 
 interface Record {
@@ -20,7 +19,7 @@ interface Record {
 }
 
 interface Props {
-  department?: string; // If provided, filter by department. If not, show all
+  department?: string;
   title?: string;
 }
 
@@ -34,182 +33,112 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
   ]);
 
   useEffect(() => {
-    const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), (livefeedSnapshot) => {
-      const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), async (archiveSnapshot) => {
+    // Listen to Progresjon (DAY/WEEK/MONTH)
+    const unsubscribeProgresjon = onSnapshot(collection(db, 'allente_progresjon'), (progSnapshot) => {
+      // Listen to Contracts (YEAR/TOTAL)
+      const unsubscribeContracts = onSnapshot(collection(db, 'allente_kontraktsarkiv'), (contractSnapshot) => {
         try {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
-          const startOfYear = new Date(today.getFullYear(), 0, 1);
-          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-          const startOfWeek = new Date(today);
-          startOfWeek.setDate(today.getDate() - today.getDay());
 
-          // Fetch employees for name mapping
-          const empSnapshot = await getDocs(collection(db, 'employees'));
-          const employeeDetailMap: { [key: string]: { dept: string; visualName: string } } = {};
-
-          empSnapshot.docs.forEach((doc) => {
+          // Load Progresjon data
+          const progresjonList: ProgresjonRow[] = [];
+          progSnapshot.docs.forEach((doc) => {
             const data = doc.data();
-            const dept = data.department || 'Unknown';
-            const visualName = data.name || '';
-
-            if (data.name) {
-              employeeDetailMap[data.name.toLowerCase().trim()] = { dept, visualName };
-            }
-            if (data.externalName) {
-              employeeDetailMap[data.externalName.toLowerCase().trim()] = { dept, visualName };
-            }
+            progresjonList.push({
+              ansatt: data.ansatt || '',
+              avdeling: data.avdeling || '',
+              dag: data.dag || 0,
+              uke: data.uke || 0,
+              måned: data.måned || 0,
+            });
           });
 
-          const getEmployeeDetail = (ansatt: string): { dept: string; visualName: string } => {
-            const ansattLower = ansatt.toLowerCase().trim();
-            if (employeeDetailMap[ansattLower]) return employeeDetailMap[ansattLower];
-            for (const [key, detail] of Object.entries(employeeDetailMap)) {
-              if (key.includes(ansattLower) || ansattLower.includes(key)) {
-                return detail;
-              }
-            }
-            return { dept: 'Unknown', visualName: ansatt };
-          };
+          // Filter by department if specified
+          let filteredProgresjon = progresjonList;
+          if (department) {
+            filteredProgresjon = progresjonList.filter(p => p.avdeling === department);
+          }
 
-          // Build Progresjon-style data from livefeed + archive
-          const sellerStats: { [key: string]: ProgresjonRow } = {};
+          // Find best for DAY/WEEK/MONTH from Progresjon
+          const bestDay = filteredProgresjon.reduce((max, p) => p.dag > max.dag ? p : max, filteredProgresjon[0] || { ansatt: '-', avdeling: '', dag: 0, uke: 0, måned: 0 });
+          const bestWeek = filteredProgresjon.reduce((max, p) => p.uke > max.uke ? p : max, filteredProgresjon[0] || { ansatt: '-', avdeling: '', dag: 0, uke: 0, måned: 0 });
+          const bestMonth = filteredProgresjon.reduce((max, p) => p.måned > max.måned ? p : max, filteredProgresjon[0] || { ansatt: '-', avdeling: '', dag: 0, uke: 0, måned: 0 });
 
-          // TODAY from livefeed
-          livefeedSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const ansatt = data.userName || 'Ukjent';
-            const detail = getEmployeeDetail(ansatt);
+          // Calculate YEAR and TOTAL from contracts
+          const yearCounts: { [key: string]: number } = {};
+          const totalCounts: { [key: string]: number } = {};
+          const deptMap: { [key: string]: string } = {}; // Map seller name to department
 
-            if (!sellerStats[ansatt]) {
-              sellerStats[ansatt] = {
-                ansatt: detail.visualName,
-                avdeling: detail.dept,
-                dag: 0,
-                uke: 0,
-                måned: 0,
-                totalt: 0,
-              };
-            }
-            sellerStats[ansatt].dag++;
-            sellerStats[ansatt].uke++;
-            sellerStats[ansatt].måned++;
-            sellerStats[ansatt].totalt++;
+          // First, build dept map from Progresjon
+          filteredProgresjon.forEach(p => {
+            deptMap[p.ansatt.toLowerCase()] = p.avdeling;
           });
 
-          // HISTORICAL from archive
-          archiveSnapshot.docs.forEach((doc) => {
+          contractSnapshot.docs.forEach((doc) => {
             const data = doc.data();
-            let originalSelger = data.selger || 'Ukjent';
-            let ansatt = originalSelger.replace(/ \/ selger$/i, '').trim();
-            const detail = getEmployeeDetail(ansatt);
-
+            let seller = data.selger || '';
             const dato = data.dato || '';
 
-            if (!sellerStats[ansatt]) {
-              sellerStats[ansatt] = {
-                ansatt: detail.visualName,
-                avdeling: detail.dept,
-                dag: 0,
-                uke: 0,
-                måned: 0,
-                totalt: 0,
-              };
-            }
+            // Strip "/ selger" suffix
+            seller = seller.replace(/ \/ selger$/i, '').trim();
 
+            // TOTAL count (all time)
+            totalCounts[seller] = (totalCounts[seller] || 0) + 1;
+
+            // YEAR count
             if (dato && typeof dato === 'string') {
               const parts = dato.split('/');
               if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
                 const year = parseInt(parts[2]);
-                const orderDate = new Date(year, month - 1, day);
-
-                if (orderDate >= today && orderDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)) {
-                  sellerStats[ansatt].dag++;
+                if (year === today.getFullYear()) {
+                  yearCounts[seller] = (yearCounts[seller] || 0) + 1;
                 }
-                if (orderDate >= startOfWeek && orderDate <= today) {
-                  sellerStats[ansatt].uke++;
-                }
-                if (orderDate >= startOfMonth && orderDate <= today) {
-                  sellerStats[ansatt].måned++;
-                }
-                if (orderDate >= startOfYear && orderDate <= today) {
-                  // Year already counted in totalt
-                }
-
-                sellerStats[ansatt].totalt++;
               }
             }
           });
 
-          // Convert to array and filter by department if specified
-          let progresjonList = Object.values(sellerStats);
-          
-          if (department) {
-            progresjonList = progresjonList.filter(row => row.avdeling === department);
-          }
-
-          console.log('📊 Progresjon data:', { 
-            total: Object.values(sellerStats).length,
-            filtered: progresjonList.length,
-            department: department || 'ALL',
+          // Find best for YEAR and TOTAL
+          let bestYearSeller = '-';
+          let bestYearCount = 0;
+          Object.entries(yearCounts).forEach(([seller, count]) => {
+            // Check if seller is in filtered list (same department)
+            const isInDept = filteredProgresjon.some(p => p.ansatt.toLowerCase() === seller.toLowerCase());
+            if (isInDept && count > bestYearCount) {
+              bestYearCount = count;
+              bestYearSeller = seller;
+            }
           });
 
-          // Find best records
-          const bestDay = progresjonList.reduce((max, row) => row.dag > max.value ? { employee: row.ansatt, value: row.dag } : max, { employee: '-', value: 0 });
-          const bestWeek = progresjonList.reduce((max, row) => row.uke > max.value ? { employee: row.ansatt, value: row.uke } : max, { employee: '-', value: 0 });
-          const bestMonth = progresjonList.reduce((max, row) => row.måned > max.value ? { employee: row.ansatt, value: row.måned } : max, { employee: '-', value: 0 });
-          
-          // Year: approximate as month data (could be improved with year-specific tracking)
-          const bestYear = progresjonList.reduce((max, row) => row.måned > max.value ? { employee: row.ansatt, value: row.måned } : max, { employee: '-', value: 0 });
-          
-          const bestTotal = progresjonList.reduce((max, row) => row.totalt > max.value ? { employee: row.ansatt, value: row.totalt } : max, { employee: '-', value: 0 });
+          let bestTotalSeller = '-';
+          let bestTotalCount = 0;
+          Object.entries(totalCounts).forEach(([seller, count]) => {
+            // Check if seller is in filtered list (same department)
+            const isInDept = filteredProgresjon.some(p => p.ansatt.toLowerCase() === seller.toLowerCase());
+            if (isInDept && count > bestTotalCount) {
+              bestTotalCount = count;
+              bestTotalSeller = seller;
+            }
+          });
 
           setRecords([
-            { 
-              title: 'FLEST SALG PÅ 1 DAG', 
-              value: bestDay.value, 
-              employee: bestDay.employee,
-              emoji: '☀️' 
-            },
-            { 
-              title: 'FLEST SALG PÅ 1 UKE', 
-              value: bestWeek.value, 
-              employee: bestWeek.employee,
-              emoji: '📅' 
-            },
-            { 
-              title: 'FLEST SALG PÅ 1 MÅNED', 
-              value: bestMonth.value, 
-              employee: bestMonth.employee,
-              emoji: '📊' 
-            },
-            { 
-              title: 'FLEST SALG PÅ I ÅR', 
-              value: bestYear.value, 
-              employee: bestYear.employee,
-              emoji: '🎯' 
-            },
-            { 
-              title: 'FLEST SALG PÅ TOTALT', 
-              value: bestTotal.value, 
-              employee: bestTotal.employee,
-              emoji: '🏆' 
-            },
+            { title: 'FLEST SALG PÅ 1 DAG', value: bestDay.dag, employee: bestDay.ansatt, emoji: '☀️' },
+            { title: 'FLEST SALG PÅ 1 UKE', value: bestWeek.uke, employee: bestWeek.ansatt, emoji: '📅' },
+            { title: 'FLEST SALG PÅ 1 MÅNED', value: bestMonth.måned, employee: bestMonth.ansatt, emoji: '📊' },
+            { title: 'FLEST SALG PÅ I ÅR', value: bestYearCount, employee: bestYearSeller, emoji: '🎯' },
+            { title: 'FLEST SALG PÅ TOTALT', value: bestTotalCount, employee: bestTotalSeller, emoji: '🏆' },
           ]);
 
-          console.log('🏆 Wall of Fame records:', { bestDay, bestWeek, bestMonth, bestYear, bestTotal });
+          console.log('🏆 Wall of Fame updated:', { bestDay, bestWeek, bestMonth, bestYear: { bestYearSeller, bestYearCount }, bestTotal: { bestTotalSeller, bestTotalCount }, department });
         } catch (err) {
           console.error('❌ Error calculating Wall of Fame:', err);
         }
       });
 
-      return () => unsubscribeArchive();
+      return () => unsubscribeContracts();
     });
 
-    return () => unsubscribeLivefeed();
+    return () => unsubscribeProgresjon();
   }, [department]);
 
   return (
@@ -222,7 +151,7 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
             <div className="record-emoji">{record.emoji}</div>
             <h3 className="record-title">{record.title}</h3>
             <div className="record-employee">{record.employee}</div>
-            <div className="record-value">{record.value} salg</div>
+            <div className="record-value">{record.value}</div>
           </div>
         ))}
       </div>
