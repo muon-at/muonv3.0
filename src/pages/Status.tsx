@@ -49,7 +49,8 @@ export default function Status() {
   const [editingTarget, setEditingTarget] = useState<'day' | 'week' | 'month' | null>(null);
   const [tempValue, setTempValue] = useState<number>(0);
   const [runRates, setRunRates] = useState({
-    day: 0,
+    dayTo16: 0,
+    dayTo21: 0,
     week: 0,
     month: 0,
   });
@@ -138,10 +139,16 @@ export default function Status() {
           revenue: todayCount * 1000, // Assume all today items are 1000 kr
         });
 
-        // Calculate runrates
+        // Calculate runrates using same logic as Min Avdeling
         const now = new Date();
-        const hoursElapsed = now.getHours() + (now.getMinutes() / 60);
-        const dayRunRate = hoursElapsed > 0 ? Math.round((todayCount / hoursElapsed) * 8) : 0;
+        const currentHour = now.getHours() + (now.getMinutes() / 60);
+        const runrateTo16 = currentHour > 0 ? Math.round((todayCount / currentHour) * 6) : 0;
+        const runrateTo21 = currentHour > 0 ? Math.round((todayCount / currentHour) * 10) : 0;
+
+        // Week runrate calculation
+        const dayOfWeek = today.getDay();
+        const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
+        const weekRunRate = daysCompleted > 0 ? Math.round((totalWeek / daysCompleted) * 5) : 0;
 
         setWeekStats({
           date: 'Denne uken',
@@ -149,7 +156,30 @@ export default function Status() {
           revenue: totalWeek * 1000, // Simplified
         });
 
-        const weekRunRate = totalWeek > 0 ? Math.round((totalWeek / 7) * 7) : 0;
+        // Month runrate calculation
+        const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+        let daysCompletedMonth = 0;
+        for (let d = 1; d <= today.getDate(); d++) {
+          const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+          const dayOfWeekCheck = checkDate.getDay();
+          const dateStr = checkDate.toISOString().split('T')[0];
+          if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+            daysCompletedMonth++;
+          }
+        }
+        
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        let workingDaysMonth = 0;
+        for (let d = 1; d <= daysInMonth; d++) {
+          const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+          const dayOfWeekCheck = checkDate.getDay();
+          const dateStr = checkDate.toISOString().split('T')[0];
+          if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+            workingDaysMonth++;
+          }
+        }
+        
+        const monthRunRate = daysCompletedMonth > 0 ? Math.round((totalMonth / daysCompletedMonth) * workingDaysMonth) : 0;
 
         setMonthStats({
           date: new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }),
@@ -157,11 +187,9 @@ export default function Status() {
           revenue: totalMonth * 1000, // Simplified
         });
 
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const monthRunRate = totalMonth > 0 ? Math.round((totalMonth / today.getDate()) * daysInMonth) : 0;
-
         setRunRates({
-          day: dayRunRate,
+          dayTo16: runrateTo16,
+          dayTo21: runrateTo21,
           week: weekRunRate,
           month: monthRunRate,
         });
@@ -425,7 +453,7 @@ export default function Status() {
                   ></div>
                 </div>
                 <div className="progress-meta">
-                  <span>Runrate: {runRates.day}</span>
+                  <span>→ 16:00: {runRates.dayTo16} | → 21:00: {runRates.dayTo21}</span>
                   <span>{todayStats.revenue} kr</span>
                 </div>
               </>
