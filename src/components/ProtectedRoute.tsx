@@ -38,6 +38,12 @@ export function ProtectedRoute({ children, requiredRole = 'employee' }: Protecte
     return children;
   }
 
+  // LIVE kiosk pages should NOT have navbar/sidebar - render full screen
+  const livePages = ['/live-krs', '/live-osl', '/live-skien'];
+  if (livePages.includes(location.pathname)) {
+    return children;
+  }
+
   return (
     <ChatSidebarProvider>
       <ProtectedRouteInner>{children}</ProtectedRouteInner>
