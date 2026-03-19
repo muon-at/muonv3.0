@@ -316,10 +316,11 @@ export default function Status() {
 
         // Master badge list (all milestones)
         const testBadges: Badge[] = [
-          { id: 'dagens_første', emoji: '⚡', navn: 'Dagens første', verdi: 0, beskrivelse: 'Første salget i dag (kun en person)' },
+          { id: 'min_første_dag', emoji: '🚀', navn: 'Min første i dag', verdi: -1, beskrivelse: 'Første salget i dag (hver dag)' },
+          { id: 'dagens_første', emoji: '⚡', navn: 'Dagens første', verdi: 0, beskrivelse: 'Første salget i dag globalt (kun en person)' },
           { id: 'første', emoji: '🎓', navn: 'FØRSTE SALGET', verdi: 1, beskrivelse: 'Gjøre første salg' },
-          { id: '5salg', emoji: '🚀', navn: '5 SALG', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
-          { id: '10salg', emoji: '🎯', navn: '10 SALG', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
+          { id: '5salg', emoji: '🎯', navn: '5 SALG', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
+          { id: '10salg', emoji: '🎪', navn: '10 SALG', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
           { id: '15salg', emoji: '🔥', navn: '15 SALG', verdi: 15, beskrivelse: 'Gjøre 15 salg på en dag' },
           { id: '20salg', emoji: '💎', navn: '20 SALG', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
           { id: 'best', emoji: '🏆', navn: 'BEST', verdi: 999, beskrivelse: 'Flest salg totalt noen sinne' },
@@ -378,6 +379,40 @@ export default function Status() {
 
         // Check if TODAY'S sales unlocked any new badges (only real milestones, not 🏆)
         const newlyAchieved: string[] = [];
+        
+        // MIN FØRSTE I DAG: Award when first sale of the day (can earn every day, once per day)
+        if (user?.name && todayStats.count > 0) {
+          try {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD
+            const badgeKeyToday = `min_første_dag_${todayStr}`;
+            
+            // Check if already earned "Min første i dag" today
+            if (!earnedBadgeIds.includes(badgeKeyToday)) {
+              newlyAchieved.push('min_første_dag');
+              console.log('🚀 Min første i dag unlocked!');
+              
+              // Store with date suffix to allow re-earning each day
+              if (user?.id) {
+                try {
+                  const badgeRef = doc(db, `users/${user.id}/earned_badges`, badgeKeyToday);
+                  await setDoc(badgeRef, {
+                    earnedAt: new Date().toISOString(),
+                    badgeName: 'Min første i dag',
+                    emoji: '🚀',
+                    date: todayStr,
+                  });
+                  earnedBadgeIds.push(badgeKeyToday);
+                  console.log(`✅ Stored: ${badgeKeyToday}`);
+                } catch (err) {
+                  console.log('Error storing min_første_dag:', err);
+                }
+              }
+            }
+          } catch (err) {
+            console.log('Error with min_første_dag:', err);
+          }
+        }
         
         // FØRSTE SALGET: Award only on first-ever sale (0 → 1+)
         // Calculate lifetime total from both livefeed AND contracts
@@ -451,9 +486,11 @@ export default function Status() {
         
         // Other milestone badges
         namedBadges.forEach((badge) => {
-          if (badge.id === 'dagens_første' || badge.id === 'første') return; // Skip, handled above
-          if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi && badge.verdi < 999) {
-            newlyAchieved.push(badge.id);
+          if (badge.id === 'min_første_dag' || badge.id === 'dagens_første' || badge.id === 'første') return; // Skip, handled above
+          if (badge.verdi > 0 && badge.verdi < 999) { // Only regular milestones
+            if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi) {
+              newlyAchieved.push(badge.id);
+            }
           }
         });
 
@@ -482,17 +519,20 @@ export default function Status() {
             }
 
             // Determine which badge to post
-            // Priority: FØRSTE SALGET (if just earned) OR highest milestone
+            // Priority: MIN FØRSTE I DAG (personal daily) > FØRSTE SALGET (lifetime) > highest milestone
             let badgeToPost = null;
             
-            if (newlyAchieved.includes('første')) {
-              // Post FØRSTE SALGET immediately (special case - first-ever sale)
+            if (newlyAchieved.includes('min_første_dag')) {
+              // Post "Min første i dag" immediately (personal daily, always priority)
+              badgeToPost = namedBadges.find(b => b.id === 'min_første_dag');
+            } else if (newlyAchieved.includes('første')) {
+              // Post FØRSTE SALGET (special case - first-ever sale)
               badgeToPost = namedBadges.find(b => b.id === 'første');
             } else {
-              // Post the highest milestone reached (excluding dagens_første, første, and best)
+              // Post the highest milestone reached (excluding dagens_første, første, min_første_dag, and best)
               const sortedByValue = newlyAchieved
                 .map(id => namedBadges.find(b => b.id === id))
-                .filter(b => b !== undefined && b?.verdi < 999)
+                .filter(b => b !== undefined && b?.verdi > 0 && b?.verdi < 999)
                 .sort((a, b) => (b?.verdi || 0) - (a?.verdi || 0));
 
               if (sortedByValue.length > 0 && sortedByValue[0]) {
@@ -856,7 +896,11 @@ export default function Status() {
             {badges.length > 0 && (
               <>
                 {badges.map((badge) => {
-                  const isAchieved = achievedBadges.includes(badge.id);
+                  // Special handling for "min_første_dag" - check if ANY date-suffixed version is achieved
+                  let isAchieved = achievedBadges.includes(badge.id);
+                  if (badge.id === 'min_første_dag') {
+                    isAchieved = achievedBadges.some(b => b.startsWith('min_første_dag_'));
+                  }
                   return (
                     <div
                       key={badge.id}
