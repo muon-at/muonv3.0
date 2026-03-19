@@ -568,3 +568,157 @@ exports.populateMasterEarningsNow = onRequest(async (req, res) => {
     });
   }
 });
+
+/**
+ * Cloud Function: Populate wall_of_fame_records with best day/week/month/year/total per employee
+ * Scheduled: Daily at 02:00 (before morning)
+ * Also available via HTTP: POST /populateWallOfFameNow
+ */
+exports.populateWallOfFame = onSchedule('0 2 * * *', async (context) => {
+  console.log('🏆 Starting Wall of Fame population (scheduled)...');
+  await calculateAndStoreWallOfFame();
+});
+
+exports.populateWallOfFameNow = onRequest(async (req, res) => {
+  console.log('🏆 Starting Wall of Fame population (on-demand)...');
+  try {
+    await calculateAndStoreWallOfFame();
+    res.json({ success: true, message: 'Wall of Fame records populated' });
+  } catch (error) {
+    console.error('❌ Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+async function calculateAndStoreWallOfFame() {
+  const db = admin.firestore();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay());
+
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const startOfYear = new Date(today.getFullYear(), 0, 1);
+
+  try {
+    // 1. Load employees to get visual names + departments
+    const empSnapshot = await db.collection('employees').get();
+    const employeeMap = {};
+    empSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const name = data.name || '';
+      const visualName = data.visualName || name;
+      const dept = data.avdeling || '';
+      if (name) {
+        employeeMap[name.toLowerCase()] = { visualName, dept };
+      }
+    });
+
+    console.log('👥 Loaded', empSnapshot.size, 'employees');
+
+    // 2. Load today's livefeed
+    const livefeedSnapshot = await db.collection('livefeed_sales').get();
+    const livefeedByUser = {};
+    livefeedSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const userName = data.userName || '';
+      livefeedByUser[userName] = (livefeedByUser[userName] || 0) + 1;
+    });
+
+    console.log('📊 Loaded', livefeedSnapshot.size, 'livefeed entries');
+
+    // 3. Load contracts
+    const contractSnapshot = await db.collection('allente_kontraktsarkiv').get();
+    const sellerStats = {};
+
+    // Process livefeed (today counts)
+    Object.entries(livefeedByUser).forEach(([userName, count]) => {
+      const empDetails = employeeMap[userName.toLowerCase()] || { visualName: userName, dept: 'unknown' };
+      sellerStats[userName] = {
+        ansatt: userName,
+        visualName: empDetails.visualName,
+        avdeling: empDetails.dept,
+        bestDay: count,
+        bestWeek: count,
+        bestMonth: count,
+        bestYear: count,
+        bestTotal: count,
+      };
+    });
+
+    // Process contracts
+    contractSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      let selger = data.selger || '';
+      const dato = data.dato || '';
+
+      // Strip "/ selger" suffix
+      selger = selger.replace(/ \/ selger$/i, '').trim();
+
+      const empDetails = employeeMap[selger.toLowerCase()] || { visualName: selger, dept: 'unknown' };
+
+      if (!sellerStats[selger]) {
+        sellerStats[selger] = {
+          ansatt: selger,
+          visualName: empDetails.visualName,
+          avdeling: empDetails.dept,
+          bestDay: 0,
+          bestWeek: 0,
+          bestMonth: 0,
+          bestYear: 0,
+          bestTotal: 0,
+        };
+      }
+
+      // Add to totals
+      sellerStats[selger].bestTotal += 1;
+
+      // Parse date
+      if (dato && typeof dato === 'string') {
+        const parts = dato.split('/');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0]);
+          const month = parseInt(parts[1]);
+          const year = parseInt(parts[2]);
+          const contractDate = new Date(year, month - 1, day);
+          contractDate.setHours(0, 0, 0, 0);
+
+          if (contractDate >= startOfYear) {
+            sellerStats[selger].bestYear += 1;
+          }
+          if (contractDate >= startOfMonth) {
+            sellerStats[selger].bestMonth += 1;
+          }
+          if (contractDate >= startOfWeek) {
+            sellerStats[selger].bestWeek += 1;
+          }
+        }
+      }
+    });
+
+    console.log('📈 Calculated stats for', Object.keys(sellerStats).length, 'sellers');
+
+    // 4. Store in wall_of_fame_records
+    const batch = db.batch();
+    let storedCount = 0;
+
+    Object.entries(sellerStats).forEach(([seller, stats]) => {
+      // Sanitize document ID (Firestore doesn't allow /, \, etc)
+      const docId = seller.replace(/[/\\?#[\]]/g, '_');
+      const ref = db.collection('wall_of_fame_records').doc(docId);
+      batch.set(ref, {
+        ...stats,
+        updatedAt: admin.firestore.Timestamp.now(),
+      });
+      storedCount++;
+    });
+
+    await batch.commit();
+    console.log('✅ Wall of Fame records populated:', storedCount, 'documents');
+    return storedCount;
+  } catch (error) {
+    console.error('❌ Error in calculateAndStoreWallOfFame:', error);
+    throw error;
+  }
+}
