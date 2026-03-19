@@ -12,23 +12,6 @@ export default function LiveKRS() {
       color: '#e2e8f0',
       position: 'relative',
     }}>
-      {/* HEADER */}
-      <div style={{
-        padding: '2rem',
-        textAlign: 'center',
-        borderBottom: '1px solid #333',
-      }}>
-        <h1 style={{
-          fontSize: '3rem',
-          fontWeight: '900',
-          margin: 0,
-          color: '#fff',
-          letterSpacing: '2px',
-        }}>
-          LIVE KRS
-        </h1>
-      </div>
-
       {/* CONTENT - Main area */}
       <div style={{
         flex: 1,
@@ -38,15 +21,7 @@ export default function LiveKRS() {
         paddingBottom: '2rem',
         overflowY: 'auto',
       }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          color: '#9ca3af',
-        }}>
-          <p>Live feed updates here...</p>
-        </div>
+        {/* Empty - livefeed on right side */}
       </div>
 
       {/* BACK BUTTON - Bottom left */}
