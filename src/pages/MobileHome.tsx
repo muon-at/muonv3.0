@@ -13,12 +13,13 @@ export default function MobileHome() {
 
   if (!user) return <div>Laster...</div>;
 
+  // 5 cards positioned at perfect circle (72° apart)
   const cards = [
-    { id: 'livefeed', label: 'LIVEFEED', icon: '📱', position: 'top-left' },
-    { id: 'minside', label: 'MIN SIDE', icon: '📊', position: 'top-right' },
-    { id: 'prosjekt', label: 'MITT PROSJEKT', icon: '🏢', position: 'right' },
-    { id: 'avdeling', label: 'MIN AVDELING', icon: '👥', position: 'bottom-right' },
-    { id: 'kalender', label: 'KALENDER', icon: '📅', position: 'bottom-left' },
+    { id: 'livefeed', label: 'LIVEFEED', icon: '📱', angle: 0 },      // Top (0°)
+    { id: 'minside', label: 'MIN SIDE', icon: '📊', angle: 72 },      // Top-right (72°)
+    { id: 'prosjekt', label: 'MITT PROSJEKT', icon: '🏢', angle: 144 }, // Bottom-right (144°)
+    { id: 'avdeling', label: 'MIN AVDELING', icon: '👥', angle: 216 }, // Bottom-left (216°)
+    { id: 'kalender', label: 'KALENDER', icon: '📅', angle: 288 },   // Top-left (288°)
   ];
 
   const renderTab = () => {
@@ -59,17 +60,27 @@ export default function MobileHome() {
           🔔
         </div>
 
-        {/* SURROUNDING CARDS */}
-        {cards.map((card) => (
-          <button
-            key={card.id}
-            className={`radial-card ${card.position}`}
-            onClick={() => setActiveTab(card.id)}
-          >
-            <div className="card-icon">{card.icon}</div>
-            <div className="card-label">{card.label}</div>
-          </button>
-        ))}
+        {/* SURROUNDING CARDS - PERFECT CIRCLE */}
+        {cards.map((card) => {
+          const rad = (card.angle * Math.PI) / 180;
+          const radius = 220; // Distance from center to card center
+          const x = Math.sin(rad) * radius;
+          const y = -Math.cos(rad) * radius;
+
+          return (
+            <button
+              key={card.id}
+              className="radial-card"
+              onClick={() => setActiveTab(card.id)}
+              style={{
+                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+              }}
+            >
+              <div className="card-icon">{card.icon}</div>
+              <div className="card-label">{card.label}</div>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
