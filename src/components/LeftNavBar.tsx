@@ -253,15 +253,9 @@ export const LeftNavBar: React.FC = () => {
               <div className={`nav-tabs-dropdown ${closingItem === 'min-avdeling' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'avd-status' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('avd-status', '/min-avdeling?tab=status')}
+                  onClick={() => handleTabClick('avd-status', '/min-avdeling')}
                 >
                   Status
-                </button>
-                <button 
-                  className={`nav-tab ${activeTab === 'avd-walloffame' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('avd-walloffame', '/min-avdeling?tab=walloffame')}
-                >
-                  Wall of Fame
                 </button>
               </div>
             )}
@@ -286,21 +280,33 @@ export const LeftNavBar: React.FC = () => {
               <div className={`nav-tabs-dropdown ${closingItem === 'mitt-prosjekt' ? 'closing' : ''}`}>
                 <button 
                   className={`nav-tab ${activeTab === 'proj-status' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('proj-status', '/mitt-prosjekt?tab=status')}
+                  onClick={() => handleTabClick('proj-status', '/mitt-prosjekt')}
                 >
                   Status
-                </button>
-                <button 
-                  className={`nav-tab ${activeTab === 'proj-walloffame' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('proj-walloffame', '/mitt-prosjekt?tab=walloffame')}
-                >
-                  Wall of Fame
                 </button>
               </div>
             )}
           </div>
 
-          {/* 4. TEAMLEDER - People icon WITH TABS */}
+          {/* 4. WALL OF FAME - Trophy icon */}
+          <button 
+            onClick={() => navigate('/wall-of-fame')}
+            style={{
+              background: activeTab === 'wall-of-fame' || location.pathname === '/wall-of-fame' ? '#5a67d8' : 'transparent',
+              position: 'relative',
+              width: '100%',
+            }}
+            className={`nav-button ${activeTab === 'wall-of-fame' || location.pathname === '/wall-of-fame' ? 'active' : ''}`}
+          >
+            <div className="icon-circle">
+              <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 9H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2h-2"/><path d="M6 9c0-1 .895-2 2-2h8c1.105 0 2 1 2 2"/><path d="M9 14h6v4H9z"/><path d="M12 6V3M8 6l-1-2M16 6l1-2"/>
+              </svg>
+            </div>
+            <div className="nav-tooltip">Wall of Fame</div>
+          </button>
+
+          {/* 5. TEAMLEDER - People icon WITH TABS */}
           {(user?.role === 'owner' || user?.role === 'teamleder') && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
               <button 
