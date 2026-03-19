@@ -227,14 +227,14 @@ export default function AvdelingDashboard() {
         <div style={{ background: '#2d3748', padding: '2rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
           <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '0.5rem' }}>SALG DENNE UKE</p>
           <p style={{ fontSize: '3rem', fontWeight: '700', color: '#ffd700', marginBottom: '1rem' }}>{deptWeekTotal}</p>
-          <p style={{ fontSize: '0.85rem', color: '#d4a05a' }}>Runrate: {Math.round((deptWeekTotal / daysCompleted) * 5)} ({daysCompleted} dager)</p>
+          <p style={{ fontSize: '0.85rem', color: '#d4a05a' }}>Runrate: {Math.round((deptWeekTotal / daysCompleted) * 5)}</p>
         </div>
 
         {/* Month */}
         <div style={{ background: '#2d3748', padding: '2rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
           <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '0.5rem' }}>SALG DENNE MÅNEDEN</p>
           <p style={{ fontSize: '3rem', fontWeight: '700', color: '#51cf66', marginBottom: '1rem' }}>{deptMonthTotal}</p>
-          <p style={{ fontSize: '0.85rem', color: '#78c969' }}>Runrate: {Math.round((deptMonthTotal / daysCompletedMonth) * workingDaysMonth)} ({daysCompletedMonth} dager)</p>
+          <p style={{ fontSize: '0.85rem', color: '#78c969' }}>Runrate: {Math.round((deptMonthTotal / daysCompletedMonth) * workingDaysMonth)}</p>
         </div>
       </div>
 
