@@ -159,10 +159,23 @@ export default function MittProsjekt() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
-  const daysCompleted = Math.floor((today.getTime() - startOfWeek.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  
+  // Count working days from Monday (not Sunday)
+  const dayOfWeek = today.getDay();
+  const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek; // Mon=1, Tue=2, ..., Fri=5, Sat=6, Sun=0
+  
   const workingDaysMonth = getWorkingDaysInMonth(today);
-  const daysCompletedMonth = Math.floor((today.getTime() - new Date(today.getFullYear(), today.getMonth(), 1).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  let daysCompletedMonth = 0;
+  const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+  for (let d = 1; d <= today.getDate(); d++) {
+    const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+    const dayOfWeekCheck = checkDate.getDay();
+    const dateStr = checkDate.toISOString().split('T')[0];
+    if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+      daysCompletedMonth++;
+    }
+  }
 
   // Department stats
   const depts = ['KRS', 'OSL', 'Skien'];
