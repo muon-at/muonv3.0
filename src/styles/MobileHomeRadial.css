@@ -19,7 +19,7 @@
   justify-content: center;
 }
 
-/* CENTRAL BELL */
+/* CENTRAL BELL - CLICKABLE BUTTON */
 .bell-center {
   position: absolute;
   width: 160px;
@@ -30,6 +30,20 @@
   justify-content: center;
   z-index: 10;
   line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  transition: all 0.15s;
+}
+
+.bell-center:hover {
+  transform: scale(1.05);
+}
+
+.bell-center:active {
+  transform: scale(0.95);
 }
 
 /* SURROUNDING CARDS - PERFECT CIRCLE */

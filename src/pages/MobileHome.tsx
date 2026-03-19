@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/authContext';
+import MobileSaleModal from '../components/MobileSaleModal';
 import MobileLivefeed from '../components/MobileLivefeed';
 import MobileMinSide from '../components/MobileMinSide';
 import MobileKalender from '../components/MobileKalender';
@@ -10,6 +11,7 @@ import '../styles/MobileHomeRadial.css';
 export default function MobileHome() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const [showSaleModal, setShowSaleModal] = useState(false);
 
   if (!user) return <div>Laster...</div>;
 
@@ -55,10 +57,14 @@ export default function MobileHome() {
   return (
     <div className="mobile-home-radial">
       <div className="radial-container">
-        {/* CENTRAL BELL */}
-        <div className="bell-center">
+        {/* CENTRAL BELL - CLICKABLE */}
+        <button 
+          className="bell-center"
+          onClick={() => setShowSaleModal(true)}
+          title="Meld salg"
+        >
           🔔
-        </div>
+        </button>
 
         {/* SURROUNDING CARDS - PERFECT CIRCLE */}
         {cards.map((card) => {
@@ -82,6 +88,14 @@ export default function MobileHome() {
           );
         })}
       </div>
+
+      {/* SALE MODAL */}
+      <MobileSaleModal 
+        isOpen={showSaleModal} 
+        onClose={() => setShowSaleModal(false)}
+        userName={user.name}
+        userDepartment={user.department || 'Ukjent'}
+      />
     </div>
   );
 }
