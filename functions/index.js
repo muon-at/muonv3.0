@@ -609,13 +609,14 @@ async function calculateAndStoreWallOfFame() {
       const data = doc.data();
       const name = data.name || '';
       const visualName = data.visualName || name;
-      const dept = data.avdeling || '';
+      const dept = data.avdeling || data.department || '';  // Try both field names
       if (name) {
         employeeMap[name.toLowerCase()] = { visualName, dept };
       }
+      console.log('  👤', name, '→ dept:', dept, 'visual:', visualName);
     });
 
-    console.log('👥 Loaded', empSnapshot.size, 'employees');
+    console.log('👥 Loaded', empSnapshot.size, 'employees, mapped:', Object.keys(employeeMap).length);
 
     // 2. Load today's livefeed
     const livefeedSnapshot = await db.collection('livefeed_sales').get();
@@ -632,28 +633,10 @@ async function calculateAndStoreWallOfFame() {
     const contractSnapshot = await db.collection('allente_kontraktsarkiv').get();
     const sellerStats = {};
 
-    // Initialize all sellers with 0
-    // First, get all employee names to ensure everyone is in the list
-    Object.values(employeeMap).forEach((empDetails, idx) => {
-      // We'll populate via livefeed and contracts below
-    });
+    // Track best day per person (count per date)
+    const dayCounts = {}; // { seller: { "12/02/2026": 3, "16/02/2026": 12, ... } }
 
-    // Process livefeed (today counts for day/week/month)
-    Object.entries(livefeedByUser).forEach(([userName, count]) => {
-      const empDetails = employeeMap[userName.toLowerCase()] || { visualName: userName, dept: 'unknown' };
-      sellerStats[userName] = {
-        ansatt: userName,
-        visualName: empDetails.visualName,
-        avdeling: empDetails.dept,
-        bestDay: count,      // Today's sales
-        bestWeek: count,     // Today + week contracts
-        bestMonth: count,    // Today + month contracts
-        bestYear: 0,         // Only contracts (NO livefeed)
-        bestTotal: 0,        // Only contracts (NO livefeed)
-      };
-    });
-
-    // Process contracts - ADD to week/month, SET year/total
+    // Process contracts first - calculate day/week/month/year/total and track daily counts
     contractSnapshot.docs.forEach((doc) => {
       const data = doc.data();
       let selger = data.selger || '';
@@ -678,6 +661,11 @@ async function calculateAndStoreWallOfFame() {
         };
       }
 
+      // Initialize day count tracker for this seller
+      if (!dayCounts[selger]) {
+        dayCounts[selger] = {};
+      }
+
       // Always add to total
       sellerStats[selger].bestTotal += 1;
 
@@ -690,6 +678,9 @@ async function calculateAndStoreWallOfFame() {
           const year = parseInt(parts[2]);
           const contractDate = new Date(year, month - 1, day);
           contractDate.setHours(0, 0, 0, 0);
+
+          // Track count per date for best day calculation
+          dayCounts[selger][dato] = (dayCounts[selger][dato] || 0) + 1;
 
           // Year: add if in current year
           if (contractDate >= startOfYear) {
@@ -706,6 +697,44 @@ async function calculateAndStoreWallOfFame() {
             sellerStats[selger].bestWeek += 1;
           }
         }
+      }
+    });
+
+    // Calculate best day per seller (max sales on a single day from contracts)
+    Object.entries(dayCounts).forEach(([seller, dateObj]) => {
+      let maxDayCount = 0;
+      Object.values(dateObj).forEach((count) => {
+        if (count > maxDayCount) {
+          maxDayCount = count;
+        }
+      });
+      sellerStats[seller].bestDay = maxDayCount;
+    });
+
+    // Process livefeed (today counts) - override bestDay if today is higher
+    Object.entries(livefeedByUser).forEach(([userName, count]) => {
+      const empDetails = employeeMap[userName.toLowerCase()] || { visualName: userName, dept: 'unknown' };
+      
+      // If not in sellerStats yet, create entry
+      if (!sellerStats[userName]) {
+        sellerStats[userName] = {
+          ansatt: userName,
+          visualName: empDetails.visualName,
+          avdeling: empDetails.dept,
+          bestDay: count,
+          bestWeek: count,
+          bestMonth: count,
+          bestYear: 0,
+          bestTotal: 0,
+        };
+      } else {
+        // Update with today's counts if higher
+        if (count > sellerStats[userName].bestDay) {
+          sellerStats[userName].bestDay = count;
+        }
+        sellerStats[userName].bestWeek += count;
+        sellerStats[userName].bestMonth += count;
+        sellerStats[userName].bestTotal += count;
       }
     });
 

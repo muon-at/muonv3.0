@@ -28,28 +28,34 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
     // Listen to wall_of_fame_records collection
     const unsubscribe = onSnapshot(collection(db, 'wall_of_fame_records'), (snapshot) => {
       try {
+        console.log('📊 Snapshot docs count:', snapshot.docs.length);
+        console.log('🔍 Looking for department:', department || 'NONE (ALL)');
+
         // Load all records
         const allRecords: { [key: string]: any } = {};
 
         snapshot.docs.forEach((doc) => {
           const data = doc.data();
           allRecords[doc.id] = data;
+          console.log('  -', doc.id, '→ avdeling:', data.avdeling, 'bestDay:', data.bestDay, 'bestTotal:', data.bestTotal);
         });
 
-        console.log('📊 All Wall of Fame records:', allRecords);
+        console.log('📊 All Wall of Fame records loaded:', Object.keys(allRecords).length, 'records');
+        console.log('   Raw data:', allRecords);
 
         // Filter by department if specified
         let filteredRecords = allRecords;
         if (department) {
           filteredRecords = {};
           Object.entries(allRecords).forEach(([key, record]) => {
+            console.log('    Checking', key, ': avdeling="' + record.avdeling + '" vs department="' + department + '" → match:', record.avdeling === department);
             if (record.avdeling === department) {
               filteredRecords[key] = record;
             }
           });
         }
 
-        console.log('🔍 Filtered for', department || 'ALL', ':', filteredRecords);
+        console.log('🔍 Filtered for', department || 'ALL', '- found', Object.keys(filteredRecords).length, 'records:', filteredRecords);
 
         // Find best for each period
         let bestDay = { name: '-', value: 0 };
