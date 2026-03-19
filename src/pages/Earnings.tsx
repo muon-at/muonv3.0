@@ -51,7 +51,7 @@ export default function Earnings() {
     return workingDays;
   };
 
-  // Load data from both livefeed (today) and contracts (week/month)
+  // Load data from livefeed (today) and contracts (week/month) with provisjoner from Admin Produkter
   useEffect(() => {
     if (!user || !user.name) return;
 
@@ -61,155 +61,180 @@ export default function Earnings() {
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
+    const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const endOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
 
-    // Listener 1: livefeed_sales (TODAY data with product types)
-    const livefeedRef = collection(db, 'livefeed_sales');
-    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
-      // Listener 2: contracts (WEEK/MONTH with provisjoner)
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
-        try {
-          let dayRevenue = 0;
-          let weekRevenue = 0;
-          let monthRevenue = 0;
-          let dayCount = 0;
-          let weekCount = 0;
-          let monthCount = 0;
-          
-          const paymentsList: PaymentHistory[] = [];
-
-          // Process TODAY from livefeed (fixed rates: BTV=1000, DTH=1000, Free=800)
-          livefeedSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const userName = data.userName || '';
-            const product = (data.product || '').toLowerCase();
-            
-            if (userName !== user.name) return;
-            
-            let productRevenue = 0;
-            if (product.includes('btv')) {
-              productRevenue = 1000;
-            } else if (product.includes('dth')) {
-              productRevenue = 1000;
-            } else if (product.includes('free')) {
-              productRevenue = 800;
-            } else {
-              productRevenue = 1000; // Default
-            }
-            
-            dayRevenue += productRevenue;
-            dayCount++;
-          });
-
-          // Process WEEK/MONTH from contracts (with product provisjoner)
-          const paymentMap: { [date: string]: number } = {};
-          
-          archiveSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const selger = data.selger || '';
-            const dato = data.dato || '';
-            const produkt = data.produkt || '';
-
-            // Filter by seller name
-            if (selger !== user.name) return;
-
-            // Parse date: "12/3/2026" → [12, 3, 2026]
-            if (dato && typeof dato === 'string') {
-              const parts = dato.split('/');
-              if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
-                const year = parseInt(parts[2]);
-                const orderDate = new Date(year, month - 1, day);
-
-                // Product provisjon (default 1000 if not specified)
-                const provisjon = 1000; // Could parse from produkt field if needed
-                const revenue = provisjon;
-
-                // WEEK counts (including today's contracts)
-                if (orderDate >= startOfWeek && orderDate <= today) {
-                  weekRevenue += revenue;
-                  weekCount++;
-                  
-                  if (orderDate.getTime() === today.getTime()) {
-                    paymentMap[dato] = (paymentMap[dato] || 0) + revenue;
-                  }
-                }
-
-                // MONTH counts (including today's contracts)
-                if (orderDate >= startOfMonth && orderDate <= today) {
-                  monthRevenue += revenue;
-                  monthCount++;
-                }
-
-                // Payment history
-                paymentsList.push({
-                  date: dato,
-                  amount: revenue,
-                  type: produkt,
-                });
-              }
-            }
-          });
-
-          // Add TODAY revenue to WEEK and MONTH totals
-          weekRevenue += dayRevenue;
-          monthRevenue += dayRevenue;
-
-          // Calculate runrates
-          const now = new Date();
-          const currentHour = now.getHours() + (now.getMinutes() / 60);
-          const dayRunRate = currentHour > 0 ? Math.round((dayRevenue / currentHour) * 6) : 0;
-
-          const dayOfWeek = today.getDay();
-          const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
-          const weekRunRate = daysCompleted > 0 ? Math.round((weekRevenue / daysCompleted) * 5) : 0;
-
-          const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
-          let daysCompletedMonth = 0;
-          for (let d = 1; d <= today.getDate(); d++) {
-            const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
-            const dayOfWeekCheck = checkDate.getDay();
-            const dateStr = checkDate.toISOString().split('T')[0];
-            if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
-              daysCompletedMonth++;
-            }
-          }
-          
-          const workingDaysMonth = getWorkingDaysInMonth(today);
-          const monthRunRate = daysCompletedMonth > 0 ? Math.round((monthRevenue / daysCompletedMonth) * workingDaysMonth) : 0;
-
-          // Sort and display last 3 payments
-          paymentsList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-          setEarnings({
-            day: dayRevenue,
-            week: weekRevenue,
-            month: monthRevenue,
-          });
-
-          setRunRates({
-            day: dayRunRate,
-            week: weekRunRate,
-            month: monthRunRate,
-          });
-
-          setPayments(paymentsList.slice(0, 3));
-
-          console.log('💰 Earnings updated:', { dayRevenue, weekRevenue, monthRevenue });
-        } catch (err) {
-          console.error('❌ Error calculating earnings:', err);
-        }
+    // First, load Admin Produkter to get provisjon rates
+    const produkterRef = collection(db, 'allente_produkter');
+    const unsubscribeProdukt = onSnapshot(produkterRef, (produktSnapshot) => {
+      const produktMap: { [key: string]: number } = {};
+      
+      produktSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const produktNavn = data.produkt || '';
+        const provisjon = parseInt(data.provisjon) || 1000;
+        produktMap[produktNavn.toLowerCase()] = provisjon;
       });
 
-      // Cleanup
-      return () => {
-        unsubscribeLivefeed();
-        unsubscribeArchive();
-      };
+      console.log('📊 Produkter loaded:', Object.keys(produktMap).length);
+
+      // Now load livefeed and contracts
+      const livefeedRef = collection(db, 'livefeed_sales');
+      const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
+        const contractsRef = collection(db, 'allente_kontraktsarkiv');
+        const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
+          try {
+            let dayRevenue = 0;
+            let weekRevenue = 0;
+            let monthRevenue = 0;
+            let prevMonthRevenue = 0;
+            
+            const paymentsList: PaymentHistory[] = [];
+
+            // Process TODAY from livefeed (fixed rates: BTV=1000, DTH=1000, Free=800)
+            livefeedSnapshot.docs.forEach((doc) => {
+              const data = doc.data();
+              const userName = data.userName || '';
+              const product = (data.product || '').toLowerCase();
+              
+              if (userName !== user.name) return;
+              
+              let productRevenue = 0;
+              if (product.includes('btv')) {
+                productRevenue = 1000;
+              } else if (product.includes('dth')) {
+                productRevenue = 1000;
+              } else if (product.includes('free')) {
+                productRevenue = 800;
+              } else {
+                productRevenue = 1000;
+              }
+              
+              dayRevenue += productRevenue;
+            });
+
+            // Process contracts for WEEK, MONTH, and PREVIOUS MONTH
+            archiveSnapshot.docs.forEach((doc) => {
+              const data = doc.data();
+              const selger = data.selger || '';
+              const dato = data.dato || '';
+              const produkt = data.produkt || '';
+
+              if (selger !== user.name) return;
+
+              if (dato && typeof dato === 'string') {
+                const parts = dato.split('/');
+                if (parts.length === 3) {
+                  const day = parseInt(parts[0]);
+                  const month = parseInt(parts[1]);
+                  const year = parseInt(parts[2]);
+                  const orderDate = new Date(year, month - 1, day);
+
+                  // Look up provisjon from Admin Produkter
+                  const produktLower = produkt.toLowerCase();
+                  let provisjon = produktMap[produktLower] || 1000;
+                  
+                  // Try partial match if exact match not found
+                  if (!produktMap[produktLower]) {
+                    for (const [key, value] of Object.entries(produktMap)) {
+                      if (produktLower.includes(key) || key.includes(produktLower)) {
+                        provisjon = value;
+                        break;
+                      }
+                    }
+                  }
+
+                  const revenue = provisjon;
+
+                  // WEEK counts
+                  if (orderDate >= startOfWeek && orderDate <= today) {
+                    weekRevenue += revenue;
+                    paymentsList.push({
+                      date: dato,
+                      amount: revenue,
+                      type: produkt,
+                    });
+                  }
+
+                  // MONTH counts
+                  if (orderDate >= startOfMonth && orderDate <= today) {
+                    monthRevenue += revenue;
+                  }
+
+                  // PREVIOUS MONTH counts
+                  if (orderDate >= startOfPrevMonth && orderDate <= endOfPrevMonth) {
+                    prevMonthRevenue += revenue;
+                  }
+                }
+              }
+            });
+
+            // Add TODAY revenue to WEEK and MONTH totals
+            weekRevenue += dayRevenue;
+            monthRevenue += dayRevenue;
+
+            // Calculate runrates
+            const now = new Date();
+            const currentHour = now.getHours() + (now.getMinutes() / 60);
+            const dayRunRate = currentHour > 0 ? Math.round((dayRevenue / currentHour) * 6) : 0;
+
+            const dayOfWeek = today.getDay();
+            const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
+            const weekRunRate = daysCompleted > 0 ? Math.round((weekRevenue / daysCompleted) * 5) : 0;
+
+            const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+            let daysCompletedMonth = 0;
+            for (let d = 1; d <= today.getDate(); d++) {
+              const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+              const dayOfWeekCheck = checkDate.getDay();
+              const dateStr = checkDate.toISOString().split('T')[0];
+              if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+                daysCompletedMonth++;
+              }
+            }
+            
+            const workingDaysMonth = getWorkingDaysInMonth(today);
+            const monthRunRate = daysCompletedMonth > 0 ? Math.round((monthRevenue / daysCompletedMonth) * workingDaysMonth) : 0;
+
+            // Create payment history for previous month
+            const prevMonthPayments: PaymentHistory[] = [
+              {
+                date: `${endOfPrevMonth.getMonth() + 1}/${endOfPrevMonth.getFullYear()}`,
+                amount: prevMonthRevenue,
+                type: 'Månedsliste',
+              },
+            ];
+
+            setEarnings({
+              day: dayRevenue,
+              week: weekRevenue,
+              month: monthRevenue,
+            });
+
+            setRunRates({
+              day: dayRunRate,
+              week: weekRunRate,
+              month: monthRunRate,
+            });
+
+            setPayments(prevMonthPayments);
+
+            console.log('💰 Earnings updated:', { dayRevenue, weekRevenue, monthRevenue, prevMonthRevenue });
+          } catch (err) {
+            console.error('❌ Error calculating earnings:', err);
+          }
+        });
+
+        return () => {
+          unsubscribeLivefeed();
+          unsubscribeArchive();
+        };
+      });
+
+      return () => unsubscribeLivefeed();
     });
 
-    return () => unsubscribeLivefeed();
+    return () => unsubscribeProdukt();
   }, [user?.id, user?.name]);
 
   if (!user) return <div className="earnings-container">Laster...</div>;
@@ -219,8 +244,8 @@ export default function Earnings() {
       <div className="earnings-content">
         <h1 className="user-header">{user?.name}</h1>
 
-        {/* Earnings Cards */}
-        <div className="earnings-section">
+        {/* Earnings Cards - 3 side by side */}
+        <div className="earnings-grid">
           {/* Day */}
           <div className="earnings-card">
             <h3>I DAG</h3>
@@ -243,16 +268,20 @@ export default function Earnings() {
           </div>
         </div>
 
-        {/* Payment History */}
+        {/* Previous Earnings */}
         <div className="payment-history">
-          <h2>Siste 3 lønniner</h2>
-          {payments.map((payment, idx) => (
-            <div key={idx} className="payment-item">
-              <span className="payment-date">{payment.date}</span>
-              <span className="payment-type">Salg</span>
-              <span className="payment-amount">{payment.amount.toLocaleString('no-NO')} kr</span>
-            </div>
-          ))}
+          <h2>Forrige lønninger</h2>
+          {payments.length > 0 ? (
+            payments.map((payment, idx) => (
+              <div key={idx} className="payment-item">
+                <span className="payment-date">{payment.date}</span>
+                <span className="payment-type">{payment.type}</span>
+                <span className="payment-amount">{payment.amount.toLocaleString('no-NO')} kr</span>
+              </div>
+            ))
+          ) : (
+            <p style={{ color: '#999' }}>Ingen forrige lønninger</p>
+          )}
         </div>
       </div>
     </div>
