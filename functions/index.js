@@ -632,22 +632,28 @@ async function calculateAndStoreWallOfFame() {
     const contractSnapshot = await db.collection('allente_kontraktsarkiv').get();
     const sellerStats = {};
 
-    // Process livefeed (today counts)
+    // Initialize all sellers with 0
+    // First, get all employee names to ensure everyone is in the list
+    Object.values(employeeMap).forEach((empDetails, idx) => {
+      // We'll populate via livefeed and contracts below
+    });
+
+    // Process livefeed (today counts for day/week/month)
     Object.entries(livefeedByUser).forEach(([userName, count]) => {
       const empDetails = employeeMap[userName.toLowerCase()] || { visualName: userName, dept: 'unknown' };
       sellerStats[userName] = {
         ansatt: userName,
         visualName: empDetails.visualName,
         avdeling: empDetails.dept,
-        bestDay: count,
-        bestWeek: count,
-        bestMonth: count,
-        bestYear: count,
-        bestTotal: count,
+        bestDay: count,      // Today's sales
+        bestWeek: count,     // Today + week contracts
+        bestMonth: count,    // Today + month contracts
+        bestYear: 0,         // Only contracts (NO livefeed)
+        bestTotal: 0,        // Only contracts (NO livefeed)
       };
     });
 
-    // Process contracts
+    // Process contracts - ADD to week/month, SET year/total
     contractSnapshot.docs.forEach((doc) => {
       const data = doc.data();
       let selger = data.selger || '';
@@ -658,6 +664,7 @@ async function calculateAndStoreWallOfFame() {
 
       const empDetails = employeeMap[selger.toLowerCase()] || { visualName: selger, dept: 'unknown' };
 
+      // Initialize if not exists
       if (!sellerStats[selger]) {
         sellerStats[selger] = {
           ansatt: selger,
@@ -671,10 +678,10 @@ async function calculateAndStoreWallOfFame() {
         };
       }
 
-      // Add to totals
+      // Always add to total
       sellerStats[selger].bestTotal += 1;
 
-      // Parse date
+      // Parse date and add to appropriate periods
       if (dato && typeof dato === 'string') {
         const parts = dato.split('/');
         if (parts.length === 3) {
@@ -684,12 +691,17 @@ async function calculateAndStoreWallOfFame() {
           const contractDate = new Date(year, month - 1, day);
           contractDate.setHours(0, 0, 0, 0);
 
+          // Year: add if in current year
           if (contractDate >= startOfYear) {
             sellerStats[selger].bestYear += 1;
           }
+
+          // Month: add to both month AND week (since month includes week)
           if (contractDate >= startOfMonth) {
             sellerStats[selger].bestMonth += 1;
           }
+
+          // Week: add if in current week
           if (contractDate >= startOfWeek) {
             sellerStats[selger].bestWeek += 1;
           }
