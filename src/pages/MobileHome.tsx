@@ -6,31 +6,28 @@ import MobileMinSide from '../components/MobileMinSide';
 import MobileKalender from '../components/MobileKalender';
 import MobileAvdeling from '../components/MobileAvdeling';
 import MobileProsjekt from '../components/MobileProsjekt';
-import '../styles/MobileHome.css';
+import '../styles/MobileHomeRadial.css';
 
 export default function MobileHome() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('salg');
   const [showSaleModal, setShowSaleModal] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   if (!user) return <div>Laster...</div>;
 
-  const tabs = [
-    { id: 'salg', label: '🔔 Salg', icon: '🔔' },
-    { id: 'livefeed', label: '📱 Feed', icon: '📱' },
-    { id: 'minside', label: '📊 Min Side', icon: '📊' },
-    { id: 'kalender', label: '📅 Kalender', icon: '📅' },
-    { id: 'avdeling', label: '👥 Avdeling', icon: '👥' },
-    { id: 'prosjekt', label: '🏢 Prosjekt', icon: '🏢' },
+  const cards = [
+    { id: 'salg', label: 'MELD SALG', icon: '🔔', isCentral: true, position: 'center' },
+    { id: 'livefeed', label: 'LIVEFEED', icon: '📱', position: 'top-left' },
+    { id: 'minside', label: 'MIN SIDE', icon: '📊', position: 'top-right' },
+    { id: 'kalender', label: 'KALENDER', icon: '📅', position: 'bottom-left' },
+    { id: 'avdeling', label: 'MIN AVDELING', icon: '👥', position: 'bottom-right' },
+    { id: 'prosjekt', label: 'MITT PROSJEKT', icon: '🏢', position: 'right' },
   ];
 
   const renderTab = () => {
     switch (activeTab) {
-      case 'salg':
-        return <div className="tab-content"><button onClick={() => setShowSaleModal(true)} className="meld-salg-btn">🔔 MELD SALG</button></div>;
       case 'livefeed':
-        return <MobileLivefeed onNewPost={() => setUnreadCount(u => u + 1)} />;
+        return <MobileLivefeed />;
       case 'minside':
         return <MobileMinSide />;
       case 'kalender':
@@ -44,28 +41,48 @@ export default function MobileHome() {
     }
   };
 
-  return (
-    <div className="mobile-home">
-      {/* MAIN CONTENT */}
-      <div className="mobile-content">
-        {renderTab()}
+  // If viewing a tab, show full screen
+  if (activeTab !== 'salg') {
+    return (
+      <div className="mobile-tab-view">
+        <button className="back-btn" onClick={() => setActiveTab('salg')}>← Tilbake</button>
+        <div className="tab-content">
+          {renderTab()}
+        </div>
       </div>
+    );
+  }
 
-      {/* BOTTOM TAB BAR */}
-      <div className="mobile-tabs">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            <span className="tab-icon">{tab.icon}</span>
-            <span className="tab-label">{tab.label.split(' ')[1]}</span>
-            {tab.id === 'livefeed' && unreadCount > 0 && (
-              <span className="tab-badge">{unreadCount}</span>
-            )}
-          </button>
-        ))}
+  // Home screen with radial layout
+  return (
+    <div className="mobile-home-radial">
+      <div className="radial-container">
+        {/* CENTRAL BELL */}
+        <button
+          className="radial-card central"
+          onClick={() => setShowSaleModal(true)}
+        >
+          <div className="card-icon">🔔</div>
+          <div className="card-label">MELD SALG</div>
+        </button>
+
+        {/* SURROUNDING CARDS */}
+        {cards.map((card) => {
+          if (card.isCentral) return null;
+          return (
+            <button
+              key={card.id}
+              className={`radial-card ${card.position}`}
+              onClick={() => setActiveTab(card.id)}
+            >
+              <div className="card-icon">{card.icon}</div>
+              <div className="card-label">{card.label.split(' ')[0]}</div>
+              {card.label.includes(' ') && (
+                <div className="card-label-secondary">{card.label.split(' ')[1]}</div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* SALE MODAL */}
