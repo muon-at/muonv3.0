@@ -57,155 +57,189 @@ export default function Status() {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievedBadges, setAchievedBadges] = useState<string[]>([]);
 
-  // Load LIVE data - TODAY from livefeed_sales, HISTORICAL from allente_kontraktsarkiv
+  // Load data from Progresjon (same logic as dashboards)
   useEffect(() => {
     if (!user || !user.name) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
+    getDocs(collection(db, 'employees')).then((empSnapshot) => {
+      const employeeDetailMap: { [key: string]: { dept: string; externalName: string; visualName: string } } = {};
 
-    // Listener 1: livefeed_sales (TODAY only)
-    const livefeedRef = collection(db, 'livefeed_sales');
-    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
-      // Listener 2: allente_kontraktsarkiv (HISTORICAL + week/month)
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
-        try {
-          let btvToday = 0;
-          let dthToday = 0;
-          let totalWeek = 0;
-          let totalMonth = 0;
-          let totalRevenue = 0;
+      empSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const dept = data.department || 'Unknown';
+        const externalName = data.externalName || '';
+        const visualName = data.name || '';
 
-          // Process TODAY data from livefeed_sales (temp posts from 🔔 modal)
-          livefeedSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const userName = data.userName || '';
-            const product = (data.product || '').toLowerCase();
-            
-            if (userName !== user.name) return;
-            
-            if (product.includes('btv')) {
-              btvToday++;
-            } else if (product.includes('dth')) {
-              dthToday++;
-            }
-          });
-
-          // Process WEEK/MONTH data from allente_kontraktsarkiv (historical CSV uploads)
-          archiveSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const selger = data.selger || '';
-            const dato = data.dato || '';
-            const produkt = (data.produkt || '').toLowerCase();
-
-            // Filter by seller name
-            if (selger !== user.name) return;
-
-            // Parse date: "12/3/2026" → [12, 3, 2026]
-            if (dato && typeof dato === 'string') {
-              const parts = dato.split('/');
-              if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
-                const year = parseInt(parts[2]);
-                const orderDate = new Date(year, month - 1, day);
-
-                // WEEK counts
-                if (orderDate >= startOfWeek && orderDate <= today) {
-                  totalWeek++;
-                }
-
-                // MONTH counts
-              if (orderDate >= startOfMonth && orderDate <= today) {
-                totalMonth++;
-              }
-
-              // REVENUE (1000 kr for BTV/DTH, 800 kr for free)
-              const price = produkt.includes('free') ? 800 : 1000;
-              totalRevenue += price;
-            }
-          }
-        });
-
-        const todayCount = btvToday + dthToday;
-        setTodayStats({
-          date: new Date().toLocaleDateString('no-NO'),
-          count: todayCount,
-          revenue: todayCount * 1000, // Assume all today items are 1000 kr
-        });
-
-        // Calculate runrates using same logic as Min Avdeling
-        const now = new Date();
-        const currentHour = now.getHours() + (now.getMinutes() / 60);
-        const runrateTo16 = currentHour > 0 ? Math.round((todayCount / currentHour) * 6) : 0;
-        const runrateTo21 = currentHour > 0 ? Math.round((todayCount / currentHour) * 10) : 0;
-
-        // Week runrate calculation
-        const dayOfWeek = today.getDay();
-        const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
-        const weekRunRate = daysCompleted > 0 ? Math.round((totalWeek / daysCompleted) * 5) : 0;
-
-        setWeekStats({
-          date: 'Denne uken',
-          count: totalWeek,
-          revenue: totalWeek * 1000, // Simplified
-        });
-
-        // Month runrate calculation
-        const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
-        let daysCompletedMonth = 0;
-        for (let d = 1; d <= today.getDate(); d++) {
-          const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
-          const dayOfWeekCheck = checkDate.getDay();
-          const dateStr = checkDate.toISOString().split('T')[0];
-          if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
-            daysCompletedMonth++;
-          }
+        if (data.name) {
+          employeeDetailMap[data.name.toLowerCase().trim()] = { dept, externalName, visualName };
         }
-        
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        let workingDaysMonth = 0;
-        for (let d = 1; d <= daysInMonth; d++) {
-          const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
-          const dayOfWeekCheck = checkDate.getDay();
-          const dateStr = checkDate.toISOString().split('T')[0];
-          if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
-            workingDaysMonth++;
-          }
-        }
-        
-        const monthRunRate = daysCompletedMonth > 0 ? Math.round((totalMonth / daysCompletedMonth) * workingDaysMonth) : 0;
-
-        setMonthStats({
-          date: new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }),
-          count: totalMonth,
-          revenue: totalMonth * 1000, // Simplified
-        });
-
-        setRunRates({
-          dayTo16: runrateTo16,
-          dayTo21: runrateTo21,
-          week: weekRunRate,
-          month: monthRunRate,
-        });
-
-          console.log('✅ LIVE STATS UPDATED:', { todayCount, totalWeek, totalMonth, btvToday, dthToday });
-        } catch (err) {
-          console.error('❌ Error loading stats:', err);
+        if (data.externalName) {
+          employeeDetailMap[data.externalName.toLowerCase().trim()] = { dept, externalName, visualName };
         }
       });
 
-      // Cleanup inner archive listener
-      return () => unsubscribeArchive();
-    });
+      const getEmployeeDetail = (ansatt: string): { dept: string; externalName: string; visualName: string } => {
+        const ansattLower = ansatt.toLowerCase().trim();
+        if (employeeDetailMap[ansattLower]) return employeeDetailMap[ansattLower];
+        for (const [key, detail] of Object.entries(employeeDetailMap)) {
+          if (key.includes(ansattLower) || ansattLower.includes(key)) {
+            return detail;
+          }
+        }
+        return { dept: 'Unknown', externalName: '', visualName: ansatt };
+      };
 
-    // Cleanup outer livefeed listener
-    return () => unsubscribeLivefeed();
+      const livefeedRef = collection(db, 'livefeed_sales');
+      const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
+        const contractsRef = collection(db, 'allente_kontraktsarkiv');
+        const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
+          try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay());
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+            const sellerStats: { [key: string]: any } = {};
+
+            // Load from livefeed (TODAY)
+            livefeedSnapshot.docs.forEach((doc) => {
+              const data = doc.data();
+              const ansatt = data.userName || 'Ukjent';
+              const detail = getEmployeeDetail(ansatt);
+
+              if (!sellerStats[ansatt]) {
+                sellerStats[ansatt] = {
+                  ansatt: detail.visualName,
+                  avdeling: detail.dept,
+                  externalName: ansatt,
+                  today: 0,
+                  week: 0,
+                  month: 0,
+                };
+              }
+              sellerStats[ansatt].today++;
+            });
+
+            // Load from archive (HISTORICAL)
+            archiveSnapshot.docs.forEach((doc) => {
+              const data = doc.data();
+              let originalSelger = data.selger || 'Ukjent';
+              let ansatt = originalSelger.replace(/ \/ selger$/i, '').trim();
+              const detail = getEmployeeDetail(ansatt);
+              const dato = data.dato || '';
+
+              if (!sellerStats[ansatt]) {
+                sellerStats[ansatt] = {
+                  ansatt: detail.visualName,
+                  avdeling: detail.dept,
+                  externalName: originalSelger,
+                  today: 0,
+                  week: 0,
+                  month: 0,
+                };
+              }
+
+              if (dato && typeof dato === 'string') {
+                const parts = dato.split('/');
+                if (parts.length === 3) {
+                  const day = parseInt(parts[0]);
+                  const month = parseInt(parts[1]);
+                  const year = parseInt(parts[2]);
+                  const orderDate = new Date(year, month - 1, day);
+
+                  if (orderDate >= today && orderDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)) {
+                    sellerStats[ansatt].today++;
+                  }
+                  if (orderDate >= startOfWeek && orderDate <= today) {
+                    sellerStats[ansatt].week++;
+                  }
+                  if (orderDate >= startOfMonth && orderDate <= today) {
+                    sellerStats[ansatt].month++;
+                  }
+                }
+              }
+            });
+
+            // Find current user's data
+            const userData = sellerStats[user.name];
+            if (userData) {
+              const todayCount = userData.today;
+              const totalWeek = userData.week;
+              const totalMonth = userData.month;
+
+              setTodayStats({
+                date: new Date().toLocaleDateString('no-NO'),
+                count: todayCount,
+                revenue: todayCount * 1000,
+              });
+
+              // Calculate runrates
+              const now = new Date();
+              const currentHour = now.getHours() + (now.getMinutes() / 60);
+              const runrateTo16 = currentHour > 0 ? Math.round((todayCount / currentHour) * 6) : 0;
+              const runrateTo21 = currentHour > 0 ? Math.round((todayCount / currentHour) * 10) : 0;
+
+              const dayOfWeek = today.getDay();
+              const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
+              const weekRunRate = daysCompleted > 0 ? Math.round((totalWeek / daysCompleted) * 5) : 0;
+
+              setWeekStats({
+                date: 'Denne uken',
+                count: totalWeek,
+                revenue: totalWeek * 1000,
+              });
+
+              const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+              let daysCompletedMonth = 0;
+              for (let d = 1; d <= today.getDate(); d++) {
+                const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+                const dayOfWeekCheck = checkDate.getDay();
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+                  daysCompletedMonth++;
+                }
+              }
+
+              const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+              let workingDaysMonth = 0;
+              for (let d = 1; d <= daysInMonth; d++) {
+                const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+                const dayOfWeekCheck = checkDate.getDay();
+                const dateStr = checkDate.toISOString().split('T')[0];
+                if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+                  workingDaysMonth++;
+                }
+              }
+
+              const monthRunRate = daysCompletedMonth > 0 ? Math.round((totalMonth / daysCompletedMonth) * workingDaysMonth) : 0;
+
+              setMonthStats({
+                date: new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }),
+                count: totalMonth,
+                revenue: totalMonth * 1000,
+              });
+
+              setRunRates({
+                dayTo16: runrateTo16,
+                dayTo21: runrateTo21,
+                week: weekRunRate,
+                month: monthRunRate,
+              });
+
+              console.log('✅ PROGRESJON STATS LOADED:', { todayCount, totalWeek, totalMonth });
+            }
+          } catch (err) {
+            console.error('❌ Error loading stats:', err);
+          }
+        });
+
+        return () => {
+          unsubscribeLivefeed();
+          unsubscribeArchive();
+        };
+      });
+    });
   }, [user?.id, user?.name]);
 
   // Check for badge achievements and post to livefeed
