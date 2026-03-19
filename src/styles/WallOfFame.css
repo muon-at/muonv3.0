@@ -1,31 +1,30 @@
 .wall-of-fame-container {
   width: 100%;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .wall-of-fame-title {
-  color: #e2e8f0;
-  font-size: 1.4rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  display: none;
 }
 
 .records-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
   width: 100%;
+  flex: 1;
 }
 
 .record-box {
   background: linear-gradient(135deg, #1f2937 0%, #2d3748 100%);
   border: 2px solid #4b5563;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 8px;
+  padding: 1rem;
   text-align: center;
   transition: all 0.3s ease;
   cursor: pointer;
@@ -33,55 +32,57 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 220px;
+  min-height: 140px;
+  height: 100%;
 }
 
 .record-box:hover {
   border-color: #5a67d8;
-  box-shadow: 0 0 20px rgba(90, 103, 216, 0.3);
-  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(90, 103, 216, 0.3);
 }
 
 .record-emoji {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
+  font-size: 2rem;
+  margin-bottom: 0.4rem;
   line-height: 1;
 }
 
 .record-title {
   color: #b0b0b0;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.3;
-  height: 2.6rem;
+  letter-spacing: 0.3px;
+  margin: 0 0 0.4rem 0;
+  line-height: 1.2;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .record-employee {
-  color: #e2e8f0;
-  font-size: 1.1rem;
+  color: #8b5cf6;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   max-width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  min-height: 1.1rem;
 }
 
 .record-value {
   color: #22c55e;
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
+  line-height: 1;
 }
 
 .record-date {
   color: #999;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-style: italic;
 }
 
@@ -98,22 +99,22 @@
   }
 
   .record-box {
-    min-height: 180px;
+    min-height: 120px;
   }
 
   .record-emoji {
-    font-size: 2.5rem;
+    font-size: 1.5rem;
   }
 
   .record-title {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 
   .record-employee {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
 
   .record-value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
 }
