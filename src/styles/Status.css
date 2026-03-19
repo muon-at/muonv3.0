@@ -171,17 +171,22 @@
 }
 
 .badge-item.dimmed {
-  opacity: 0.4;
-  filter: grayscale(100%) brightness(0.8);
+  opacity: 0.3 !important;
+  filter: grayscale(100%) brightness(0.5) !important;
+}
+
+.badge-item.dimmed:hover {
+  transform: scale(1.05);
+  filter: grayscale(100%) brightness(0.6) !important;
 }
 
 .badge-item.achieved {
-  opacity: 1;
-  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)) !important;
 }
 
 .badge-item.achieved:hover {
-  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+  filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6)) !important;
 }
 
 .badge-emoji {

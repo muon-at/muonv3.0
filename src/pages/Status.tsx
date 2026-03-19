@@ -356,8 +356,10 @@ export default function Status() {
         setBadges(namedBadges);
         setAchievedBadges(achievedList);
 
-        console.log('✅ Badges loaded:', namedBadges.length, 'badges with names');
-        console.log('🎖️ Achieved:', achievedList);
+        console.log('✅ Badges loaded:', namedBadges.length, 'badges');
+        console.log('📊 Today stats count:', todayStats.count);
+        console.log('🎖️ Achieved badges:', achievedList);
+        console.log('📋 All badges:', namedBadges.map(b => `${b.navn}(verdi:${b.verdi})`));
       } catch (err) {
         console.error('❌ Error loading badges:', err);
       }
@@ -584,16 +586,27 @@ export default function Status() {
         {/* Badges Section */}
         <div className="badges-section">
           <div className="badges-container">
-            {badges.map((badge) => (
-              <div
-                key={badge.id}
-                className={`badge-item ${achievedBadges.includes(badge.id) ? 'achieved' : 'dimmed'}`}
-                title={badge.beskrivelse}
-              >
-                <div className="badge-emoji">{badge.emoji}</div>
-                <div className="badge-name">{badge.navn}</div>
-              </div>
-            ))}
+            {badges.length > 0 && (
+              <>
+                {badges.map((badge) => {
+                  const isAchieved = achievedBadges.includes(badge.id);
+                  return (
+                    <div
+                      key={badge.id}
+                      className={`badge-item ${isAchieved ? 'achieved' : 'dimmed'}`}
+                      title={badge.beskrivelse}
+                    >
+                      <div className="badge-emoji">{badge.emoji}</div>
+                      <div className="badge-name">{badge.navn}</div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+          {/* Debug: Show stats */}
+          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#ccc', textAlign: 'center' }}>
+            <p>Salg i dag: {todayStats.count} | Badges: {badges.length} | Achieved: {achievedBadges.length}</p>
           </div>
         </div>
       </div>
