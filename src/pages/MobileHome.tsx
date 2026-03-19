@@ -63,7 +63,7 @@ export default function MobileHome() {
         {/* SURROUNDING CARDS - PERFECT CIRCLE */}
         {cards.map((card) => {
           const rad = (card.angle * Math.PI) / 180;
-          const radius = 220; // Distance from center to card center
+          const radius = 170; // Distance from center to card center (reduced to fit screen)
           const x = Math.sin(rad) * radius;
           const y = -Math.cos(rad) * radius;
 
