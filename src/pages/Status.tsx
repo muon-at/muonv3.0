@@ -312,36 +312,19 @@ export default function Status() {
   useEffect(() => {
     const loadBadges = async () => {
       try {
-        const badgesSnap = await getDocs(collection(db, 'allente_badges'));
         const badgesList: Badge[] = [];
 
-        // Test data - fallback
+        // Master badge list (all milestones)
         const testBadges: Badge[] = [
+          { id: 'første', emoji: '🎓', navn: 'FØRSTE SALGET', verdi: 1, beskrivelse: 'Gjøre første salg' },
           { id: '5salg', emoji: '🚀', navn: '5 SALG', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
           { id: '10salg', emoji: '🎯', navn: '10 SALG', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
-          { id: '20salg', emoji: '💎', navn: '20 SALG', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
           { id: '15salg', emoji: '🔥', navn: '15 SALG', verdi: 15, beskrivelse: 'Gjøre 15 salg på en dag' },
-          { id: 'første', emoji: '🎓', navn: 'FØRSTE SALGET', verdi: 1, beskrivelse: 'Gjøre første salg' },
-          { id: 'mvp_måned', emoji: '👑', navn: 'MVP MÅNED', verdi: 999, beskrivelse: 'Høyest salg denne måneden' },
-          { id: 'mvp_dag', emoji: '⭐', navn: 'MVP DAG', verdi: 999, beskrivelse: 'Høyest salg i dag' },
-          { id: 'best', emoji: '🏆', navn: 'BEST', verdi: 999, beskrivelse: 'Beste ytelse' },
+          { id: '20salg', emoji: '💎', navn: '20 SALG', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
+          { id: 'best', emoji: '🏆', navn: 'BEST', verdi: 999, beskrivelse: 'Flest salg totalt noen sinne' },
         ];
 
-        // Load badges from Firestore or use test data
-        if (badgesSnap.size > 0) {
-          badgesSnap.forEach((doc) => {
-            const data = doc.data();
-            badgesList.push({
-              id: doc.id,
-              emoji: data.emoji || '🏅',
-              navn: data.navn || '',
-              verdi: data.verdi || 0,
-              beskrivelse: data.beskrivelse || '',
-            });
-          });
-        } else {
-          badgesList.push(...testBadges);
-        }
+        badgesList.push(...testBadges);
 
         // Filter and sort
         const namedBadges = badgesList.filter((badge) => badge.navn && badge.navn.trim().length > 0);
@@ -354,7 +337,7 @@ export default function Status() {
           earnedBadgeIds = earnedSnap.docs.map(doc => doc.id);
         }
 
-        // Check if TODAY'S sales unlocked any new badges
+        // Check if TODAY'S sales unlocked any new badges (only real milestones, not 🏆)
         const newlyAchieved: string[] = [];
         namedBadges.forEach((badge) => {
           if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi && badge.verdi < 999) {
@@ -362,22 +345,35 @@ export default function Status() {
           }
         });
 
-        // Auto-save newly achieved badges
+        // Auto-save newly achieved badges + post to livefeed
         if (newlyAchieved.length > 0 && user?.id) {
           try {
             for (const badgeId of newlyAchieved) {
               const badge = namedBadges.find(b => b.id === badgeId);
+              
+              // Save to earned badges
               const earnedRef = doc(db, `users/${user.id}/earned_badges`, badgeId);
               await setDoc(earnedRef, {
                 earnedAt: new Date().toISOString(),
                 badgeName: badge?.navn,
                 emoji: badge?.emoji,
               });
+
+              // Post to livefeed
+              const livefeedRef = collection(db, 'livefeed_sales');
+              await addDoc(livefeedRef, {
+                type: 'badge_earned',
+                userName: user.name,
+                badge: badge?.emoji,
+                badgeName: badge?.navn,
+                timestamp: new Date(),
+                message: `${user.name} ${badge?.emoji} ${badge?.navn}!`,
+              });
             }
             earnedBadgeIds = [...earnedBadgeIds, ...newlyAchieved];
-            console.log('🎖️ New badges earned:', newlyAchieved);
+            console.log('🎖️ New badges earned & posted:', newlyAchieved);
           } catch (err) {
-            console.error('Error saving earned badges:', err);
+            console.error('Error saving badges:', err);
           }
         }
 
@@ -385,7 +381,7 @@ export default function Status() {
         setAchievedBadges(earnedBadgeIds);
 
         console.log('✅ Badges loaded:', namedBadges.length);
-        console.log('🏅 Earned badges:', earnedBadgeIds);
+        console.log('🏅 Earned by this user:', earnedBadgeIds);
       } catch (err) {
         console.error('❌ Error loading badges:', err);
       }
@@ -393,6 +389,70 @@ export default function Status() {
 
     loadBadges();
   }, [user?.id, todayStats.count]);
+
+  // Award 🏆 to employee with most total salg (one-time setup)
+  useEffect(() => {
+    const awardTrophyBadge = async () => {
+      try {
+        // Get all employees and sum their total salg from archive
+        const contractsSnap = await getDocs(collection(db, 'allente_kontraktsarkiv'));
+        const employeeSalg: { [name: string]: number } = {};
+
+        contractsSnap.docs.forEach((doc) => {
+          const data = doc.data();
+          const selger = data.selger || '';
+          let ansatt = selger.replace(/ \/ selger$/i, '').trim();
+          employeeSalg[ansatt] = (employeeSalg[ansatt] || 0) + 1;
+        });
+
+        // Find employee with most salg
+        let topEmployee = '';
+        let maxSalg = 0;
+        for (const [name, salg] of Object.entries(employeeSalg)) {
+          if (salg > maxSalg) {
+            maxSalg = salg;
+            topEmployee = name;
+          }
+        }
+
+        if (topEmployee && maxSalg > 0) {
+          // Get the user ID for this employee
+          const empSnap = await getDocs(collection(db, 'employees'));
+          let topEmployeeId = '';
+          
+          empSnap.docs.forEach((doc) => {
+            const data = doc.data();
+            const visualName = data.name || '';
+            const externalName = data.externalName || '';
+            
+            // Match with topEmployee name
+            if (visualName.toLowerCase().trim() === topEmployee.toLowerCase().trim() || 
+                externalName.toLowerCase().trim() === topEmployee.toLowerCase().trim()) {
+              topEmployeeId = doc.id;
+            }
+          });
+
+          // Award 🏆 to top employee
+          if (topEmployeeId) {
+            const trophyRef = doc(db, `users/${topEmployeeId}/earned_badges`, 'best');
+            await setDoc(trophyRef, {
+              earnedAt: new Date().toISOString(),
+              badgeName: 'BEST',
+              emoji: '🏆',
+              totalSalg: maxSalg,
+              isTopAllTime: true,
+            });
+            console.log(`🏆 Trophy awarded to ${topEmployee} (${maxSalg} total salg)`);
+          }
+        }
+      } catch (err) {
+        console.error('Error awarding trophy:', err);
+      }
+    };
+
+    // Run once on component mount
+    awardTrophyBadge();
+  }, []);
 
   // Load user targets from Firestore
   useEffect(() => {
