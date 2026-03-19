@@ -308,29 +308,32 @@ export default function Status() {
     postAchievedBadges();
   }, [user?.id, todayStats.count]);
 
-  // Load badges from Firestore - Option B: emoji as field, not doc ID
+  // Load badges and earned badges from Firestore
   useEffect(() => {
     const loadBadges = async () => {
       try {
         const badgesSnap = await getDocs(collection(db, 'allente_badges'));
         const badgesList: Badge[] = [];
-        const achievedList: string[] = [];
 
-        // Test data - fallback for now
+        // Test data - fallback
         const testBadges: Badge[] = [
-          { id: 'gold', emoji: '🥇', navn: 'Gold', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
-          { id: 'trophy', emoji: '🏆', navn: 'Trophy', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
-          { id: 'fire', emoji: '🔥', navn: 'On Fire', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
-          { id: 'star', emoji: '⭐', navn: 'Star', verdi: 50, beskrivelse: 'Gjøre 50 salg på en dag' },
+          { id: '5salg', emoji: '🚀', navn: '5 SALG', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
+          { id: '10salg', emoji: '🎯', navn: '10 SALG', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
+          { id: '20salg', emoji: '💎', navn: '20 SALG', verdi: 20, beskrivelse: 'Gjøre 20 salg på en dag' },
+          { id: '15salg', emoji: '🔥', navn: '15 SALG', verdi: 15, beskrivelse: 'Gjøre 15 salg på en dag' },
+          { id: 'første', emoji: '🎓', navn: 'FØRSTE SALGET', verdi: 1, beskrivelse: 'Gjøre første salg' },
+          { id: 'mvp_måned', emoji: '👑', navn: 'MVP MÅNED', verdi: 999, beskrivelse: 'Høyest salg denne måneden' },
+          { id: 'mvp_dag', emoji: '⭐', navn: 'MVP DAG', verdi: 999, beskrivelse: 'Høyest salg i dag' },
+          { id: 'best', emoji: '🏆', navn: 'BEST', verdi: 999, beskrivelse: 'Beste ytelse' },
         ];
 
-        // If Firestore has badges, use those. Otherwise use test data.
+        // Load badges from Firestore or use test data
         if (badgesSnap.size > 0) {
           badgesSnap.forEach((doc) => {
             const data = doc.data();
             badgesList.push({
               id: doc.id,
-              emoji: data.emoji || '🏅', // Expect emoji field
+              emoji: data.emoji || '🏅',
               navn: data.navn || '',
               verdi: data.verdi || 0,
               beskrivelse: data.beskrivelse || '',
@@ -340,33 +343,56 @@ export default function Status() {
           badgesList.push(...testBadges);
         }
 
-        // Filter: Only badges with navn (name) set
+        // Filter and sort
         const namedBadges = badgesList.filter((badge) => badge.navn && badge.navn.trim().length > 0);
-
-        // Sort by verdi (ascending)
         namedBadges.sort((a, b) => a.verdi - b.verdi);
 
-        // Check which badges are achieved
+        // Load earned badges from Firestore for current user
+        let earnedBadgeIds: string[] = [];
+        if (user?.id) {
+          const earnedSnap = await getDocs(collection(db, `users/${user.id}/earned_badges`));
+          earnedBadgeIds = earnedSnap.docs.map(doc => doc.id);
+        }
+
+        // Check if TODAY'S sales unlocked any new badges
+        const newlyAchieved: string[] = [];
         namedBadges.forEach((badge) => {
-          if (todayStats.count >= badge.verdi) {
-            achievedList.push(badge.id);
+          if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi && badge.verdi < 999) {
+            newlyAchieved.push(badge.id);
           }
         });
 
-        setBadges(namedBadges);
-        setAchievedBadges(achievedList);
+        // Auto-save newly achieved badges
+        if (newlyAchieved.length > 0 && user?.id) {
+          try {
+            for (const badgeId of newlyAchieved) {
+              const badge = namedBadges.find(b => b.id === badgeId);
+              const earnedRef = doc(db, `users/${user.id}/earned_badges`, badgeId);
+              await setDoc(earnedRef, {
+                earnedAt: new Date().toISOString(),
+                badgeName: badge?.navn,
+                emoji: badge?.emoji,
+              });
+            }
+            earnedBadgeIds = [...earnedBadgeIds, ...newlyAchieved];
+            console.log('🎖️ New badges earned:', newlyAchieved);
+          } catch (err) {
+            console.error('Error saving earned badges:', err);
+          }
+        }
 
-        console.log('✅ Badges loaded:', namedBadges.length, 'badges');
-        console.log('📊 Today stats count:', todayStats.count);
-        console.log('🎖️ Achieved badges:', achievedList);
-        console.log('📋 All badges:', namedBadges.map(b => `${b.navn}(verdi:${b.verdi})`));
+        setBadges(namedBadges);
+        setAchievedBadges(earnedBadgeIds);
+
+        console.log('✅ Badges loaded:', namedBadges.length);
+        console.log('🏅 Earned badges:', earnedBadgeIds);
       } catch (err) {
         console.error('❌ Error loading badges:', err);
       }
     };
 
     loadBadges();
-  }, [todayStats.count]);
+  }, [user?.id, todayStats.count]);
 
   // Load user targets from Firestore
   useEffect(() => {
@@ -603,10 +629,6 @@ export default function Status() {
                 })}
               </>
             )}
-          </div>
-          {/* Debug: Show stats */}
-          <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#ccc', textAlign: 'center' }}>
-            <p>Salg i dag: {todayStats.count} | Badges: {badges.length} | Achieved: {achievedBadges.length}</p>
           </div>
         </div>
       </div>
