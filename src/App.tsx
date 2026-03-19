@@ -47,8 +47,8 @@ function RoutedContent() {
     }
   }, []);
 
-  // Show livefeed only on Min Side routes + LIVE kiosk pages
-  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt', '/min-avdeling', '/live-krs', '/live-osl', '/live-skien'].includes(location.pathname);
+  // Show livefeed only on Min Side routes (NOT on LIVE pages - they have their own ticker)
+  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt', '/min-avdeling'].includes(location.pathname);
 
   return (
     <>

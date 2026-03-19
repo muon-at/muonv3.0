@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import LivefeedTicker from '../components/LivefeedTicker';
 
 export default function LiveKRS() {
   const navigate = useNavigate();
@@ -12,16 +13,20 @@ export default function LiveKRS() {
       color: '#e2e8f0',
       position: 'relative',
     }}>
+      {/* TICKER AT TOP */}
+      <LivefeedTicker />
+
       {/* CONTENT - Main area */}
       <div style={{
         flex: 1,
-        paddingRight: '340px',
         paddingLeft: '2rem',
         paddingTop: '2rem',
         paddingBottom: '2rem',
+        paddingRight: '2rem',
+        marginTop: '80px',
         overflowY: 'auto',
       }}>
-        {/* Empty - livefeed on right side */}
+        {/* Main content area */}
       </div>
 
       {/* BACK BUTTON - Bottom left */}
