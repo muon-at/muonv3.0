@@ -481,23 +481,35 @@ export default function Status() {
               console.log(`✅ Badge saved: ${badgeId}`);
             }
 
-            // Only post the HIGHEST milestone reached
-            const sortedByValue = newlyAchieved
-              .map(id => namedBadges.find(b => b.id === id))
-              .filter(b => b !== undefined)
-              .sort((a, b) => (b?.verdi || 0) - (a?.verdi || 0));
+            // Determine which badge to post
+            // Priority: FØRSTE SALGET (if just earned) OR highest milestone
+            let badgeToPost = null;
+            
+            if (newlyAchieved.includes('første')) {
+              // Post FØRSTE SALGET immediately (special case - first-ever sale)
+              badgeToPost = namedBadges.find(b => b.id === 'første');
+            } else {
+              // Post the highest milestone reached (excluding dagens_første, første, and best)
+              const sortedByValue = newlyAchieved
+                .map(id => namedBadges.find(b => b.id === id))
+                .filter(b => b !== undefined && b?.verdi < 999)
+                .sort((a, b) => (b?.verdi || 0) - (a?.verdi || 0));
 
-            if (sortedByValue.length > 0 && sortedByValue[0]) {
-              const topBadge = sortedByValue[0];
+              if (sortedByValue.length > 0 && sortedByValue[0]) {
+                badgeToPost = sortedByValue[0];
+              }
+            }
+
+            if (badgeToPost) {
               const livefeedRef = collection(db, 'livefeed_sales');
               
               const livefeedData = {
                 type: 'badge_earned',
                 userName: user.name,
-                badge: topBadge.emoji,
-                badgeName: topBadge.navn,
+                badge: badgeToPost.emoji,
+                badgeName: badgeToPost.navn,
                 timestamp: new Date(),
-                message: `${user.name} ${topBadge.emoji} ${topBadge.navn}!`,
+                message: `${user.name} ${badgeToPost.emoji} ${badgeToPost.navn}!`,
               };
               
               console.log('📝 Posting to livefeed:', livefeedData);
