@@ -309,3 +309,254 @@ exports.countEmojiFromChat = onDocumentCreated(
 exports.getVapidKey = onRequest((req, res) => {
   res.json({ vapidPublicKey: VAPID_PUBLIC });
 });
+
+// =====================================================
+// MASTER EARNINGS COLLECTION - EARNINGS DATA PIPELINE
+// =====================================================
+
+const { schedule } = require('firebase-functions/v2/scheduler');
+
+/**
+ * Daily scheduled function: Populate master_earnings collection
+ * Runs at 03:00 daily (before 04:00 livefeed cleanup)
+ * 
+ * Populates master_earnings with:
+ * - All contracts from allente_kontraktsarkiv
+ * - Today's posts from livefeed_sales
+ * - Provisjon rates from Admin Produkter
+ * 
+ * Structure:
+ * {
+ *   ansatt: string (employee name)
+ *   produkt: string (product name)
+ *   dato: string (DD/MM/YYYY)
+ *   provisjon: number (from Admin Produkter)
+ *   lønn: number | null (filled from livefeed posts for today)
+ *   type: string ('contract' | 'post')
+ *   contractId / postId: string
+ *   createdAt: ISO string
+ *   updatedAt: ISO string
+ * }
+ */
+exports.populateMasterEarnings = schedule('0 3 * * *')
+  .timeZone('Europe/Oslo')
+  .onRun(async (context) => {
+    console.log('🔄 [03:00] Populating master_earnings collection...');
+
+    try {
+      const db = admin.firestore();
+      
+      // Load all products with provisjoner
+      const produktSnapshot = await db.collection('allente_produkter').get();
+      const produktMap = {};
+
+      produktSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        const produktNavn = (data.produkt || data.navn || '').toLowerCase().trim();
+        const provisjon = parseInt(data.provisjon) || 1000;
+        produktMap[produktNavn] = provisjon;
+        console.log(`📦 Product: "${produktNavn}" => ${provisjon}kr`);
+      });
+
+      // Load all contracts
+      const contractsSnapshot = await db.collection('allente_kontraktsarkiv').get();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let newContracts = 0;
+      let existingContracts = 0;
+
+      // For each contract, create/update master_earnings entry
+      for (const contractDoc of contractsSnapshot.docs) {
+        const data = contractDoc.data();
+        const ansatt = data.selger || '';
+        const produktNavn = (data.produkt || '').toLowerCase().trim();
+        const dato = data.dato || '';
+        const contractId = contractDoc.id;
+
+        if (!ansatt || !dato) {
+          console.log(`⚠️ Skipping contract ${contractId}: missing ansatt or dato`);
+          continue;
+        }
+
+        // Look up provisjon
+        let provisjon = produktMap[produktNavn] || 1000;
+        if (!produktMap[produktNavn]) {
+          // Try partial match
+          for (const [key, value] of Object.entries(produktMap)) {
+            if (produktNavn.includes(key) || key.includes(produktNavn)) {
+              provisjon = value;
+              console.log(`✅ Partial match: "${produktNavn}" => "${key}" = ${provisjon}kr`);
+              break;
+            }
+          }
+        }
+
+        // Create unique ID for this earning event
+        const earningId = `${ansatt.toLowerCase()}_${dato.replace(/\//g, '-')}_${contractId.substring(0, 8)}`;
+
+        // Check if already exists
+        const earningDoc = await db.collection('master_earnings').doc(earningId).get();
+        
+        if (!earningDoc.exists) {
+          // NEW contract entry
+          await db.collection('master_earnings').doc(earningId).set({
+            ansatt: ansatt.trim(),
+            produkt: produktNavn,
+            dato: dato,
+            provisjon: provisjon,
+            lønn: null,
+            type: 'contract',
+            contractId: contractId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+          newContracts++;
+          console.log(`✅ Created: ${earningId} (${ansatt} | ${produktNavn} | ${provisjon}kr)`);
+        } else {
+          existingContracts++;
+        }
+      }
+
+      // NOW: Process today's livefeed posts (for lønn in dag)
+      const livefeedSnapshot = await db.collection('livefeed_sales').get();
+      let newPosts = 0;
+      
+      for (const postDoc of livefeedSnapshot.docs) {
+        const data = postDoc.data();
+        const userName = data.userName || '';
+        const product = (data.product || '').toLowerCase().trim();
+        const timestamp = data.timestamp?.toDate?.() || new Date();
+        const postDate = timestamp.toISOString().split('T')[0];
+
+        const todayStr = today.toISOString().split('T')[0];
+
+        if (postDate === todayStr && userName && product) {
+          // Look up provisjon
+          let provisjon = produktMap[product] || 1000;
+          if (!produktMap[product]) {
+            for (const [key, value] of Object.entries(produktMap)) {
+              if (product.includes(key) || key.includes(product)) {
+                provisjon = value;
+                break;
+              }
+            }
+          }
+
+          // Get date in DD/MM/YYYY format
+          const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+          
+          // Create ID for this post
+          const postId = `${userName.toLowerCase()}_${dateStr.replace(/\//g, '-')}_post_${postDoc.id.substring(0, 8)}`;
+
+          // Check if already exists
+          const earningDoc = await db.collection('master_earnings').doc(postId).get();
+          
+          if (!earningDoc.exists) {
+            // NEW post entry
+            await db.collection('master_earnings').doc(postId).set({
+              ansatt: userName.trim(),
+              produkt: product,
+              dato: dateStr,
+              provisjon: provisjon,
+              lønn: provisjon,
+              type: 'post',
+              postId: postDoc.id,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+            newPosts++;
+            console.log(`✅ Posted: ${postId} (${userName} | ${product} | ${provisjon}kr)`);
+          }
+        }
+      }
+
+      console.log(`✅ Master earnings populated:
+        - Contracts: ${newContracts} new, ${existingContracts} existing
+        - Posts: ${newPosts} new
+      `);
+
+      return null;
+    } catch (error) {
+      console.error('❌ Error populating master_earnings:', error);
+      throw error;
+    }
+  });
+
+/**
+ * HTTP Function: Manual trigger to populate master_earnings
+ * POST https://us-central1-PROJECT.cloudfunctions.net/populateMasterEarningsNow
+ */
+exports.populateMasterEarningsNow = onRequest(async (req, res) => {
+  console.log('🔄 Manual trigger: Populating master_earnings...');
+
+  try {
+    const db = admin.firestore();
+    
+    // Load all products
+    const produktSnapshot = await db.collection('allente_produkter').get();
+    const produktMap = {};
+
+    produktSnapshot.docs.forEach((doc) => {
+      const data = doc.data();
+      const produktNavn = (data.produkt || data.navn || '').toLowerCase().trim();
+      const provisjon = parseInt(data.provisjon) || 1000;
+      produktMap[produktNavn] = provisjon;
+    });
+
+    // Load all contracts
+    const contractsSnapshot = await db.collection('allente_kontraktsarkiv').get();
+    let newCount = 0;
+
+    for (const contractDoc of contractsSnapshot.docs) {
+      const data = contractDoc.data();
+      const ansatt = data.selger || '';
+      const produktNavn = (data.produkt || '').toLowerCase().trim();
+      const dato = data.dato || '';
+      const contractId = contractDoc.id;
+
+      if (!ansatt || !dato) continue;
+
+      let provisjon = produktMap[produktNavn] || 1000;
+      if (!produktMap[produktNavn]) {
+        for (const [key, value] of Object.entries(produktMap)) {
+          if (produktNavn.includes(key) || key.includes(produktNavn)) {
+            provisjon = value;
+            break;
+          }
+        }
+      }
+
+      const earningId = `${ansatt.toLowerCase()}_${dato.replace(/\//g, '-')}_${contractId.substring(0, 8)}`;
+      const earningDoc = await db.collection('master_earnings').doc(earningId).get();
+
+      if (!earningDoc.exists) {
+        await db.collection('master_earnings').doc(earningId).set({
+          ansatt: ansatt.trim(),
+          produkt: produktNavn,
+          dato: dato,
+          provisjon: provisjon,
+          lønn: null,
+          type: 'contract',
+          contractId: contractId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        newCount++;
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Master earnings populated. ${newCount} new entries added.`,
+      kontrakterProcessert: contractsSnapshot.size,
+      nyeEarnings: newCount,
+    });
+  } catch (error) {
+    console.error('❌ Error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});

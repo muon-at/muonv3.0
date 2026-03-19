@@ -16,6 +16,16 @@ interface EarningsRunRate {
   month: number;
 }
 
+interface MasterEarning {
+  ansatt: string;
+  produkt: string;
+  dato: string; // DD/MM/YYYY
+  provisjon: number;
+  lønn: number | null;
+  type: string; // 'contract' | 'post'
+  createdAt: string;
+}
+
 export default function Earnings() {
   const { user } = useAuth();
   const [earnings, setEarnings] = useState<EarningsData>({
@@ -46,129 +56,114 @@ export default function Earnings() {
     return workingDays;
   };
 
-  // Same dual-listener pattern as Status.tsx
+  // Parse DD/MM/YYYY to Date
+  const parseNorwegianDate = (dateStr: string): Date => {
+    const [day, month, year] = dateStr.split('/');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  };
+
+  // Listen to master_earnings collection
   useEffect(() => {
     if (!user || !user.name) return;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    
     const startOfWeek = new Date(today);
     startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
     
-    // Previous month
     const startOfPrevMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
     const endOfPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+    endOfPrevMonth.setHours(23, 59, 59, 999);
 
-    // Listen to livefeed (TODAY data)
-    const livefeedRef = collection(db, 'livefeed_sales');
-    const unsubscribeLivefeed = onSnapshot(livefeedRef, (livefeedSnapshot) => {
-      // Listen to contracts (WEEK/MONTH/PREV MONTH data)
-      const contractsRef = collection(db, 'allente_kontraktsarkiv');
-      const unsubscribeArchive = onSnapshot(contractsRef, (archiveSnapshot) => {
-        try {
-          let dayCount = 0;
-          let weekCount = 0;
-          let monthCount = 0;
-          let prevMonthCount = 0;
+    const earningsRef = collection(db, 'master_earnings');
+    const unsubscribe = onSnapshot(earningsRef, (snapshot) => {
+      try {
+        let dayRevenue = 0;
+        let weekRevenue = 0;
+        let monthRevenue = 0;
+        let prevMonthRevenue = 0;
 
-          // COUNT TODAY from livefeed (each sale = 1 count)
-          livefeedSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            if (data.userName === user.name && data.product) {
-              dayCount++;
-            }
-          });
+        const userName = user.name.toLowerCase().trim();
 
-          // COUNT WEEK/MONTH/PREV from contracts
-          archiveSnapshot.docs.forEach((doc) => {
-            const data = doc.data();
-            const selger = (data.selger || '').toLowerCase().trim();
-            const userName = user.name.toLowerCase().trim();
-            
-            if (selger !== userName) return;
+        snapshot.docs.forEach((doc) => {
+          const data = doc.data() as MasterEarning;
+          const ansatt = (data.ansatt || '').toLowerCase().trim();
 
-            const dato = data.dato || '';
-            if (dato && typeof dato === 'string') {
-              const parts = dato.split('/');
-              if (parts.length === 3) {
-                const day = parseInt(parts[0]);
-                const month = parseInt(parts[1]);
-                const year = parseInt(parts[2]);
-                const orderDate = new Date(year, month - 1, day);
+          // Filter by employee name
+          if (ansatt !== userName) return;
 
-                // Count for WEEK
-                if (orderDate >= startOfWeek && orderDate <= today) {
-                  weekCount++;
-                }
+          const provisjon = data.provisjon || 0;
+          const orderDate = parseNorwegianDate(data.dato);
 
-                // Count for MONTH
-                if (orderDate >= startOfMonth && orderDate <= today) {
-                  monthCount++;
-                }
-
-                // Count for PREVIOUS MONTH
-                if (orderDate >= startOfPrevMonth && orderDate <= endOfPrevMonth) {
-                  prevMonthCount++;
-                }
-              }
-            }
-          });
-
-          // Calculate revenue (1000kr per sale, matching Progresjon logic)
-          const dayRevenue = dayCount * 1000;
-          const weekRevenue = (weekCount + dayCount) * 1000; // Include today
-          const monthRevenue = (monthCount + dayCount) * 1000; // Include today
-          const prevMonthRevenue = prevMonthCount * 1000;
-
-          // Calculate runrates
-          const now = new Date();
-          const currentHour = now.getHours() + (now.getMinutes() / 60);
-          const dayRunRate = currentHour > 0 ? Math.round((dayRevenue / currentHour) * 6) : 0;
-
-          const dayOfWeek = today.getDay();
-          const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
-          const weekRunRate = daysCompleted > 0 ? Math.round((weekRevenue / daysCompleted) * 5) : 0;
-
-          const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
-          let daysCompletedMonth = 0;
-          for (let d = 1; d <= today.getDate(); d++) {
-            const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
-            const dayOfWeekCheck = checkDate.getDay();
-            const dateStr = checkDate.toISOString().split('T')[0];
-            if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
-              daysCompletedMonth++;
-            }
+          // TODAY
+          if (orderDate.getTime() === today.getTime()) {
+            dayRevenue += provisjon;
           }
-          
-          const workingDaysMonth = getWorkingDaysInMonth(today);
-          const monthRunRate = daysCompletedMonth > 0 ? Math.round((monthRevenue / daysCompletedMonth) * workingDaysMonth) : 0;
 
-          setEarnings({
-            day: dayRevenue,
-            week: weekRevenue,
-            month: monthRevenue,
-          });
+          // WEEK (from Monday of this week to today)
+          if (orderDate >= startOfWeek && orderDate <= today) {
+            weekRevenue += provisjon;
+          }
 
-          setRunRates({
-            day: dayRunRate,
-            week: weekRunRate,
-            month: monthRunRate,
-          });
+          // MONTH (from 1st of month to today)
+          if (orderDate >= startOfMonth && orderDate <= today) {
+            monthRevenue += provisjon;
+          }
 
-          setPrevMonth(prevMonthRevenue);
+          // PREVIOUS MONTH
+          if (orderDate >= startOfPrevMonth && orderDate <= endOfPrevMonth) {
+            prevMonthRevenue += provisjon;
+          }
+        });
 
-          console.log('💰 Earnings (counts):', { dayCount, weekCount: weekCount + dayCount, monthCount: monthCount + dayCount, prevMonthCount });
-          console.log('💰 Earnings (revenue):', { dayRevenue, weekRevenue, monthRevenue, prevMonthRevenue });
-        } catch (err) {
-          console.error('❌ Error calculating earnings:', err);
+        // Calculate runrates
+        const now = new Date();
+        const currentHour = now.getHours() + (now.getMinutes() / 60);
+        const dayRunRate = currentHour > 0 ? Math.round((dayRevenue / currentHour) * 6) : 0;
+
+        const dayOfWeek = today.getDay();
+        const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
+        const weekRunRate = daysCompleted > 0 ? Math.round((weekRevenue / daysCompleted) * 5) : 0;
+
+        const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+        let daysCompletedMonth = 0;
+        for (let d = 1; d <= today.getDate(); d++) {
+          const checkDate = new Date(today.getFullYear(), today.getMonth(), d);
+          const dayOfWeekCheck = checkDate.getDay();
+          const dateStr = checkDate.toISOString().split('T')[0];
+          if (dayOfWeekCheck >= 1 && dayOfWeekCheck <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+            daysCompletedMonth++;
+          }
         }
-      });
+        
+        const workingDaysMonth = getWorkingDaysInMonth(today);
+        const monthRunRate = daysCompletedMonth > 0 ? Math.round((monthRevenue / daysCompletedMonth) * workingDaysMonth) : 0;
 
-      return () => unsubscribeArchive();
+        setEarnings({
+          day: dayRevenue,
+          week: weekRevenue,
+          month: monthRevenue,
+        });
+
+        setRunRates({
+          day: dayRunRate,
+          week: weekRunRate,
+          month: monthRunRate,
+        });
+
+        setPrevMonth(prevMonthRevenue);
+
+        console.log('💰 Earnings (from master_earnings):', { dayRevenue, weekRevenue, monthRevenue, prevMonthRevenue });
+      } catch (err) {
+        console.error('❌ Error calculating earnings:', err);
+      }
     });
 
-    return () => unsubscribeLivefeed();
+    return () => unsubscribe();
   }, [user?.id, user?.name]);
 
   if (!user) return <div className="earnings-container">Laster...</div>;
@@ -206,7 +201,7 @@ export default function Earnings() {
         <div className="payment-history">
           <h2>Forrige måned</h2>
           <div className="payment-item">
-            <span className="payment-date">Forrige måned total</span>
+            <span className="payment-date">Total</span>
             <span className="payment-type">Kontrakter</span>
             <span className="payment-amount">{prevMonth.toLocaleString('no-NO')} kr</span>
           </div>
