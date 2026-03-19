@@ -8,6 +8,22 @@ export default function MittProsjekt() {
   const [loading, setLoading] = useState(true);
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
 
+  // Calculate working days in month (mon-fri minus norwegian holidays)
+  const getWorkingDaysInMonth = (date: Date): number => {
+    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const norwegianHolidays2026 = ['2026-01-01', '2026-04-09', '2026-04-10', '2026-04-12', '2026-04-13', '2026-05-01', '2026-05-17', '2026-05-21', '2026-05-31', '2026-06-01', '2026-12-25', '2026-12-26'];
+    let workingDays = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const checkDate = new Date(date.getFullYear(), date.getMonth(), d);
+      const dayOfWeek = checkDate.getDay();
+      const dateStr = checkDate.toISOString().split('T')[0];
+      if (dayOfWeek >= 1 && dayOfWeek <= 5 && !norwegianHolidays2026.includes(dateStr)) {
+        workingDays++;
+      }
+    }
+    return workingDays;
+  };
+
   useEffect(() => {
     if (!user) {
       setLoading(false);
@@ -15,37 +31,34 @@ export default function MittProsjekt() {
     }
 
     getDocs(collection(db, 'employees')).then((empSnapshot) => {
-      const employeeDetailMap: { [key: string]: { dept: string; externalName: string } } = {};
-      const employeeMapLower: { [key: string]: string } = {};
+      const employeeDetailMap: { [key: string]: { dept: string; externalName: string; visualName: string } } = {};
 
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
         const dept = data.department || 'Unknown';
         const externalName = data.externalName || '';
+        const visualName = data.name || '';
 
         if (data.name) {
-          employeeDetailMap[data.name] = { dept, externalName };
-          employeeMapLower[data.name.toLowerCase().trim()] = dept;
+          employeeDetailMap[data.name.toLowerCase().trim()] = { dept, externalName, visualName };
         }
         if (data.externalName) {
-          employeeDetailMap[data.externalName] = { dept, externalName };
-          employeeMapLower[data.externalName.toLowerCase().trim()] = dept;
+          employeeDetailMap[data.externalName.toLowerCase().trim()] = { dept, externalName, visualName };
         }
       });
 
-      const getEmployeeDetail = (ansatt: string): { dept: string; externalName: string } => {
-        if (employeeDetailMap[ansatt]) return employeeDetailMap[ansatt];
+      const getEmployeeDetail = (ansatt: string): { dept: string; externalName: string; visualName: string } => {
         const ansattLower = ansatt.toLowerCase().trim();
+        
+        if (employeeDetailMap[ansattLower]) return employeeDetailMap[ansattLower];
+        
         for (const [key, detail] of Object.entries(employeeDetailMap)) {
-          if (key.toLowerCase().trim() === ansattLower) return detail;
-        }
-        for (const [key, detail] of Object.entries(employeeDetailMap)) {
-          const keyLower = key.toLowerCase().trim();
-          if (keyLower.includes(ansattLower) || ansattLower.includes(keyLower)) {
+          if (key.includes(ansattLower) || ansattLower.includes(key)) {
             return detail;
           }
         }
-        return { dept: 'Unknown', externalName: '' };
+        
+        return { dept: 'Unknown', externalName: '', visualName: ansatt };
       };
 
       const livefeedRef = collection(db, 'livefeed_sales');
@@ -69,7 +82,7 @@ export default function MittProsjekt() {
 
               if (!sellerStats[ansatt]) {
                 sellerStats[ansatt] = {
-                  ansatt,
+                  ansatt: detail.visualName,
                   avdeling: detail.dept,
                   externalName: ansatt,
                   today: 0,
@@ -90,7 +103,7 @@ export default function MittProsjekt() {
 
               if (!sellerStats[ansatt]) {
                 sellerStats[ansatt] = {
-                  ansatt,
+                  ansatt: detail.visualName,
                   avdeling: detail.dept,
                   externalName: originalSelger,
                   today: 0,
@@ -148,6 +161,8 @@ export default function MittProsjekt() {
   const startOfWeek = new Date(today);
   startOfWeek.setDate(today.getDate() - today.getDay());
   const daysCompleted = Math.floor((today.getTime() - startOfWeek.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const workingDaysMonth = getWorkingDaysInMonth(today);
+  const daysCompletedMonth = Math.floor((today.getTime() - new Date(today.getFullYear(), today.getMonth(), 1).getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   // Department stats
   const depts = ['KRS', 'OSL', 'Skien'];
@@ -168,6 +183,7 @@ export default function MittProsjekt() {
   const muonRunrateTo16 = currentHour > 0 ? Math.round((muonToday / currentHour) * 6) : 0;
   const muonRunrateTo21 = currentHour > 0 ? Math.round((muonToday / currentHour) * 10) : 0;
   const muonRunrateWeek = daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0;
+  const muonRunrateMonth = daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0;
 
   // Top 3 global
   const top3TodayAll = [...progresjonData].sort((a, b) => (b.today || 0) - (a.today || 0)).slice(0, 3);
@@ -238,13 +254,13 @@ export default function MittProsjekt() {
             <div key={`month-${dept}`} style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
               <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>{dept}</p>
               <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#51cf66', marginBottom: '0.5rem' }}>{deptStats[dept].month}</p>
-              <p style={{ fontSize: '0.75rem', color: '#78c969' }}>Måned total</p>
+              <p style={{ fontSize: '0.75rem', color: '#78c969' }}>Runrate: {Math.round((deptStats[dept].month / daysCompletedMonth) * workingDaysMonth)}</p>
             </div>
           ))}
           <div style={{ background: '#1f3a52', padding: '1.5rem', borderRadius: '12px', border: '2px solid #5a67d8' }}>
             <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>MUON</p>
             <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#5a67d8', marginBottom: '0.5rem' }}>{muonMonth}</p>
-            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Måned total</p>
+            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Runrate: {muonRunrateMonth}</p>
           </div>
         </div>
       </div>
@@ -268,7 +284,7 @@ export default function MittProsjekt() {
 
           {/* Week */}
           <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#ffd700' }}>IEKE</h3>
+            <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#ffd700' }}>UKE</h3>
             {top3WeekAll.map((emp, idx) => (
               <div key={emp.ansatt} style={{ marginBottom: '0.8rem' }}>
                 <p style={{ fontSize: '0.9rem', fontWeight: '700', color: '#e2e8f0' }}>
@@ -313,7 +329,7 @@ export default function MittProsjekt() {
 
           {/* Week */}
           <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#ffd700' }}>IEKE</h3>
+            <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#ffd700' }}>UKE</h3>
             {deptRankingWeek.map((d, idx) => (
               <div key={d.dept} style={{ marginBottom: '0.8rem' }}>
                 <p style={{ fontSize: '0.9rem', fontWeight: '700', color: '#e2e8f0' }}>
