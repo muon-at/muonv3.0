@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import { useSearchParams } from 'react-router-dom';
 import WallOfFame from '../components/WallOfFame';
 
 const DEPT_COLORS: { [key: string]: string } = {
@@ -12,6 +13,9 @@ const DEPT_COLORS: { [key: string]: string } = {
 
 export default function MittProsjekt() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'status';
+  
   const [loading, setLoading] = useState(true);
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [allGoals, setAllGoals] = useState<{ [key: string]: { day: number; week: number; month: number } }>({
@@ -235,6 +239,42 @@ export default function MittProsjekt() {
       </div>
 
       <div style={{ paddingLeft: '1rem', paddingRight: 0 }}>
+        {/* TAB BUTTONS */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+          <button
+            onClick={() => setSearchParams({ tab: 'status' })}
+            style={{
+              padding: '0.5rem 1rem',
+              background: currentTab === 'status' ? '#5a67d8' : '#404040',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            Status
+          </button>
+          <button
+            onClick={() => setSearchParams({ tab: 'wallfame' })}
+            style={{
+              padding: '0.5rem 1rem',
+              background: currentTab === 'wallfame' ? '#5a67d8' : '#404040',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '0.85rem',
+            }}
+          >
+            Wall of Fame
+          </button>
+        </div>
+
+        {currentTab === 'status' && (
+        <>
         {/* MUON SUMMARY AT TOP */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}>
           {/* DAG */}
@@ -322,9 +362,12 @@ export default function MittProsjekt() {
           </div>
         ))}
         </div>
+        </>
+        )}
 
-      {/* WALL OF FAME - ALL DEPARTMENTS */}
-      <WallOfFame title="WALL OF FAME - MUON" />
+        {currentTab === 'wallfame' && (
+          <WallOfFame title="WALL OF FAME - MUON" />
+        )}
       </div>
     </div>
   );
