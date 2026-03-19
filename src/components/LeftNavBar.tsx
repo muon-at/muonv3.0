@@ -330,6 +330,24 @@ export const LeftNavBar: React.FC = () => {
                   >
                     Mine Selgere
                   </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'tl-live-krs' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('tl-live-krs', '/live-krs')}
+                  >
+                    LIVE KRS
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'tl-live-osl' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('tl-live-osl', '/live-osl')}
+                  >
+                    LIVE OSL
+                  </button>
+                  <button 
+                    className={`nav-tab ${activeTab === 'tl-live-skien' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('tl-live-skien', '/live-skien')}
+                  >
+                    LIVE Skien
+                  </button>
                 </div>
               )}
             </div>

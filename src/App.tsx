@@ -16,6 +16,9 @@ import Records from './pages/Records';
 import Earnings from './pages/Earnings';
 import MittProsjekt from './pages/MittProsjekt';
 import AvdelingDashboard from './pages/AvdelingDashboard';
+import LiveKRS from './pages/LiveKRS';
+import LiveOSL from './pages/LiveOSL';
+import LiveSkien from './pages/LiveSkien';
 
 import MissingEmployees from './pages/MissingEmployees';
 import MobileHome from './pages/MobileHome';
@@ -44,8 +47,8 @@ function RoutedContent() {
     }
   }, []);
 
-  // Show livefeed only on Min Side routes
-  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt', '/min-avdeling'].includes(location.pathname);
+  // Show livefeed only on Min Side routes + LIVE kiosk pages
+  const showLivefeed = ['/status', '/records', '/earnings', '/calendar', '/mitt-prosjekt', '/min-avdeling', '/live-krs', '/live-osl', '/live-skien'].includes(location.pathname);
 
   return (
     <>
@@ -142,6 +145,30 @@ function RoutedContent() {
             element={
               <ProtectedRoute requiredRole="teamleder">
                 <Teamleder />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/live-krs" 
+            element={
+              <ProtectedRoute requiredRole="teamleder">
+                <LiveKRS />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/live-osl" 
+            element={
+              <ProtectedRoute requiredRole="teamleder">
+                <LiveOSL />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/live-skien" 
+            element={
+              <ProtectedRoute requiredRole="teamleder">
+                <LiveSkien />
               </ProtectedRoute>
             } 
           />
