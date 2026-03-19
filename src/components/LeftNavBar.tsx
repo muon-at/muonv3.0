@@ -257,6 +257,12 @@ export const LeftNavBar: React.FC = () => {
                 >
                   Status
                 </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'avd-wallfame' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('avd-wallfame', '/min-avdeling?tab=wallfame')}
+                >
+                  Wall of Fame
+                </button>
               </div>
             )}
           </div>
@@ -283,6 +289,12 @@ export const LeftNavBar: React.FC = () => {
                   onClick={() => handleTabClick('proj-status', '/mitt-prosjekt')}
                 >
                   Status
+                </button>
+                <button 
+                  className={`nav-tab ${activeTab === 'proj-wallfame' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('proj-wallfame', '/mitt-prosjekt?tab=wallfame')}
+                >
+                  Wall of Fame
                 </button>
               </div>
             )}
