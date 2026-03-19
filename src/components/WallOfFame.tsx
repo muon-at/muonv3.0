@@ -3,29 +3,35 @@ import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import '../styles/WallOfFame.css';
 
+interface ProgresjonRow {
+  ansatt: string;
+  avdeling: string;
+  dag: number;
+  uke: number;
+  måned: number;
+  totalt: number;
+}
+
 interface Record {
   title: string;
   value: number;
   employee: string;
-  date: string;
   emoji: string;
 }
 
 interface Props {
-  department?: string; // If provided, filter by department. If not, show all departments
+  department?: string; // If provided, filter by department. If not, show all
   title?: string;
 }
 
 export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props) {
   const [records, setRecords] = useState<Record[]>([
-    { title: 'FLEST SALG PÅ 1 DAG', value: 0, employee: '-', date: '-', emoji: '☀️' },
-    { title: 'FLEST SALG PÅ 1 UKE', value: 0, employee: '-', date: '-', emoji: '📅' },
-    { title: 'FLEST SALG PÅ 1 MÅNED', value: 0, employee: '-', date: '-', emoji: '📊' },
-    { title: 'FLEST SALG PÅ I ÅR', value: 0, employee: '-', date: '-', emoji: '🎯' },
-    { title: 'FLEST SALG PÅ TOTALT', value: 0, employee: '-', date: '-', emoji: '🏆' },
+    { title: 'FLEST SALG PÅ 1 DAG', value: 0, employee: '-', emoji: '☀️' },
+    { title: 'FLEST SALG PÅ 1 UKE', value: 0, employee: '-', emoji: '📅' },
+    { title: 'FLEST SALG PÅ 1 MÅNED', value: 0, employee: '-', emoji: '📊' },
+    { title: 'FLEST SALG PÅ I ÅR', value: 0, employee: '-', emoji: '🎯' },
+    { title: 'FLEST SALG PÅ TOTALT', value: 0, employee: '-', emoji: '🏆' },
   ]);
-
-
 
   useEffect(() => {
     const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), (livefeedSnapshot) => {
@@ -39,40 +45,78 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
           const startOfWeek = new Date(today);
           startOfWeek.setDate(today.getDate() - today.getDay());
 
-          // Collect all employees from both sources
-          const employees = new Map<string, { day: number; week: number; month: number; year: number; total: number; dept: string }>();
+          // Fetch employees for name mapping
+          const empSnapshot = await getDocs(collection(db, 'employees'));
+          const employeeDetailMap: { [key: string]: { dept: string; visualName: string } } = {};
+
+          empSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const dept = data.department || 'Unknown';
+            const visualName = data.name || '';
+
+            if (data.name) {
+              employeeDetailMap[data.name.toLowerCase().trim()] = { dept, visualName };
+            }
+            if (data.externalName) {
+              employeeDetailMap[data.externalName.toLowerCase().trim()] = { dept, visualName };
+            }
+          });
+
+          const getEmployeeDetail = (ansatt: string): { dept: string; visualName: string } => {
+            const ansattLower = ansatt.toLowerCase().trim();
+            if (employeeDetailMap[ansattLower]) return employeeDetailMap[ansattLower];
+            for (const [key, detail] of Object.entries(employeeDetailMap)) {
+              if (key.includes(ansattLower) || ansattLower.includes(key)) {
+                return detail;
+              }
+            }
+            return { dept: 'Unknown', visualName: ansatt };
+          };
+
+          // Build Progresjon-style data from livefeed + archive
+          const sellerStats: { [key: string]: ProgresjonRow } = {};
 
           // TODAY from livefeed
           livefeedSnapshot.docs.forEach((doc) => {
             const data = doc.data();
-            const userName = data.userName || '';
-            if (!userName) return;
+            const ansatt = data.userName || 'Ukjent';
+            const detail = getEmployeeDetail(ansatt);
 
-            if (!employees.has(userName)) {
-              employees.set(userName, { day: 0, week: 0, month: 0, year: 0, total: 0, dept: '' });
+            if (!sellerStats[ansatt]) {
+              sellerStats[ansatt] = {
+                ansatt: detail.visualName,
+                avdeling: detail.dept,
+                dag: 0,
+                uke: 0,
+                måned: 0,
+                totalt: 0,
+              };
             }
-            const emp = employees.get(userName)!;
-            emp.day++;
-            emp.week++;
-            emp.month++;
-            emp.year++;
-            emp.total++;
+            sellerStats[ansatt].dag++;
+            sellerStats[ansatt].uke++;
+            sellerStats[ansatt].måned++;
+            sellerStats[ansatt].totalt++;
           });
 
-          // HISTORICAL from contracts
+          // HISTORICAL from archive
           archiveSnapshot.docs.forEach((doc) => {
             const data = doc.data();
-            let selger = data.selger || '';
+            let originalSelger = data.selger || 'Ukjent';
+            let ansatt = originalSelger.replace(/ \/ selger$/i, '').trim();
+            const detail = getEmployeeDetail(ansatt);
+
             const dato = data.dato || '';
 
-            // Deduplicate: strip "/ selger" suffix
-            selger = selger.replace(/ \/ selger$/i, '').trim();
-            if (!selger) return;
-
-            if (!employees.has(selger)) {
-              employees.set(selger, { day: 0, week: 0, month: 0, year: 0, total: 0, dept: '' });
+            if (!sellerStats[ansatt]) {
+              sellerStats[ansatt] = {
+                ansatt: detail.visualName,
+                avdeling: detail.dept,
+                dag: 0,
+                uke: 0,
+                måned: 0,
+                totalt: 0,
+              };
             }
-            const emp = employees.get(selger)!;
 
             if (dato && typeof dato === 'string') {
               const parts = dato.split('/');
@@ -82,124 +126,81 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
                 const year = parseInt(parts[2]);
                 const orderDate = new Date(year, month - 1, day);
 
-                // Week
+                if (orderDate >= today && orderDate < new Date(today.getTime() + 24 * 60 * 60 * 1000)) {
+                  sellerStats[ansatt].dag++;
+                }
                 if (orderDate >= startOfWeek && orderDate <= today) {
-                  emp.week++;
+                  sellerStats[ansatt].uke++;
                 }
-
-                // Month
                 if (orderDate >= startOfMonth && orderDate <= today) {
-                  emp.month++;
+                  sellerStats[ansatt].måned++;
                 }
-
-                // Year
                 if (orderDate >= startOfYear && orderDate <= today) {
-                  emp.year++;
+                  // Year already counted in totalt
                 }
 
-                // Total
-                emp.total++;
+                sellerStats[ansatt].totalt++;
               }
             }
           });
 
-          // Fetch department info for all employees
-          try {
-            const peopleSnap = await getDocs(collection(db, 'employees'));
-            const deptMap = new Map<string, string>();
-            
-            console.log('👥 People collection docs:', peopleSnap.size);
-            
-            peopleSnap.docs.forEach((doc) => {
-              const data = doc.data();
-              const visual = data.name || '';
-              const externalName = data.externalName || '';
-              const dept = data.avdeling || '';
-              
-              console.log(`📍 ${visual} => ${dept}`);
-              
-              deptMap.set(visual.toLowerCase().trim(), dept);
-              deptMap.set(externalName.toLowerCase().trim(), dept);
-            });
-
-            // Update dept in employees map
-            employees.forEach((emp, name) => {
-              const foundDept = deptMap.get(name.toLowerCase().trim());
-              emp.dept = foundDept || 'Unknown';
-              console.log(`✅ ${name} => ${emp.dept}`);
-            });
-          } catch (err) {
-            console.error('❌ Error fetching people:', err);
-          }
-
-          // Filter by department if specified
-          let filteredEmployees = Array.from(employees.entries());
-          console.log('🔍 Total employees:', filteredEmployees.length);
-          console.log('🔍 Filtering by department:', department);
+          // Convert to array and filter by department if specified
+          let progresjonList = Object.values(sellerStats);
           
           if (department) {
-            filteredEmployees = filteredEmployees.filter(([name, emp]) => {
-              const matches = emp.dept === department;
-              if (matches) console.log(`✅ ${name} in ${emp.dept}`);
-              return matches;
-            });
-            console.log('📊 Filtered employees:', filteredEmployees.length);
+            progresjonList = progresjonList.filter(row => row.avdeling === department);
           }
 
+          console.log('📊 Progresjon data:', { 
+            total: Object.values(sellerStats).length,
+            filtered: progresjonList.length,
+            department: department || 'ALL',
+          });
+
           // Find best records
-          const bestDay = filteredEmployees.reduce((max, [name, emp]) => emp.day > max.value ? { name, value: emp.day } : max, { name: '-', value: 0 });
-          const bestWeek = filteredEmployees.reduce((max, [name, emp]) => emp.week > max.value ? { name, value: emp.week } : max, { name: '-', value: 0 });
-          const bestMonth = filteredEmployees.reduce((max, [name, emp]) => emp.month > max.value ? { name, value: emp.month } : max, { name: '-', value: 0 });
-          const bestYear = filteredEmployees.reduce((max, [name, emp]) => emp.year > max.value ? { name, value: emp.year } : max, { name: '-', value: 0 });
-          const bestTotal = filteredEmployees.reduce((max, [name, emp]) => emp.total > max.value ? { name, value: emp.total } : max, { name: '-', value: 0 });
+          const bestDay = progresjonList.reduce((max, row) => row.dag > max.value ? { employee: row.ansatt, value: row.dag } : max, { employee: '-', value: 0 });
+          const bestWeek = progresjonList.reduce((max, row) => row.uke > max.value ? { employee: row.ansatt, value: row.uke } : max, { employee: '-', value: 0 });
+          const bestMonth = progresjonList.reduce((max, row) => row.måned > max.value ? { employee: row.ansatt, value: row.måned } : max, { employee: '-', value: 0 });
+          
+          // Year: approximate as month data (could be improved with year-specific tracking)
+          const bestYear = progresjonList.reduce((max, row) => row.måned > max.value ? { employee: row.ansatt, value: row.måned } : max, { employee: '-', value: 0 });
+          
+          const bestTotal = progresjonList.reduce((max, row) => row.totalt > max.value ? { employee: row.ansatt, value: row.totalt } : max, { employee: '-', value: 0 });
 
           setRecords([
             { 
               title: 'FLEST SALG PÅ 1 DAG', 
               value: bestDay.value, 
-              employee: bestDay.name,
-              date: bestDay.name !== '-' ? new Date().toLocaleDateString('no-NO') : '-',
+              employee: bestDay.employee,
               emoji: '☀️' 
             },
             { 
               title: 'FLEST SALG PÅ 1 UKE', 
               value: bestWeek.value, 
-              employee: bestWeek.name,
-              date: bestWeek.name !== '-' ? `Uke ${Math.ceil(new Date().getDate() / 7)}` : '-',
+              employee: bestWeek.employee,
               emoji: '📅' 
             },
             { 
               title: 'FLEST SALG PÅ 1 MÅNED', 
               value: bestMonth.value, 
-              employee: bestMonth.name,
-              date: bestMonth.name !== '-' ? new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }) : '-',
+              employee: bestMonth.employee,
               emoji: '📊' 
             },
             { 
               title: 'FLEST SALG PÅ I ÅR', 
               value: bestYear.value, 
-              employee: bestYear.name,
-              date: bestYear.name !== '-' ? new Date().getFullYear().toString() : '-',
+              employee: bestYear.employee,
               emoji: '🎯' 
             },
             { 
               title: 'FLEST SALG PÅ TOTALT', 
               value: bestTotal.value, 
-              employee: bestTotal.name,
-              date: bestTotal.name !== '-' ? 'All-time' : '-',
+              employee: bestTotal.employee,
               emoji: '🏆' 
             },
           ]);
 
-          console.log('📊 Wall of Fame updated:', { 
-            bestDay: `${bestDay.name} (${bestDay.value})`,
-            bestWeek: `${bestWeek.name} (${bestWeek.value})`,
-            bestMonth: `${bestMonth.name} (${bestMonth.value})`,
-            bestYear: `${bestYear.name} (${bestYear.value})`,
-            bestTotal: `${bestTotal.name} (${bestTotal.value})`,
-            department,
-            filteredCount: filteredEmployees.length,
-          });
+          console.log('🏆 Wall of Fame records:', { bestDay, bestWeek, bestMonth, bestYear, bestTotal });
         } catch (err) {
           console.error('❌ Error calculating Wall of Fame:', err);
         }
@@ -222,7 +223,6 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
             <h3 className="record-title">{record.title}</h3>
             <div className="record-employee">{record.employee}</div>
             <div className="record-value">{record.value} salg</div>
-            <div className="record-date">{record.date}</div>
           </div>
         ))}
       </div>
