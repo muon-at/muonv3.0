@@ -336,10 +336,86 @@ export default function Status() {
         if (user?.id) {
           const earnedSnap = await getDocs(collection(db, `users/${user.id}/earned_badges`));
           earnedBadgeIds = earnedSnap.docs.map(doc => doc.id);
+          
+          // Auto-award 🎓 if user has any historical sales from contracts
+          // (they get it for free if they already have sales)
+          if (user?.name) {
+            try {
+              const contractsSnap = await getDocs(collection(db, 'allente_kontraktsarkiv'));
+              let haHistoricalSalg = false;
+              
+              contractsSnap.docs.forEach((doc) => {
+                const data = doc.data();
+                const selger = data.selger || '';
+                let ansatt = selger.replace(/ \/ selger$/i, '').trim();
+                if (ansatt.toLowerCase() === user.name.toLowerCase()) {
+                  haHistoricalSalg = true;
+                }
+              });
+              
+              // If has historical sales and doesn't have 🎓 badge yet, auto-award it
+              if (haHistoricalSalg && !earnedBadgeIds.includes('første')) {
+                try {
+                  const firstRef = doc(db, `users/${user.id}/earned_badges`, 'første');
+                  await setDoc(firstRef, {
+                    earnedAt: new Date().toISOString(),
+                    badgeName: 'FØRSTE SALGET',
+                    emoji: '🎓',
+                    autoAwarded: true,
+                    reason: 'Existing historical sales',
+                  });
+                  earnedBadgeIds.push('første');
+                  console.log('🎓 Auto-awarded FØRSTE SALGET (historical sales)');
+                } catch (err) {
+                  console.log('Error auto-awarding første:', err);
+                }
+              }
+            } catch (err) {
+              console.log('Error checking historical sales:', err);
+            }
+          }
         }
 
         // Check if TODAY'S sales unlocked any new badges (only real milestones, not 🏆)
         const newlyAchieved: string[] = [];
+        
+        // FØRSTE SALGET: Award only on first-ever sale (0 → 1+)
+        // Calculate lifetime total from both livefeed AND contracts
+        if (user?.name) {
+          let lifetimeSalg = 0;
+          try {
+            // Count from contracts (historical)
+            const contractsSnap = await getDocs(collection(db, 'allente_kontraktsarkiv'));
+            contractsSnap.docs.forEach((doc) => {
+              const data = doc.data();
+              const selger = data.selger || '';
+              let ansatt = selger.replace(/ \/ selger$/i, '').trim();
+              if (ansatt.toLowerCase() === user.name.toLowerCase()) {
+                lifetimeSalg++;
+              }
+            });
+            
+            // Count from livefeed (recent)
+            const livefeedSnap = await getDocs(collection(db, 'livefeed_sales'));
+            livefeedSnap.docs.forEach((doc) => {
+              const data = doc.data();
+              const userName = data.userName || '';
+              if (userName.toLowerCase() === user.name.toLowerCase() && !data.type) {
+                lifetimeSalg++;
+              }
+            });
+            
+            console.log(`📊 Lifetime salg for ${user.name}: ${lifetimeSalg}`);
+            
+            // If just got first sale (was 0, now > 0)
+            if (lifetimeSalg > 0 && !earnedBadgeIds.includes('første')) {
+              newlyAchieved.push('første');
+              console.log('🎓 FØRSTE SALGET unlocked!');
+            }
+          } catch (err) {
+            console.log('Error calculating lifetime salg:', err);
+          }
+        }
         
         // Special check for "Dagens første" - only award if:
         // 1. User doesn't already have it earned
@@ -373,8 +449,9 @@ export default function Status() {
           }
         }
         
+        // Other milestone badges
         namedBadges.forEach((badge) => {
-          if (badge.id === 'dagens_første') return; // Skip, handled above
+          if (badge.id === 'dagens_første' || badge.id === 'første') return; // Skip, handled above
           if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi && badge.verdi < 999) {
             newlyAchieved.push(badge.id);
           }
