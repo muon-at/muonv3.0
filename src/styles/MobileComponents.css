@@ -371,14 +371,7 @@
   border: 1.5px solid;
 }
 
-/* COMPACT LAYOUT (ALL 3 PERIODS ON 1 SCREEN) */
-.mobile-prosjekt-compact h3,
-.mobile-avdeling-compact h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
-  color: #4db8ff;
-  text-align: center;
-}
+
 
 
 

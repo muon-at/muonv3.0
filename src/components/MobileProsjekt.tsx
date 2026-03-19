@@ -40,30 +40,52 @@ export default function MobileProsjekt() {
       Skien: new Set(),
     };
 
-    getDocs(collection(db, 'employees')).then((empSnapshot) => {
-      empSnapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        const dept = data.avdeling || '';
-        if (dept in deptEmpsMap) {
-          deptEmpsMap[dept].add(data.name?.toLowerCase() || '');
-        }
-      });
+    const loadAndSubscribe = async () => {
+      try {
+        const empSnapshot = await getDocs(collection(db, 'employees'));
+        console.log('🔍 MobileProsjekt: Employees loaded:', empSnapshot.size);
 
-      const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
-        updateStats(deptEmpsMap);
-      });
+        empSnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const dept = data.avdeling || '';
+          if (dept in deptEmpsMap) {
+            deptEmpsMap[dept].add(data.name?.toLowerCase() || '');
+          }
+        });
 
-      const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), () => {
-        updateStats(deptEmpsMap);
-      });
+        console.log('📊 Dept employees:', {
+          KRS: deptEmpsMap.KRS.size,
+          OSL: deptEmpsMap.OSL.size,
+          Skien: deptEmpsMap.Skien.size,
+        });
 
-      setLoading(false);
+        // Call updateStats immediately
+        await updateStats(deptEmpsMap);
 
-      return () => {
-        unsubscribeLivefeed();
-        unsubscribeArchive();
-      };
-    });
+        // Then set up listeners
+        const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
+          console.log('🔄 Livefeed changed');
+          updateStats(deptEmpsMap);
+        });
+
+        const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), () => {
+          console.log('🔄 Archive changed');
+          updateStats(deptEmpsMap);
+        });
+
+        setLoading(false);
+
+        return () => {
+          unsubscribeLivefeed();
+          unsubscribeArchive();
+        };
+      } catch (error) {
+        console.error('❌ Error loading Mitt Prosjekt:', error);
+        setLoading(false);
+      }
+    };
+
+    loadAndSubscribe();
   }, []);
 
   const updateStats = async (deptEmpsMap: { [dept: string]: Set<string> }) => {
