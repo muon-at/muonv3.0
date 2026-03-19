@@ -1,0 +1,133 @@
+/* MOBILE LIVEFEED */
+.mobile-livefeed h3,
+.mobile-minside h3,
+.mobile-kalender h3,
+.mobile-avdeling h3,
+.mobile-prosjekt h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.2rem;
+  color: #4db8ff;
+}
+
+.mobile-livefeed .posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post-card {
+  background: #1f2937;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: #2d3748;
+  border-bottom: 1px solid #333;
+}
+
+.post-user {
+  font-weight: 600;
+  color: #4db8ff;
+  font-size: 0.95rem;
+}
+
+.post-dept {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.post-gif {
+  width: 100%;
+  aspect-ratio: 200 / 130;
+  object-fit: cover;
+  display: block;
+}
+
+.post-product {
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  background: #1f2937;
+  text-align: center;
+  font-weight: 500;
+}
+
+.loading {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+/* PROGRESS CARDS */
+.progress-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.progress-card {
+  background: #1f2937;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.progress-card .label {
+  font-size: 0.9rem;
+  color: #b0b0b0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #2d3748;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-card .values {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.values .current {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.values .target {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .mobile-content {
+    padding: 0.75rem;
+    padding-bottom: 80px;
+  }
+
+  .progress-cards {
+    gap: 1rem;
+  }
+
+  .progress-card {
+    padding: 0.75rem;
+  }
+}
