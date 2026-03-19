@@ -16,6 +16,10 @@ export default function AvdelingDashboard() {
   const [goals, setGoals] = useState<Goals>({ day: 5, week: 20, month: 80 });
   const [editingGoals, setEditingGoals] = useState<Goals | null>(null);
   const [showGoalModal, setShowGoalModal] = useState(false);
+  const [selectedDept, setSelectedDept] = useState<string>('KRS');
+  
+  const isOwner = user?.role === 'owner';
+  const viewDept = isOwner ? selectedDept : user?.department;
 
   const getWorkingDaysInMonth = (date: Date): number => {
     const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -33,16 +37,17 @@ export default function AvdelingDashboard() {
   };
 
   useEffect(() => {
-    if (!user?.department) {
+    const deptToLoad = isOwner ? selectedDept : user?.department;
+    if (!deptToLoad) {
       setLoading(false);
       return;
     }
 
     // Load goals from Firestore
     getDocs(collection(db, 'department_goals')).then((snap) => {
-      const doc = snap.docs.find(d => d.id === user.department);
-      if (doc) {
-        const data = doc.data();
+      const docSnap = snap.docs.find(d => d.id === deptToLoad);
+      if (docSnap) {
+        const data = docSnap.data();
         setGoals({ day: data.day || 5, week: data.week || 20, month: data.month || 80 });
       }
     });
@@ -94,7 +99,7 @@ export default function AvdelingDashboard() {
               const ansatt = data.userName || 'Ukjent';
               const detail = getEmployeeDetail(ansatt);
 
-              if (detail.dept !== user.department) return;
+              if (detail.dept !== deptToLoad) return;
 
               if (!sellerStats[ansatt]) {
                 sellerStats[ansatt] = {
@@ -115,7 +120,7 @@ export default function AvdelingDashboard() {
               let ansatt = originalSelger.replace(/ \/ selger$/i, '').trim();
               const detail = getEmployeeDetail(ansatt);
 
-              if (detail.dept !== user.department) return;
+              if (detail.dept !== deptToLoad) return;
 
               const dato = data.dato || '';
 
@@ -166,12 +171,12 @@ export default function AvdelingDashboard() {
         };
       });
     });
-  }, [user?.department]);
+  }, [selectedDept, isOwner, user?.department]);
 
   const handleSaveGoals = async () => {
-    if (!editingGoals || !user?.department) return;
+    if (!editingGoals || !viewDept) return;
     try {
-      const goalsRef = doc(db, 'department_goals', user.department);
+      const goalsRef = doc(db, 'department_goals', viewDept);
       await setDoc(goalsRef, editingGoals);
       setGoals(editingGoals);
       setEditingGoals(null);
@@ -185,7 +190,7 @@ export default function AvdelingDashboard() {
     return <div style={{ padding: '2rem', color: '#999' }}>Laster...</div>;
   }
 
-  if (!user?.department) {
+  if (!user?.department && !isOwner) {
     return <div style={{ padding: '2rem', color: '#999' }}>Ingen avdeling funnet</div>;
   }
 
@@ -236,7 +241,31 @@ export default function AvdelingDashboard() {
   return (
     <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1.5rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: '700' }}>Min Avdeling: {user.department}</h1>
+        <div style={{ flex: 1 }}>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>Min Avdeling: {viewDept}</h1>
+          {isOwner && (
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {['KRS', 'OSL', 'Skien'].map(dept => (
+                <button
+                  key={dept}
+                  onClick={() => setSelectedDept(dept)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    background: selectedDept === dept ? '#5a67d8' : '#404040',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {dept}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         {canEditGoals && (
           <button
             onClick={() => {
@@ -324,7 +353,7 @@ export default function AvdelingDashboard() {
       {showGoalModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
           <div style={{ background: '#2d3748', padding: '2rem', borderRadius: '12px', border: '1px solid #4b5563', maxWidth: '400px', width: '90%' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>Endre Mål for {user.department}</h2>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '1.5rem' }}>Endre Mål for {viewDept}</h2>
             
             {editingGoals && (
               <>
