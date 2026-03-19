@@ -15,10 +15,19 @@ interface DeptGoals {
   month: number;
 }
 
+interface Employee {
+  name: string;
+  visualName: string;
+  today: number;
+  week: number;
+  month: number;
+}
+
 export default function MobileAvdeling() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DeptStats>({ today: 0, week: 0, month: 0 });
   const [goals, setGoals] = useState<DeptGoals>({ day: 5, week: 20, month: 80 });
+  const [top3, setTop3] = useState({ day: [] as Employee[], week: [] as Employee[], month: [] as Employee[] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,24 +50,37 @@ export default function MobileAvdeling() {
       });
     });
 
-    // Real-time listener
-    const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
-      updateStats();
+    // Load employee list for department
+    let deptEmps = new Set<string>();
+    getDocs(collection(db, 'employees')).then((empSnapshot) => {
+      const empDetailMap: { [key: string]: { visualName: string } } = {};
+      empSnapshot.docs.forEach((doc) => {
+        const data = doc.data();
+        if (data.avdeling === user.department) {
+          deptEmps.add(data.name?.toLowerCase() || '');
+          empDetailMap[data.name?.toLowerCase() || ''] = { visualName: data.visualName || data.name };
+        }
+      });
+
+      // Real-time listener
+      const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
+        updateStats(deptEmps, empDetailMap);
+      });
+
+      const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), () => {
+        updateStats(deptEmps, empDetailMap);
+      });
+
+      setLoading(false);
+
+      return () => {
+        unsubscribeLivefeed();
+        unsubscribeArchive();
+      };
     });
-
-    const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), () => {
-      updateStats();
-    });
-
-    setLoading(false);
-
-    return () => {
-      unsubscribeLivefeed();
-      unsubscribeArchive();
-    };
   }, [user?.department]);
 
-  const updateStats = async () => {
+  const updateStats = async (deptEmps: Set<string>, empDetailMap: { [key: string]: { visualName: string } }) => {
     if (!user?.department) return;
 
     const today = new Date();
@@ -69,27 +91,31 @@ export default function MobileAvdeling() {
 
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const empSnapshot = await getDocs(collection(db, 'employees'));
-    const deptEmps = new Set<string>();
+    const empStats: { [key: string]: { today: number; week: number; month: number; visualName: string } } = {};
 
-    empSnapshot.docs.forEach((doc) => {
-      const data = doc.data();
-      if (data.avdeling === user.department) {
-        deptEmps.add(data.name?.toLowerCase() || '');
-      }
+    // Initialize employees
+    deptEmps.forEach((emp) => {
+      empStats[emp] = {
+        today: 0,
+        week: 0,
+        month: 0,
+        visualName: empDetailMap[emp]?.visualName || emp,
+      };
     });
-
-    const livefeedSnapshot = await getDocs(collection(db, 'livefeed_sales'));
-    const contractsSnapshot = await getDocs(collection(db, 'allente_kontraktsarkiv'));
 
     let dayCount = 0,
       weekCount = 0,
       monthCount = 0;
 
     // Count livefeed
+    const livefeedSnapshot = await getDocs(collection(db, 'livefeed_sales'));
     livefeedSnapshot.docs.forEach((doc) => {
       const data = doc.data();
-      if (deptEmps.has(data.userName?.toLowerCase() || '')) {
+      const userName = data.userName?.toLowerCase() || '';
+      if (deptEmps.has(userName)) {
+        empStats[userName].today++;
+        empStats[userName].week++;
+        empStats[userName].month++;
         dayCount++;
         weekCount++;
         monthCount++;
@@ -97,18 +123,26 @@ export default function MobileAvdeling() {
     });
 
     // Count contracts
+    const contractsSnapshot = await getDocs(collection(db, 'allente_kontraktsarkiv'));
     contractsSnapshot.docs.forEach((doc) => {
       const data = doc.data();
       let selger = (data.selger || '').replace(/ \/ selger$/i, '').trim();
+      const selgerLower = selger.toLowerCase();
 
-      if (deptEmps.has(selger.toLowerCase()) && data.dato) {
+      if (deptEmps.has(selgerLower) && data.dato) {
         const [day, month, year] = data.dato.split('/').map(Number);
         if (day && month && year) {
           const contractDate = new Date(year, month - 1, day);
           contractDate.setHours(0, 0, 0, 0);
 
-          if (contractDate >= startOfWeek) weekCount++;
-          if (contractDate >= startOfMonth) monthCount++;
+          if (contractDate >= startOfWeek) {
+            empStats[selgerLower].week++;
+            weekCount++;
+          }
+          if (contractDate >= startOfMonth) {
+            empStats[selgerLower].month++;
+            monthCount++;
+          }
         }
       }
     });
@@ -118,6 +152,21 @@ export default function MobileAvdeling() {
       week: weekCount,
       month: monthCount,
     });
+
+    // Get top 3 for each period
+    const empArray = Object.entries(empStats).map(([key, val]) => ({
+      name: key,
+      visualName: val.visualName,
+      today: val.today,
+      week: val.week,
+      month: val.month,
+    }));
+
+    setTop3({
+      day: empArray.sort((a, b) => b.today - a.today).slice(0, 3),
+      week: empArray.sort((a, b) => b.week - a.week).slice(0, 3),
+      month: empArray.sort((a, b) => b.month - a.month).slice(0, 3),
+    });
   };
 
   const getPercentage = (current: number, target: number) => {
@@ -126,14 +175,20 @@ export default function MobileAvdeling() {
 
   if (loading) return <div className="loading">Laster avdeling...</div>;
 
+  const medals = ['🥇', '🥈', '🥉'];
+
   return (
     <div className="mobile-avdeling">
       <h3>👥 {user?.department || 'AVDELING'}</h3>
 
-      <div className="progress-cards">
-        {/* TODAY */}
-        <div className="progress-card">
-          <div className="label">I DAG</div>
+      {/* DAG */}
+      <div className="period-section">
+        <div className="period-title">I DAG</div>
+        <div className="stats-row">
+          <div className="stat-box">
+            <div className="stat-label">Mål</div>
+            <div className="stat-value">{goals.day}</div>
+          </div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -143,15 +198,32 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="values">
-            <span className="current">{stats.today}</span>
-            <span className="target">/ {goals.day}</span>
+          <div className="stat-box">
+            <div className="stat-label">Salg</div>
+            <div className="stat-value">{stats.today}</div>
           </div>
         </div>
+        {top3.day.length > 0 && (
+          <div className="top3-list">
+            {top3.day.map((emp, idx) => (
+              <div key={idx} className="top3-item">
+                <span className="medal">{medals[idx]}</span>
+                <span className="name">{emp.visualName}</span>
+                <span className="count">{emp.today}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* WEEK */}
-        <div className="progress-card">
-          <div className="label">UKE</div>
+      {/* UKE */}
+      <div className="period-section">
+        <div className="period-title">UKE</div>
+        <div className="stats-row">
+          <div className="stat-box">
+            <div className="stat-label">Mål</div>
+            <div className="stat-value">{goals.week}</div>
+          </div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -161,15 +233,32 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="values">
-            <span className="current">{stats.week}</span>
-            <span className="target">/ {goals.week}</span>
+          <div className="stat-box">
+            <div className="stat-label">Salg</div>
+            <div className="stat-value">{stats.week}</div>
           </div>
         </div>
+        {top3.week.length > 0 && (
+          <div className="top3-list">
+            {top3.week.map((emp, idx) => (
+              <div key={idx} className="top3-item">
+                <span className="medal">{medals[idx]}</span>
+                <span className="name">{emp.visualName}</span>
+                <span className="count">{emp.week}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-        {/* MONTH */}
-        <div className="progress-card">
-          <div className="label">MÅNED</div>
+      {/* MÅNED */}
+      <div className="period-section">
+        <div className="period-title">MÅNED</div>
+        <div className="stats-row">
+          <div className="stat-box">
+            <div className="stat-label">Mål</div>
+            <div className="stat-value">{goals.month}</div>
+          </div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -179,11 +268,22 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="values">
-            <span className="current">{stats.month}</span>
-            <span className="target">/ {goals.month}</span>
+          <div className="stat-box">
+            <div className="stat-label">Salg</div>
+            <div className="stat-value">{stats.month}</div>
           </div>
         </div>
+        {top3.month.length > 0 && (
+          <div className="top3-list">
+            {top3.month.map((emp, idx) => (
+              <div key={idx} className="top3-item">
+                <span className="medal">{medals[idx]}</span>
+                <span className="name">{emp.visualName}</span>
+                <span className="count">{emp.month}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
