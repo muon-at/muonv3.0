@@ -3,6 +3,12 @@ import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
 
+const DEPT_COLORS: { [key: string]: string } = {
+  KRS: '#4db8ff',
+  OSL: '#ff6b6b',
+  Skien: '#51cf66',
+};
+
 export default function MittProsjekt() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -34,7 +40,6 @@ export default function MittProsjekt() {
       return;
     }
 
-    // Load all department goals
     getDocs(collection(db, 'department_goals')).then((snap) => {
       const goalsMap: { [key: string]: { day: number; week: number; month: number } } = {
         KRS: { day: 5, week: 20, month: 80 },
@@ -169,8 +174,6 @@ export default function MittProsjekt() {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
   const dayOfWeek = today.getDay();
   const daysCompleted = dayOfWeek === 0 ? 0 : dayOfWeek;
   const workingDaysMonth = getWorkingDaysInMonth(today);
@@ -185,7 +188,6 @@ export default function MittProsjekt() {
     }
   }
 
-  // Department stats
   const depts = ['KRS', 'OSL', 'Skien'];
   const deptStats: { [key: string]: { today: number; week: number; month: number } } = {};
   depts.forEach(dept => {
@@ -206,15 +208,9 @@ export default function MittProsjekt() {
     month: (allGoals.KRS?.month || 80) + (allGoals.OSL?.month || 80) + (allGoals.Skien?.month || 80),
   };
 
-  // Top 3 global
   const top3TodayAll = [...progresjonData].sort((a, b) => (b.today || 0) - (a.today || 0)).slice(0, 3);
   const top3WeekAll = [...progresjonData].sort((a, b) => (b.week || 0) - (a.week || 0)).slice(0, 3);
   const top3MonthAll = [...progresjonData].sort((a, b) => (b.month || 0) - (a.month || 0)).slice(0, 3);
-
-  // Department rankings
-  const deptRankingToday = [...depts].map(d => ({ dept: d, sales: deptStats[d].today })).sort((a, b) => b.sales - a.sales);
-  const deptRankingWeek = [...depts].map(d => ({ dept: d, sales: deptStats[d].week })).sort((a, b) => b.sales - a.sales);
-  const deptRankingMonth = [...depts].map(d => ({ dept: d, sales: deptStats[d].month })).sort((a, b) => b.sales - a.sales);
 
   const medals = ['🥇', '🥈', '🥉'];
 
@@ -222,120 +218,107 @@ export default function MittProsjekt() {
     const percent = Math.min((current / goal) * 100, 100);
     return (
       <div style={{ marginTop: '0.5rem' }}>
-        <div style={{ background: '#1f2937', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+        <div style={{ background: '#1f2937', height: '5px', borderRadius: '3px', overflow: 'hidden' }}>
           <div style={{ background: color, height: '100%', width: `${percent}%`, transition: 'width 0.3s' }} />
         </div>
-        <p style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '0.25rem' }}>{current} / {goal}</p>
+        <p style={{ fontSize: '0.65rem', color: '#9ca3af', marginTop: '0.2rem' }}>{current} / {goal}</p>
       </div>
     );
   };
 
   return (
-    <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1.5rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
-      <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '1rem' }}>Mitt Prosjekt</h1>
+    <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '1rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
+      <h1 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.75rem' }}>Mitt Prosjekt</h1>
 
-      {/* DAY */}
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem', color: '#4db8ff' }}>📊 I DAG</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-          {depts.map(dept => (
-            <div key={dept} style={{ background: '#2d3748', padding: '1rem', borderRadius: '10px', border: '1px solid #4b5563' }}>
-              <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>{dept}</p>
-              <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#4db8ff' }}>{deptStats[dept].today}</p>
-              <ProgressBar current={deptStats[dept].today} goal={allGoals[dept]?.day || 5} color="#4db8ff" />
-            </div>
-          ))}
-          <div style={{ background: '#1f3a52', padding: '1rem', borderRadius: '10px', border: '2px solid #5a67d8' }}>
-            <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>MUON</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#5a67d8' }}>{muonToday}</p>
-            <ProgressBar current={muonToday} goal={muonGoals.day} color="#5a67d8" />
+      {/* MUON SUMMARY AT TOP */}
+      <div style={{ marginBottom: '0.75rem' }}>
+        <h2 style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem', color: '#5a67d8' }}>📊 MUON SAMLET</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+          {/* DAG */}
+          <div style={{ background: '#1f3a52', padding: '0.8rem', borderRadius: '8px', border: '2px solid #5a67d8' }}>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>I DAG</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#4db8ff' }}>{muonToday}</p>
+            <ProgressBar current={muonToday} goal={muonGoals.day} color="#4db8ff" />
+          </div>
+
+          {/* IEKE */}
+          <div style={{ background: '#1f3a52', padding: '0.8rem', borderRadius: '8px', border: '2px solid #5a67d8' }}>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>IEKE</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ffd700' }}>{muonWeek}</p>
+            <ProgressBar current={muonWeek} goal={muonGoals.week} color="#ffd700" />
+            <p style={{ fontSize: '0.65rem', color: '#d4a05a', marginTop: '0.3rem' }}>Runrate: {daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0}</p>
+          </div>
+
+          {/* MÅNED */}
+          <div style={{ background: '#1f3a52', padding: '0.8rem', borderRadius: '8px', border: '2px solid #5a67d8' }}>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>MÅNED</p>
+            <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#51cf66' }}>{muonMonth}</p>
+            <ProgressBar current={muonMonth} goal={muonGoals.month} color="#51cf66" />
+            <p style={{ fontSize: '0.65rem', color: '#78c969', marginTop: '0.3rem' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0}</p>
           </div>
         </div>
       </div>
 
-      {/* WEEK */}
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem', color: '#ffd700' }}>📊 IEKE</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+      {/* DEPARTMENTS BREAKDOWN - 3 SECTIONS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '0.75rem', flex: 1, minHeight: 0 }}>
+        {/* DAG SECTION */}
+        <div style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+          <h3 style={{ fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem', color: '#4db8ff' }}>I DAG</h3>
           {depts.map(dept => (
-            <div key={`week-${dept}`} style={{ background: '#2d3748', padding: '1rem', borderRadius: '10px', border: '1px solid #4b5563' }}>
-              <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>{dept}</p>
-              <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#ffd700' }}>{deptStats[dept].week}</p>
-              <p style={{ fontSize: '0.7rem', color: '#d4a05a', marginTop: '0.5rem' }}>Runrate: {daysCompleted > 0 ? Math.round((deptStats[dept].week / daysCompleted) * 5) : 0}</p>
+            <div key={`day-${dept}`} style={{ marginBottom: '0.5rem', padding: '0.5rem', background: '#1f2937', borderRadius: '6px', borderLeft: `3px solid ${DEPT_COLORS[dept]}` }}>
+              <p style={{ fontSize: '0.7rem', color: DEPT_COLORS[dept], fontWeight: '700' }}>{dept}</p>
+              <p style={{ fontSize: '1.3rem', fontWeight: '700', color: '#4db8ff' }}>{deptStats[dept].today}</p>
+              <p style={{ fontSize: '0.65rem', color: '#9ca3af' }}>Mål: {allGoals[dept]?.day || 5}</p>
             </div>
           ))}
-          <div style={{ background: '#1f3a52', padding: '1rem', borderRadius: '10px', border: '2px solid #5a67d8' }}>
-            <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>MUON</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#5a67d8' }}>{muonWeek}</p>
-            <p style={{ fontSize: '0.7rem', color: '#7ca3c0', marginTop: '0.5rem' }}>Runrate: {daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0}</p>
-          </div>
+        </div>
+
+        {/* IEKE SECTION */}
+        <div style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+          <h3 style={{ fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem', color: '#ffd700' }}>IEKE</h3>
+          {depts.map(dept => (
+            <div key={`week-${dept}`} style={{ marginBottom: '0.5rem', padding: '0.5rem', background: '#1f2937', borderRadius: '6px', borderLeft: `3px solid ${DEPT_COLORS[dept]}` }}>
+              <p style={{ fontSize: '0.7rem', color: DEPT_COLORS[dept], fontWeight: '700' }}>{dept}</p>
+              <p style={{ fontSize: '1.3rem', fontWeight: '700', color: '#ffd700' }}>{deptStats[dept].week}</p>
+              <p style={{ fontSize: '0.65rem', color: '#d4a05a' }}>Runrate: {daysCompleted > 0 ? Math.round((deptStats[dept].week / daysCompleted) * 5) : 0}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* MÅNED SECTION */}
+        <div style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+          <h3 style={{ fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem', color: '#51cf66' }}>MÅNED</h3>
+          {depts.map(dept => (
+            <div key={`month-${dept}`} style={{ marginBottom: '0.5rem', padding: '0.5rem', background: '#1f2937', borderRadius: '6px', borderLeft: `3px solid ${DEPT_COLORS[dept]}` }}>
+              <p style={{ fontSize: '0.7rem', color: DEPT_COLORS[dept], fontWeight: '700' }}>{dept}</p>
+              <p style={{ fontSize: '1.3rem', fontWeight: '700', color: '#51cf66' }}>{deptStats[dept].month}</p>
+              <p style={{ fontSize: '0.65rem', color: '#78c969' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((deptStats[dept].month / daysCompletedMonth) * workingDaysMonth) : 0}</p>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* MONTH */}
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem', color: '#51cf66' }}>📊 MÅNED</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
-          {depts.map(dept => (
-            <div key={`month-${dept}`} style={{ background: '#2d3748', padding: '1rem', borderRadius: '10px', border: '1px solid #4b5563' }}>
-              <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>{dept}</p>
-              <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#51cf66' }}>{deptStats[dept].month}</p>
-              <p style={{ fontSize: '0.7rem', color: '#78c969', marginTop: '0.5rem' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((deptStats[dept].month / daysCompletedMonth) * workingDaysMonth) : 0}</p>
-            </div>
-          ))}
-          <div style={{ background: '#1f3a52', padding: '1rem', borderRadius: '10px', border: '2px solid #5a67d8' }}>
-            <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.5rem' }}>MUON</p>
-            <p style={{ fontSize: '1.8rem', fontWeight: '700', color: '#5a67d8' }}>{muonMonth}</p>
-            <p style={{ fontSize: '0.7rem', color: '#7ca3c0', marginTop: '0.5rem' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* TOP 3 + RANKINGS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', flex: 1, minHeight: 0 }}>
-        {/* TOP 3 */}
-        <div>
-          <h2 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem' }}>🏆 Top 3</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', height: '100%' }}>
-            {[
-              { label: 'I DAG', data: top3TodayAll, color: '#4db8ff' },
-              { label: 'UKE', data: top3WeekAll, color: '#ffd700' },
-              { label: 'MÅNED', data: top3MonthAll, color: '#51cf66' },
-            ].map(({ label, data, color }) => (
-              <div key={label} style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', height: 'fit-content' }}>
-                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', color }}>{label}</h3>
-                {data.map((emp, idx) => (
-                  <div key={emp.ansatt} style={{ marginBottom: '0.4rem', fontSize: '0.7rem' }}>
-                    <p style={{ fontWeight: '700', color: '#e2e8f0' }}>{medals[idx]} {emp.ansatt.substring(0, 10)}</p>
-                    <p style={{ color: color, fontSize: '0.65rem' }}>{label === 'I DAG' ? emp.today : label === 'UKE' ? emp.week : emp.month} salg</p>
-                  </div>
-                ))}
+      {/* TOP 3 - 3 COLUMNS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+        {[
+          { label: 'I DAG', data: top3TodayAll, color: '#4db8ff' },
+          { label: 'IEKE', data: top3WeekAll, color: '#ffd700' },
+          { label: 'MÅNED', data: top3MonthAll, color: '#51cf66' },
+        ].map(({ label, data, color }) => (
+          <div key={label} style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', height: 'fit-content' }}>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', color }}>🏆 {label}</h3>
+            {data.map((emp, idx) => (
+              <div key={emp.ansatt} style={{ marginBottom: '0.3rem', fontSize: '0.65rem' }}>
+                <p style={{ fontWeight: '700', color: DEPT_COLORS[emp.avdeling] || '#e2e8f0' }}>
+                  {medals[idx]} {emp.ansatt}
+                </p>
+                <p style={{ color: color, fontSize: '0.6rem', marginTop: '0.05rem' }}>
+                  {label === 'I DAG' ? emp.today : label === 'IEKE' ? emp.week : emp.month} salg
+                </p>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* RANKINGS */}
-        <div>
-          <h2 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '0.75rem' }}>🥇 Avdeling</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', height: '100%' }}>
-            {[
-              { label: 'I DAG', data: deptRankingToday, color: '#4db8ff' },
-              { label: 'UKE', data: deptRankingWeek, color: '#ffd700' },
-              { label: 'MÅNED', data: deptRankingMonth, color: '#51cf66' },
-            ].map(({ label, data, color }) => (
-              <div key={label} style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', height: 'fit-content' }}>
-                <h3 style={{ fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.5rem', color }}>{label}</h3>
-                {data.map((d, idx) => (
-                  <div key={d.dept} style={{ marginBottom: '0.4rem', fontSize: '0.7rem' }}>
-                    <p style={{ fontWeight: '700', color: '#e2e8f0' }}>{medals[idx]} {d.dept}</p>
-                    <p style={{ color: color, fontSize: '0.65rem' }}>{d.sales} salg</p>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
