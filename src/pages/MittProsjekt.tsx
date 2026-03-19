@@ -227,13 +227,15 @@ export default function MittProsjekt() {
   };
 
   return (
-    <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '0.75rem', paddingBottom: '0.75rem', paddingLeft: '1rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
-      <h1 style={{ fontSize: '1.4rem', fontWeight: '700', marginBottom: '0.75rem' }}>Mitt Prosjekt</h1>
+    <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: 0, paddingBottom: '0.75rem', paddingLeft: 0, background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
+      {/* ORANGE HEADER WITH ALLENTE LOGO */}
+      <div style={{ background: '#FF6B00', padding: '1.2rem 1rem', marginBottom: '1rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: '900', color: '#fff', margin: 0, letterSpacing: '0.05em' }}>allente</h1>
+      </div>
 
-      {/* MUON SUMMARY AT TOP */}
-      <div style={{ marginBottom: '0.75rem' }}>
-        <h2 style={{ fontSize: '0.9rem', fontWeight: '700', marginBottom: '0.5rem', color: '#5a67d8' }}>📊 MUON SAMLET</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+      <div style={{ paddingLeft: '1rem', paddingRight: 0 }}>
+        {/* MUON SUMMARY AT TOP */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}>
           {/* DAG */}
           <div style={{ background: '#1f3a52', padding: '0.8rem', borderRadius: '8px', border: '2px solid #5a67d8' }}>
             <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>I DAG</p>
@@ -257,7 +259,6 @@ export default function MittProsjekt() {
             <p style={{ fontSize: '0.65rem', color: '#78c969', marginTop: '0.3rem' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0}</p>
           </div>
         </div>
-      </div>
 
       {/* DEPARTMENTS BREAKDOWN - 3 SECTIONS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '0.75rem', flex: 1, minHeight: 0 }}>
@@ -319,6 +320,7 @@ export default function MittProsjekt() {
             ))}
           </div>
         ))}
+        </div>
       </div>
     </div>
   );
