@@ -20,8 +20,9 @@ export default function LiveOSL() {
       {/* SLIDESHOW */}
       <div style={{
         flex: 1,
-        marginTop: '80px',
+        marginTop: '240px',
         position: 'relative',
+        padding: '2rem',
       }}>
         <LiveSlideshow department="OSL" />
       </div>

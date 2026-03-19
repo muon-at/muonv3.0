@@ -42,7 +42,7 @@ export default function LivefeedTicker() {
       top: 0,
       left: 0,
       right: 0,
-      height: '80px',
+      height: '240px',
       background: '#000000',
       borderBottom: '2px solid #333',
       display: 'flex',
