@@ -56,19 +56,19 @@ export default function LiveSkien() {
           position: 'fixed',
           bottom: '2rem',
           left: '2rem',
-          padding: '0.75rem 1.5rem',
-          background: '#666666',
-          color: '#fff',
+          padding: 0,
+          background: 'transparent',
+          color: '#222222',
           border: 'none',
-          borderRadius: '8px',
-          fontWeight: '600',
+          borderRadius: 0,
+          fontWeight: '400',
           cursor: 'pointer',
-          fontSize: '1rem',
+          fontSize: '0.5rem',
           zIndex: 100,
-          transition: 'background 0.2s',
+          transition: 'color 0.2s',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = '#777777')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = '#666666')}
+        onMouseEnter={(e) => (e.currentTarget.style.color = '#333333')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = '#222222')}
       >
         ← Tilbake
       </button>
