@@ -247,7 +247,9 @@ export default function AvdelingDashboard() {
     <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1.5rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexDirection: 'column' }}>
         <div style={{ textAlign: 'center', width: '100%' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>{viewDept}</h1>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>
+            {currentTab === 'wallfame' ? '🏆 WALL OF FAME 🏆' : viewDept}
+          </h1>
           {isOwner && (
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               {['KRS', 'OSL', 'Skien'].map(dept => (
