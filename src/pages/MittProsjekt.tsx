@@ -251,9 +251,9 @@ export default function MittProsjekt() {
             <ProgressBar current={muonToday} goal={muonGoals.day} color="#4db8ff" />
           </div>
 
-          {/* IEKE */}
+          {/* UKE */}
           <div style={{ background: '#1f3a52', padding: '0.8rem', borderRadius: '8px', border: '2px solid #5a67d8' }}>
-            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>IEKE</p>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.3rem' }}>UKE</p>
             <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#ffd700' }}>{muonWeek}</p>
             <ProgressBar current={muonWeek} goal={muonGoals.week} color="#ffd700" />
             <p style={{ fontSize: '0.65rem', color: '#d4a05a', marginTop: '0.3rem' }}>Runrate: {daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0}</p>
@@ -282,9 +282,9 @@ export default function MittProsjekt() {
           ))}
         </div>
 
-        {/* IEKE SECTION */}
+        {/* UKE SECTION */}
         <div style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', overflowY: 'auto' }}>
-          <h3 style={{ fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem', color: '#ffd700' }}>IEKE</h3>
+          <h3 style={{ fontSize: '0.8rem', fontWeight: '700', marginBottom: '0.5rem', color: '#ffd700' }}>UKE</h3>
           {depts.map(dept => (
             <div key={`week-${dept}`} style={{ marginBottom: '0.5rem', padding: '0.5rem', background: '#1f2937', borderRadius: '6px', borderLeft: `3px solid ${DEPT_COLORS[dept]}` }}>
               <p style={{ fontSize: '0.7rem', color: DEPT_COLORS[dept], fontWeight: '700' }}>{dept}</p>
@@ -311,7 +311,7 @@ export default function MittProsjekt() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
         {[
           { label: 'I DAG', data: top3TodayAll, color: '#4db8ff' },
-          { label: 'IEKE', data: top3WeekAll, color: '#ffd700' },
+          { label: 'UKE', data: top3WeekAll, color: '#ffd700' },
           { label: 'MÅNED', data: top3MonthAll, color: '#51cf66' },
         ].map(({ label, data, color }) => (
           <div key={label} style={{ background: '#2d3748', padding: '0.75rem', borderRadius: '8px', border: '1px solid #4b5563', height: 'fit-content' }}>
@@ -322,7 +322,7 @@ export default function MittProsjekt() {
                   {medals[idx]} {emp.ansatt}
                 </p>
                 <p style={{ color: color, fontSize: '0.6rem', marginTop: '0.05rem' }}>
-                  {label === 'I DAG' ? emp.today : label === 'IEKE' ? emp.week : emp.month} salg
+                  {label === 'I DAG' ? emp.today : label === 'UKE' ? emp.week : emp.month} salg
                 </p>
               </div>
             ))}

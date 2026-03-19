@@ -383,7 +383,7 @@ export default function AvdelingDashboard() {
                 </div>
 
                 <div style={{ marginBottom: '1.5rem' }}>
-                  <label style={{ fontSize: '0.9rem', color: '#9ca3af', display: 'block', marginBottom: '0.5rem' }}>Mål IEKE</label>
+                  <label style={{ fontSize: '0.9rem', color: '#9ca3af', display: 'block', marginBottom: '0.5rem' }}>Mål UKE</label>
                   <input
                     type="number"
                     value={editingGoals.week}
