@@ -25,6 +25,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   const [gifLoading, setGifLoading] = useState(false);
   const [selectedGif, setSelectedGif] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // LOCK to prevent double-submit
   const gifCache = useRef<Map<string, any[]>>(new Map());
   const modalRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
@@ -34,6 +35,7 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     if (isAnimating) {
       const timer = setTimeout(() => {
         setIsAnimating(false);
+        setIsSubmitting(false); // UNLOCK for next submit
         setGifSearch('');
         setGifResults([]);
         setCurrentGifIndex(0);
@@ -123,6 +125,12 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
   };
 
   const handleSend = async () => {
+    // PREVENT DOUBLE-SUBMIT
+    if (isSubmitting) {
+      console.warn('⚠️ Submit already in progress - ignoring duplicate click');
+      return;
+    }
+
     if (!selectedGif) {
       console.warn('GIF ikke valgt');
       return;
@@ -134,6 +142,10 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
     }
 
     try {
+      // LOCK THE BUTTON
+      setIsSubmitting(true);
+      console.log('🔒 Submit locked - preventing duplicates');
+
       // Trigger slide-to-livefeed animation
       setIsAnimating(true);
 
@@ -235,9 +247,9 @@ export default function NewSaleModal({ isOpen, onClose, userName, userDepartment
 
         {/* Action Buttons */}
         <div className="modal-actions">
-          <button onClick={onClose} className="cancel-btn">Avbryt</button>
-          <button onClick={handleSend} disabled={!selectedGif} className="send-btn">
-            Send ✓
+          <button onClick={onClose} className="cancel-btn" disabled={isSubmitting}>Avbryt</button>
+          <button onClick={handleSend} disabled={!selectedGif || isSubmitting} className="send-btn">
+            {isSubmitting ? '⏳ Sender...' : 'Send ✓'}
           </button>
         </div>
       </div>
