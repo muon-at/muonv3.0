@@ -728,42 +728,12 @@ export default function Status() {
     return Math.min((current / target) * 100, 100);
   };
 
-  const testSaveBadge = async () => {
-    if (!user?.id) {
-      console.error('No user ID');
-      return;
-    }
-    try {
-      const testBadgeRef = doc(db, `users/${user.id}/earned_badges`, 'test_badge');
-      await setDoc(testBadgeRef, {
-        earnedAt: new Date().toISOString(),
-        badgeName: 'TEST BADGE',
-        emoji: '⭐',
-        userId: user.id,
-        userName: user.name,
-      });
-      console.log('✅ Test badge saved to:', `users/${user.id}/earned_badges/test_badge`);
-      alert(`✅ Test badge saved! Check Firestore users/${user.id}/earned_badges`);
-    } catch (err) {
-      console.error('❌ Error saving test badge:', err);
-      alert(`❌ Error: ${err}`);
-    }
-  };
-
   if (!user) return <div className="status-container">Laster...</div>;
 
   return (
     <div className="status-container">
       <div className="status-content">
         <h1 className="user-header">{user?.name}</h1>
-        {user?.role === 'owner' && (
-          <button 
-            onClick={testSaveBadge}
-            style={{ marginBottom: '1rem', padding: '0.5rem 1rem', background: '#666', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            🧪 Test Save Badge
-          </button>
-        )}
 
         {/* Progress Bars */}
         <div className="progress-section">
