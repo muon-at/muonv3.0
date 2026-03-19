@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import LivefeedTicker from '../components/LivefeedTicker';
+import LiveSlideshow from '../components/LiveSlideshow';
 
 export default function LiveKRS() {
   const navigate = useNavigate();
@@ -16,17 +17,13 @@ export default function LiveKRS() {
       {/* TICKER AT TOP */}
       <LivefeedTicker />
 
-      {/* CONTENT - Main area */}
+      {/* SLIDESHOW */}
       <div style={{
         flex: 1,
-        paddingLeft: '2rem',
-        paddingTop: '2rem',
-        paddingBottom: '2rem',
-        paddingRight: '2rem',
         marginTop: '80px',
-        overflowY: 'auto',
+        position: 'relative',
       }}>
-        {/* Main content area */}
+        <LiveSlideshow department="KRS" />
       </div>
 
       {/* BACK BUTTON - Bottom left */}
