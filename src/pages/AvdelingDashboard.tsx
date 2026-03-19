@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import { useSearchParams } from 'react-router-dom';
+import WallOfFame from '../components/WallOfFame';
 
 interface Goals {
   day: number;
@@ -11,6 +13,9 @@ interface Goals {
 
 export default function AvdelingDashboard() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'status';
+  
   const [loading, setLoading] = useState(true);
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [goals, setGoals] = useState<Goals>({ day: 5, week: 20, month: 80 });
@@ -279,6 +284,8 @@ export default function AvdelingDashboard() {
         )}
       </div>
 
+      {currentTab === 'status' && (
+      <>
       {/* SALG STATISTICS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {/* Today */}
@@ -348,6 +355,12 @@ export default function AvdelingDashboard() {
           ))}
         </div>
       </div>
+      </>
+      )}
+
+      {currentTab === 'wallfame' && (
+        <WallOfFame department={viewDept} title={`WALL OF FAME - ${viewDept}`} />
+      )}
 
       {/* GOAL MODAL */}
       {showGoalModal && (

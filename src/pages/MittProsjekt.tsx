@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import { useSearchParams } from 'react-router-dom';
+import WallOfFame from '../components/WallOfFame';
 
 const DEPT_COLORS: { [key: string]: string } = {
   KRS: '#4db8ff',
@@ -11,6 +13,9 @@ const DEPT_COLORS: { [key: string]: string } = {
 
 export default function MittProsjekt() {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'status';
+  
   const [loading, setLoading] = useState(true);
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [allGoals, setAllGoals] = useState<{ [key: string]: { day: number; week: number; month: number } }>({
@@ -235,6 +240,8 @@ export default function MittProsjekt() {
 
       <div style={{ paddingLeft: '1rem', paddingRight: 0 }}>
 
+        {currentTab === 'status' && (
+        <>
         {/* MUON SUMMARY AT TOP */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}>
           {/* DAG */}
@@ -322,6 +329,12 @@ export default function MittProsjekt() {
           </div>
         ))}
         </div>
+        </>
+        )}
+
+        {currentTab === 'wallfame' && (
+          <WallOfFame title="WALL OF FAME - MUON" />
+        )}
       </div>
     </div>
   );
