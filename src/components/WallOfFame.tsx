@@ -1,160 +1,205 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import type { RecordsCache } from '../utils/recordsCache';
-import '../styles/Plaquet.css';
+import '../styles/WallOfFame.css';
 
-interface WallOfFameProps {
-  recordsCache: RecordsCache;
+interface Record {
+  title: string;
+  value: number;
+  employee: string;
+  date: string;
+  emoji: string;
 }
 
-interface DeptRecords {
-  day: { name: string; count: number } | null;
-  week: { name: string; count: number } | null;
-  month: { name: string; count: number } | null;
+interface Props {
+  department?: string; // If provided, filter by department. If not, show all departments
+  title?: string;
 }
 
-export const WallOfFame: React.FC<WallOfFameProps> = ({ recordsCache }) => {
-  const [empDeptMap, setEmpDeptMap] = useState<{ [emp: string]: string }>({});
-  const [deptRecords, setDeptRecords] = useState<{ [dept: string]: DeptRecords }>({
-    KRS: { day: null, week: null, month: null },
-    OSL: { day: null, week: null, month: null },
-    Skien: { day: null, week: null, month: null },
-    Allente: { day: null, week: null, month: null },
-  });
+export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props) {
+  const [records, setRecords] = useState<Record[]>([
+    { title: 'FLEST SALG PÅ 1 DAG', value: 0, employee: '-', date: '-', emoji: '☀️' },
+    { title: 'FLEST SALG PÅ 1 UKE', value: 0, employee: '-', date: '-', emoji: '📅' },
+    { title: 'FLEST SALG PÅ 1 MÅNED', value: 0, employee: '-', date: '-', emoji: '📊' },
+    { title: 'FLEST SALG PÅ I ÅR', value: 0, employee: '-', date: '-', emoji: '🎯' },
+    { title: 'FLEST SALG PÅ TOTALT', value: 0, employee: '-', date: '-', emoji: '🏆' },
+  ]);
 
-  // Load employee departments on mount
+
+
   useEffect(() => {
-    const loadEmpDepts = async () => {
-      try {
-        const empRef = collection(db, 'employees');
-        const empSnap = await getDocs(empRef);
-        const map: { [emp: string]: string } = {};
-        empSnap.forEach(doc => {
-          const data = doc.data();
-          if (data.externalName) {
-            map[data.externalName] = data.department || 'Allente';
+    const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), (livefeedSnapshot) => {
+      const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), async (archiveSnapshot) => {
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const startOfYear = new Date(today.getFullYear(), 0, 1);
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          const startOfWeek = new Date(today);
+          startOfWeek.setDate(today.getDate() - today.getDay());
+
+          // Collect all employees from both sources
+          const employees = new Map<string, { day: number; week: number; month: number; year: number; total: number; dept: string }>();
+
+          // TODAY from livefeed
+          livefeedSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            const userName = data.userName || '';
+            if (!userName) return;
+
+            if (!employees.has(userName)) {
+              employees.set(userName, { day: 0, week: 0, month: 0, year: 0, total: 0, dept: '' });
+            }
+            const emp = employees.get(userName)!;
+            emp.day++;
+            emp.week++;
+            emp.month++;
+            emp.year++;
+            emp.total++;
+          });
+
+          // HISTORICAL from contracts
+          archiveSnapshot.docs.forEach((doc) => {
+            const data = doc.data();
+            let selger = data.selger || '';
+            const dato = data.dato || '';
+
+            // Deduplicate: strip "/ selger" suffix
+            selger = selger.replace(/ \/ selger$/i, '').trim();
+            if (!selger) return;
+
+            if (!employees.has(selger)) {
+              employees.set(selger, { day: 0, week: 0, month: 0, year: 0, total: 0, dept: '' });
+            }
+            const emp = employees.get(selger)!;
+
+            if (dato && typeof dato === 'string') {
+              const parts = dato.split('/');
+              if (parts.length === 3) {
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                const orderDate = new Date(year, month - 1, day);
+
+                // Week
+                if (orderDate >= startOfWeek && orderDate <= today) {
+                  emp.week++;
+                }
+
+                // Month
+                if (orderDate >= startOfMonth && orderDate <= today) {
+                  emp.month++;
+                }
+
+                // Year
+                if (orderDate >= startOfYear && orderDate <= today) {
+                  emp.year++;
+                }
+
+                // Total
+                emp.total++;
+              }
+            }
+          });
+
+          // Fetch department info for all employees
+          const peopleSnap = await getDocs(collection(db, 'allente_people'));
+          const deptMap = new Map<string, string>();
+          
+          peopleSnap.docs.forEach((doc) => {
+            const data = doc.data();
+            const visual = data.name || '';
+            const externalName = data.externalName || '';
+            const dept = data.avdeling || '';
+            
+            deptMap.set(visual.toLowerCase().trim(), dept);
+            deptMap.set(externalName.toLowerCase().trim(), dept);
+          });
+
+          // Update dept in employees map
+          employees.forEach((emp, name) => {
+            emp.dept = deptMap.get(name.toLowerCase().trim()) || '';
+          });
+
+          // Filter by department if specified
+          let filteredEmployees = Array.from(employees.entries());
+          if (department) {
+            filteredEmployees = filteredEmployees.filter(([_, emp]) => emp.dept === department);
           }
-        });
-        console.log('✅ Emp dept map loaded:', Object.keys(map).length, 'employees');
-        setEmpDeptMap(map);
-      } catch (err) {
-        console.error('Error loading employee departments:', err);
-      }
-    };
-    loadEmpDepts();
-  }, []);
 
-  // Calculate records for each department
-  useEffect(() => {
-    if (Object.keys(empDeptMap).length === 0) {
-      console.log('⏳ Waiting for emp dept map...');
-      return;
-    }
+          // Find best records
+          const bestDay = filteredEmployees.reduce((max, [name, emp]) => emp.day > max.value ? { name, value: emp.day } : max, { name: '-', value: 0 });
+          const bestWeek = filteredEmployees.reduce((max, [name, emp]) => emp.week > max.value ? { name, value: emp.week } : max, { name: '-', value: 0 });
+          const bestMonth = filteredEmployees.reduce((max, [name, emp]) => emp.month > max.value ? { name, value: emp.month } : max, { name: '-', value: 0 });
+          const bestYear = filteredEmployees.reduce((max, [name, emp]) => emp.year > max.value ? { name, value: emp.year } : max, { name: '-', value: 0 });
+          const bestTotal = filteredEmployees.reduce((max, [name, emp]) => emp.total > max.value ? { name, value: emp.total } : max, { name: '-', value: 0 });
 
-    console.log('🔍 Filtering records for all departments...');
-    const depts = ['KRS', 'OSL', 'Skien', 'Allente'];
-    const results: { [dept: string]: DeptRecords } = {};
+          setRecords([
+            { 
+              title: 'FLEST SALG PÅ 1 DAG', 
+              value: bestDay.value, 
+              employee: bestDay.name,
+              date: bestDay.name !== '-' ? new Date().toLocaleDateString('no-NO') : '-',
+              emoji: '☀️' 
+            },
+            { 
+              title: 'FLEST SALG PÅ 1 UKE', 
+              value: bestWeek.value, 
+              employee: bestWeek.name,
+              date: bestWeek.name !== '-' ? `Uke ${Math.ceil(new Date().getDate() / 7)}` : '-',
+              emoji: '📅' 
+            },
+            { 
+              title: 'FLEST SALG PÅ 1 MÅNED', 
+              value: bestMonth.value, 
+              employee: bestMonth.name,
+              date: bestMonth.name !== '-' ? new Date().toLocaleDateString('no-NO', { month: 'long', year: 'numeric' }) : '-',
+              emoji: '📊' 
+            },
+            { 
+              title: 'FLEST SALG PÅ I ÅR', 
+              value: bestYear.value, 
+              employee: bestYear.name,
+              date: bestYear.name !== '-' ? new Date().getFullYear().toString() : '-',
+              emoji: '🎯' 
+            },
+            { 
+              title: 'FLEST SALG PÅ TOTALT', 
+              value: bestTotal.value, 
+              employee: bestTotal.name,
+              date: bestTotal.name !== '-' ? 'All-time' : '-',
+              emoji: '🏆' 
+            },
+          ]);
 
-    depts.forEach(dept => {
-      const deptEmps = Object.entries(recordsCache.employees || {})
-        .filter(([emp]) => empDeptMap[emp] === dept)
-        .map(([name, record]) => ({ 
-          name, 
-          dayBest: record.dayBest, 
-          weekBest: record.weekBest, 
-          monthBest: record.monthBest 
-        }));
+          console.log('📊 Wall of Fame updated:', { bestDay, bestWeek, bestMonth, bestYear, bestTotal });
+        } catch (err) {
+          console.error('❌ Error calculating Wall of Fame:', err);
+        }
+      });
 
-      console.log(`🏢 ${dept} employees found:`, deptEmps.length);
-
-      if (deptEmps.length > 0) {
-        const dayTop = deptEmps.reduce((a, b) => a.dayBest > b.dayBest ? a : b);
-        const weekTop = deptEmps.reduce((a, b) => a.weekBest > b.weekBest ? a : b);
-        const monthTop = deptEmps.reduce((a, b) => a.monthBest > b.monthBest ? a : b);
-
-        results[dept] = {
-          day: { name: dayTop.name, count: dayTop.dayBest },
-          week: { name: weekTop.name, count: weekTop.weekBest },
-          month: { name: monthTop.name, count: monthTop.monthBest },
-        };
-      } else {
-        results[dept] = { day: null, week: null, month: null };
-      }
+      return () => unsubscribeArchive();
     });
 
-    setDeptRecords(results);
-  }, [empDeptMap, recordsCache]);
+    return () => unsubscribeLivefeed();
+  }, [department]);
 
-  const depts = ['KRS', 'OSL', 'Skien', 'Allente'];
-
-  const PlaqueCard = ({ dept, records, isDepartment }: { dept: string; records: DeptRecords | any; isDepartment?: boolean }) => (
-    <div className="plaquet">
-      <div className="plaquet-content">
-        <div className="plaquet-trophy">{isDepartment ? '🏢' : '🏆'}</div>
-        <div className="plaquet-title">{dept}</div>
-        <div className="plaquet-subtitle">{isDepartment ? 'Totalt' : 'Rekorder'}</div>
-        <div className="plaquet-records">
-          <div className="plaquet-record">
-            <span className="plaquet-record-label">Day:</span>
-            {isDepartment ? (
-              <span className="plaquet-record-value">{records.day?.count || 0}</span>
-            ) : (
-              <>
-                <span className="plaquet-record-name">{records.day ? records.day.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{records.day ? records.day.count : '0'}</span>
-              </>
-            )}
+  return (
+    <div className="wall-of-fame-container">
+      <h2 className="wall-of-fame-title">{title}</h2>
+      
+      <div className="records-grid">
+        {records.map((record, idx) => (
+          <div key={idx} className="record-box">
+            <div className="record-emoji">{record.emoji}</div>
+            <h3 className="record-title">{record.title}</h3>
+            <div className="record-employee">{record.employee}</div>
+            <div className="record-value">{record.value} salg</div>
+            <div className="record-date">{record.date}</div>
           </div>
-          <div className="plaquet-record">
-            <span className="plaquet-record-label">Week:</span>
-            {isDepartment ? (
-              <span className="plaquet-record-value">{records.week?.count || 0}</span>
-            ) : (
-              <>
-                <span className="plaquet-record-name">{records.week ? records.week.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{records.week ? records.week.count : '0'}</span>
-              </>
-            )}
-          </div>
-          <div className="plaquet-record">
-            <span className="plaquet-record-label">Month:</span>
-            {isDepartment ? (
-              <span className="plaquet-record-value">{records.month?.count || 0}</span>
-            ) : (
-              <>
-                <span className="plaquet-record-name">{records.month ? records.month.name.split(' ')[0] : '—'}</span>
-                <span className="plaquet-record-value">{records.month ? records.month.count : '0'}</span>
-              </>
-            )}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
-
-  // Prepare department records
-  const deptTotals: { [dept: string]: DeptRecords } = {};
-  depts.forEach(dept => {
-    const deptRecord = recordsCache.departments?.[dept] || { dayBest: 0, weekBest: 0, monthBest: 0 };
-    deptTotals[dept] = {
-      day: { name: 'Total', count: deptRecord.dayBest },
-      week: { name: 'Total', count: deptRecord.weekBest },
-      month: { name: 'Total', count: deptRecord.monthBest },
-    };
-  });
-
-  return (
-    <div className="plaquet-container">
-      {/* EMPLOYEE PLAQUES */}
-      {depts.map(dept => (
-        <PlaqueCard key={`emp-${dept}`} dept={dept} records={deptRecords[dept]} isDepartment={false} />
-      ))}
-      
-      {/* DEPARTMENT PLAQUES */}
-      {depts.map(dept => (
-        <PlaqueCard key={`dept-${dept}`} dept={dept} records={deptTotals[dept]} isDepartment={true} />
-      ))}
-    </div>
-  );
-};
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import WallOfFame from '../components/WallOfFame';
 
 interface Goals {
   day: number;
@@ -348,6 +349,9 @@ export default function AvdelingDashboard() {
           ))}
         </div>
       </div>
+
+      {/* WALL OF FAME */}
+      <WallOfFame department={viewDept} title={`WALL OF FAME - ${viewDept}`} />
 
       {/* GOAL MODAL */}
       {showGoalModal && (

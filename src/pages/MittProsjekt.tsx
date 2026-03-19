@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import WallOfFame from '../components/WallOfFame';
 
 const DEPT_COLORS: { [key: string]: string } = {
   KRS: '#4db8ff',
@@ -321,6 +322,9 @@ export default function MittProsjekt() {
           </div>
         ))}
         </div>
+
+      {/* WALL OF FAME - ALL DEPARTMENTS */}
+      <WallOfFame title="WALL OF FAME - MUON" />
       </div>
     </div>
   );

@@ -1,0 +1,119 @@
+.wall-of-fame-container {
+  width: 100%;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.wall-of-fame-title {
+  color: #e2e8f0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.record-box {
+  background: linear-gradient(135deg, #1f2937 0%, #2d3748 100%);
+  border: 2px solid #4b5563;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.record-box:hover {
+  border-color: #5a67d8;
+  box-shadow: 0 0 20px rgba(90, 103, 216, 0.3);
+  transform: translateY(-2px);
+}
+
+.record-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.record-title {
+  color: #b0b0b0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+  height: 2.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.record-employee {
+  color: #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.record-value {
+  color: #22c55e;
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.record-date {
+  color: #999;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .records-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .records-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .record-box {
+    min-height: 180px;
+  }
+
+  .record-emoji {
+    font-size: 2.5rem;
+  }
+
+  .record-title {
+    font-size: 0.8rem;
+  }
+
+  .record-employee {
+    font-size: 1rem;
+  }
+
+  .record-value {
+    font-size: 1.5rem;
+  }
+}
