@@ -348,30 +348,40 @@ export default function Status() {
         // Auto-save newly achieved badges + post to livefeed
         if (newlyAchieved.length > 0 && user?.id) {
           try {
+            // Save ALL newly achieved badges to Firestore
             for (const badgeId of newlyAchieved) {
               const badge = namedBadges.find(b => b.id === badgeId);
-              
-              // Save to earned badges
               const earnedRef = doc(db, `users/${user.id}/earned_badges`, badgeId);
               await setDoc(earnedRef, {
                 earnedAt: new Date().toISOString(),
                 badgeName: badge?.navn,
                 emoji: badge?.emoji,
               });
+            }
 
-              // Post to livefeed
+            // Only post the HIGHEST milestone reached (to avoid posting "5 SALG" and "10 SALG" when hitting 10)
+            // Sort by verdi descending and post only the first (highest)
+            const sortedByValue = newlyAchieved
+              .map(id => namedBadges.find(b => b.id === id))
+              .filter(b => b !== undefined)
+              .sort((a, b) => (b?.verdi || 0) - (a?.verdi || 0));
+
+            if (sortedByValue.length > 0 && sortedByValue[0]) {
+              const topBadge = sortedByValue[0];
               const livefeedRef = collection(db, 'livefeed_sales');
               await addDoc(livefeedRef, {
                 type: 'badge_earned',
                 userName: user.name,
-                badge: badge?.emoji,
-                badgeName: badge?.navn,
+                badge: topBadge.emoji,
+                badgeName: topBadge.navn,
                 timestamp: new Date(),
-                message: `${user.name} ${badge?.emoji} ${badge?.navn}!`,
+                message: `${user.name} ${topBadge.emoji} ${topBadge.navn}!`,
               });
+              console.log('🎖️ Posted highest milestone:', topBadge.navn);
             }
+
             earnedBadgeIds = [...earnedBadgeIds, ...newlyAchieved];
-            console.log('🎖️ New badges earned & posted:', newlyAchieved);
+            console.log('✅ All badges earned:', newlyAchieved);
           } catch (err) {
             console.error('Error saving badges:', err);
           }
