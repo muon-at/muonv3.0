@@ -48,6 +48,7 @@ export default function Status() {
   });
   const [editingTarget, setEditingTarget] = useState<'day' | 'week' | 'month' | null>(null);
   const [tempValue, setTempValue] = useState<number>(0);
+  const [monthEdited, setMonthEdited] = useState<boolean>(false);
   const [runRates, setRunRates] = useState({
     dayTo16: 0,
     dayTo21: 0,
@@ -418,6 +419,7 @@ export default function Status() {
         week: weekTarget,
         month: tempValue,
       };
+      setMonthEdited(true); // Mark month as edited
     } else {
       newTargets = {
         ...targets,
@@ -464,6 +466,8 @@ export default function Status() {
               <button 
                 className="edit-btn"
                 onClick={() => handleTargetEdit('day')}
+                disabled={!monthEdited}
+                style={{ opacity: monthEdited ? 1 : 0.4, cursor: monthEdited ? 'pointer' : 'not-allowed' }}
               >
                 Endre
               </button>
@@ -504,6 +508,8 @@ export default function Status() {
               <button 
                 className="edit-btn"
                 onClick={() => handleTargetEdit('week')}
+                disabled={!monthEdited}
+                style={{ opacity: monthEdited ? 1 : 0.4, cursor: monthEdited ? 'pointer' : 'not-allowed' }}
               >
                 Endre
               </button>
