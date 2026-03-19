@@ -316,6 +316,7 @@ export default function Status() {
 
         // Master badge list (all milestones)
         const testBadges: Badge[] = [
+          { id: 'dagens_første', emoji: '⚡', navn: 'Dagens første', verdi: 0, beskrivelse: 'Første salget i dag (kun en person)' },
           { id: 'første', emoji: '🎓', navn: 'FØRSTE SALGET', verdi: 1, beskrivelse: 'Gjøre første salg' },
           { id: '5salg', emoji: '🚀', navn: '5 SALG', verdi: 5, beskrivelse: 'Gjøre 5 salg på en dag' },
           { id: '10salg', emoji: '🎯', navn: '10 SALG', verdi: 10, beskrivelse: 'Gjøre 10 salg på en dag' },
@@ -339,7 +340,41 @@ export default function Status() {
 
         // Check if TODAY'S sales unlocked any new badges (only real milestones, not 🏆)
         const newlyAchieved: string[] = [];
+        
+        // Special check for "Dagens første" - only award if:
+        // 1. User doesn't already have it earned
+        // 2. No one else has earned it today
+        if (todayStats.count > 0 && !earnedBadgeIds.includes('dagens_første')) {
+          try {
+            // Check if anyone earned this badge today
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            
+            const livefeedRef = collection(db, 'livefeed_sales');
+            const todaysPosts = await getDocs(livefeedRef);
+            
+            let dagensFørsteAwardedToday = false;
+            todaysPosts.docs.forEach((doc) => {
+              const data = doc.data();
+              const postDate = data.timestamp?.toDate?.() || new Date(data.timestamp);
+              const postDateStr = postDate.toISOString().split('T')[0];
+              
+              if (data.badgeName === 'Dagens første' && postDateStr === todayStr) {
+                dagensFørsteAwardedToday = true;
+              }
+            });
+            
+            // Only award if not awarded yet today
+            if (!dagensFørsteAwardedToday) {
+              newlyAchieved.push('dagens_første');
+            }
+          } catch (err) {
+            console.log('Error checking dagens_første:', err);
+          }
+        }
+        
         namedBadges.forEach((badge) => {
+          if (badge.id === 'dagens_første') return; // Skip, handled above
           if (!earnedBadgeIds.includes(badge.id) && todayStats.count >= badge.verdi && badge.verdi < 999) {
             newlyAchieved.push(badge.id);
           }
