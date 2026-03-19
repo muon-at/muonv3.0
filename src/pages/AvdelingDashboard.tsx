@@ -188,8 +188,6 @@ export default function AvdelingDashboard() {
   // Runrates
   const runrateTo16 = currentHour > 0 ? Math.round((deptTodayTotal / currentHour) * 6) : 0;
   const runrateTo21 = currentHour > 0 ? Math.round((deptTodayTotal / currentHour) * 10) : 0;
-  const runrateWeek = daysCompleted > 0 ? Math.round((deptWeekTotal / daysCompleted) * 5) : 0;
-  const runrateMonth = daysCompletedMonth > 0 ? Math.round((deptMonthTotal / daysCompletedMonth) * workingDaysMonth) : 0;
 
   // Top 3 by period
   const top3Today = [...progresjonData].sort((a, b) => (b.today || 0) - (a.today || 0)).slice(0, 3);
@@ -216,14 +214,14 @@ export default function AvdelingDashboard() {
         <div style={{ background: '#2d3748', padding: '2rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
           <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '0.5rem' }}>SALG DENNE UKE</p>
           <p style={{ fontSize: '3rem', fontWeight: '700', color: '#ffd700', marginBottom: '1rem' }}>{deptWeekTotal}</p>
-          <p style={{ fontSize: '0.85rem', color: '#d4a05a' }}>Runrate: {runrateWeek} (5 dager)</p>
+          <p style={{ fontSize: '0.85rem', color: '#d4a05a' }}>Runrate: {Math.round((deptWeekTotal / daysCompleted) * 5)} ({daysCompleted} dager)</p>
         </div>
 
         {/* Month */}
         <div style={{ background: '#2d3748', padding: '2rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
           <p style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '0.5rem' }}>SALG DENNE MÅNEDEN</p>
           <p style={{ fontSize: '3rem', fontWeight: '700', color: '#51cf66', marginBottom: '1rem' }}>{deptMonthTotal}</p>
-          <p style={{ fontSize: '0.85rem', color: '#78c969' }}>Runrate: {runrateMonth}</p>
+          <p style={{ fontSize: '0.85rem', color: '#78c969' }}>Runrate: {Math.round((deptMonthTotal / daysCompletedMonth) * workingDaysMonth)} ({daysCompletedMonth} dager)</p>
         </div>
       </div>
 

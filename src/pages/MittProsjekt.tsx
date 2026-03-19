@@ -182,8 +182,6 @@ export default function MittProsjekt() {
   // Runrates Muon
   const muonRunrateTo16 = currentHour > 0 ? Math.round((muonToday / currentHour) * 6) : 0;
   const muonRunrateTo21 = currentHour > 0 ? Math.round((muonToday / currentHour) * 10) : 0;
-  const muonRunrateWeek = daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0;
-  const muonRunrateMonth = daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0;
 
   // Top 3 global
   const top3TodayAll = [...progresjonData].sort((a, b) => (b.today || 0) - (a.today || 0)).slice(0, 3);
@@ -235,13 +233,13 @@ export default function MittProsjekt() {
             <div key={`week-${dept}`} style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
               <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>{dept}</p>
               <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#ffd700', marginBottom: '0.5rem' }}>{deptStats[dept].week}</p>
-              <p style={{ fontSize: '0.75rem', color: '#d4a05a' }}>Runrate: {Math.round((deptStats[dept].week / daysCompleted) * 5)}</p>
+              <p style={{ fontSize: '0.75rem', color: '#d4a05a' }}>Runrate: {daysCompleted > 0 ? Math.round((deptStats[dept].week / daysCompleted) * 5) : 0}</p>
             </div>
           ))}
           <div style={{ background: '#1f3a52', padding: '1.5rem', borderRadius: '12px', border: '2px solid #5a67d8' }}>
             <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>MUON</p>
             <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#5a67d8', marginBottom: '0.5rem' }}>{muonWeek}</p>
-            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Runrate: {muonRunrateWeek}</p>
+            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Runrate: {daysCompleted > 0 ? Math.round((muonWeek / daysCompleted) * 5) : 0}</p>
           </div>
         </div>
       </div>
@@ -254,13 +252,13 @@ export default function MittProsjekt() {
             <div key={`month-${dept}`} style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563' }}>
               <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>{dept}</p>
               <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#51cf66', marginBottom: '0.5rem' }}>{deptStats[dept].month}</p>
-              <p style={{ fontSize: '0.75rem', color: '#78c969' }}>Runrate: {Math.round((deptStats[dept].month / daysCompletedMonth) * workingDaysMonth)}</p>
+              <p style={{ fontSize: '0.75rem', color: '#78c969' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((deptStats[dept].month / daysCompletedMonth) * workingDaysMonth) : 0}</p>
             </div>
           ))}
           <div style={{ background: '#1f3a52', padding: '1.5rem', borderRadius: '12px', border: '2px solid #5a67d8' }}>
             <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginBottom: '0.3rem' }}>MUON</p>
             <p style={{ fontSize: '2.2rem', fontWeight: '700', color: '#5a67d8', marginBottom: '0.5rem' }}>{muonMonth}</p>
-            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Runrate: {muonRunrateMonth}</p>
+            <p style={{ fontSize: '0.75rem', color: '#7ca3c0' }}>Runrate: {daysCompletedMonth > 0 ? Math.round((muonMonth / daysCompletedMonth) * workingDaysMonth) : 0}</p>
           </div>
         </div>
       </div>
