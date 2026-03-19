@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { collection, onSnapshot, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/authContext';
+import { useSearchParams } from 'react-router-dom';
 import WallOfFame from '../components/WallOfFame';
 
 interface Goals {
@@ -12,6 +13,9 @@ interface Goals {
 
 export default function AvdelingDashboard() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const currentTab = searchParams.get('tab') || 'status';
+  
   const [loading, setLoading] = useState(true);
   const [progresjonData, setProgresjonData] = useState<any[]>([]);
   const [goals, setGoals] = useState<Goals>({ day: 5, week: 20, month: 80 });
@@ -244,6 +248,40 @@ export default function AvdelingDashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexDirection: 'column' }}>
         <div style={{ textAlign: 'center', width: '100%' }}>
           <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>{viewDept}</h1>
+          
+          {/* TAB BUTTONS */}
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginBottom: '1rem' }}>
+            <button
+              onClick={() => setSearchParams({ tab: 'status' })}
+              style={{
+                padding: '0.5rem 1rem',
+                background: currentTab === 'status' ? '#5a67d8' : '#404040',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              Status
+            </button>
+            <button
+              onClick={() => setSearchParams({ tab: 'wallfame' })}
+              style={{
+                padding: '0.5rem 1rem',
+                background: currentTab === 'wallfame' ? '#5a67d8' : '#404040',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              Wall of Fame
+            </button>
+          </div>
           {isOwner && (
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               {['KRS', 'OSL', 'Skien'].map(dept => (
@@ -280,6 +318,8 @@ export default function AvdelingDashboard() {
         )}
       </div>
 
+      {currentTab === 'status' && (
+      <>
       {/* SALG STATISTICS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {/* Today */}
@@ -352,6 +392,12 @@ export default function AvdelingDashboard() {
 
       {/* WALL OF FAME */}
       <WallOfFame department={viewDept} title={`WALL OF FAME - ${viewDept}`} />
+      </>
+      )}
+
+      {currentTab === 'wallfame' && (
+        <WallOfFame department={viewDept} title={`WALL OF FAME - ${viewDept}`} />
+      )}
 
       {/* GOAL MODAL */}
       {showGoalModal && (
