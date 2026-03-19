@@ -141,79 +141,72 @@ export default function MobileProsjekt() {
   const depts = ['KRS', 'OSL', 'Skien'];
 
   return (
-    <div className="mobile-prosjekt-compact">
+    <div className="mobile-prosjekt-matrix">
       <h3>🏢 MITT PROSJEKT</h3>
 
-      <div className="compact-periods">
-        {/* I DAG */}
-        <div className="compact-period">
-          <div className="period-label">I DAG</div>
-          <div className="compact-grid">
-            {depts.map((dept) => (
-              <div
-                key={dept}
-                className="compact-box"
-                style={{
-                  background: deptColors[dept as keyof typeof deptColors],
-                  borderColor: deptBorders[dept as keyof typeof deptBorders],
-                }}
-              >
-                <div className="cbox-dept">{dept}</div>
-                <div className="cbox-value">{stats[dept as keyof AllDepts]?.today || 0}</div>
-              </div>
-            ))}
-            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-              <div className="cbox-dept">MUON</div>
-              <div className="cbox-value">{muonTotal.day}</div>
-            </div>
-          </div>
+      <div className="matrix-table">
+        {/* HEADER ROW */}
+        <div className="matrix-header">
+          <div className="matrix-cell header-cell"></div>
+          <div className="matrix-cell header-cell">I DAG</div>
+          <div className="matrix-cell header-cell">UKE</div>
+          <div className="matrix-cell header-cell">MÅNED</div>
         </div>
 
-        {/* UKE */}
-        <div className="compact-period">
-          <div className="period-label">UKE</div>
-          <div className="compact-grid">
-            {depts.map((dept) => (
-              <div
-                key={dept}
-                className="compact-box"
-                style={{
-                  background: deptColors[dept as keyof typeof deptColors],
-                  borderColor: deptBorders[dept as keyof typeof deptBorders],
-                }}
-              >
-                <div className="cbox-dept">{dept}</div>
-                <div className="cbox-value">{stats[dept as keyof AllDepts]?.week || 0}</div>
-              </div>
-            ))}
-            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-              <div className="cbox-dept">MUON</div>
-              <div className="cbox-value">{muonTotal.week}</div>
+        {/* DEPT ROWS */}
+        {depts.map((dept) => (
+          <div key={dept} className="matrix-row">
+            <div className="matrix-cell dept-label">{dept}</div>
+            <div
+              className="matrix-cell data-cell"
+              style={{
+                background: deptColors[dept as keyof typeof deptColors],
+                borderColor: deptBorders[dept as keyof typeof deptBorders],
+              }}
+            >
+              {stats[dept as keyof AllDepts]?.today || 0}
+            </div>
+            <div
+              className="matrix-cell data-cell"
+              style={{
+                background: deptColors[dept as keyof typeof deptColors],
+                borderColor: deptBorders[dept as keyof typeof deptBorders],
+              }}
+            >
+              {stats[dept as keyof AllDepts]?.week || 0}
+            </div>
+            <div
+              className="matrix-cell data-cell"
+              style={{
+                background: deptColors[dept as keyof typeof deptColors],
+                borderColor: deptBorders[dept as keyof typeof deptBorders],
+              }}
+            >
+              {stats[dept as keyof AllDepts]?.month || 0}
             </div>
           </div>
-        </div>
+        ))}
 
-        {/* MÅNED */}
-        <div className="compact-period">
-          <div className="period-label">MÅNED</div>
-          <div className="compact-grid">
-            {depts.map((dept) => (
-              <div
-                key={dept}
-                className="compact-box"
-                style={{
-                  background: deptColors[dept as keyof typeof deptColors],
-                  borderColor: deptBorders[dept as keyof typeof deptBorders],
-                }}
-              >
-                <div className="cbox-dept">{dept}</div>
-                <div className="cbox-value">{stats[dept as keyof AllDepts]?.month || 0}</div>
-              </div>
-            ))}
-            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-              <div className="cbox-dept">MUON</div>
-              <div className="cbox-value">{muonTotal.month}</div>
-            </div>
+        {/* MUON ROW */}
+        <div className="matrix-row">
+          <div className="matrix-cell dept-label muon">MUON</div>
+          <div
+            className="matrix-cell data-cell muon"
+            style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}
+          >
+            {muonTotal.day}
+          </div>
+          <div
+            className="matrix-cell data-cell muon"
+            style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}
+          >
+            {muonTotal.week}
+          </div>
+          <div
+            className="matrix-cell data-cell muon"
+            style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}
+          >
+            {muonTotal.month}
           </div>
         </div>
       </div>

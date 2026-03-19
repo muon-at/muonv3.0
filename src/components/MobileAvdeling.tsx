@@ -139,43 +139,52 @@ export default function MobileAvdeling() {
   if (loading) return <div className="loading">Laster avdeling...</div>;
 
   return (
-    <div className="mobile-avdeling-compact">
+    <div className="mobile-avdeling-matrix">
       <h3>👥 {user?.department || 'AVDELING'}</h3>
 
-      <div className="avdeling-compact-content">
-        {/* I DAG */}
-        <div className="avdeling-period">
-          <div className="period-label">I DAG</div>
-          <div
-            className="avdeling-stat-compact"
-            style={{ background: deptColor, borderColor: deptBorder }}
-          >
-            <div className="cbox-dept">Mål: {goals.day}</div>
-            <div className="cbox-value">{stats.today}</div>
+      <div className="matrix-table">
+        {/* HEADER ROW */}
+        <div className="matrix-header">
+          <div className="matrix-cell header-cell">MÅL</div>
+          <div className="matrix-cell header-cell">I DAG</div>
+          <div className="matrix-cell header-cell">UKE</div>
+          <div className="matrix-cell header-cell">MÅNED</div>
+        </div>
+
+        {/* GOALS ROW */}
+        <div className="matrix-row">
+          <div className="matrix-cell label-cell">Mål</div>
+          <div className="matrix-cell header-value" style={{ borderColor: deptBorder }}>
+            {goals.day}
+          </div>
+          <div className="matrix-cell header-value" style={{ borderColor: deptBorder }}>
+            {goals.week}
+          </div>
+          <div className="matrix-cell header-value" style={{ borderColor: deptBorder }}>
+            {goals.month}
           </div>
         </div>
 
-        {/* UKE */}
-        <div className="avdeling-period">
-          <div className="period-label">UKE</div>
+        {/* SALES ROW */}
+        <div className="matrix-row">
+          <div className="matrix-cell label-cell">Salg</div>
           <div
-            className="avdeling-stat-compact"
+            className="matrix-cell data-cell"
             style={{ background: deptColor, borderColor: deptBorder }}
           >
-            <div className="cbox-dept">Mål: {goals.week}</div>
-            <div className="cbox-value">{stats.week}</div>
+            {stats.today}
           </div>
-        </div>
-
-        {/* MÅNED */}
-        <div className="avdeling-period">
-          <div className="period-label">MÅNED</div>
           <div
-            className="avdeling-stat-compact"
+            className="matrix-cell data-cell"
             style={{ background: deptColor, borderColor: deptBorder }}
           >
-            <div className="cbox-dept">Mål: {goals.month}</div>
-            <div className="cbox-value">{stats.month}</div>
+            {stats.week}
+          </div>
+          <div
+            className="matrix-cell data-cell"
+            style={{ background: deptColor, borderColor: deptBorder }}
+          >
+            {stats.month}
           </div>
         </div>
       </div>

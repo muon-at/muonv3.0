@@ -301,6 +301,76 @@
   color: #e2e8f0;
 }
 
+/* MATRIX LAYOUT (STRUCTURED GRID - RYDDIG) */
+.mobile-prosjekt-matrix h3,
+.mobile-avdeling-matrix h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #4db8ff;
+  text-align: center;
+}
+
+.matrix-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-collapse: collapse;
+}
+
+.matrix-header,
+.matrix-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 0;
+}
+
+.matrix-cell {
+  padding: 0.6rem 0.4rem;
+  text-align: center;
+  border: 1px solid #333;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+}
+
+.header-cell {
+  background: #0a0a0a;
+  color: #9ca3af;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.dept-label,
+.label-cell {
+  background: #1a1a1a;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.dept-label.muon,
+.label-cell.muon {
+  color: #7c3aed;
+}
+
+.data-cell {
+  font-size: 1.4rem;
+  color: #e2e8f0;
+  border: 1.5px solid;
+  font-weight: 700;
+}
+
+.header-value {
+  background: #0a0a0a;
+  color: #e2e8f0;
+  font-size: 1.2rem;
+  border: 1.5px solid;
+}
+
 /* COMPACT LAYOUT (ALL 3 PERIODS ON 1 SCREEN) */
 .mobile-prosjekt-compact h3,
 .mobile-avdeling-compact h3 {
@@ -310,119 +380,7 @@
   text-align: center;
 }
 
-.compact-periods {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
 
-.compact-period {
-  flex: 1;
-}
-
-.period-label {
-  font-size: 0.7rem;
-  color: #9ca3af;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 0.35rem;
-  text-align: center;
-}
-
-.compact-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.4rem;
-}
-
-.compact-box {
-  padding: 0.6rem 0.5rem;
-  border-radius: 6px;
-  border: 1.5px solid;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 65px;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.compact-box:hover {
-  opacity: 0.85;
-}
-
-.compact-box.muon {
-  grid-column: 1 / -1;
-  min-height: 60px;
-}
-
-.cbox-dept {
-  font-size: 0.7rem;
-  color: #e2e8f0;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 0.25rem;
-}
-
-.cbox-value {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #e2e8f0;
-  line-height: 1;
-}
-
-/* COMPACT AVDELING */
-.mobile-avdeling-compact {
-  display: flex;
-  flex-direction: column;
-}
-
-.avdeling-compact-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.avdeling-period {
-  flex: 1;
-}
-
-.avdeling-stat-compact {
-  padding: 0.6rem;
-  border-radius: 6px;
-  border: 1.5px solid;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 65px;
-  text-align: center;
-  transition: all 0.2s;
-}
-
-.avdeling-stat-compact:hover {
-  opacity: 0.85;
-}
-
-.avdeling-stat-compact .cbox-dept {
-  font-size: 0.7rem;
-  color: #e2e8f0;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  margin-bottom: 0.2rem;
-}
-
-.avdeling-stat-compact .cbox-value {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #e2e8f0;
-  line-height: 1;
-}
 
 /* RESPONSIVE */
 @media (max-width: 480px) {
@@ -457,24 +415,17 @@
     font-size: 1rem;
   }
 
-  .dept-grid {
-    gap: 0.5rem;
+  .matrix-cell {
+    padding: 0.5rem 0.3rem;
+    min-height: 45px;
+    font-size: 0.9rem;
   }
 
-  .dept-box {
-    min-height: 90px;
-    padding: 0.75rem;
+  .data-cell {
+    font-size: 1.2rem;
   }
 
-  .dept-value {
-    font-size: 1.8rem;
-  }
-
-  .dept-stat-box {
-    padding: 1rem;
-  }
-
-  .dept-stat-box .stat-value {
-    font-size: 2rem;
+  .header-value {
+    font-size: 1rem;
   }
 }
