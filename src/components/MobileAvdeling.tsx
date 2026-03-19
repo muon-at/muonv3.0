@@ -15,19 +15,10 @@ interface DeptGoals {
   month: number;
 }
 
-interface Employee {
-  name: string;
-  visualName: string;
-  today: number;
-  week: number;
-  month: number;
-}
-
 export default function MobileAvdeling() {
   const { user } = useAuth();
   const [stats, setStats] = useState<DeptStats>({ today: 0, week: 0, month: 0 });
   const [goals, setGoals] = useState<DeptGoals>({ day: 5, week: 20, month: 80 });
-  const [top3, setTop3] = useState({ day: [] as Employee[], week: [] as Employee[], month: [] as Employee[] });
   const [loading, setLoading] = useState(true);
 
   const deptColorMap = {
@@ -51,7 +42,6 @@ export default function MobileAvdeling() {
       return;
     }
 
-    // Load department goals
     getDocs(collection(db, 'department_goals')).then((snapshot) => {
       snapshot.forEach((doc) => {
         if (doc.id === user.department) {
@@ -65,25 +55,21 @@ export default function MobileAvdeling() {
       });
     });
 
-    // Load employee list for department
     let deptEmps = new Set<string>();
     getDocs(collection(db, 'employees')).then((empSnapshot) => {
-      const empDetailMap: { [key: string]: { visualName: string } } = {};
       empSnapshot.docs.forEach((doc) => {
         const data = doc.data();
         if (data.avdeling === user.department) {
           deptEmps.add(data.name?.toLowerCase() || '');
-          empDetailMap[data.name?.toLowerCase() || ''] = { visualName: data.visualName || data.name };
         }
       });
 
-      // Real-time listener
       const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
-        updateStats(deptEmps, empDetailMap);
+        updateStats(deptEmps);
       });
 
       const unsubscribeArchive = onSnapshot(collection(db, 'allente_kontraktsarkiv'), () => {
-        updateStats(deptEmps, empDetailMap);
+        updateStats(deptEmps);
       });
 
       setLoading(false);
@@ -95,7 +81,7 @@ export default function MobileAvdeling() {
     });
   }, [user?.department]);
 
-  const updateStats = async (deptEmps: Set<string>, empDetailMap: { [key: string]: { visualName: string } }) => {
+  const updateStats = async (deptEmps: Set<string>) => {
     if (!user?.department) return;
 
     const today = new Date();
@@ -106,38 +92,21 @@ export default function MobileAvdeling() {
 
     const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const empStats: { [key: string]: { today: number; week: number; month: number; visualName: string } } = {};
-
-    // Initialize employees
-    deptEmps.forEach((emp) => {
-      empStats[emp] = {
-        today: 0,
-        week: 0,
-        month: 0,
-        visualName: empDetailMap[emp]?.visualName || emp,
-      };
-    });
-
     let dayCount = 0,
       weekCount = 0,
       monthCount = 0;
 
-    // Count livefeed
     const livefeedSnapshot = await getDocs(collection(db, 'livefeed_sales'));
     livefeedSnapshot.docs.forEach((doc) => {
       const data = doc.data();
       const userName = data.userName?.toLowerCase() || '';
       if (deptEmps.has(userName)) {
-        empStats[userName].today++;
-        empStats[userName].week++;
-        empStats[userName].month++;
         dayCount++;
         weekCount++;
         monthCount++;
       }
     });
 
-    // Count contracts
     const contractsSnapshot = await getDocs(collection(db, 'allente_kontraktsarkiv'));
     contractsSnapshot.docs.forEach((doc) => {
       const data = doc.data();
@@ -151,11 +120,9 @@ export default function MobileAvdeling() {
           contractDate.setHours(0, 0, 0, 0);
 
           if (contractDate >= startOfWeek) {
-            empStats[selgerLower].week++;
             weekCount++;
           }
           if (contractDate >= startOfMonth) {
-            empStats[selgerLower].month++;
             monthCount++;
           }
         }
@@ -167,135 +134,50 @@ export default function MobileAvdeling() {
       week: weekCount,
       month: monthCount,
     });
-
-    // Get top 3 for each period
-    const empArray = Object.entries(empStats).map(([key, val]) => ({
-      name: key,
-      visualName: val.visualName,
-      today: val.today,
-      week: val.week,
-      month: val.month,
-    }));
-
-    setTop3({
-      day: empArray.sort((a, b) => b.today - a.today).slice(0, 3),
-      week: empArray.sort((a, b) => b.week - a.week).slice(0, 3),
-      month: empArray.sort((a, b) => b.month - a.month).slice(0, 3),
-    });
-  };
-
-  const getPercentage = (current: number, target: number) => {
-    return Math.min((current / target) * 100, 100);
   };
 
   if (loading) return <div className="loading">Laster avdeling...</div>;
 
-  const medals = ['🥇', '🥈', '🥉'];
-
   return (
-    <div className="mobile-avdeling">
+    <div className="mobile-avdeling-compact">
       <h3>👥 {user?.department || 'AVDELING'}</h3>
 
-      {/* I DAG */}
-      <div className="period-section">
-        <div className="period-title">I DAG</div>
-        <div
-          className="dept-stat-box"
-          style={{ background: deptColor, borderColor: deptBorder }}
-        >
-          <div className="stat-label">Mål</div>
-          <div className="stat-value">{goals.day}</div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${getPercentage(stats.today, goals.day)}%`,
-                background: '#4db8ff',
-              }}
-            />
+      <div className="avdeling-compact-content">
+        {/* I DAG */}
+        <div className="avdeling-period">
+          <div className="period-label">I DAG</div>
+          <div
+            className="avdeling-stat-compact"
+            style={{ background: deptColor, borderColor: deptBorder }}
+          >
+            <div className="cbox-dept">Mål: {goals.day}</div>
+            <div className="cbox-value">{stats.today}</div>
           </div>
-          <div className="stat-label">Salg</div>
-          <div className="stat-value">{stats.today}</div>
         </div>
-        {top3.day.length > 0 && (
-          <div className="top3-list">
-            {top3.day.map((emp, idx) => (
-              <div key={idx} className="top3-item">
-                <span className="medal">{medals[idx]}</span>
-                <span className="name">{emp.visualName}</span>
-                <span className="count">{emp.today}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* UKE */}
-      <div className="period-section">
-        <div className="period-title">UKE</div>
-        <div
-          className="dept-stat-box"
-          style={{ background: deptColor, borderColor: deptBorder }}
-        >
-          <div className="stat-label">Mål</div>
-          <div className="stat-value">{goals.week}</div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${getPercentage(stats.week, goals.week)}%`,
-                background: '#ffd700',
-              }}
-            />
+        {/* UKE */}
+        <div className="avdeling-period">
+          <div className="period-label">UKE</div>
+          <div
+            className="avdeling-stat-compact"
+            style={{ background: deptColor, borderColor: deptBorder }}
+          >
+            <div className="cbox-dept">Mål: {goals.week}</div>
+            <div className="cbox-value">{stats.week}</div>
           </div>
-          <div className="stat-label">Salg</div>
-          <div className="stat-value">{stats.week}</div>
         </div>
-        {top3.week.length > 0 && (
-          <div className="top3-list">
-            {top3.week.map((emp, idx) => (
-              <div key={idx} className="top3-item">
-                <span className="medal">{medals[idx]}</span>
-                <span className="name">{emp.visualName}</span>
-                <span className="count">{emp.week}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* MÅNED */}
-      <div className="period-section">
-        <div className="period-title">MÅNED</div>
-        <div
-          className="dept-stat-box"
-          style={{ background: deptColor, borderColor: deptBorder }}
-        >
-          <div className="stat-label">Mål</div>
-          <div className="stat-value">{goals.month}</div>
-          <div className="progress-bar">
-            <div
-              className="progress-fill"
-              style={{
-                width: `${getPercentage(stats.month, goals.month)}%`,
-                background: '#51cf66',
-              }}
-            />
+        {/* MÅNED */}
+        <div className="avdeling-period">
+          <div className="period-label">MÅNED</div>
+          <div
+            className="avdeling-stat-compact"
+            style={{ background: deptColor, borderColor: deptBorder }}
+          >
+            <div className="cbox-dept">Mål: {goals.month}</div>
+            <div className="cbox-value">{stats.month}</div>
           </div>
-          <div className="stat-label">Salg</div>
-          <div className="stat-value">{stats.month}</div>
         </div>
-        {top3.month.length > 0 && (
-          <div className="top3-list">
-            {top3.month.map((emp, idx) => (
-              <div key={idx} className="top3-item">
-                <span className="medal">{medals[idx]}</span>
-                <span className="name">{emp.visualName}</span>
-                <span className="count">{emp.month}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

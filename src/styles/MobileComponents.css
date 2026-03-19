@@ -301,6 +301,129 @@
   color: #e2e8f0;
 }
 
+/* COMPACT LAYOUT (ALL 3 PERIODS ON 1 SCREEN) */
+.mobile-prosjekt-compact h3,
+.mobile-avdeling-compact h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #4db8ff;
+  text-align: center;
+}
+
+.compact-periods {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.compact-period {
+  flex: 1;
+}
+
+.period-label {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.35rem;
+  text-align: center;
+}
+
+.compact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+
+.compact-box {
+  padding: 0.6rem 0.5rem;
+  border-radius: 6px;
+  border: 1.5px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 65px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.compact-box:hover {
+  opacity: 0.85;
+}
+
+.compact-box.muon {
+  grid-column: 1 / -1;
+  min-height: 60px;
+}
+
+.cbox-dept {
+  font-size: 0.7rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.25rem;
+}
+
+.cbox-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  line-height: 1;
+}
+
+/* COMPACT AVDELING */
+.mobile-avdeling-compact {
+  display: flex;
+  flex-direction: column;
+}
+
+.avdeling-compact-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.avdeling-period {
+  flex: 1;
+}
+
+.avdeling-stat-compact {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1.5px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 65px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.avdeling-stat-compact:hover {
+  opacity: 0.85;
+}
+
+.avdeling-stat-compact .cbox-dept {
+  font-size: 0.7rem;
+  color: #e2e8f0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 0.2rem;
+}
+
+.avdeling-stat-compact .cbox-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  line-height: 1;
+}
+
 /* RESPONSIVE */
 @media (max-width: 480px) {
   .mobile-content {

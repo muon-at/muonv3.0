@@ -12,10 +12,6 @@ interface AllDepts {
   [dept: string]: DeptStats;
 }
 
-interface AllDeptsGoals {
-  [dept: string]: { day: number; week: number; month: number };
-}
-
 export default function MobileProsjekt() {
   const [stats, setStats] = useState<AllDepts>({
     KRS: { today: 0, week: 0, month: 0 },
@@ -23,11 +19,6 @@ export default function MobileProsjekt() {
     Skien: { today: 0, week: 0, month: 0 },
   });
   const [muonTotal, setMuonTotal] = useState({ day: 0, week: 0, month: 0 });
-  const [goals, setGoals] = useState<AllDeptsGoals>({
-    KRS: { day: 5, week: 20, month: 80 },
-    OSL: { day: 5, week: 20, month: 80 },
-    Skien: { day: 5, week: 20, month: 80 },
-  });
   const [loading, setLoading] = useState(true);
 
   const deptColors = {
@@ -43,29 +34,6 @@ export default function MobileProsjekt() {
   };
 
   useEffect(() => {
-    // Load all department goals
-    getDocs(collection(db, 'department_goals')).then((snapshot) => {
-      const goalsMap: AllDeptsGoals = {
-        KRS: { day: 5, week: 20, month: 80 },
-        OSL: { day: 5, week: 20, month: 80 },
-        Skien: { day: 5, week: 20, month: 80 },
-      };
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        if (doc.id === 'KRS' || doc.id === 'OSL' || doc.id === 'Skien') {
-          goalsMap[doc.id] = {
-            day: data.day || 5,
-            week: data.week || 20,
-            month: data.month || 80,
-          };
-        }
-      });
-
-      setGoals(goalsMap);
-    });
-
-    // Load employee list
     let deptEmpsMap: { [dept: string]: Set<string> } = {
       KRS: new Set(),
       OSL: new Set(),
@@ -81,7 +49,6 @@ export default function MobileProsjekt() {
         }
       });
 
-      // Real-time listener
       const unsubscribeLivefeed = onSnapshot(collection(db, 'livefeed_sales'), () => {
         updateStats(deptEmpsMap);
       });
@@ -118,7 +85,6 @@ export default function MobileProsjekt() {
       muonWeek = 0,
       muonMonth = 0;
 
-    // Count livefeed
     const livefeedSnapshot = await getDocs(collection(db, 'livefeed_sales'));
     livefeedSnapshot.docs.forEach((doc) => {
       const data = doc.data();
@@ -137,7 +103,6 @@ export default function MobileProsjekt() {
       }
     });
 
-    // Count contracts
     const contractsSnapshot = await getDocs(collection(db, 'allente_kontraktsarkiv'));
     contractsSnapshot.docs.forEach((doc) => {
       const data = doc.data();
@@ -174,90 +139,81 @@ export default function MobileProsjekt() {
   if (loading) return <div className="loading">Laster prosjekt...</div>;
 
   const depts = ['KRS', 'OSL', 'Skien'];
-  const muonGoal = {
-    day: (goals.KRS?.day || 5) + (goals.OSL?.day || 5) + (goals.Skien?.day || 5),
-    week: (goals.KRS?.week || 20) + (goals.OSL?.week || 20) + (goals.Skien?.week || 20),
-    month: (goals.KRS?.month || 80) + (goals.OSL?.month || 80) + (goals.Skien?.month || 80),
-  };
 
   return (
-    <div className="mobile-prosjekt">
+    <div className="mobile-prosjekt-compact">
       <h3>🏢 MITT PROSJEKT</h3>
 
-      {/* I DAG */}
-      <div className="period-section">
-        <div className="period-title">I DAG</div>
-        <div className="dept-grid">
-          {depts.map((dept) => (
-            <div
-              key={dept}
-              className="dept-box"
-              style={{
-                background: deptColors[dept as keyof typeof deptColors],
-                borderColor: deptBorders[dept as keyof typeof deptBorders],
-              }}
-            >
-              <div className="dept-name">{dept}</div>
-              <div className="dept-value">{stats[dept as keyof AllDepts]?.today || 0}</div>
-              <div className="dept-goal">/ {goals[dept]?.day || 5}</div>
+      <div className="compact-periods">
+        {/* I DAG */}
+        <div className="compact-period">
+          <div className="period-label">I DAG</div>
+          <div className="compact-grid">
+            {depts.map((dept) => (
+              <div
+                key={dept}
+                className="compact-box"
+                style={{
+                  background: deptColors[dept as keyof typeof deptColors],
+                  borderColor: deptBorders[dept as keyof typeof deptBorders],
+                }}
+              >
+                <div className="cbox-dept">{dept}</div>
+                <div className="cbox-value">{stats[dept as keyof AllDepts]?.today || 0}</div>
+              </div>
+            ))}
+            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
+              <div className="cbox-dept">MUON</div>
+              <div className="cbox-value">{muonTotal.day}</div>
             </div>
-          ))}
-          <div className="dept-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-            <div className="dept-name">MUON</div>
-            <div className="dept-value">{muonTotal.day}</div>
-            <div className="dept-goal">/ {muonGoal.day}</div>
           </div>
         </div>
-      </div>
 
-      {/* UKE */}
-      <div className="period-section">
-        <div className="period-title">UKE</div>
-        <div className="dept-grid">
-          {depts.map((dept) => (
-            <div
-              key={dept}
-              className="dept-box"
-              style={{
-                background: deptColors[dept as keyof typeof deptColors],
-                borderColor: deptBorders[dept as keyof typeof deptBorders],
-              }}
-            >
-              <div className="dept-name">{dept}</div>
-              <div className="dept-value">{stats[dept as keyof AllDepts]?.week || 0}</div>
-              <div className="dept-goal">/ {goals[dept]?.week || 20}</div>
+        {/* UKE */}
+        <div className="compact-period">
+          <div className="period-label">UKE</div>
+          <div className="compact-grid">
+            {depts.map((dept) => (
+              <div
+                key={dept}
+                className="compact-box"
+                style={{
+                  background: deptColors[dept as keyof typeof deptColors],
+                  borderColor: deptBorders[dept as keyof typeof deptBorders],
+                }}
+              >
+                <div className="cbox-dept">{dept}</div>
+                <div className="cbox-value">{stats[dept as keyof AllDepts]?.week || 0}</div>
+              </div>
+            ))}
+            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
+              <div className="cbox-dept">MUON</div>
+              <div className="cbox-value">{muonTotal.week}</div>
             </div>
-          ))}
-          <div className="dept-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-            <div className="dept-name">MUON</div>
-            <div className="dept-value">{muonTotal.week}</div>
-            <div className="dept-goal">/ {muonGoal.week}</div>
           </div>
         </div>
-      </div>
 
-      {/* MÅNED */}
-      <div className="period-section">
-        <div className="period-title">MÅNED</div>
-        <div className="dept-grid">
-          {depts.map((dept) => (
-            <div
-              key={dept}
-              className="dept-box"
-              style={{
-                background: deptColors[dept as keyof typeof deptColors],
-                borderColor: deptBorders[dept as keyof typeof deptBorders],
-              }}
-            >
-              <div className="dept-name">{dept}</div>
-              <div className="dept-value">{stats[dept as keyof AllDepts]?.month || 0}</div>
-              <div className="dept-goal">/ {goals[dept]?.month || 80}</div>
+        {/* MÅNED */}
+        <div className="compact-period">
+          <div className="period-label">MÅNED</div>
+          <div className="compact-grid">
+            {depts.map((dept) => (
+              <div
+                key={dept}
+                className="compact-box"
+                style={{
+                  background: deptColors[dept as keyof typeof deptColors],
+                  borderColor: deptBorders[dept as keyof typeof deptBorders],
+                }}
+              >
+                <div className="cbox-dept">{dept}</div>
+                <div className="cbox-value">{stats[dept as keyof AllDepts]?.month || 0}</div>
+              </div>
+            ))}
+            <div className="compact-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
+              <div className="cbox-dept">MUON</div>
+              <div className="cbox-value">{muonTotal.month}</div>
             </div>
-          ))}
-          <div className="dept-box muon" style={{ background: '#1a1a3a', borderColor: '#7c3aed' }}>
-            <div className="dept-name">MUON</div>
-            <div className="dept-value">{muonTotal.month}</div>
-            <div className="dept-goal">/ {muonGoal.month}</div>
           </div>
         </div>
       </div>
