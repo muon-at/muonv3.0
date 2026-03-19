@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #000000;
+  background: transparent;
   color: #e2e8f0;
   padding: 1rem;
   overflow: hidden;
@@ -12,7 +12,7 @@
 .radial-container {
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -20,129 +20,85 @@
 }
 
 /* CENTRAL BELL */
-.radial-card.central {
+.bell-center {
   position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4db8ff, #2a8fc9);
-  border: 3px solid #5a67d8;
+  width: 180px;
+  height: 180px;
+  font-size: 8rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  cursor: pointer;
   z-index: 10;
-  transition: all 0.2s;
-  box-shadow: 0 0 30px rgba(77, 184, 255, 0.5);
 }
 
-.radial-card.central:active {
-  transform: scale(0.95);
-  box-shadow: 0 0 50px rgba(77, 184, 255, 0.8);
-}
-
-.radial-card.central .card-icon {
-  font-size: 3rem;
-  animation: bell-swing 2s ease-in-out infinite;
-}
-
-@keyframes bell-swing {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(15deg); }
-  75% { transform: rotate(-15deg); }
-}
-
-.radial-card.central .card-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-align: center;
-  color: #000000;
-  line-height: 1.1;
-}
-
-/* SURROUNDING CARDS - CIRCULAR POSITIONS */
+/* SURROUNDING CARDS - LARGER */
 .radial-card {
   position: absolute;
-  width: 90px;
-  height: 90px;
-  border-radius: 12px;
+  width: 130px;
+  height: 130px;
+  border-radius: 16px;
   background: #1f2937;
   border: 2px solid #333;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.75rem;
   cursor: pointer;
-  transition: all 0.3s;
-  padding: 0.5rem;
+  padding: 0.75rem;
   text-align: center;
+  transition: all 0.15s;
 }
 
-.radial-card:not(.central):hover {
+.radial-card:hover {
   background: #2d3748;
   border-color: #4db8ff;
   transform: scale(1.05);
 }
 
-.radial-card:not(.central):active {
+.radial-card:active {
   transform: scale(0.95);
 }
 
 .card-icon {
-  font-size: 1.8rem;
+  font-size: 2.5rem;
 }
 
 .card-label {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #e2e8f0;
-  line-height: 1;
-}
-
-.card-label-secondary {
-  font-size: 0.6rem;
-  color: #9ca3af;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 /* POSITIONING IN CIRCLE */
-/* Imagine clock positions: 12, 2, 4, 8, 10 */
-
 .radial-card.top-left {
-  top: 0;
-  left: 15%;
-  /* 11 o'clock */
+  top: 15%;
+  left: 10%;
 }
 
 .radial-card.top-right {
   top: 15%;
-  right: 15%;
-  /* 1 o'clock */
+  right: 10%;
 }
 
 .radial-card.right {
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  /* 3 o'clock */
 }
 
 .radial-card.bottom-right {
   bottom: 15%;
-  right: 15%;
-  /* 5 o'clock */
+  right: 10%;
 }
 
 .radial-card.bottom-left {
-  bottom: 0;
-  left: 15%;
-  /* 7 o'clock */
+  bottom: 15%;
+  left: 10%;
 }
 
-/* TAB VIEW (when clicking a card) */
+/* TAB VIEW */
 .mobile-tab-view {
   display: flex;
   flex-direction: column;
@@ -182,26 +138,43 @@
     width: 100%;
   }
 
-  .radial-card.central {
-    width: 100px;
-    height: 100px;
+  .bell-center {
+    width: 150px;
+    height: 150px;
+    font-size: 6rem;
   }
 
-  .radial-card.central .card-icon {
-    font-size: 2.5rem;
-  }
-
-  .radial-card:not(.central) {
-    width: 75px;
-    height: 75px;
+  .radial-card {
+    width: 110px;
+    height: 110px;
   }
 
   .card-icon {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
 
   .card-label {
-    font-size: 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .radial-card.top-left {
+    top: 12%;
+    left: 5%;
+  }
+
+  .radial-card.top-right {
+    top: 12%;
+    right: 5%;
+  }
+
+  .radial-card.bottom-right {
+    bottom: 12%;
+    right: 5%;
+  }
+
+  .radial-card.bottom-left {
+    bottom: 12%;
+    left: 5%;
   }
 }
 
@@ -211,7 +184,22 @@
     height: 100vh;
   }
 
-  .radial-container {
-    max-width: 450px;
+  .bell-center {
+    width: 140px;
+    height: 140px;
+    font-size: 5rem;
+  }
+
+  .radial-card {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-icon {
+    font-size: 1.8rem;
+  }
+
+  .card-label {
+    font-size: 0.7rem;
   }
 }
