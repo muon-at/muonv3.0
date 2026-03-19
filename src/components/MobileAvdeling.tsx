@@ -30,6 +30,21 @@ export default function MobileAvdeling() {
   const [top3, setTop3] = useState({ day: [] as Employee[], week: [] as Employee[], month: [] as Employee[] });
   const [loading, setLoading] = useState(true);
 
+  const deptColorMap = {
+    KRS: '#1a3a52',
+    OSL: '#1a3a2a',
+    Skien: '#3a2a1a',
+  };
+
+  const deptBorderMap = {
+    KRS: '#4db8ff',
+    OSL: '#51cf66',
+    Skien: '#ffa94d',
+  };
+
+  const deptColor = deptColorMap[user?.department as keyof typeof deptColorMap] || '#1f2937';
+  const deptBorder = deptBorderMap[user?.department as keyof typeof deptBorderMap] || '#333';
+
   useEffect(() => {
     if (!user?.department) {
       setLoading(false);
@@ -181,14 +196,15 @@ export default function MobileAvdeling() {
     <div className="mobile-avdeling">
       <h3>👥 {user?.department || 'AVDELING'}</h3>
 
-      {/* DAG */}
+      {/* I DAG */}
       <div className="period-section">
         <div className="period-title">I DAG</div>
-        <div className="stats-row">
-          <div className="stat-box">
-            <div className="stat-label">Mål</div>
-            <div className="stat-value">{goals.day}</div>
-          </div>
+        <div
+          className="dept-stat-box"
+          style={{ background: deptColor, borderColor: deptBorder }}
+        >
+          <div className="stat-label">Mål</div>
+          <div className="stat-value">{goals.day}</div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -198,10 +214,8 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="stat-box">
-            <div className="stat-label">Salg</div>
-            <div className="stat-value">{stats.today}</div>
-          </div>
+          <div className="stat-label">Salg</div>
+          <div className="stat-value">{stats.today}</div>
         </div>
         {top3.day.length > 0 && (
           <div className="top3-list">
@@ -219,11 +233,12 @@ export default function MobileAvdeling() {
       {/* UKE */}
       <div className="period-section">
         <div className="period-title">UKE</div>
-        <div className="stats-row">
-          <div className="stat-box">
-            <div className="stat-label">Mål</div>
-            <div className="stat-value">{goals.week}</div>
-          </div>
+        <div
+          className="dept-stat-box"
+          style={{ background: deptColor, borderColor: deptBorder }}
+        >
+          <div className="stat-label">Mål</div>
+          <div className="stat-value">{goals.week}</div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -233,10 +248,8 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="stat-box">
-            <div className="stat-label">Salg</div>
-            <div className="stat-value">{stats.week}</div>
-          </div>
+          <div className="stat-label">Salg</div>
+          <div className="stat-value">{stats.week}</div>
         </div>
         {top3.week.length > 0 && (
           <div className="top3-list">
@@ -254,11 +267,12 @@ export default function MobileAvdeling() {
       {/* MÅNED */}
       <div className="period-section">
         <div className="period-title">MÅNED</div>
-        <div className="stats-row">
-          <div className="stat-box">
-            <div className="stat-label">Mål</div>
-            <div className="stat-value">{goals.month}</div>
-          </div>
+        <div
+          className="dept-stat-box"
+          style={{ background: deptColor, borderColor: deptBorder }}
+        >
+          <div className="stat-label">Mål</div>
+          <div className="stat-value">{goals.month}</div>
           <div className="progress-bar">
             <div
               className="progress-fill"
@@ -268,10 +282,8 @@ export default function MobileAvdeling() {
               }}
             />
           </div>
-          <div className="stat-box">
-            <div className="stat-label">Salg</div>
-            <div className="stat-value">{stats.month}</div>
-          </div>
+          <div className="stat-label">Salg</div>
+          <div className="stat-value">{stats.month}</div>
         </div>
         {top3.month.length > 0 && (
           <div className="top3-list">
