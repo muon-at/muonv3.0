@@ -120,6 +120,8 @@ export default function Status() {
                 };
               }
               sellerStats[ansatt].today++;
+              sellerStats[ansatt].week++;  // Today's sales count toward week total
+              sellerStats[ansatt].month++; // Today's sales count toward month total
             });
 
             // Load from archive (HISTORICAL)
