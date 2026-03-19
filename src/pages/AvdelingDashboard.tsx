@@ -240,9 +240,9 @@ export default function AvdelingDashboard() {
 
   return (
     <div style={{ marginLeft: '135px', paddingRight: '340px', paddingTop: '1rem', paddingBottom: '1rem', paddingLeft: '1.5rem', background: '#1a1a1a', minHeight: '100vh', color: '#e2e8f0', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>Min Avdeling: {viewDept}</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexDirection: 'column' }}>
+        <div style={{ textAlign: 'center', width: '100%' }}>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: isOwner ? '1rem' : 0 }}>{viewDept}</h1>
           {isOwner && (
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               {['KRS', 'OSL', 'Skien'].map(dept => (
@@ -310,7 +310,7 @@ export default function AvdelingDashboard() {
       {/* TOP 3 BY PERIOD */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', flex: 1 }}>
         {/* Top 3 Today */}
-        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', height: 'fit-content' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#4db8ff' }}>🏆 Top 3 I DAG</h3>
           {[...progresjonData].sort((a, b) => (b.today || 0) - (a.today || 0)).slice(0, 3).map((emp, idx) => (
             <div key={emp.ansatt} style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #404040' }}>
@@ -323,7 +323,7 @@ export default function AvdelingDashboard() {
         </div>
 
         {/* Top 3 Week */}
-        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', height: 'fit-content' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#ffd700' }}>🏆 Top 3 UKE</h3>
           {[...progresjonData].sort((a, b) => (b.week || 0) - (a.week || 0)).slice(0, 3).map((emp, idx) => (
             <div key={emp.ansatt} style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #404040' }}>
@@ -336,7 +336,7 @@ export default function AvdelingDashboard() {
         </div>
 
         {/* Top 3 Month */}
-        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', overflowY: 'auto' }}>
+        <div style={{ background: '#2d3748', padding: '1.5rem', borderRadius: '12px', border: '1px solid #4b5563', height: 'fit-content' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: '700', marginBottom: '1rem', color: '#51cf66' }}>🏆 Top 3 MÅNED</h3>
           {[...progresjonData].sort((a, b) => (b.month || 0) - (a.month || 0)).slice(0, 3).map((emp, idx) => (
             <div key={emp.ansatt} style={{ marginBottom: '0.75rem', paddingBottom: '0.75rem', borderBottom: '1px solid #404040' }}>
