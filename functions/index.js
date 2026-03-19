@@ -2,6 +2,7 @@ const admin = require('firebase-admin');
 const webpush = require('web-push');
 const { onDocumentCreated } = require('firebase-functions/v2/firestore');
 const { onRequest } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 
 // Initialize Firebase Admin
 admin.initializeApp();
@@ -314,8 +315,6 @@ exports.getVapidKey = onRequest((req, res) => {
 // MASTER EARNINGS COLLECTION - EARNINGS DATA PIPELINE
 // =====================================================
 
-const { schedule } = require('firebase-functions/v2/scheduler');
-
 /**
  * Daily scheduled function: Populate master_earnings collection
  * Runs at 03:00 daily (before 04:00 livefeed cleanup)
@@ -338,9 +337,12 @@ const { schedule } = require('firebase-functions/v2/scheduler');
  *   updatedAt: ISO string
  * }
  */
-exports.populateMasterEarnings = schedule('0 3 * * *')
-  .timeZone('Europe/Oslo')
-  .onRun(async (context) => {
+exports.populateMasterEarnings = onSchedule(
+  {
+    schedule: '0 3 * * *',
+    timeZone: 'Europe/Oslo',
+  },
+  async (context) => {
     console.log('🔄 [03:00] Populating master_earnings collection...');
 
     try {
@@ -392,8 +394,10 @@ exports.populateMasterEarnings = schedule('0 3 * * *')
           }
         }
 
-        // Create unique ID for this earning event
-        const earningId = `${ansatt.toLowerCase()}_${dato.replace(/\//g, '-')}_${contractId.substring(0, 8)}`;
+        // Create unique ID for this earning event (sanitize to remove invalid chars)
+        const sanitizedAnsatt = ansatt.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        const sanitizedDato = dato.replace(/\//g, '-');
+        const earningId = `${sanitizedAnsatt}_${sanitizedDato}_${contractId.substring(0, 8)}`;
 
         // Check if already exists
         const earningDoc = await db.collection('master_earnings').doc(earningId).get();
@@ -446,8 +450,10 @@ exports.populateMasterEarnings = schedule('0 3 * * *')
           // Get date in DD/MM/YYYY format
           const dateStr = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
           
-          // Create ID for this post
-          const postId = `${userName.toLowerCase()}_${dateStr.replace(/\//g, '-')}_post_${postDoc.id.substring(0, 8)}`;
+          // Create ID for this post (sanitize to remove invalid chars)
+          const sanitizedUser = userName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+          const sanitizedDate = dateStr.replace(/\//g, '-');
+          const postId = `${sanitizedUser}_${sanitizedDate}_post_${postDoc.id.substring(0, 8)}`;
 
           // Check if already exists
           const earningDoc = await db.collection('master_earnings').doc(postId).get();
@@ -527,7 +533,9 @@ exports.populateMasterEarningsNow = onRequest(async (req, res) => {
         }
       }
 
-      const earningId = `${ansatt.toLowerCase()}_${dato.replace(/\//g, '-')}_${contractId.substring(0, 8)}`;
+      const sanitizedAnsatt = ansatt.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      const sanitizedDato = dato.replace(/\//g, '-');
+      const earningId = `${sanitizedAnsatt}_${sanitizedDato}_${contractId.substring(0, 8)}`;
       const earningDoc = await db.collection('master_earnings').doc(earningId).get();
 
       if (!earningDoc.exists) {
