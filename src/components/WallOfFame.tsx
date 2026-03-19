@@ -104,28 +104,46 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
           });
 
           // Fetch department info for all employees
-          const peopleSnap = await getDocs(collection(db, 'allente_people'));
-          const deptMap = new Map<string, string>();
-          
-          peopleSnap.docs.forEach((doc) => {
-            const data = doc.data();
-            const visual = data.name || '';
-            const externalName = data.externalName || '';
-            const dept = data.avdeling || '';
+          try {
+            const peopleSnap = await getDocs(collection(db, 'employees'));
+            const deptMap = new Map<string, string>();
             
-            deptMap.set(visual.toLowerCase().trim(), dept);
-            deptMap.set(externalName.toLowerCase().trim(), dept);
-          });
+            console.log('👥 People collection docs:', peopleSnap.size);
+            
+            peopleSnap.docs.forEach((doc) => {
+              const data = doc.data();
+              const visual = data.name || '';
+              const externalName = data.externalName || '';
+              const dept = data.avdeling || '';
+              
+              console.log(`📍 ${visual} => ${dept}`);
+              
+              deptMap.set(visual.toLowerCase().trim(), dept);
+              deptMap.set(externalName.toLowerCase().trim(), dept);
+            });
 
-          // Update dept in employees map
-          employees.forEach((emp, name) => {
-            emp.dept = deptMap.get(name.toLowerCase().trim()) || '';
-          });
+            // Update dept in employees map
+            employees.forEach((emp, name) => {
+              const foundDept = deptMap.get(name.toLowerCase().trim());
+              emp.dept = foundDept || 'Unknown';
+              console.log(`✅ ${name} => ${emp.dept}`);
+            });
+          } catch (err) {
+            console.error('❌ Error fetching people:', err);
+          }
 
           // Filter by department if specified
           let filteredEmployees = Array.from(employees.entries());
+          console.log('🔍 Total employees:', filteredEmployees.length);
+          console.log('🔍 Filtering by department:', department);
+          
           if (department) {
-            filteredEmployees = filteredEmployees.filter(([_, emp]) => emp.dept === department);
+            filteredEmployees = filteredEmployees.filter(([name, emp]) => {
+              const matches = emp.dept === department;
+              if (matches) console.log(`✅ ${name} in ${emp.dept}`);
+              return matches;
+            });
+            console.log('📊 Filtered employees:', filteredEmployees.length);
           }
 
           // Find best records
@@ -173,7 +191,15 @@ export default function WallOfFame({ department, title = 'WALL OF FAME' }: Props
             },
           ]);
 
-          console.log('📊 Wall of Fame updated:', { bestDay, bestWeek, bestMonth, bestYear, bestTotal });
+          console.log('📊 Wall of Fame updated:', { 
+            bestDay: `${bestDay.name} (${bestDay.value})`,
+            bestWeek: `${bestWeek.name} (${bestWeek.value})`,
+            bestMonth: `${bestMonth.name} (${bestMonth.value})`,
+            bestYear: `${bestYear.name} (${bestYear.value})`,
+            bestTotal: `${bestTotal.name} (${bestTotal.value})`,
+            department,
+            filteredCount: filteredEmployees.length,
+          });
         } catch (err) {
           console.error('❌ Error calculating Wall of Fame:', err);
         }
