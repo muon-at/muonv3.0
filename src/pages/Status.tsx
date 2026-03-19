@@ -348,19 +348,28 @@ export default function Status() {
         // Auto-save newly achieved badges + post to livefeed
         if (newlyAchieved.length > 0 && user?.id) {
           try {
+            console.log('🎖️ Saving badges for user:', user.id, user.name);
+            console.log('📊 Newly achieved:', newlyAchieved);
+            
             // Save ALL newly achieved badges to Firestore
             for (const badgeId of newlyAchieved) {
               const badge = namedBadges.find(b => b.id === badgeId);
               const earnedRef = doc(db, `users/${user.id}/earned_badges`, badgeId);
-              await setDoc(earnedRef, {
+              
+              const badgeData = {
                 earnedAt: new Date().toISOString(),
-                badgeName: badge?.navn,
-                emoji: badge?.emoji,
-              });
+                badgeName: badge?.navn || '',
+                emoji: badge?.emoji || '',
+                userId: user.id,
+                userName: user.name,
+              };
+              
+              console.log(`💾 Setting badge ${badgeId}:`, badgeData);
+              await setDoc(earnedRef, badgeData);
+              console.log(`✅ Badge saved: ${badgeId}`);
             }
 
-            // Only post the HIGHEST milestone reached (to avoid posting "5 SALG" and "10 SALG" when hitting 10)
-            // Sort by verdi descending and post only the first (highest)
+            // Only post the HIGHEST milestone reached
             const sortedByValue = newlyAchieved
               .map(id => namedBadges.find(b => b.id === id))
               .filter(b => b !== undefined)
@@ -369,21 +378,29 @@ export default function Status() {
             if (sortedByValue.length > 0 && sortedByValue[0]) {
               const topBadge = sortedByValue[0];
               const livefeedRef = collection(db, 'livefeed_sales');
-              await addDoc(livefeedRef, {
+              
+              const livefeedData = {
                 type: 'badge_earned',
                 userName: user.name,
                 badge: topBadge.emoji,
                 badgeName: topBadge.navn,
                 timestamp: new Date(),
                 message: `${user.name} ${topBadge.emoji} ${topBadge.navn}!`,
-              });
-              console.log('🎖️ Posted highest milestone:', topBadge.navn);
+              };
+              
+              console.log('📝 Posting to livefeed:', livefeedData);
+              const docRef = await addDoc(livefeedRef, livefeedData);
+              console.log('📤 Posted to livefeed:', docRef.id);
             }
 
             earnedBadgeIds = [...earnedBadgeIds, ...newlyAchieved];
-            console.log('✅ All badges earned:', newlyAchieved);
+            console.log('✅ Badge process complete');
           } catch (err) {
-            console.error('Error saving badges:', err);
+            console.error('❌ Error saving badges:', err);
+          }
+        } else {
+          if (newlyAchieved.length > 0) {
+            console.warn('⚠️ Cannot save badges - user not ready:', { userId: user?.id, userName: user?.name });
           }
         }
 
@@ -545,12 +562,42 @@ export default function Status() {
     return Math.min((current / target) * 100, 100);
   };
 
+  const testSaveBadge = async () => {
+    if (!user?.id) {
+      console.error('No user ID');
+      return;
+    }
+    try {
+      const testBadgeRef = doc(db, `users/${user.id}/earned_badges`, 'test_badge');
+      await setDoc(testBadgeRef, {
+        earnedAt: new Date().toISOString(),
+        badgeName: 'TEST BADGE',
+        emoji: '⭐',
+        userId: user.id,
+        userName: user.name,
+      });
+      console.log('✅ Test badge saved to:', `users/${user.id}/earned_badges/test_badge`);
+      alert(`✅ Test badge saved! Check Firestore users/${user.id}/earned_badges`);
+    } catch (err) {
+      console.error('❌ Error saving test badge:', err);
+      alert(`❌ Error: ${err}`);
+    }
+  };
+
   if (!user) return <div className="status-container">Laster...</div>;
 
   return (
     <div className="status-container">
       <div className="status-content">
         <h1 className="user-header">{user?.name}</h1>
+        {user?.role === 'owner' && (
+          <button 
+            onClick={testSaveBadge}
+            style={{ marginBottom: '1rem', padding: '0.5rem 1rem', background: '#666', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            🧪 Test Save Badge
+          </button>
+        )}
 
         {/* Progress Bars */}
         <div className="progress-section">
